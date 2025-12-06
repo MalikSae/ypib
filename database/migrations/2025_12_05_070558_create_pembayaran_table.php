@@ -6,22 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('pembayaran', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('pembayaran');
-    }
+   public function up()
+{
+    Schema::create('pembayarans', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('mahasiswa_id')->constrained()->onDelete('cascade');
+        $table->string('no_pembayaran')->unique();
+        $table->decimal('jumlah', 10, 2);
+        $table->date('tanggal_bayar');
+        $table->string('bukti_pembayaran');
+        $table->enum('status', ['pending', 'diverifikasi', 'ditolak'])->default('pending');
+        $table->text('catatan')->nullable();
+        $table->timestamps();
+    });
+}
 };

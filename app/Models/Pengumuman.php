@@ -9,43 +9,16 @@ class Pengumuman extends Model
 {
     use HasFactory;
 
-    protected $table = 'pengumuman';
-
     protected $fillable = [
-        'created_by',
         'judul',
         'isi',
-        'tipe',
-        'is_published',
-        'published_at',
+        'kategori',
+        'tanggal_publish',
+        'is_active',
     ];
 
     protected $casts = [
-        'is_published' => 'boolean',
-        'published_at' => 'datetime',
+        'tanggal_publish' => 'date',
+        'is_active' => 'boolean',
     ];
-
-    // Relationships
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    // Scopes
-    public function scopePublished($query)
-    {
-        return $query->where('is_published', true)
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
-    }
-
-    public function scopePenting($query)
-    {
-        return $query->where('tipe', 'penting');
-    }
-
-    public function scopeLatest($query)
-    {
-        return $query->orderBy('published_at', 'desc');
-    }
 }
