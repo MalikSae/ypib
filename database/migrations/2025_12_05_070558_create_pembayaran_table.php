@@ -15,7 +15,7 @@ return new class extends Migration
         $table->decimal('jumlah', 10, 2);
         $table->date('tanggal_bayar');
         $table->string('bukti_pembayaran');
-        $table->enum('status', ['pending', 'diverifikasi', 'ditolak'])->default('pending');
+        $table->enum('status', ['pending', 'terverifikasi', 'ditolak'])->default('pending');
         $table->text('catatan')->nullable();
         $table->timestamps();
     });

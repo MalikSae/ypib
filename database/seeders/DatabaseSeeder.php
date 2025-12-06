@@ -3,23 +3,48 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Jurusan;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create Admin
+        User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@lsp.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+            'phone' => '081234567890',
+            'address' => 'Kantor Pusat LSP',
+            'email_verified_at' => now(),
         ]);
+
+        // Create Jurusan
+        $jurusans = [
+            [
+                'kode_jurusan' => 'TI',
+                'nama_jurusan' => 'Teknik Informatika',
+                'deskripsi' => 'Program studi yang mempelajari ilmu komputer, pemrograman, dan pengembangan perangkat lunak.',
+                'kuota' => 100,
+            ],
+            [
+                'kode_jurusan' => 'SI',
+                'nama_jurusan' => 'Sistem Informasi',
+                'deskripsi' => 'Program studi yang menggabungkan ilmu komputer dengan manajemen bisnis.',
+                'kuota' => 80,
+            ],
+            [
+                'kode_jurusan' => 'BD',
+                'nama_jurusan' => 'Bisnis Digital',
+                'deskripsi' => 'Program studi yang fokus pada pengembangan bisnis berbasis teknologi digital.',
+                'kuota' => 60,
+            ],
+        ];
+
+        foreach ($jurusans as $jurusan) {
+            Jurusan::create($jurusan);
+        }
     }
 }
