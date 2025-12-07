@@ -19,23 +19,7 @@
                             <i class="fas fa-calendar-alt mr-2"></i>
                             {{ now()->isoFormat('D MMMM YYYY') }}
                         </span>
-                        <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                            <i class="fas fa-clock mr-2"></i>
-                            {{ now()->isoFormat('HH:mm') }} WIB
-                        </span>
                     </div>
-                </div>
-                
-                <!-- Video Player -->
-                <div class="rounded-xl overflow-hidden shadow-2xl fade-in" style="animation-delay: 0.2s">
-                    <iframe width="100%" height="315" 
-                            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                            title="Campus Tour" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen
-                            class="rounded-xl">
-                    </iframe>
                 </div>
             </div>
         </div>
@@ -166,7 +150,7 @@
                 Campus Gallery
             </h3>
             <div class="grid grid-cols-2 gap-3">
-                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop" 
+                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop" 
                      alt="Campus 1" 
                      class="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer">
                 <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop" 

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\PembayaranController as AdminPembayaranController;
 use App\Http\Controllers\Admin\PengumumanController as AdminPengumumanController;
 use App\Http\Controllers\Admin\JurusanController as AdminJurusanController;
+use App\Http\Controllers\Admin\AkunController as AdminAkunController;
 
 // Controllers Mahasiswa
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
@@ -45,6 +46,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Dashboard Admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Kelola Akun User (Verifikasi Pendaftaran Akun)
+    Route::get('/akun', [AdminAkunController::class, 'index'])->name('akun.index');
+    Route::post('/akun/{id}/verifikasi', [AdminAkunController::class, 'verifikasi'])->name('akun.verifikasi');
+    Route::delete('/akun/{id}', [AdminAkunController::class, 'destroy'])->name('akun.destroy');
     
     // Kelola Mahasiswa
     Route::get('/mahasiswa', [AdminMahasiswaController::class, 'index'])->name('mahasiswa.index');

@@ -43,8 +43,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
 
-        return redirect(route('mahasiswa.dashboard', absolute: false));
+        return redirect()->route('login')->with('status', 'Registrasi berhasil! Akun Anda sedang dalam proses verifikasi admin. Silakan cek secara berkala.');
     }
 }

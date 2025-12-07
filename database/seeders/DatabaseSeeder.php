@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@lsp.com',
             'password' => bcrypt('password'),
             'role' => 'admin',
+            'status_akun' => 'aktif',
             'phone' => '081234567890',
             'address' => 'Kantor Pusat LSP',
             'email_verified_at' => now(),

@@ -62,6 +62,12 @@
                     <span>Dashboard</span>
                 </a>
                 
+                <a href="{{ route('admin.akun.index') }}" 
+                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.akun.*') ? 'bg-blue-700 shadow-lg' : '' }}">
+                    <i class="fas fa-user-check w-5"></i>
+                    <span>Verifikasi Akun</span>
+                </a>
+
                 <a href="{{ route('admin.mahasiswa.index') }}" 
                    class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.mahasiswa.*') ? 'bg-blue-700 shadow-lg' : '' }}">
                     <i class="fas fa-users w-5"></i>

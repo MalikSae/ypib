@@ -49,6 +49,21 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->status_akun !== 'aktif') {
+            Auth::guard('web')->logout();
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+
+            $message = $user->status_akun === 'pending'
+                ? 'Akun Anda sedang menunggu verifikasi admin. Silakan tunggu 1x24 jam.'
+                : 'Pendaftaran akun Anda ditolak. Silakan hubungi bagian administrasi.';
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
