@@ -1,63 +1,153 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/OjUh3bgu)
+# LSP2025 - Sistem Informasi Penerimaan Mahasiswa Baru
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+LSP2025 adalah aplikasi web manajemen pendaftaran mahasiswa baru yang modern dan responsif, dibangun menggunakan **Laravel 12**. Sistem ini dirancang untuk memfasilitasi seluruh rangkaian proses penerimaan mahasiswa baru, mulai dari pendaftaran akun, pengisian formulir biodata, verifikasi dokumen, pembayaran, hingga pengumuman kelulusan secara digital.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi ini membagi akses menjadi dua peran utama: **Administrator** yang mengelola sistem secara keseluruhan, dan **Mahasiswa** (calon pendaftar) yang menggunakan sistem untuk mendaftar.
 
-## About Laravel
+## 🛠️ Teknologi yang Digunakan
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Project ini dibangun di atas stack teknologi modern untuk performa dan pengalaman pengguna yang optimal:
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+*   **Backend Framework:** [Laravel 12](https://laravel.com) (PHP ^8.2)
+*   **Database:** MySQL
+*   **Frontend:**
+    *   Blade Templates
+    *   [Tailwind CSS v3](https://tailwindcss.com) (Utility-first CSS framework)
+    *   [Alpine.js](https://alpinejs.dev) (Lightweight JavaScript framework)
+*   **Authentication:** Laravel Breeze / Sanctum
+*   **Build Tool:** Vite
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Fitur Utama
 
-## Learning Laravel
+### 👑 Administrator
+*   **Dashboard Analitik:** Menampilkan ringkasan statistik pendaftar, status pembayaran, dan grafik pertumbuhan pendaftar.
+*   **Manajemen Jurusan:** Menambah, mengedit, dan menghapus program studi serta mengelola kuota penerimaan.
+*   **Manajemen Mahasiswa:**
+    *   Melihat daftar calon mahasiswa.
+    *   Memverifikasi biodata dan berkas pendaftaran.
+    *   Mengubah status kelulusan (Diterima/Ditolak/Cadangan).
+*   **Validasi Pembayaran:** Memeriksa bukti transfer yang diunggah mahasiswa dan mengubah status pembayaran.
+*   **Portal Pengumuman:** Membuat berita atau pengumuman penting dengan dukungan gambar cover dan kategori (Umum, Penerimaan, Pembayaran).
+*   **Manajemen Akun:** Mengelola data pengguna sistem.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 🎓 Mahasiswa (Calon Pendaftar)
+*   **Registrasi & Login:** Pembuatan akun mandiri yang aman.
+*   **Dashboard Personal:** Pusat informasi status pendaftaran dan notifikasi penting.
+*   **Formulir Pendaftaran:** Pengisian data diri, orang tua, sekolah asal, dan pemilihan jurusan.
+*   **Upload Dokumen:** Antarmuka pengunggahan berkas persyaratan (Ijazah, KK, Pas Foto, dll).
+*   **Pembayaran:** Fitur upload bukti pembayaran biaya pendaftaran.
+*   **Cek Pengumuman:** Melihat informasi terbaru seputar PMB dengan tampilan visual yang menarik.
+*   **Cetak Kartu:** (Opsional/Future) Mencetak kartu tanda peserta ujian.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📸 Galeri & Tangkapan Layar
 
-## Laravel Sponsors
+Berikut adalah gambaran visual dari aplikasi LSP2025.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Diagram Use Case
+![Use Case Diagram](usecase-lsp.jpg)
+*Gambaran alur interaksi pengguna dengan sistem*
 
-### Premium Partners
+### 1. Dashboard Mahasiswa
+![Dashboard Mahasiswa](https://via.placeholder.com/800x450.png?text=Dashboard+Mahasiswa+Preview)
+*Tampilan dashboard mahasiswa dengan status pendaftaran real-time dan pengumuman terbaru*
 
--   **[Vehikl](https://vehikl.com)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Redberry](https://redberry.international/laravel-development)**
--   **[Active Logic](https://activelogic.com)**
+### 2. Pusat Informasi & Pengumuman
+![Halaman Pengumuman](https://via.placeholder.com/800x450.png?text=Halaman+Pengumuman)
+*Daftar pengumuman dengan filter kategori dan tampilan kartu bergambar*
 
-## Contributing
+### 3. Formulir Pendaftaran
+![Formulir Pendaftaran](https://via.placeholder.com/800x450.png?text=Formulir+Pendaftaran)
+*Antarmuka pengisian biodata calon mahasiswa*
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Dashboard Administrator
+![Dashboard Admin](https://via.placeholder.com/800x450.png?text=Dashboard+Admin+Preview)
+*Panel kontrol admin untuk memantau statistik dan verifikasi data*
 
-## Code of Conduct
+*(Catatan: Gambar di atas adalah placeholder. Silakan ganti URL gambar dengan screenshot asli dari aplikasi Anda setelah instalasi.)*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚀 Panduan Instalasi & Penggunaan
 
-## Security Vulnerabilities
+Ikuti langkah-langkah berikut untuk menjalankan project ini di lingkungan pengembangan lokal (Localhost).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Prasyarat Sistem
+Pastikan komputer Anda telah terinstall:
+*   **PHP** >= 8.2
+*   **Composer** (PHP Package Manager)
+*   **Node.js** & **NPM**
+*   **MySQL** Database Server
 
-## License
+### Langkah-langkah Instalasi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1.  **Clone Repository**
+    Unduh source code project ke komputer Anda:
+    ```bash
+    git clone https://github.com/username/LSP2025.git
+    cd LSP2025
+    ```
 
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/OjUh3bgu)
+2.  **Install Dependencies**
+    Install library PHP dan JavaScript yang dibutuhkan:
+    ```bash
+    # Install dependency PHP
+    composer install
+
+    # Install dependency Frontend
+    npm install
+    ```
+
+3.  **Konfigurasi Environment**
+    Salin file konfigurasi contoh `.env.example` menjadi `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    Buka file `.env` dengan text editor dan sesuaikan konfigurasi database:
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=lsp2025_db  # Sesuaikan dengan nama database Anda
+    DB_USERNAME=root        # Sesuaikan dengan user database Anda
+    DB_PASSWORD=            # Sesuaikan dengan password database Anda
+    ```
+
+4.  **Generate Application Key**
+    Buat kunci enkripsi aplikasi Laravel:
+    ```bash
+    php artisan key:generate
+    ```
+
+5.  **Migrasi Database & Seeding**
+    Jalankan perintah ini untuk membuat tabel-tabel di database dan mengisi data awal (akun Admin default & Data Jurusan):
+    ```bash
+    php artisan migrate --seed
+    ```
+
+6.  **Build Assets Frontend**
+    Kompilasi file CSS dan JavaScript (Tailwind & Alpine):
+    ```bash
+    npm run build
+    ```
+
+7.  **Jalankan Server**
+    Jalankan server pengembangan Laravel:
+    ```bash
+    php artisan serve
+    ```
+    Akses aplikasi melalui browser di alamat: `http://127.0.0.1:8000`
+
+## 🔐 Akun Demo (Default)
+
+Untuk pengujian awal, Anda dapat menggunakan akun Administrator yang dibuat otomatis oleh seeder:
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Administrator** | `admin@lsp.com` | `password` |
+| **Mahasiswa** | *(Silakan Register Akun Baru)* | - |
+
+## 🤝 Kontribusi
+
+Kontribusi selalu diterima! Silakan buat **Pull Request** baru atau buka **Issue** jika Anda menemukan bug atau memiliki saran fitur baru.
+
+## 📝 Lisensi
+
+Project ini bersifat open-source dan dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).

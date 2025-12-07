@@ -35,13 +35,6 @@
                     </a>
                     @endif
                 </div>
-                
-                <!-- Illustration/Image -->
-                <div class="fade-in-up float" style="animation-delay: 0.2s">
-                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop" 
-                         alt="Student" 
-                         class="rounded-2xl shadow-2xl">
-                </div>
             </div>
         </div>
     </div>
@@ -241,7 +234,7 @@
                 </div>
             </div>
             <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop" 
+                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=400&fit=crop" 
                      alt="Campus" 
                      class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
