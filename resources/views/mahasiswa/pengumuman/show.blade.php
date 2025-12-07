@@ -132,6 +132,14 @@
                     </div>
                 </div>
 
+                @if($pengumuman->gambar)
+                <div class="w-full h-64 md:h-96 bg-slate-100">
+                    <img src="{{ Storage::url($pengumuman->gambar) }}" 
+                         alt="{{ $pengumuman->judul }}" 
+                         class="w-full h-full object-cover">
+                </div>
+                @endif
+
                 <!-- Isi Pengumuman -->
                 <div class="p-8">
                     <div class="prose prose-lg max-w-none">

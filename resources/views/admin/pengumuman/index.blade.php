@@ -27,8 +27,19 @@
                 @forelse($pengumumen as $item)
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4">
-                        <p class="font-semibold text-gray-800">{{ $item->judul }}</p>
-                        <p class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit(strip_tags($item->isi), 50) }}</p>
+                        <div class="flex items-center gap-3">
+                            @if($item->gambar)
+                                <img src="{{ Storage::url($item->gambar) }}" alt="" class="w-10 h-10 rounded-lg object-cover border border-gray-200">
+                            @else
+                                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                            @endif
+                            <div>
+                                <p class="font-semibold text-gray-800 line-clamp-1">{{ $item->judul }}</p>
+                                <p class="text-xs text-gray-500 truncate max-w-xs">{{ Str::limit(strip_tags($item->isi), 50) }}</p>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600">
@@ -50,15 +61,21 @@
                          @endif
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end space-x-2">
+                        <div class="flex justify-end gap-2">
+                            <a href="{{ route('admin.pengumuman.show', $item->id) }}" 
+                               class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                               title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
                             <a href="{{ route('admin.pengumuman.edit', $item->id) }}" 
-                               class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                               class="p-2 text-yellow-600 hover:bg-yellow-50 rounded transition-colors"
+                               title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('admin.pengumuman.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus pengumuman ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
+                                <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors" title="Hapus">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
@@ -77,8 +94,10 @@
         </table>
     </div>
     
+    @if($pengumumen->hasPages())
     <div class="px-6 py-4 border-t border-gray-100">
         {{ $pengumumen->links() }}
     </div>
+    @endif
 </div>
 @endsection

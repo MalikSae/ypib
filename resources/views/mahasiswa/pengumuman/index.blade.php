@@ -50,60 +50,67 @@
         <div class="space-y-4">
             @foreach($pengumumans as $pengumuman)
             <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex-1">
-                            <!-- Kategori Badge -->
-                            <div class="mb-3">
-                                @if($pengumuman->kategori === 'umum')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
-                                        <i class="fas fa-tag mr-1"></i>Umum
+                <div class="p-6 flex items-start space-x-4">
+                    @if($pengumuman->gambar)
+                    <div class="flex-shrink-0 w-32 h-32 rounded-xl overflow-hidden shadow-sm">
+                        <img src="{{ Storage::url($pengumuman->gambar) }}" alt="{{ $pengumuman->judul }}" class="w-full h-full object-cover">
+                    </div>
+                    @endif
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <!-- Kategori Badge -->
+                                <div class="mb-3">
+                                    @if($pengumuman->kategori === 'umum')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                            <i class="fas fa-tag mr-1"></i>Umum
+                                        </span>
+                                    @elseif($pengumuman->kategori === 'penerimaan')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                            <i class="fas fa-user-check mr-1"></i>Penerimaan
+                                        </span>
+                                    @elseif($pengumuman->kategori === 'pembayaran')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                            <i class="fas fa-money-bill-wave mr-1"></i>Pembayaran
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                            <i class="fas fa-tag mr-1"></i>{{ ucfirst($pengumuman->kategori) }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <!-- Judul -->
+                                <h3 class="text-xl font-bold text-gray-800 mb-2 hover:text-indigo-600 transition-colors">
+                                    {{ $pengumuman->judul }}
+                                </h3>
+
+                                <!-- Isi (Preview) -->
+                                <p class="text-gray-600 mb-4 line-clamp-2">
+                                    {{ Str::limit(strip_tags($pengumuman->isi), 150) }}
+                                </p>
+
+                                <!-- Meta Info -->
+                                <div class="flex items-center text-sm text-gray-500 space-x-4">
+                                    <span class="flex items-center">
+                                        <i class="far fa-calendar mr-2"></i>
+                                        {{ $pengumuman->tanggal_publish->format('d M Y') }}
                                     </span>
-                                @elseif($pengumuman->kategori === 'penerimaan')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                                        <i class="fas fa-user-check mr-1"></i>Penerimaan
+                                    <span class="flex items-center">
+                                        <i class="far fa-clock mr-2"></i>
+                                        {{ $pengumuman->created_at->diffForHumans() }}
                                     </span>
-                                @elseif($pengumuman->kategori === 'pembayaran')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                        <i class="fas fa-money-bill-wave mr-1"></i>Pembayaran
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                                        <i class="fas fa-tag mr-1"></i>{{ ucfirst($pengumuman->kategori) }}
-                                    </span>
-                                @endif
+                                </div>
                             </div>
 
-                            <!-- Judul -->
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 hover:text-indigo-600 transition-colors">
-                                {{ $pengumuman->judul }}
-                            </h3>
-
-                            <!-- Isi (Preview) -->
-                            <p class="text-gray-600 mb-4 line-clamp-2">
-                                {{ Str::limit(strip_tags($pengumuman->isi), 150) }}
-                            </p>
-
-                            <!-- Meta Info -->
-                            <div class="flex items-center text-sm text-gray-500 space-x-4">
-                                <span class="flex items-center">
-                                    <i class="far fa-calendar mr-2"></i>
-                                    {{ $pengumuman->tanggal_publish->format('d M Y') }}
-                                </span>
-                                <span class="flex items-center">
-                                    <i class="far fa-clock mr-2"></i>
-                                    {{ $pengumuman->created_at->diffForHumans() }}
-                                </span>
+                            <!-- Action Button -->
+                            <div class="ml-4">
+                                <a href="{{ route('mahasiswa.pengumuman.show', $pengumuman->id) }}" 
+                                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                                    <span class="hidden sm:inline mr-2">Baca</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
                             </div>
-                        </div>
-
-                        <!-- Action Button -->
-                        <div class="ml-4">
-                            <a href="{{ route('mahasiswa.pengumuman.show', $pengumuman->id) }}" 
-                               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                                <span class="hidden sm:inline mr-2">Baca</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </a>
                         </div>
                     </div>
                 </div>

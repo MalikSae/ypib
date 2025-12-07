@@ -69,6 +69,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengumuman', [AdminPengumumanController::class, 'index'])->name('pengumuman.index');
     Route::get('/pengumuman/create', [AdminPengumumanController::class, 'create'])->name('pengumuman.create');
     Route::post('/pengumuman', [AdminPengumumanController::class, 'store'])->name('pengumuman.store');
+    Route::get('/pengumuman/{id}', [AdminPengumumanController::class, 'show'])->name('pengumuman.show');
     Route::get('/pengumuman/{id}/edit', [AdminPengumumanController::class, 'edit'])->name('pengumuman.edit');
     Route::patch('/pengumuman/{id}', [AdminPengumumanController::class, 'update'])->name('pengumuman.update');
     Route::delete('/pengumuman/{id}', [AdminPengumumanController::class, 'destroy'])->name('pengumuman.destroy');

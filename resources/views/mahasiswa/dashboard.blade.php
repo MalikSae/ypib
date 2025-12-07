@@ -191,9 +191,15 @@
         <div class="space-y-4">
             @foreach($pengumumans as $pengumuman)
             <div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:shadow-md transition-all duration-200">
+                @if($pengumuman->gambar)
+                <div class="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden shadow-sm">
+                    <img src="{{ Storage::url($pengumuman->gambar) }}" alt="{{ $pengumuman->judul }}" class="w-full h-full object-cover">
+                </div>
+                @else
                 <div class="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
                     <i class="fas fa-megaphone text-indigo-600"></i>
                 </div>
+                @endif
                 <div class="flex-1">
                     <h4 class="font-semibold text-gray-800">{{ $pengumuman->judul }}</h4>
                     <p class="text-sm text-gray-600 mt-1">{{ Str::limit($pengumuman->isi, 150) }}</p>
