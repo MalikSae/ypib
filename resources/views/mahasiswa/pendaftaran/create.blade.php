@@ -61,8 +61,12 @@
                         <h4 class="font-bold text-gray-800 mb-2">{{ $jurusan->nama_jurusan }}</h4>
                         <p class="text-sm text-gray-600">{{ Str::limit($jurusan->deskripsi, 80) }}</p>
                         <div class="mt-3 pt-3 border-t border-gray-200">
-                            <p class="text-xs text-gray-500">
-                                <i class="fas fa-users mr-1"></i>Kuota: {{ $jurusan->kuota }} orang
+                            <p class="text-xs text-gray-500 font-semibold">
+                                <i class="fas fa-users mr-1"></i>Sisa Kuota: 
+                                <span class="text-indigo-600">
+                                    {{ max(0, $jurusan->kuota - $jurusan->mahasiswa_diterima_count) }}
+                                </span> 
+                                / {{ $jurusan->kuota }}
                             </p>
                         </div>
                     </div>

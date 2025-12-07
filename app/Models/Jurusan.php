@@ -21,4 +21,18 @@ class Jurusan extends Model
     {
         return $this->hasMany(Mahasiswa::class);
     }
+
+    public function mahasiswaDiterima()
+    {
+        return $this->hasMany(Mahasiswa::class)->whereHas('pembayarans', function($query) {
+            $query->where('status', 'terverifikasi');
+        });
+    }
+
+    public function getSisaKuotaAttribute()
+    {
+        // Hitung sisa kuota: Total Kuota - Jumlah Mahasiswa Diterima
+        $terisi = $this->mahasiswaDiterima()->count();
+        return max(0, $this->kuota - $terisi);
+    }
 }

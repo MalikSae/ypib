@@ -10,7 +10,7 @@ class JurusanController extends Controller
 {
     public function index()
     {
-        $jurusans = Jurusan::withCount('mahasiswas')->paginate(10);
+        $jurusans = Jurusan::withCount(['mahasiswas', 'mahasiswaDiterima'])->paginate(10);
         return view('admin.jurusan.index', compact('jurusans'));
     }
 
@@ -36,14 +36,14 @@ class JurusanController extends Controller
     public function edit($id)
     {
         // PERUBAHAN: Load dengan count mahasiswa untuk validasi kuota
-        $jurusan = Jurusan::withCount('mahasiswas')->findOrFail($id);
+        $jurusan = Jurusan::withCount(['mahasiswas', 'mahasiswaDiterima'])->findOrFail($id);
         return view('admin.jurusan.edit', compact('jurusan'));
     }
 
     public function update(Request $request, $id)
     {
         // PERUBAHAN: Load dengan count mahasiswa untuk validasi kuota
-        $jurusan = Jurusan::withCount('mahasiswas')->findOrFail($id);
+        $jurusan = Jurusan::withCount(['mahasiswas', 'mahasiswaDiterima'])->findOrFail($id);
         
         $request->validate([
             'kode_jurusan' => 'required|string|unique:jurusans,kode_jurusan,' . $id,
@@ -53,18 +53,19 @@ class JurusanController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        // Validasi status: Tidak boleh non-active jika ada mahasiswa
+        // Validasi status: Tidak boleh non-active jika ada mahasiswa (pending atau diterima)
+        // Kita tetap gunakan mahasiswas_count untuk status aktif/nonaktif agar aman
         if ($request->status == 'inactive' && $jurusan->mahasiswas_count > 0) {
             return redirect()->back()
                            ->withInput()
-                           ->with('error', 'Tidak dapat menonaktifkan jurusan yang masih memiliki mahasiswa terdaftar (' . $jurusan->mahasiswas_count . ' mahasiswa)');
+                           ->with('error', 'Tidak dapat menonaktifkan jurusan yang masih memiliki mahasiswa terdaftar (' . $jurusan->mahasiswas_count . ' mahasiswa, termasuk pending).');
         }
 
-        // PERUBAHAN: Validasi kuota tidak boleh lebih kecil dari mahasiswa terdaftar
-        if ($request->kuota < $jurusan->mahasiswas_count) {
+        // PERUBAHAN: Validasi kuota tidak boleh lebih kecil dari mahasiswa DITERIMA
+        if ($request->kuota < $jurusan->mahasiswa_diterima_count) {
             return redirect()->back()
                            ->withInput()
-                           ->with('error', 'Kuota tidak boleh lebih kecil dari jumlah mahasiswa yang sudah terdaftar (' . $jurusan->mahasiswas_count . ' mahasiswa)');
+                           ->with('error', 'Kuota tidak boleh lebih kecil dari jumlah mahasiswa yang sudah DITERIMA (' . $jurusan->mahasiswa_diterima_count . ' mahasiswa)');
         }
 
         $jurusan->update($request->all());

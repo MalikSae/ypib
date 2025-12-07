@@ -20,9 +20,12 @@ class PendaftaranController extends Controller
                            ->with('info', 'Anda sudah melakukan pendaftaran');
         }
 
-        // Ambil jurusan dengan menghitung jumlah mahasiswa yang sudah terdaftar
+        // Ambil jurusan dengan menghitung jumlah mahasiswa yang sudah DITERIMA
         // HANYA JURUSAN AKTIF
-        $jurusans = Jurusan::where('status', 'active')->withCount('mahasiswas')->get();
+        $jurusans = Jurusan::where('status', 'active')
+                           ->withCount('mahasiswaDiterima')
+                           ->get();
+                           
         return view('mahasiswa.pendaftaran.create', compact('jurusans'));
     }
 
@@ -54,7 +57,7 @@ class PendaftaranController extends Controller
 
         // ===== LOGIC KUOTA DIMULAI DI SINI =====
         // Ambil data jurusan yang dipilih
-        $jurusan = Jurusan::withCount('mahasiswas')->findOrFail($request->jurusan_id);
+        $jurusan = Jurusan::withCount('mahasiswaDiterima')->findOrFail($request->jurusan_id);
         
         // Cek status aktif
         if ($jurusan->status !== 'active') {
@@ -63,8 +66,8 @@ class PendaftaranController extends Controller
                            ->withInput();
         }
 
-        // Cek apakah kuota jurusan masih tersedia
-        if ($jurusan->mahasiswas_count >= $jurusan->kuota) {
+        // Cek apakah kuota jurusan masih tersedia (Berdasarkan yang DITERIMA)
+        if ($jurusan->mahasiswa_diterima_count >= $jurusan->kuota) {
             return redirect()->back()
                            ->with('error', 'Maaf, kuota untuk jurusan ' . $jurusan->nama_jurusan . ' sudah penuh!')
                            ->withInput();

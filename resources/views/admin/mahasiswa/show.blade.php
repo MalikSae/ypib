@@ -40,7 +40,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Update Status</label>
                     <select name="status_pendaftaran" class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                         <option value="pending" {{ $mahasiswa->status_pendaftaran == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="diverifikasi" {{ $mahasiswa->status_pendaftaran == 'diverifikasi' ? 'selected' : '' }}>Diverifikasi (Lanjut Pembayaran)</option>
+                        <option value="diverifikasi" {{ $mahasiswa->status_pendaftaran == 'diverifikasi' ? 'selected' : '' }}>Diverifikasi</option>
                         <option value="ditolak" {{ $mahasiswa->status_pendaftaran == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                 </div>

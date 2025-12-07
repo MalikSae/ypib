@@ -37,7 +37,23 @@
                         {{ Str::limit($jurusan->deskripsi, 50) }}
                     </td>
                     <td class="px-6 py-4">
-                        {{ $jurusan->kuota ?? 'Unlimited' }}
+                        <div class="flex flex-col">
+                            <div class="text-sm mb-1">
+                                <span class="font-bold text-gray-800" title="Sisa Kuota">{{ max(0, $jurusan->kuota - $jurusan->mahasiswa_diterima_count) }}</span>
+                                <span class="text-gray-400 text-xs">/ {{ $jurusan->kuota }} Kursi</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                @php
+                                    $terisi = $jurusan->mahasiswa_diterima_count ?? 0;
+                                    $percentage = $jurusan->kuota > 0 ? ($terisi / $jurusan->kuota) * 100 : 0;
+                                    $colorClass = $percentage >= 100 ? 'bg-red-500' : ($percentage >= 80 ? 'bg-yellow-500' : 'bg-blue-600');
+                                @endphp
+                                <div class="{{ $colorClass }} h-1.5 rounded-full transition-all duration-500" style="width: {{ min(100, $percentage) }}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                Terisi: {{ $terisi }} (Diterima)
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         @if($jurusan->status == 'active')
