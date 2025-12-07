@@ -1,153 +1,183 @@
-# LSP2025 - Sistem Informasi Penerimaan Mahasiswa Baru
+# Sistem Penerimaan Mahasiswa Baru (SPMB)
 
-LSP2025 adalah aplikasi web manajemen pendaftaran mahasiswa baru yang modern dan responsif, dibangun menggunakan **Laravel 12**. Sistem ini dirancang untuk memfasilitasi seluruh rangkaian proses penerimaan mahasiswa baru, mulai dari pendaftaran akun, pengisian formulir biodata, verifikasi dokumen, pembayaran, hingga pengumuman kelulusan secara digital.
+Aplikasi web untuk manajemen pendaftaran mahasiswa baru menggunakan Laravel 12. Menyediakan fitur lengkap untuk proses penerimaan dari registrasi hingga verifikasi pendaftaran.
 
-Aplikasi ini membagi akses menjadi dua peran utama: **Administrator** yang mengelola sistem secara keseluruhan, dan **Mahasiswa** (calon pendaftar) yang menggunakan sistem untuk mendaftar.
+## Tech Stack
 
-## 🛠️ Teknologi yang Digunakan
+-   **Backend:** Laravel 12 (PHP 8.2+)
+-   **Database:** MySQL
+-   **Frontend:** Blade, Tailwind CSS, Alpine.js
+-   **Auth:** Laravel Breeze
+-   **Build Tool:** Vite
 
-Project ini dibangun di atas stack teknologi modern untuk performa dan pengalaman pengguna yang optimal:
+## Fitur
 
-*   **Backend Framework:** [Laravel 12](https://laravel.com) (PHP ^8.2)
-*   **Database:** MySQL
-*   **Frontend:**
-    *   Blade Templates
-    *   [Tailwind CSS v3](https://tailwindcss.com) (Utility-first CSS framework)
-    *   [Alpine.js](https://alpinejs.dev) (Lightweight JavaScript framework)
-*   **Authentication:** Laravel Breeze / Sanctum
-*   **Build Tool:** Vite
+### Administrator
 
-## ✨ Fitur Utama
+-   Dashboard dengan statistik dan grafik pendaftar
+-   Manajemen jurusan dan kuota
+-   Verifikasi biodata dan dokumen mahasiswa
+-   Validasi pembayaran
+-   Manajemen pengumuman dengan kategori
+-   Kelola status kelulusan (Diterima/Ditolak)
 
-### 👑 Administrator
-*   **Dashboard Analitik:** Menampilkan ringkasan statistik pendaftar, status pembayaran, dan grafik pertumbuhan pendaftar.
-*   **Manajemen Jurusan:** Menambah, mengedit, dan menghapus program studi serta mengelola kuota penerimaan.
-*   **Manajemen Mahasiswa:**
-    *   Melihat daftar calon mahasiswa.
-    *   Memverifikasi biodata dan berkas pendaftaran.
-    *   Mengubah status kelulusan (Diterima/Ditolak/Cadangan).
-*   **Validasi Pembayaran:** Memeriksa bukti transfer yang diunggah mahasiswa dan mengubah status pembayaran.
-*   **Portal Pengumuman:** Membuat berita atau pengumuman penting dengan dukungan gambar cover dan kategori (Umum, Penerimaan, Pembayaran).
-*   **Manajemen Akun:** Mengelola data pengguna sistem.
+### Mahasiswa
 
-### 🎓 Mahasiswa (Calon Pendaftar)
-*   **Registrasi & Login:** Pembuatan akun mandiri yang aman.
-*   **Dashboard Personal:** Pusat informasi status pendaftaran dan notifikasi penting.
-*   **Formulir Pendaftaran:** Pengisian data diri, orang tua, sekolah asal, dan pemilihan jurusan.
-*   **Upload Dokumen:** Antarmuka pengunggahan berkas persyaratan (Ijazah, KK, Pas Foto, dll).
-*   **Pembayaran:** Fitur upload bukti pembayaran biaya pendaftaran.
-*   **Cek Pengumuman:** Melihat informasi terbaru seputar PMB dengan tampilan visual yang menarik.
-*   **Cetak Kartu:** (Opsional/Future) Mencetak kartu tanda peserta ujian.
+-   Registrasi dan login
+-   Dashboard status pendaftaran
+-   Formulir pendaftaran online
+-   Upload dokumen persyaratan
+-   Upload bukti pembayaran
+-   Lihat pengumuman dan informasi PMB
 
-## 📸 Galeri & Tangkapan Layar
+## Screenshots
 
-Berikut adalah gambaran visual dari aplikasi LSP2025.
+### Use Case Diagram
 
-### Diagram Use Case
-![Use Case Diagram](usecase-lsp.jpg)
-*Gambaran alur interaksi pengguna dengan sistem*
+![Use Case Diagram](https://github.com/user-attachments/assets/bd734549-bcb3-4788-99e1-a358214b6ebb)
 
-### 1. Dashboard Mahasiswa
-![Dashboard Mahasiswa](https://via.placeholder.com/800x450.png?text=Dashboard+Mahasiswa+Preview)
-*Tampilan dashboard mahasiswa dengan status pendaftaran real-time dan pengumuman terbaru*
+### Registrasi
 
-### 2. Pusat Informasi & Pengumuman
-![Halaman Pengumuman](https://via.placeholder.com/800x450.png?text=Halaman+Pengumuman)
-*Daftar pengumuman dengan filter kategori dan tampilan kartu bergambar*
+![Register](https://github.com/user-attachments/assets/2f79309d-7b59-472d-93c3-7600a039da47)
 
-### 3. Formulir Pendaftaran
-![Formulir Pendaftaran](https://via.placeholder.com/800x450.png?text=Formulir+Pendaftaran)
-*Antarmuka pengisian biodata calon mahasiswa*
+### Login
 
-### 4. Dashboard Administrator
-![Dashboard Admin](https://via.placeholder.com/800x450.png?text=Dashboard+Admin+Preview)
-*Panel kontrol admin untuk memantau statistik dan verifikasi data*
+![Login](https://github.com/user-attachments/assets/62293726-9209-4909-ac36-75916daf3af8)
 
-*(Catatan: Gambar di atas adalah placeholder. Silakan ganti URL gambar dengan screenshot asli dari aplikasi Anda setelah instalasi.)*
+> **Note:** Setelah login berhasil, akun harus diverifikasi admin terlebih dahulu sebelum dapat mengakses dashboard.
 
-## 🚀 Panduan Instalasi & Penggunaan
+### Dashboard Mahasiswa
 
-Ikuti langkah-langkah berikut untuk menjalankan project ini di lingkungan pengembangan lokal (Localhost).
+![Dashboard Mahasiswa](https://github.com/user-attachments/assets/37bb97d4-4532-4e5b-b674-079392411ecd)
 
-### Prasyarat Sistem
-Pastikan komputer Anda telah terinstall:
-*   **PHP** >= 8.2
-*   **Composer** (PHP Package Manager)
-*   **Node.js** & **NPM**
-*   **MySQL** Database Server
+### Formulir Pendaftaran
 
-### Langkah-langkah Instalasi
+![Form Pendaftaran 1](https://github.com/user-attachments/assets/b5ed61be-c635-469a-a9b4-aa82154aa705)
+![Form Pendaftaran 2](https://github.com/user-attachments/assets/f0636867-b4bc-4ce0-bf62-bfbe5a63fbf7)
 
-1.  **Clone Repository**
-    Unduh source code project ke komputer Anda:
-    ```bash
-    git clone https://github.com/username/LSP2025.git
-    cd LSP2025
-    ```
+### Pembayaran
 
-2.  **Install Dependencies**
-    Install library PHP dan JavaScript yang dibutuhkan:
-    ```bash
-    # Install dependency PHP
-    composer install
+![Pembayaran](https://github.com/user-attachments/assets/d8cdcc7d-7650-4f78-9d0d-ea3ff9808066)
 
-    # Install dependency Frontend
-    npm install
-    ```
+### Halaman Pengumuman
 
-3.  **Konfigurasi Environment**
-    Salin file konfigurasi contoh `.env.example` menjadi `.env`:
-    ```bash
-    cp .env.example .env
-    ```
-    Buka file `.env` dengan text editor dan sesuaikan konfigurasi database:
-    ```env
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=lsp2025_db  # Sesuaikan dengan nama database Anda
-    DB_USERNAME=root        # Sesuaikan dengan user database Anda
-    DB_PASSWORD=            # Sesuaikan dengan password database Anda
-    ```
+![Pengumuman](https://github.com/user-attachments/assets/85667018-5dad-4662-952b-b8cad1c2d3ad)
 
-4.  **Generate Application Key**
-    Buat kunci enkripsi aplikasi Laravel:
-    ```bash
-    php artisan key:generate
-    ```
+### Dashboard Admin
 
-5.  **Migrasi Database & Seeding**
-    Jalankan perintah ini untuk membuat tabel-tabel di database dan mengisi data awal (akun Admin default & Data Jurusan):
-    ```bash
-    php artisan migrate --seed
-    ```
+![Dashboard Admin](https://github.com/user-attachments/assets/99d89bc1-cba6-4596-add9-90785fae08c8)
 
-6.  **Build Assets Frontend**
-    Kompilasi file CSS dan JavaScript (Tailwind & Alpine):
-    ```bash
-    npm run build
-    ```
+### Verifikasi Akun Mahasiswa
 
-7.  **Jalankan Server**
-    Jalankan server pengembangan Laravel:
-    ```bash
-    php artisan serve
-    ```
-    Akses aplikasi melalui browser di alamat: `http://127.0.0.1:8000`
+![Verifikasi Akun](https://github.com/user-attachments/assets/9391b99a-9393-4092-b5ae-c7c7f4b33a0b)
 
-## 🔐 Akun Demo (Default)
+### Daftar Pendaftar
 
-Untuk pengujian awal, Anda dapat menggunakan akun Administrator yang dibuat otomatis oleh seeder:
+![Daftar Pendaftar](https://github.com/user-attachments/assets/841e44b8-cc15-4b88-ac9d-3d0a2f0dd4dc)
 
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Administrator** | `admin@lsp.com` | `password` |
-| **Mahasiswa** | *(Silakan Register Akun Baru)* | - |
+### Verifikasi Pendaftaran
 
-## 🤝 Kontribusi
+![Verifikasi Pendaftaran](https://github.com/user-attachments/assets/4b2f2e0f-4fd6-4547-836c-ad55b33f86e3)
 
-Kontribusi selalu diterima! Silakan buat **Pull Request** baru atau buka **Issue** jika Anda menemukan bug atau memiliki saran fitur baru.
+### Verifikasi Pembayaran
 
-## 📝 Lisensi
+![Verifikasi Pembayaran](https://github.com/user-attachments/assets/3c8c720c-90e4-4058-b5d3-48fc7c31ef1d)
 
-Project ini bersifat open-source dan dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
+### Daftar Pengumuman Admin
+
+![Daftar Pengumuman](https://github.com/user-attachments/assets/27f18b2f-9070-43a8-aaa5-ad8255e9bbf4)
+
+### Tambah Pengumuman
+
+![Tambah Pengumuman](https://github.com/user-attachments/assets/7a62d44c-a9f7-4868-92e8-dc715dd9979f)
+
+### Detail Pengumuman
+
+![Detail Pengumuman](https://github.com/user-attachments/assets/fa0b7caf-5fbb-4ae6-99f3-f2308c0bf4ef)
+
+### Daftar Jurusan
+
+![Daftar Jurusan](https://github.com/user-attachments/assets/87dd4ef7-e78a-4ecc-a64a-b97332298f6a)
+
+### Tambah Jurusan
+
+![Tambah Jurusan](https://github.com/user-attachments/assets/071f9b23-a055-48dc-9170-0431bf4fb902)
+
+## Instalasi
+
+### Prasyarat
+
+-   PHP >= 8.2
+-   Composer
+-   Node.js & NPM
+-   MySQL
+
+### Langkah Instalasi
+
+1. Clone repository
+
+```bash
+git clone (url repository)
+cd LSP2025
+```
+
+2. Install dependencies
+
+```bash
+composer install
+npm install
+```
+
+3. Setup environment
+
+```bash
+cp .env.example .env
+```
+
+Edit file `.env` dan sesuaikan konfigurasi database:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=lsp2025_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+4. Generate key
+
+```bash
+php artisan key:generate
+```
+
+5. Migrasi database
+
+```bash
+php artisan migrate --seed
+```
+
+6. Build assets
+
+```bash
+npm run build
+```
+
+7. Jalankan server
+
+```bash
+php artisan serve
+```
+
+Akses aplikasi di `http://127.0.0.1:8000`
+
+## Akun Default
+
+| Role      | Email               | Password |
+| --------- | ------------------- | -------- |
+| Admin     | admin@lsp.com       | password |
+| Mahasiswa | _(Register manual)_ | -        |
+
+## Lisensi
+
+MIT License
