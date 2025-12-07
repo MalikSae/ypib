@@ -44,8 +44,7 @@
                       x-data="{ 
                           fileName: '', 
                           filePreview: null,
-                          fileType: '',
-                          jumlah: ''
+                          fileType: ''
                       }"
                       class="p-8">
                     @csrf
@@ -76,7 +75,7 @@
                         </div>
                     </div>
 
-                    <!-- Jumlah Pembayaran -->
+                    <!-- Jumlah Pembayaran (Readonly) -->
                     <div class="mb-6">
                         <label class="block text-gray-700 font-semibold mb-3">
                             <i class="fas fa-money-bill-wave text-indigo-600 mr-2"></i>
@@ -85,24 +84,13 @@
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">Rp</span>
                             <input type="text" 
-                                   name="jumlah" 
-                                   x-model="jumlah"
-                                   @input="jumlah = $event.target.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
-                                   class="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 transition-all"
-                                   placeholder="0"
-                                   required>
+                                   value="{{ number_format($biaya, 0, ',', '.') }}"
+                                   class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 bg-gray-50 text-gray-500 rounded-xl focus:border-gray-200 cursor-not-allowed font-bold"
+                                   readonly>
                         </div>
-                        <input type="hidden" 
-                               name="jumlah" 
-                               :value="jumlah.replace(/\./g, '')">
-                        @error('jumlah')
-                            <p class="mt-2 text-sm text-red-600 flex items-center">
-                                <i class="fas fa-exclamation-circle mr-2"></i>{{ $message }}
-                            </p>
-                        @enderror
-                        <p class="mt-2 text-sm text-gray-600" x-show="jumlah">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Terbilang: <span class="font-semibold" x-text="jumlah ? 'Rp ' + jumlah : ''"></span>
+                        <p class="mt-2 text-sm text-gray-600">
+                            <i class="fas fa-lock mr-1 text-gray-400"></i>
+                            Nominal pembayaran sudah ditentukan oleh sistem.
                         </p>
                     </div>
 
@@ -240,7 +228,7 @@
                     </div>
                     <div class="bg-white/10 rounded-lg p-3">
                         <p class="text-blue-100 mb-1">Atas Nama</p>
-                        <p class="font-bold">Universitas ABC</p>
+                        <p class="font-bold">Universitas LSP</p>
                     </div>
                 </div>
             </div>
@@ -292,7 +280,7 @@
                     </div>
                     <div class="flex justify-between items-center pt-2">
                         <span class="font-bold text-lg">Total</span>
-                        <span class="font-bold text-2xl">Rp 250.000</span>
+                        <span class="font-bold text-2xl">Rp {{ number_format($biaya, 0, ',', '.') }}</span>
                     </div>
                 </div>
             </div>

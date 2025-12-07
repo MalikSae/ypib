@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 class PembayaranController extends Controller
 {
+    private $biayaPendaftaran = 250000;
+
     // Menampilkan riwayat pembayaran
     public function index()
     {
@@ -33,7 +35,8 @@ class PembayaranController extends Controller
                            ->with('info', 'Silakan lengkapi pendaftaran terlebih dahulu');
         }
 
-        return view('mahasiswa.pembayaran.create', compact('mahasiswa'));
+        $biaya = $this->biayaPendaftaran;
+        return view('mahasiswa.pembayaran.create', compact('mahasiswa', 'biaya'));
     }
 
     // Simpan pembayaran
@@ -42,7 +45,6 @@ class PembayaranController extends Controller
         $mahasiswa = auth()->user()->mahasiswa;
 
         $request->validate([
-            'jumlah' => 'required|numeric|min:0',
             'tanggal_bayar' => 'required|date',
             'bukti_pembayaran' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048'
         ]);
@@ -56,7 +58,7 @@ class PembayaranController extends Controller
         Pembayaran::create([
             'mahasiswa_id' => $mahasiswa->id,
             'no_pembayaran' => $no_pembayaran,
-            'jumlah' => $request->jumlah,
+            'jumlah' => $this->biayaPendaftaran,
             'tanggal_bayar' => $request->tanggal_bayar,
             'bukti_pembayaran' => $buktiPath,
             'status' => 'pending'
