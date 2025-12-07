@@ -82,7 +82,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Mahasiswa Diterima</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $mahasiswaDiterima }}</h3>
+                    <h3 class="text-3xl font-bold text-gray-800">{{ $totalMahasiswa }}</h3>
                 </div>
                 <div class="bg-green-100 p-4 rounded-full">
                     <i class="fas fa-check-circle text-3xl text-green-600"></i>

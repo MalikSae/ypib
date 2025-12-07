@@ -8,11 +8,16 @@ use Illuminate\Http\Request;
 
 class PengumumanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengumumans = Pengumuman::where('is_active', true)
-                                 ->latest()
-                                 ->paginate(10);
+        $query = Pengumuman::where('is_active', true);
+
+        // Filter berdasarkan kategori jika ada
+        if ($request->has('kategori') && $request->kategori !== 'all') {
+            $query->where('kategori', $request->kategori);
+        }
+
+        $pengumumans = $query->latest()->paginate(10);
 
         return view('mahasiswa.pengumuman.index', compact('pengumumans'));
     }

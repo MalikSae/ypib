@@ -23,4 +23,12 @@ class Pengumuman extends Model
         'tanggal_publish' => 'date',
         'is_active' => 'boolean',
     ];
+
+    // Validation rules (optional, bisa dipakai di FormRequest)
+    public static function validationRules()
+    {
+        return [
+            'kategori' => 'required|in:umum,penerimaan,pembayaran',
+        ];
+    }
 }

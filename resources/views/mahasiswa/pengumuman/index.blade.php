@@ -22,29 +22,25 @@
     </div>
 
     <!-- Filter Kategori -->
-    <div x-data="{ kategori: 'all' }" class="mb-6">
+    <div class="mb-6">
         <div class="bg-white rounded-xl shadow-lg p-4">
             <div class="flex flex-wrap gap-2">
-                <button @click="kategori = 'all'" 
-                        :class="kategori === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200">
+                <a href="{{ route('mahasiswa.pengumuman.index') }}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200 {{ !request('kategori') || request('kategori') === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
                     <i class="fas fa-th-large mr-2"></i>Semua
-                </button>
-                <button @click="kategori = 'penting'" 
-                        :class="kategori === 'penting' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-exclamation-circle mr-2"></i>Penting
-                </button>
-                <button @click="kategori = 'informasi'" 
-                        :class="kategori === 'informasi' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-info-circle mr-2"></i>Informasi
-                </button>
-                <button @click="kategori = 'jadwal'" 
-                        :class="kategori === 'jadwal' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                        class="px-4 py-2 rounded-lg font-medium transition-all duration-200">
-                    <i class="fas fa-calendar-alt mr-2"></i>Jadwal
-                </button>
+                </a>
+                <a href="{{ route('mahasiswa.pengumuman.index', ['kategori' => 'umum']) }}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200 {{ request('kategori') === 'umum' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                    <i class="fas fa-tag mr-2"></i>Umum
+                </a>
+                <a href="{{ route('mahasiswa.pengumuman.index', ['kategori' => 'penerimaan']) }}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200 {{ request('kategori') === 'penerimaan' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                    <i class="fas fa-user-check mr-2"></i>Penerimaan
+                </a>
+                <a href="{{ route('mahasiswa.pengumuman.index', ['kategori' => 'pembayaran']) }}" 
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200 {{ request('kategori') === 'pembayaran' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                    <i class="fas fa-money-bill-wave mr-2"></i>Pembayaran
+                </a>
             </div>
         </div>
     </div>
@@ -59,21 +55,21 @@
                         <div class="flex-1">
                             <!-- Kategori Badge -->
                             <div class="mb-3">
-                                @if($pengumuman->kategori === 'penting')
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                        <i class="fas fa-exclamation-circle mr-1"></i>Penting
+                                @if($pengumuman->kategori === 'umum')
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                        <i class="fas fa-tag mr-1"></i>Umum
                                     </span>
-                                @elseif($pengumuman->kategori === 'informasi')
+                                @elseif($pengumuman->kategori === 'penerimaan')
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                                        <i class="fas fa-info-circle mr-1"></i>Informasi
+                                        <i class="fas fa-user-check mr-1"></i>Penerimaan
                                     </span>
-                                @elseif($pengumuman->kategori === 'jadwal')
+                                @elseif($pengumuman->kategori === 'pembayaran')
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                        <i class="fas fa-calendar-alt mr-1"></i>Jadwal
+                                        <i class="fas fa-money-bill-wave mr-1"></i>Pembayaran
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                                        <i class="fas fa-tag mr-1"></i>Umum
+                                        <i class="fas fa-tag mr-1"></i>{{ ucfirst($pengumuman->kategori) }}
                                     </span>
                                 @endif
                             </div>
@@ -113,11 +109,11 @@
                 </div>
 
                 <!-- Highlight Bar -->
-                @if($pengumuman->kategori === 'penting')
-                    <div class="h-1 bg-gradient-to-r from-red-500 to-red-600"></div>
-                @elseif($pengumuman->kategori === 'informasi')
+                @if($pengumuman->kategori === 'umum')
+                    <div class="h-1 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                @elseif($pengumuman->kategori === 'penerimaan')
                     <div class="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                @elseif($pengumuman->kategori === 'jadwal')
+                @elseif($pengumuman->kategori === 'pembayaran')
                     <div class="h-1 bg-gradient-to-r from-green-500 to-green-600"></div>
                 @else
                     <div class="h-1 bg-gradient-to-r from-gray-400 to-gray-500"></div>
@@ -128,7 +124,7 @@
 
         <!-- Pagination -->
         <div class="mt-8">
-            {{ $pengumumans->links() }}
+            {{ $pengumumans->appends(request()->query())->links() }}
         </div>
     @else
         <!-- Empty State -->

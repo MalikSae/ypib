@@ -33,12 +33,6 @@ class PembayaranController extends Controller
                            ->with('info', 'Silakan lengkapi pendaftaran terlebih dahulu');
         }
 
-        // Cek apakah sudah diverifikasi
-        if ($mahasiswa->status_pendaftaran !== 'diverifikasi') {
-            return redirect()->route('mahasiswa.pembayaran.index')
-                           ->with('error', 'Pendaftaran Anda belum diverifikasi');
-        }
-
         return view('mahasiswa.pembayaran.create', compact('mahasiswa'));
     }
 

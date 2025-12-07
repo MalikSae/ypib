@@ -61,20 +61,13 @@
     </div>
 
     <!-- Action Button -->
-    @if($mahasiswa->status_pendaftaran === 'diverifikasi')
+    @if($pembayarans->count() == 0)
     <div class="mb-6">
         <a href="{{ route('mahasiswa.pembayaran.create') }}" 
            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
             <i class="fas fa-plus-circle mr-2"></i>
             Upload Pembayaran Baru
         </a>
-    </div>
-    @else
-    <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm">
-        <div class="flex items-center">
-            <i class="fas fa-info-circle text-yellow-500 text-xl mr-3"></i>
-            <p class="text-yellow-700 font-medium">Pendaftaran Anda masih dalam proses verifikasi. Harap tunggu hingga diverifikasi untuk melakukan pembayaran.</p>
-        </div>
     </div>
     @endif
 
@@ -168,7 +161,7 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Belum Ada Pembayaran</h3>
             <p class="text-gray-600 mb-6">Anda belum melakukan pembayaran apapun</p>
-            @if($mahasiswa->status_pendaftaran === 'diverifikasi')
+            @if($pembayarans->count() == 0)
             <a href="{{ route('mahasiswa.pembayaran.create') }}" 
                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
                 <i class="fas fa-plus-circle mr-2"></i>

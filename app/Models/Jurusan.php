@@ -14,6 +14,7 @@ class Jurusan extends Model
         'nama_jurusan',
         'deskripsi',
         'kuota',
+        'status',
     ];
 
     public function mahasiswas()

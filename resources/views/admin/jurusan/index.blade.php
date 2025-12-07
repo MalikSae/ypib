@@ -18,6 +18,7 @@
                 <tr>
                     <th class="px-6 py-4">Kode</th>
                     <th class="px-6 py-4">Nama Jurusan</th>
+                    <th class="px-6 py-4">Deskripsi</th>
                     <th class="px-6 py-4">Kuota</th>
                     <th class="px-6 py-4">Status</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
@@ -32,11 +33,18 @@
                     <td class="px-6 py-4 font-medium text-gray-800">
                         {{ $jurusan->nama_jurusan }}
                     </td>
+                    <td class="px-6 py-4 text-gray-600 text-sm">
+                        {{ Str::limit($jurusan->deskripsi, 50) }}
+                    </td>
                     <td class="px-6 py-4">
                         {{ $jurusan->kuota ?? 'Unlimited' }}
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                        @if($jurusan->status == 'active')
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Aktif</span>
+                        @else
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Non-Aktif</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end space-x-2">
