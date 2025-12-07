@@ -7,6 +7,7 @@ use App\Models\Jurusan;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PendaftaranController extends Controller
 {
@@ -44,6 +45,11 @@ class PendaftaranController extends Controller
             'no_hp' => 'required|string',
             'asal_sekolah' => 'required|string',
             'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ], [
+            'foto.max' => 'Ukuran foto maksimal 2MB. Silakan kompres foto Anda terlebih dahulu.',
+            'foto.uploaded' => 'Gagal mengupload foto. Ukuran file mungkin terlalu besar melebihi batas server.',
+            'foto.mimes' => 'Format foto harus berupa: jpeg, png, jpg, atau webp.',
+            'foto.image' => 'File yang diupload harus berupa gambar.',
         ]);
 
         // ===== LOGIC KUOTA DIMULAI DI SINI =====
@@ -69,9 +75,9 @@ class PendaftaranController extends Controller
             // Generate nomor pendaftaran
             $no_pendaftaran = 'PMB' . date('Y') . str_pad(Mahasiswa::count() + 1, 4, '0', STR_PAD_LEFT);
 
-            // Pastikan folder penyimpanan ada
-            if (!Storage::disk('public')->exists('foto-mahasiswa')) {
-                Storage::disk('public')->makeDirectory('foto-mahasiswa');
+            // Validasi file upload sebelum disimpan
+            if (!$request->file('foto')->isValid()) {
+                throw new \Exception("File foto korup atau gagal diupload.");
             }
 
             $fotoPath = $request->file('foto')->store('foto-mahasiswa', 'public');
@@ -95,6 +101,9 @@ class PendaftaranController extends Controller
                         ->with('success', 'Pendaftaran berhasil! Nomor pendaftaran Anda: ' . $no_pendaftaran);
 
         } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Pendaftaran Error: ' . $e->getMessage());
+
             // Bersihkan file jika database gagal
             if (isset($fotoPath) && Storage::disk('public')->exists($fotoPath)) {
                 Storage::disk('public')->delete($fotoPath);
