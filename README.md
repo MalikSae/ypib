@@ -118,7 +118,7 @@ Aplikasi web untuk manajemen pendaftaran mahasiswa baru menggunakan Laravel 12. 
 
 ```bash
 git clone (url repository)
-cd LSP2025
+cd (masuk folder)
 ```
 
 2. Install dependencies
