@@ -1,175 +1,450 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Panel') - Sistem PMB</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Alpine.js untuk interaktivitas -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Font Awesome untuk icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>@yield('title', 'Admin PMB YPIB')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        @keyframes slideIn {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        *, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { margin: 0; padding: 0; background: #F1F4F7; }
+
+        /* ─────────────────────────────────────────
+           SIDEBAR
+        ───────────────────────────────────────── */
+        #admin-sidebar {
+            width: 260px;
+            height: 100vh;
+            background: #FFFFFF;
+            border-right: 1px solid #DEE3E9;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            z-index: 50;
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden;
         }
-        .slide-in { animation: slideIn 0.5s ease-out; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        /* Label teks sidebar (sembunyikan saat tablet collapsed) */
+        .sidebar-label { transition: opacity 0.2s, width 0.2s; white-space: nowrap; overflow: hidden; }
+        .sidebar-meta  { transition: opacity 0.2s; }
+
+        /* ─────────────────────────────────────────
+           OVERLAY (mobile)
+        ───────────────────────────────────────── */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10,19,23,0.45);
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.28s;
         }
-        .fade-in { animation: fadeIn 0.6s ease-out; }
+        #sidebar-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ─────────────────────────────────────────
+           MAIN WRAPPER
+        ───────────────────────────────────────── */
+        #admin-main {
+            margin-left: 260px;
+            background: #F1F4F7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.28s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ─────────────────────────────────────────
+           TOPBAR
+        ───────────────────────────────────────── */
+        #admin-topbar {
+            background: #FFFFFF;
+            border-bottom: 1px solid #DEE3E9;
+            height: 64px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        /* Hamburger — hidden di desktop */
+        #btn-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #444950;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        #btn-hamburger:hover { background: #F1F4F7; }
+
+        /* Topbar title + hamburger wrapper */
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+
+        /* ─────────────────────────────────────────
+           NAV ITEMS
+        ───────────────────────────────────────── */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #444950;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+        .nav-item:hover { background: #F1F4F7; }
+        .nav-item .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            color: #5D6C7B;
+            transition: color 0.15s;
+        }
+        .nav-item.active {
+            background: #EFF4FF;
+            color: #0064E0;
+            font-weight: 700;
+        }
+        .nav-item.active .nav-icon { color: #0064E0; }
+
+        /* ─────────────────────────────────────────
+           CONTENT AREA
+        ───────────────────────────────────────── */
+        #admin-content { padding: 32px; flex: 1; }
+
+        /* ─────────────────────────────────────────
+           FLASH
+        ───────────────────────────────────────── */
+        .flash-success {
+            background: #E8F5E9; border: 1px solid #A5D6A7; color: #2E7D32;
+            border-radius: 12px; padding: 14px 16px; font-size: 14px;
+            margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+        }
+        .flash-error {
+            background: #FFEBEE; border: 1px solid #EF9A9A; color: #C62828;
+            border-radius: 12px; padding: 14px 16px; font-size: 14px;
+            margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+        }
+
+        /* ─────────────────────────────────────────
+           PAGINATION (shared)
+        ───────────────────────────────────────── */
+        nav[aria-label] span, nav[aria-label] a {
+            display: inline-flex !important; align-items: center !important;
+            justify-content: center !important; min-width: 36px !important;
+            height: 36px !important; border-radius: 9999px !important;
+            font-size: 14px !important; font-weight: 500 !important;
+            padding: 0 8px !important; margin: 0 2px !important;
+            text-decoration: none !important; color: #444950 !important;
+            border: 1px solid #DEE3E9 !important; background: #FFFFFF !important;
+        }
+        nav[aria-label] span[aria-current] {
+            background: #0064E0 !important; color: #FFFFFF !important;
+            border-color: #0064E0 !important; font-weight: 700 !important;
+        }
+        nav[aria-label] a:hover { background: #F1F4F7 !important; }
+        nav[aria-label] span.cursor-default { color: #CED0D4 !important; }
+
+        /* ═══════════════════════════════════════
+           TABLET  768px – 1023px
+           Sidebar collapsed to icon-only (68px)
+        ═══════════════════════════════════════ */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            #admin-sidebar {
+                width: 68px;
+                padding: 24px 12px;
+                overflow: visible;
+            }
+            #admin-main { margin-left: 68px; }
+            .sidebar-label { opacity: 0; width: 0; pointer-events: none; }
+            .sidebar-meta  { opacity: 0; pointer-events: none; }
+            .nav-section-label { display: none; }
+
+            /* Logo: hanya tampilkan kotak PMB */
+            .sidebar-brand-text { display: none; }
+
+            /* User info bottom: avatar saja */
+            .sidebar-user-name, .sidebar-user-role { display: none; }
+
+            /* Nav items: center icon */
+            .nav-item {
+                justify-content: center;
+                padding: 10px;
+                gap: 0;
+                position: relative;
+            }
+
+            /* Tooltip on hover untuk tablet */
+            .nav-item::after {
+                content: attr(data-label);
+                position: absolute;
+                left: calc(100% + 12px);
+                top: 50%;
+                transform: translateY(-50%);
+                background: #0A1317;
+                color: #FFFFFF;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 6px 12px;
+                border-radius: 8px;
+                white-space: nowrap;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.15s;
+                z-index: 100;
+            }
+            .nav-item:hover::after { opacity: 1; }
+        }
+
+        /* ═══════════════════════════════════════
+           MOBILE  < 768px
+           Sidebar sebagai off-canvas drawer
+        ═══════════════════════════════════════ */
+        @media (max-width: 767px) {
+            #admin-sidebar {
+                width: 260px;
+                transform: translateX(-100%);
+                box-shadow: 4px 0 24px rgba(10,19,23,0.12);
+            }
+            #admin-sidebar.open { transform: translateX(0); }
+
+            #admin-main { margin-left: 0; }
+
+            #btn-hamburger { display: flex; }
+
+            #admin-topbar { padding: 0 16px; }
+            #admin-content { padding: 16px; }
+
+            /* Topbar title lebih kecil di mobile */
+            .topbar-page-title { font-size: 16px !important; }
+
+            /* Sembunyikan nama user di topbar mobile (hemat space) */
+            .topbar-username { display: none; }
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE GRID HELPERS
+        ═══════════════════════════════════════ */
+
+        /* Stat cards: 4 col → 2 col → 1 col */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 1023px) {
+            .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        }
+        @media (max-width: 480px) {
+            .stat-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+        }
+
+        /* 2-col detail layout → 1 col tablet+mobile */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 65% 35%;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 1023px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            .detail-sidebar-col {
+                position: static !important;
+            }
+        }
+
+        /* Card 2-col field grid → 1 col on mobile */
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 480px) {
+            .field-grid { grid-template-columns: 1fr; gap: 12px; }
+            .field-full  { grid-column: 1 !important; }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-    
-    <!-- Sidebar -->
-    <div x-data="{ open: false }" class="flex">
-        <!-- Mobile Menu Button -->
-        <button @click="open = !open" class="lg:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-3 rounded-lg shadow-lg">
-            <i class="fas fa-bars"></i>
-        </button>
+<body>
 
-        <!-- Sidebar -->
-        <aside :class="open ? 'translate-x-0' : '-translate-x-full'" 
-               class="fixed lg:static lg:translate-x-0 inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white shadow-2xl transform transition-transform duration-300 ease-in-out">
-            
-            <!-- Logo dengan Gambar -->
-            <div class="p-6 border-b border-blue-700">
-                <div class="flex items-center space-x-3">
-                    <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=100&h=100&fit=crop" 
-                         alt="Logo" 
-                         class="w-12 h-12 rounded-full ring-2 ring-white shadow-lg">
-                    <div>
-                        <h2 class="text-xl font-bold">Admin Panel</h2>
-                        <p class="text-xs text-blue-300">Sistem PMB 2025</p>
-                    </div>
-                </div>
-            </div>
+{{-- ══════ OVERLAY (mobile) ══════ --}}
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-            <!-- Navigation -->
-            <nav class="mt-6 px-4 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>Dashboard</span>
-                </a>
-                
-                <a href="{{ route('admin.akun.index') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.akun.*') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-user-check w-5"></i>
-                    <span>Verifikasi Akun</span>
-                </a>
+{{-- ══════════════ SIDEBAR ══════════════ --}}
+<aside id="admin-sidebar">
 
-                <a href="{{ route('admin.mahasiswa.index') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.mahasiswa.*') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-users w-5"></i>
-                    <span>Data Mahasiswa</span>
-                </a>
-                
-                <a href="{{ route('admin.pembayaran.index') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.pembayaran.*') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-money-bill-wave w-5"></i>
-                    <span>Pembayaran</span>
-                </a>
-                
-                <a href="{{ route('admin.pengumuman.index') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.pengumuman.*') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-bullhorn w-5"></i>
-                    <span>Pengumuman</span>
-                </a>
-                
-                <a href="{{ route('admin.jurusan.index') }}" 
-                   class="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 {{ request()->routeIs('admin.jurusan.*') ? 'bg-blue-700 shadow-lg' : '' }}">
-                    <i class="fas fa-graduation-cap w-5"></i>
-                    <span>Jurusan</span>
-                </a>
-            </nav>
-
-            <!-- User Profile Card -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700">
-                <div class="flex items-center space-x-3 mb-3">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=3b82f6&color=fff" 
-                         alt="Profile" 
-                         class="w-10 h-10 rounded-full">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-blue-300">Administrator</p>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" 
-                            class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 lg:ml-0 min-h-screen">
-            <!-- Top Bar -->
-            <header class="bg-white shadow-sm sticky top-0 z-30">
-                <div class="px-6 py-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 ml-12 lg:ml-0">
-                            <h1 class="text-2xl font-bold text-gray-800">@yield('title', 'Dashboard')</h1>
-                            <p class="text-sm text-gray-500 mt-1">@yield('subtitle', 'Selamat datang di panel admin')</p>
-                        </div>
-                        <div class="flex items-center space-x-4">
-                            <div class="text-right">
-                                <p class="text-sm font-medium text-gray-700">{{ now()->isoFormat('dddd') }}</p>
-                                <p class="text-xs text-gray-500">{{ now()->isoFormat('D MMMM YYYY') }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <div class="p-6">
-                <!-- Alert Messages -->
-                @if(session('success'))
-                <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm fade-in">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                        <p class="text-green-700">{{ session('success') }}</p>
-                    </div>
-                </div>
-                @endif
-
-                @if(session('error'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm fade-in">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-                        <p class="text-red-700">{{ session('error') }}</p>
-                    </div>
-                </div>
-                @endif
-
-                @if(session('info'))
-                <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm fade-in">
-                    <div class="flex items-center">
-                        <i class="fas fa-info-circle text-blue-500 mr-3"></i>
-                        <p class="text-blue-700">{{ session('info') }}</p>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Page Content -->
-                @yield('content')
-            </div>
-        </main>
+    {{-- Logo + Brand --}}
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;">
+        <img src="{{ asset('images/logo-ypib.png') }}" alt="PMB YPIB" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;">
     </div>
 
+    {{-- Divider --}}
+    <div style="height:1px;background:#DEE3E9;margin:0 0 16px 0;"></div>
+
+    {{-- Navigation --}}
+    <nav style="flex:1;">
+        <div class="nav-section-label" style="font-size:11px;font-weight:700;color:#8595A4;letter-spacing:0.08em;margin-bottom:8px;padding:0 12px;">MENU UTAMA</div>
+
+        {{-- Dashboard --}}
+        <a href="{{ route('admin.dashboard') }}"
+           data-label="Dashboard"
+           class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+            </svg>
+            <span class="sidebar-label">Dashboard</span>
+        </a>
+
+        {{-- Data Pendaftar --}}
+        <a href="{{ route('admin.registrations.index') }}"
+           data-label="Data Pendaftar"
+           class="nav-item {{ request()->routeIs('admin.registrations.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            </svg>
+            <span class="sidebar-label">Data Pendaftar</span>
+        </a>
+
+        {{-- Data Afiliasi --}}
+        <a href="{{ route('admin.referrers.index') }}"
+           data-label="Data Afiliasi"
+           class="nav-item {{ request()->routeIs('admin.referrers.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+            </svg>
+            <span class="sidebar-label">Data Afiliasi</span>
+        </a>
+
+        {{-- Kelola Komisi --}}
+        <a href="{{ route('admin.rewards.index') }}"
+           data-label="Kelola Komisi"
+           class="nav-item {{ request()->routeIs('admin.rewards.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+            </svg>
+            <span class="sidebar-label">Kelola Komisi</span>
+        </a>
+    </nav>
+
+    {{-- Bottom: Logout --}}
+    <div>
+        <div style="height:1px;background:#DEE3E9;margin:16px 0;"></div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="nav-item" style="width:100%;border:none;cursor:pointer;color:#E41E3F;background:transparent;" data-label="Logout">
+                <svg class="nav-icon" style="color:#E41E3F;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                </svg>
+                <span class="sidebar-label" style="color:#E41E3F;">Logout</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+{{-- ══════════════ MAIN ══════════════ --}}
+<div id="admin-main">
+
+    {{-- Topbar --}}
+    <header id="admin-topbar">
+        <div class="topbar-left">
+            {{-- Hamburger button (mobile only) --}}
+            <button id="btn-hamburger" onclick="openSidebar()" aria-label="Buka menu">
+                <svg style="width:22px;height:22px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
+            <h1 class="topbar-page-title" style="font-size:20px;font-weight:700;color:#0A1317;margin:0;">@yield('page-title', 'Dashboard')</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span class="topbar-username" style="font-size:14px;font-weight:500;color:#444950;">{{ auth()->user()->name }}</span>
+            <span style="background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;">{{ ucfirst(auth()->user()->role) }}</span>
+        </div>
+    </header>
+
+    {{-- Content --}}
+    <div id="admin-content">
+
+        {{-- Flash Messages --}}
+        @if(session('success'))
+            <div class="flash-success">
+                <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="flash-error">
+                <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @yield('content')
+    </div>
+</div>
+
+<script>
+    /* ── Mobile sidebar toggle ── */
+    function openSidebar() {
+        document.getElementById('admin-sidebar').classList.add('open');
+        var ov = document.getElementById('sidebar-overlay');
+        ov.style.display = 'block';
+        requestAnimationFrame(function() { ov.classList.add('visible'); });
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        document.getElementById('admin-sidebar').classList.remove('open');
+        var ov = document.getElementById('sidebar-overlay');
+        ov.classList.remove('visible');
+        setTimeout(function() { ov.style.display = 'none'; }, 280);
+        document.body.style.overflow = '';
+    }
+
+    /* ── Close sidebar on nav link click (mobile) ── */
+    document.querySelectorAll('#admin-sidebar .nav-item').forEach(function(el) {
+        el.addEventListener('click', function() {
+            if (window.innerWidth < 768) closeSidebar();
+        });
+    });
+
+    /* ── Swipe-to-close (mobile touch) ── */
+    var touchStartX = 0;
+    document.getElementById('admin-sidebar').addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    document.getElementById('admin-sidebar').addEventListener('touchend', function(e) {
+        if (e.changedTouches[0].clientX - touchStartX < -60) closeSidebar();
+    }, { passive: true });
+</script>
 </body>
 </html>

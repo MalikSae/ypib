@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -25,25 +26,31 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'regex:/^.+@.+\..+$/i', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'phone'    => ['required', 'numeric', 'digits_between:10,15'],
+        ], [
+            'email.regex' => 'Format alamat email tidak valid (harus mengandung domain seperti .com, .id, dll).',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'phone'    => $request->phone,
+            'role'     => 'mahasiswa',
         ]);
 
         event(new Registered($user));
 
+        Auth::login($user);
 
-        return redirect()->route('login')->with('status', 'Registrasi berhasil! Akun Anda sedang dalam proses verifikasi admin. Silakan cek secara berkala.');
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 }

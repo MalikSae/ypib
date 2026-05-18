@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     protected $fillable = [
@@ -15,9 +17,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'status_akun',
         'phone',
-        'address',
+        'is_referrer',
     ];
 
     protected $hidden = [
@@ -29,11 +30,19 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'is_referrer'       => 'boolean',
         ];
     }
-    public function mahasiswa()
+
+    public function referrer()
     {
-        return $this->hasOne(Mahasiswa::class);
+        return $this->hasOne(Referrer::class);
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
     }
 }
+

@@ -1,170 +1,128 @@
 @extends('layouts.admin')
-
-@section('title', 'Dashboard')
-@section('subtitle', 'Overview sistem penerimaan mahasiswa baru')
+@section('title', 'Dashboard Admin PMB YPIB')
+@section('page-title', 'Dashboard')
 
 @section('content')
-<div class="space-y-6">
-    
-    <!-- Video Banner -->
-    <div class="relative bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl overflow-hidden">
-        <div class="absolute inset-0 bg-black opacity-40"></div>
-        <div class="relative z-10 p-8 lg:p-12">
-            <div class="grid lg:grid-cols-2 gap-8 items-center">
-                <div class="text-white space-y-4 fade-in">
-                    <h2 class="text-4xl font-bold">Selamat Datang, {{ auth()->user()->name }}! 👋</h2>
-                    <p class="text-lg text-blue-100">Kelola sistem penerimaan mahasiswa baru dengan mudah dan efisien.</p>
-                    <div class="flex space-x-4">
-                        <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                            <i class="fas fa-calendar-alt mr-2"></i>
-                            {{ now()->isoFormat('D MMMM YYYY') }}
-                        </span>
-                    </div>
-                </div>
+
+{{-- ── STAT CARDS ── --}}
+<div class="stat-grid">
+
+    {{-- Card 1: Total Pendaftar --}}
+    <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
             </div>
         </div>
+        <div style="font-size:32px;font-weight:700;color:#0A1317;line-height:1;">{{ $stats['total'] }}</div>
+        <div style="font-size:14px;color:#5D6C7B;margin-top:6px;">Total Pendaftar</div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Card 1 -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 fade-in">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Total Mahasiswa</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $totalMahasiswa }}</h3>
-                </div>
-                <div class="bg-blue-100 p-4 rounded-full">
-                    <i class="fas fa-users text-3xl text-blue-600"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-sm text-green-600">
-                <i class="fas fa-arrow-up mr-1"></i>
-                <span>12% dari bulan lalu</span>
+    {{-- Card 2: Menunggu Konfirmasi --}}
+    <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#FFF8E1;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#F2A918;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
             </div>
         </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 fade-in" style="animation-delay: 0.1s">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Pending Verifikasi</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $pendingVerifikasi }}</h3>
-                </div>
-                <div class="bg-yellow-100 p-4 rounded-full">
-                    <i class="fas fa-clock text-3xl text-yellow-600"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-sm text-yellow-600">
-                <i class="fas fa-exclamation-circle mr-1"></i>
-                <span>Perlu perhatian</span>
-            </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 fade-in" style="animation-delay: 0.2s">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Mahasiswa Diterima</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $totalMahasiswa }}</h3>
-                </div>
-                <div class="bg-green-100 p-4 rounded-full">
-                    <i class="fas fa-check-circle text-3xl text-green-600"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-sm text-green-600">
-                <i class="fas fa-arrow-up mr-1"></i>
-                <span>8% dari target</span>
-            </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 fade-in" style="animation-delay: 0.3s">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Pending Pembayaran</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $pendingPembayaran }}</h3>
-                </div>
-                <div class="bg-purple-100 p-4 rounded-full">
-                    <i class="fas fa-money-bill-wave text-3xl text-purple-600"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-sm text-purple-600">
-                <i class="fas fa-info-circle mr-1"></i>
-                <span>Segera verifikasi</span>
-            </div>
-        </div>
+        <div style="font-size:32px;font-weight:700;color:#0A1317;line-height:1;">{{ $stats['pending_payment'] + ($stats['pending_verify'] ?? 0) }}</div>
+        <div style="font-size:14px;color:#5D6C7B;margin-top:6px;">Menunggu Konfirmasi</div>
     </div>
 
-    <!-- Quick Actions & Gallery -->
-    <div class="grid lg:grid-cols-3 gap-6">
-        <!-- Quick Actions -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 fade-in">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-bolt text-yellow-500 mr-2"></i>
-                Quick Actions
-            </h3>
-            <div class="grid grid-cols-2 gap-4">
-                <a href="{{ route('admin.mahasiswa.index') }}" 
-                   class="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-all duration-200">
-                    <i class="fas fa-user-check text-2xl text-blue-600"></i>
-                    <div>
-                        <p class="font-semibold text-gray-800">Verifikasi Mahasiswa</p>
-                        <p class="text-xs text-gray-600">{{ $pendingVerifikasi }} pending</p>
-                    </div>
-                </a>
-                
-                <a href="{{ route('admin.pembayaran.index') }}" 
-                   class="flex items-center space-x-3 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-all duration-200">
-                    <i class="fas fa-credit-card text-2xl text-green-600"></i>
-                    <div>
-                        <p class="font-semibold text-gray-800">Cek Pembayaran</p>
-                        <p class="text-xs text-gray-600">{{ $pendingPembayaran }} menunggu</p>
-                    </div>
-                </a>
-                
-                <a href="{{ route('admin.pengumuman.create') }}" 
-                   class="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg hover:shadow-md transition-all duration-200">
-                    <i class="fas fa-bullhorn text-2xl text-purple-600"></i>
-                    <div>
-                        <p class="font-semibold text-gray-800">Buat Pengumuman</p>
-                        <p class="text-xs text-gray-600">Informasi baru</p>
-                    </div>
-                </a>
-                
-                <a href="{{ route('admin.jurusan.index') }}" 
-                   class="flex items-center space-x-3 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg hover:shadow-md transition-all duration-200">
-                    <i class="fas fa-graduation-cap text-2xl text-orange-600"></i>
-                    <div>
-                        <p class="font-semibold text-gray-800">Kelola Jurusan</p>
-                        <p class="text-xs text-gray-600">Edit data jurusan</p>
-                    </div>
-                </a>
+    {{-- Card 3: Terdaftar --}}
+    <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#E8F5E9;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#31A24C;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
             </div>
         </div>
+        <div style="font-size:32px;font-weight:700;color:#0A1317;line-height:1;">{{ $stats['accepted'] ?? 0 }}</div>
+        <div style="font-size:14px;color:#5D6C7B;margin-top:6px;">Terdaftar</div>
+    </div>
 
-        <!-- Campus Gallery -->
-        <div class="bg-white rounded-xl shadow-lg p-6 fade-in" style="animation-delay: 0.2s">
-            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-images text-pink-500 mr-2"></i>
-                Campus Gallery
-            </h3>
-            <div class="grid grid-cols-2 gap-3">
-                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop" 
-                     alt="Campus 1" 
-                     class="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=300&fit=crop" 
-                     alt="Campus 2" 
-                     class="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&h=300&fit=crop" 
-                     alt="Campus 3" 
-                     class="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer">
-                <img src="https://images.unsplash.com/photo-1519406596751-0a3ccc4937fe?w=400&h=300&fit=crop" 
-                     alt="Campus 4" 
-                     class="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 cursor-pointer">
+    {{-- Card 4: Total Referrer --}}
+    <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                </svg>
             </div>
         </div>
+        <div style="font-size:32px;font-weight:700;color:#0A1317;line-height:1;">{{ $stats['referrers'] ?? 0 }}</div>
+        <div style="font-size:14px;color:#5D6C7B;margin-top:6px;">Total Referrer</div>
     </div>
 
 </div>
+
+{{-- ── PENDAFTAR TERBARU ── --}}
+<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:700;color:#0A1317;margin:0;">Pendaftar Terbaru</h2>
+        <a href="{{ route('admin.registrations.index') }}"
+           style="font-size:14px;font-weight:500;color:#0064E0;text-decoration:none;display:flex;align-items:center;gap:4px;">
+            Lihat Semua
+            <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+        </a>
+    </div>
+
+    <div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;overflow:hidden;">
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#F1F4F7;">
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">No. Daftar</th>
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Nama</th>
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Prodi</th>
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Referral</th>
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
+                        <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recent as $reg)
+                    <tr style="border-bottom:1px solid #DEE3E9;transition:background 0.12s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background=''">
+                        <td style="padding:16px 24px;font-size:14px;color:#444950;">
+                            @if($reg->registration_number)
+                                <a href="{{ route('admin.registrations.show', $reg->id) }}"
+                                   style="font-family:monospace;font-weight:600;color:#0064E0;text-decoration:none;">{{ $reg->registration_number }}</a>
+                            @else
+                                <span style="color:#8595A4;font-size:12px;">—</span>
+                            @endif
+                        </td>
+                        <td style="padding:16px 24px;font-size:14px;font-weight:500;color:#1C1E21;">{{ $reg->full_name }}</td>
+                        <td style="padding:16px 24px;font-size:14px;color:#444950;">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
+                        <td style="padding:16px 24px;font-size:14px;color:#444950;">
+                            @if($reg->referrer)
+                                <span style="background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
+                            @else
+                                <span style="color:#CED0D4;">—</span>
+                            @endif
+                        </td>
+                        <td style="padding:16px 24px;">
+                            @include('admin.registrations._status_badge', ['status' => $reg->status])
+                        </td>
+                        <td style="padding:16px 24px;font-size:14px;color:#8595A4;">{{ $reg->created_at->format('d/m/Y') }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="padding:48px 24px;text-align:center;font-size:14px;color:#8595A4;">
+                            Belum ada data pendaftar.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 @endsection

@@ -1,118 +1,86 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\RegistrationController as AdminRegistrationController;
+use App\Http\Controllers\Admin\ReferrerController as AdminReferrerController;
+use App\Http\Controllers\Admin\RewardController as AdminRewardController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\ReferrerController;
+use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
-// Controllers Admin
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
-use App\Http\Controllers\Admin\PembayaranController as AdminPembayaranController;
-use App\Http\Controllers\Admin\PengumumanController as AdminPengumumanController;
-use App\Http\Controllers\Admin\JurusanController as AdminJurusanController;
-use App\Http\Controllers\Admin\AkunController as AdminAkunController;
+// ── Public Landing ─────────────────────────────────────────────────────────
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/prodi/{slug}', [LandingController::class, 'prodi'])->name('prodi.show');
 
-// Controllers Mahasiswa
-use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
-use App\Http\Controllers\Mahasiswa\PendaftaranController;
-use App\Http\Controllers\Mahasiswa\PembayaranController as MahasiswaPembayaranController;
-use App\Http\Controllers\Mahasiswa\PengumumanController as MahasiswaPengumumanController;
+// ── Referral Tracking (public, tanpa auth) ──────────────────────────────────
+Route::get('/ref/{code}', [ReferralController::class, 'track'])->name('referral.track');
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
-use App\Models\Mahasiswa;
-use App\Models\Jurusan;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-
-Route::get('/', function () {
-    if (Auth::check()) {
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        return redirect()->route('mahasiswa.dashboard');
+// ── Breeze Dashboard (keep for compatibility) ───────────────────────────────
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if (in_array($user->role, ['admin', 'operator'])) {
+        return redirect()->route('admin.dashboard');
     }
-    return redirect()->route('login');
-});
+    if ($user->is_referrer) {
+        return redirect()->route('referrer.dashboard');
+    }
+    return redirect()->route('registration.status');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    
-    // Dashboard Admin
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
-    // Kelola Akun User (Verifikasi Pendaftaran Akun)
-    Route::get('/akun', [AdminAkunController::class, 'index'])->name('akun.index');
-    Route::post('/akun/{id}/verifikasi', [AdminAkunController::class, 'verifikasi'])->name('akun.verifikasi');
-    Route::delete('/akun/{id}', [AdminAkunController::class, 'destroy'])->name('akun.destroy');
-    
-    // Kelola Mahasiswa
-    Route::get('/mahasiswa', [AdminMahasiswaController::class, 'index'])->name('mahasiswa.index');
-    Route::get('/mahasiswa/{id}', [AdminMahasiswaController::class, 'show'])->name('mahasiswa.show');
-    Route::post('/mahasiswa/{id}/verifikasi', [AdminMahasiswaController::class, 'verifikasi'])->name('mahasiswa.verifikasi');
-    Route::patch('/mahasiswa/{id}/status', [AdminMahasiswaController::class, 'updateStatus'])->name('mahasiswa.updateStatus');
-    Route::delete('/mahasiswa/{id}', [AdminMahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
-    
-    // Kelola Pembayaran
-    Route::get('/pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
-    Route::get('/pembayaran/{id}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
-    Route::post('/pembayaran/{id}/verifikasi', [AdminPembayaranController::class, 'verifikasi'])->name('pembayaran.verifikasi');
-    Route::delete('/pembayaran/{id}', [AdminPembayaranController::class, 'destroy'])->name('pembayaran.destroy');
-    
-    // Kelola Pengumuman
-    Route::get('/pengumuman', [AdminPengumumanController::class, 'index'])->name('pengumuman.index');
-    Route::get('/pengumuman/create', [AdminPengumumanController::class, 'create'])->name('pengumuman.create');
-    Route::post('/pengumuman', [AdminPengumumanController::class, 'store'])->name('pengumuman.store');
-    Route::get('/pengumuman/{id}', [AdminPengumumanController::class, 'show'])->name('pengumuman.show');
-    Route::get('/pengumuman/{id}/edit', [AdminPengumumanController::class, 'edit'])->name('pengumuman.edit');
-    Route::patch('/pengumuman/{id}', [AdminPengumumanController::class, 'update'])->name('pengumuman.update');
-    Route::delete('/pengumuman/{id}', [AdminPengumumanController::class, 'destroy'])->name('pengumuman.destroy');
-    
-    // Kelola Jurusan
-    Route::get('/jurusan', [AdminJurusanController::class, 'index'])->name('jurusan.index');
-    Route::get('/jurusan/create', [AdminJurusanController::class, 'create'])->name('jurusan.create');
-    Route::post('/jurusan', [AdminJurusanController::class, 'store'])->name('jurusan.store');
-    Route::get('/jurusan/{id}/edit', [AdminJurusanController::class, 'edit'])->name('jurusan.edit');
-    Route::patch('/jurusan/{id}', [AdminJurusanController::class, 'update'])->name('jurusan.update');
-    Route::delete('/jurusan/{id}', [AdminJurusanController::class, 'destroy'])->name('jurusan.destroy');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Mahasiswa Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-    
-    // Dashboard Mahasiswa
-    Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
-    
-    // Pendaftaran
-    Route::get('/pendaftaran', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
-    Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
-    Route::get('/pendaftaran/status', [PendaftaranController::class, 'status'])->name('pendaftaran.status');
-    
-    // Pembayaran
-    Route::get('/pembayaran', [MahasiswaPembayaranController::class, 'index'])->name('pembayaran.index');
-    Route::get('/pembayaran/create', [MahasiswaPembayaranController::class, 'create'])->name('pembayaran.create');
-    Route::post('/pembayaran', [MahasiswaPembayaranController::class, 'store'])->name('pembayaran.store');
-    Route::get('/pembayaran/{id}', [MahasiswaPembayaranController::class, 'show'])->name('pembayaran.show');
-    
-    // Pengumuman
-    Route::get('/pengumuman', [MahasiswaPengumumanController::class, 'index'])->name('pengumuman.index');
-    Route::get('/pengumuman/{id}', [MahasiswaPengumumanController::class, 'show'])->name('pengumuman.show');
-});
-
+// ── Auth Profile ────────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// ── Mahasiswa ───────────────────────────────────────────────────────────────
+Route::get('/daftar', [RegistrationController::class, 'create'])->name('registration.create');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/pendaftaran', [RegistrationController::class, 'index'])->name('registration.index');
+    Route::get('/pendaftaran/status', [RegistrationController::class, 'status'])->name('registration.status');
+    Route::post('/pendaftaran/upload-bukti', [RegistrationController::class, 'uploadProof'])->name('registration.upload-proof');
+});
+
+// ── Referrer Area (auth, semua role bisa daftar jadi referrer) ───────────────
+Route::middleware('auth')->prefix('referrer')->name('referrer.')->group(function () {
+    Route::get('/daftar', [ReferrerController::class, 'create'])->name('create');
+    Route::post('/daftar', [ReferrerController::class, 'store'])->name('store');
+    Route::get('/dashboard', [ReferrerController::class, 'dashboard'])->name('dashboard');
+});
+
+// ── Admin & Operator ────────────────────────────────────────────────────────
+Route::prefix('admin')
+    ->middleware(['auth', 'role:admin,operator'])
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        Route::prefix('pendaftar')->name('registrations.')->group(function () {
+            Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
+            Route::get('/{id}', [AdminRegistrationController::class, 'show'])->name('show');
+            Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
+            Route::post('/{id}/upload-bukti', [AdminRegistrationController::class, 'uploadBukti'])->name('upload-bukti');
+            Route::post('/{id}/status', [AdminRegistrationController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{id}/catatan', [AdminRegistrationController::class, 'addNote'])->name('add-note');
+        });
+
+        // Referrer management
+        Route::prefix('referrer')->name('referrers.')->group(function () {
+            Route::get('/', [AdminReferrerController::class, 'index'])->name('index');
+            Route::post('/{id}/toggle', [AdminReferrerController::class, 'toggle'])->name('toggle');
+        });
+
+        // Reward management
+        Route::prefix('reward')->name('rewards.')->group(function () {
+            Route::get('/', [AdminRewardController::class, 'index'])->name('index');
+            Route::post('/{id}/approve', [AdminRewardController::class, 'approve'])->name('approve');
+            Route::post('/{id}/disburse', [AdminRewardController::class, 'disburse'])->name('disburse');
+        });
+    });
 
 require __DIR__.'/auth.php';

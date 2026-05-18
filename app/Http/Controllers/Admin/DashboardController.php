@@ -3,25 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Mahasiswa;
-use App\Models\Pembayaran;
-use Illuminate\Http\Request;
+use App\Models\Registration;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Admin Statistics
-        $totalMahasiswa = Mahasiswa::count();
-        $pendingVerifikasi = Mahasiswa::where('status_pendaftaran', 'pending')->count();
-        $mahasiswaDiterima = Mahasiswa::where('status_pendaftaran', 'diterima')->count();
-        $pendingPembayaran = Pembayaran::where('status', 'pending')->count();
+        $stats = [
+            'total'           => Registration::count(),
+            'pending_payment' => Registration::where('status', 'payment_pending')->count(),
+            'pending_verify'  => Registration::whereIn('status', ['payment_confirmed', 'document_pending'])->count(),
+            'accepted'        => Registration::where('status', 'accepted')->count(),
+        ];
 
-        return view('admin.dashboard', compact(
-            'totalMahasiswa',
-            'pendingVerifikasi',
-            'mahasiswaDiterima',
-            'pendingPembayaran'
-        ));
+        $recent = Registration::with(['user', 'firstChoiceProgram'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('admin.dashboard', compact('stats', 'recent'));
     }
 }
