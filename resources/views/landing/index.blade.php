@@ -99,10 +99,15 @@
         .prog-card, .step-card { width:calc(50% - 12px); }
     }
     @media (max-width:767px) {
-        .hero-section { min-height:auto; padding:56px 0 48px; }
+        .hero-section { min-height:auto; padding:0; }
         .hero-stat-grid { grid-template-columns:repeat(2,1fr); gap:12px; }
         .prog-card, .step-card { width:100%; }
         .cta-card { padding:40px 24px; border-radius:20px; }
+        .hero-img-container { height: 100% !important; }
+        .hero-image { max-height: 380px !important; right: -20px !important; bottom: 0 !important; }
+        .hero-content-container { padding-top: 48px !important; padding-bottom: 350px !important; }
+        .hero-buttons { flex-direction: column; width: 100%; }
+        .hero-buttons a { width: 100%; justify-content: center; }
     }
 </style>
 
@@ -112,13 +117,13 @@
     <div class="hero-circle-2"></div>
     
     {{-- Image Container for Bottom Anchoring --}}
-    <div class="pub-container" style="position:absolute; bottom:0; left:0; right:0; height:100%; pointer-events:none;">
+    <div class="pub-container hero-img-container" style="position:absolute; bottom:0; left:0; right:0; height:100%; pointer-events:none;">
         <div style="position:relative; width:100%; height:100%;">
-            <img src="{{ asset('images/mahasiswa.png') }}" alt="Mahasiswa YPIB" style="position:absolute; bottom:0; right:0; max-height: 90%; width: auto; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); pointer-events:auto;">
+            <img src="{{ asset('images/mahasiswa.png') }}" class="hero-image" alt="Mahasiswa YPIB" style="position:absolute; bottom:0; right:0; max-height: 90%; width: auto; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); pointer-events:auto;">
         </div>
     </div>
 
-    <div class="pub-container" style="position:relative;z-index:1;width:100%;padding-top:40px;padding-bottom:40px;">
+    <div class="pub-container hero-content-container" style="position:relative;z-index:1;width:100%;padding-top:40px;padding-bottom:40px;">
         <div class="hero-grid" style="grid-template-columns: 1.2fr 0.8fr;">
             {{-- Kiri --}}
             <div>
@@ -135,7 +140,7 @@
                 <p style="font-size:18px;color:rgba(255,255,255,0.75);line-height:1.6;margin:0 0 32px 0;max-width:480px;">
                     Bergabung bersama ribuan mahasiswa berprestasi. 9 program studi unggulan dari 3 Fakultas siap mengantarmu menuju karir impian.
                 </p>
-                <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                <div class="hero-buttons" style="display:flex;flex-wrap:wrap;gap:12px;">
                     <a href="#prodi" class="btn-white">
                         <svg style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
