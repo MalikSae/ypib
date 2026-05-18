@@ -17,7 +17,7 @@
     }
     .hero-circle-1 { position:absolute;top:-120px;right:-120px;width:400px;height:400px;border-radius:9999px;background:rgba(255,255,255,0.05); }
     .hero-circle-2 { position:absolute;bottom:-80px;left:-80px;width:280px;height:280px;border-radius:9999px;background:rgba(255,255,255,0.04); }
-    .hero-grid { display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center; }
+    .hero-grid { display:grid;grid-template-columns:1.2fr 0.8fr;gap:64px;align-items:center; }
     .hero-stat-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
     .hero-stat-card {
         background:rgba(255,255,255,0.1);
@@ -95,7 +95,7 @@
 
     /* Responsive */
     @media (max-width:1023px) {
-        .hero-grid { grid-template-columns:1fr; gap:40px; }
+        .hero-grid { grid-template-columns:1fr !important; gap:40px; }
         .prog-card, .step-card { width:calc(50% - 12px); }
     }
     @media (max-width:767px) {
@@ -124,7 +124,7 @@
     </div>
 
     <div class="pub-container hero-content-container" style="position:relative;z-index:1;width:100%;padding-top:40px;padding-bottom:40px;">
-        <div class="hero-grid" style="grid-template-columns: 1.2fr 0.8fr;">
+        <div class="hero-grid">
             {{-- Kiri --}}
             <div>
                 @if($period)
