@@ -158,5 +158,9 @@ class DatabaseSeeder extends Seeder
             're_registration_reward_amount' => 500000,
             'is_active'             => true,
         ]);
+
+        $this->call([
+            FacilitySeeder::class,
+        ]);
     }
 }

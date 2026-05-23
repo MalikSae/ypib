@@ -128,13 +128,13 @@
             {{-- Kiri --}}
             <div>
                 @if($period)
-                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#FFFFFF;font-size:12px;font-weight:600;padding:6px 14px;border-radius:9999px;margin-bottom:24px;">
-                    <span style="width:7px;height:7px;border-radius:9999px;background:#31A24C;display:inline-block;animation:pulse 2s infinite;"></span>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:9999px;margin-bottom:24px;" class="text-white">
+                    <span style="width:7px;height:7px;border-radius:9999px;display:inline-block;animation:pulse 2s infinite;" class="bg-success"></span>
                     Pendaftaran dibuka hingga {{ \Carbon\Carbon::parse($period->close_date)->isoFormat('D MMMM Y') }}
                 </div>
                 @endif
 
-                <h1 style="font-size:clamp(2rem,5vw,3.25rem);font-weight:700;color:#FFFFFF;line-height:1.18;margin:0 0 20px 0;">
+                <h1 style="font-size:clamp(2rem,5vw,3.25rem);font-weight:700;line-height:1.18;margin:0 0 20px 0;" class="text-white">
                     Kuliah di<br><span style="color:#FBBF24;">YPIB Majalengka</span><br>Mulai di Sini
                 </h1>
                 <p style="font-size:18px;color:rgba(255,255,255,0.75);line-height:1.6;margin:0 0 32px 0;max-width:480px;">
@@ -163,14 +163,14 @@
 </section>
 
 {{-- ═══ TENTANG YPIB ═══ --}}
-<section style="padding:80px 0;background:#FFFFFF;">
+<section style="padding:80px 0;" class="bg-white">
     <div class="pub-container">
         <div style="max-width:800px;margin:0 auto;text-align:center;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;" class="text-primary-600">
                 Profil Universitas
             </div>
-            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#0A1317;margin:0 0 24px 0;">Tentang YPIB Majalengka</h2>
-            <p style="font-size:16px;color:#5D6C7B;line-height:1.8;margin:0;">
+            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;margin:0 0 24px 0;" class="text-neutral-900">Tentang YPIB Majalengka</h2>
+            <p style="font-size:16px;line-height:1.8;margin:0;" class="text-neutral-500">
                 Universitas Yayasan Pendidikan Imam Bonjol (YPIB) Majalengka adalah perguruan tinggi swasta di Majalengka, Jawa Barat, yang berdiri pada 8 Juni 2022 dari penggabungan STIKes YPIB Majalengka dan STF YPIB Cirebon. Universitas ini memiliki tiga fakultas utama: Ilmu Kesehatan, Farmasi, serta Psikologi, Bisnis, dan Teknologi, dengan program studi di bidang keperawatan, kebidanan, farmasi, psikologi, perdagangan internasional, dan ilmu komputer. Berkomitmen mencetak lulusan profesional, islami, dan mandiri, Universitas YPIB terus berkembang sebagai institusi pendidikan unggulan di wilayahnya.
             </p>
         </div>
@@ -181,12 +181,12 @@
 <section id="prodi" style="padding:80px 0;background:#F8FAFC;">
     <div class="pub-container">
         <div style="text-align:center;margin-bottom:48px;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;" class="text-primary-600">
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 3.741-1.342m-7.48 0a49.994 49.994 0 0 1 3.74 1.342" /></svg>
                 Akademik
             </div>
-            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#0A1317;margin:0 0 12px 0;">Program Studi</h2>
-            <p style="font-size:16px;color:#5D6C7B;max-width:480px;margin:0 auto;">Pilih program studi yang sesuai dengan minat dan passion-mu</p>
+            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;margin:0 0 12px 0;" class="text-neutral-900">Program Studi</h2>
+            <p style="font-size:16px;max-width:480px;margin:0 auto;" class="text-neutral-500">Pilih program studi yang sesuai dengan minat dan passion-mu</p>
         </div>
 
         <div x-data="{ activeTab: 'Semua' }">
@@ -200,13 +200,13 @@
             <div class="prog-grid">
                 @foreach($programs as $program)
                 <div x-show="activeTab === 'Semua' || activeTab === '{{ $program->faculty->name }}'" class="prog-card" style="display:none;" x-transition.opacity.duration.300ms>
-                    <h3 style="font-size:18px;font-weight:700;margin:0 0 4px 0;color:#0A1317;">{{ $program->name }}</h3>
-                    <p style="font-size:13px;color:#8595A4;margin:0 0 16px 0;">{{ $program->faculty->name }}</p>
+                    <h3 style="font-size:18px;font-weight:700;margin:0 0 4px 0;" class="text-neutral-900">{{ $program->name }}</h3>
+                    <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-400">{{ $program->faculty->name }}</p>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-                        <span style="background:#E8F5E9;color:#2E7D32;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Akreditasi {{ $program->accreditation }}</span>
-                        <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Kuota {{ $program->quota }}</span>
+                        <span style="background:#E8F5E9;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-success-700">Akreditasi {{ $program->accreditation }}</span>
+                        <span style="background:#e6edfc;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-primary-600">Kuota {{ $program->quota }}</span>
                     </div>
-                    <div style="margin-top:auto;padding-top:16px;border-top:1px solid #F1F4F7;">
+                    <div style="margin-top:auto;padding-top:16px;" class="border-t-neutral-100">
                         <a href="{{ route('prodi.show', $program->slug) }}"
                            style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#082e8f;text-decoration:none;transition:color 0.15s;"
                            onmouseover="this.style.color='#052066';"
@@ -222,15 +222,15 @@
 </section>
 
 {{-- ═══ CARA DAFTAR ═══ --}}
-<section id="cara-daftar" style="padding:80px 0;background:#F1F4F7;">
+<section id="cara-daftar" style="padding:80px 0;" class="bg-neutral-100">
     <div class="pub-container">
         <div style="text-align:center;margin-bottom:48px;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;" class="text-primary-600">
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
                 Panduan
             </div>
-            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#0A1317;margin:0 0 12px 0;">Cara Mendaftar</h2>
-            <p style="font-size:16px;color:#5D6C7B;max-width:480px;margin:0 auto;">Ikuti 4 langkah mudah untuk menyelesaikan pendaftaranmu</p>
+            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;margin:0 0 12px 0;" class="text-neutral-900">Cara Mendaftar</h2>
+            <p style="font-size:16px;max-width:480px;margin:0 auto;" class="text-neutral-500">Ikuti 4 langkah mudah untuk menyelesaikan pendaftaranmu</p>
         </div>
 
         <div class="steps-grid">
@@ -247,10 +247,10 @@
             <div class="step-card">
                 <div class="step-num">{{ $step['num'] }}</div>
                 <div style="width:44px;height:44px;border-radius:12px;background:#e6edfc;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-                    <svg style="width:22px;height:22px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">{!! $step['svg'] !!}</svg>
+                    <svg style="width:22px;height:22px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary-600">{!! $step['svg'] !!}</svg>
                 </div>
-                <h3 style="font-size:16px;font-weight:700;color:#0A1317;margin:0 0 8px 0;">{{ $step['title'] }}</h3>
-                <p style="font-size:13px;color:#5D6C7B;margin:0;line-height:1.5;">{{ $step['desc'] }}</p>
+                <h3 style="font-size:16px;font-weight:700;margin:0 0 8px 0;" class="text-neutral-900">{{ $step['title'] }}</h3>
+                <p style="font-size:13px;margin:0;line-height:1.5;" class="text-neutral-500">{{ $step['desc'] }}</p>
             </div>
             @endforeach
         </div>
@@ -259,16 +259,16 @@
 
 {{-- ═══ BIAYA & CTA ═══ --}}
 @if($period)
-<section id="biaya" style="padding:80px 0;background:#FFFFFF;">
+<section id="biaya" style="padding:80px 0;" class="bg-white">
     <div class="pub-container">
         <div class="cta-card">
             <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:9999px;background:rgba(255,255,255,0.05);"></div>
             <div style="position:relative;z-index:1;">
-                <div style="display:inline-block;background:rgba(255,255,255,0.15);color:#FFFFFF;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+                <div style="display:inline-block;background:rgba(255,255,255,0.15);font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;" class="text-white">
                     {{ $period->name }}
                 </div>
-                <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#FFFFFF;margin:0 0 8px 0;">Biaya Pendaftaran</h2>
-                <div style="font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;color:#FFFFFF;margin:20px 0;">
+                <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;margin:0 0 8px 0;" class="text-white">Biaya Pendaftaran</h2>
+                <div style="font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;margin:20px 0;" class="text-white">
                     Bervariasi Tiap Program Studi
                 </div>
                 <p style="font-size:15px;color:rgba(255,255,255,0.7);margin:0 0 32px 0;">

@@ -2,161 +2,247 @@
 @section('title', 'Data Pendaftar — Admin PMB YPIB')
 @section('page-title', 'Data Pendaftar')
 
+@php
+$statusConfig = [
+    ''                                 => ['label' => 'Semua',            'color' => 'neutral'],
+    'menunggu_pembayaran'              => ['label' => 'Belum Bayar',      'color' => 'warning'],
+    'menunggu_konfirmasi'              => ['label' => 'Konfirmasi',       'color' => 'info'],
+    'terdaftar'                        => ['label' => 'Terdaftar',        'color' => 'success'],
+    'diterima'                         => ['label' => 'Diterima',         'color' => 'green'],
+    'ditolak'                          => ['label' => 'Ditolak',          'color' => 'error'],
+    'perlu_revisi'                     => ['label' => 'Perlu Revisi',     'color' => 'orange'],
+    'menunggu_konfirmasi_daftar_ulang' => ['label' => 'Konfirmasi DU',   'color' => 'info'],
+    'daftar_ulang_selesai'             => ['label' => 'Selesai DU',      'color' => 'primary'],
+];
+
+$badgeMap = [
+    'menunggu_pembayaran'              => ['label' => 'Belum Bayar',         'class' => 'bg-neutral-100 text-neutral-600'],
+    'menunggu_konfirmasi'              => ['label' => 'Menunggu Konfirmasi', 'class' => 'bg-neutral-100 text-neutral-600'],
+    'terdaftar'                        => ['label' => 'Terdaftar',           'class' => 'bg-primary-50 text-primary-700'],
+    'diterima'                         => ['label' => 'Diterima',            'class' => 'bg-primary-100 text-primary-800'],
+    'ditolak'                          => ['label' => 'Ditolak',             'class' => 'bg-neutral-200 text-neutral-600'],
+    'perlu_revisi'                     => ['label' => 'Perlu Revisi',        'class' => 'bg-neutral-100 text-neutral-600'],
+    'menunggu_konfirmasi_daftar_ulang' => ['label' => 'Konfirmasi Daftar Ulang', 'class' => 'bg-neutral-100 text-neutral-600'],
+    'daftar_ulang_selesai'             => ['label' => 'Selesai Daftar Ulang',    'class' => 'bg-primary-50 text-primary-700'],
+];
+
+$activeStatus = request('status', '');
+@endphp
+
 @section('content')
-<style>
-    @media (max-width: 767px) {
-        .filter-search { width: 100% !important; }
-        .filter-row    { flex-direction: column; align-items: stretch !important; }
-        .filter-row select, .filter-row input { width: 100% !important; }
-        .filter-row a, .filter-row button { width: 100% !important; text-align: center; justify-content: center; }
-    }
-</style>
 
-{{-- ── FILTER SECTION ── --}}
-<div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;padding:20px;margin-bottom:24px;">
-    <form method="GET" action="{{ route('admin.registrations.index') }}"
-          class="filter-row"
-          style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-
-        {{-- Search --}}
-        <input type="text" name="search" value="{{ request('search') }}"
-               placeholder="Cari nama / nomor pendaftaran..."
-               style="height:44px;border-radius:8px;border:1px solid #CED0D4;padding:0 16px;font-size:14px;color:#1C1E21;width:320px;outline:none;font-family:inherit;transition:border 0.15s;"
-               onfocus="this.style.border='2px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'">
-
-        {{-- Status filter --}}
-        <select name="status"
-                style="height:44px;border-radius:8px;border:1px solid #CED0D4;padding:0 12px;font-size:14px;color:#1C1E21;background:#fff;outline:none;font-family:inherit;">
-            <option value="">Semua Status</option>
-            @foreach([
-                'menunggu_pembayaran' => 'Menunggu Pembayaran',
-                'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
-                'terdaftar'           => 'Terdaftar',
-                'diterima'            => 'Diterima',
-                'ditolak'             => 'Ditolak',
-                'perlu_revisi'        => 'Perlu Revisi',
-            ] as $val => $lbl)
-                <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
-            @endforeach
-        </select>
-
-        {{-- Tombol Filter --}}
-        <button type="submit"
-                style="height:44px;border-radius:9999px;padding:0 24px;background:#082e8f;color:#FFFFFF;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'">
-            Filter
-        </button>
-
-        {{-- Tombol Reset --}}
-        <a href="{{ route('admin.registrations.index') }}"
-           style="height:44px;border-radius:9999px;padding:0 24px;background:transparent;color:#444950;font-size:14px;font-weight:700;border:1px solid #CED0D4;text-decoration:none;display:inline-flex;align-items:center;transition:background 0.15s;"
-           onmouseover="this.style.background='#F1F4F7'" onmouseout="this.style.background='transparent'">
-            Reset
-        </a>
-    </form>
+{{-- ============================================================ --}}
+{{-- PAGE HEADER --}}
+{{-- ============================================================ --}}
+<div class="mb-6 flex items-start justify-between">
+    <div>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Data Pendaftar</h1>
+        <p class="mt-0.5 text-sm text-neutral-400">Kelola dan pantau seluruh proses penerimaan mahasiswa baru.</p>
+    </div>
 </div>
 
-{{-- ── TABEL ── --}}
-<div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;overflow:hidden;">
-
-    {{-- Info count --}}
-    <div style="padding:14px 24px;border-bottom:1px solid #DEE3E9;">
-        <span style="font-size:14px;color:#5D6C7B;">{{ $registrations->total() }} pendaftar ditemukan</span>
+{{-- ============================================================ --}}
+{{-- METRIC SUMMARY CARDS --}}
+{{-- ============================================================ --}}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+        <div>
+            <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $totalRegistrations }}</div>
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Total Pendaftar</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            </svg>
+        </div>
     </div>
 
-    <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-            <thead>
-                <tr style="background:#F1F4F7;">
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">No. Daftar</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Nama</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">Prodi</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Referral</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Tanggal</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Aksi</th>
+    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+        <div>
+            <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ ($statusCounts['menunggu_pembayaran'] ?? 0) + ($statusCounts['menunggu_konfirmasi'] ?? 0) }}</div>
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Proses Bayar</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+        <div>
+            <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $statusCounts['terdaftar'] ?? 0 }}</div>
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Terdaftar</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+        <div>
+            <div class="text-3xl font-extrabold text-primary-600 leading-none mb-2">{{ ($statusCounts['diterima'] ?? 0) + ($statusCounts['daftar_ulang_selesai'] ?? 0) }}</div>
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Diterima</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+{{-- ============================================================ --}}
+{{-- TABLE WRAPPER --}}
+{{-- ============================================================ --}}
+<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-0">
+
+    {{-- Search Bar Row --}}
+    <div class="px-5 pt-5 pb-4 border-b border-neutral-100">
+        <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex gap-3">
+            @if($activeStatus)
+                <input type="hidden" name="status" value="{{ $activeStatus }}">
+            @endif
+            <div class="flex-1 relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama, nomor pendaftaran..."
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+            </div>
+            <x-button type="submit" color="primary" size="sm">Cari</x-button>
+            @if(request('search'))
+                <a href="{{ route('admin.registrations.index', array_filter(['status' => $activeStatus])) }}" class="decoration-none">
+                    <x-button type="button" variant="outline" color="neutral" size="sm">Reset</x-button>
+                </a>
+            @endif
+        </form>
+    </div>
+
+    {{-- Status Tab Pills --}}
+    <div class="flex items-center gap-2 px-4 py-3 border-b border-neutral-100 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        @foreach($statusConfig as $statusKey => $cfg)
+            @php
+                $count = $statusKey === '' ? $totalRegistrations : ($statusCounts[$statusKey] ?? 0);
+                $isActive = $activeStatus === $statusKey;
+                $href = route('admin.registrations.index', array_filter([
+                    'status' => $statusKey,
+                    'search' => request('search'),
+                ]));
+            @endphp
+            <a href="{{ $href }}" class="decoration-none shrink-0">
+                <span @class([
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
+                    'bg-neutral-900 text-white shadow-sm' => $isActive,
+                    'text-neutral-600 bg-white hover:bg-neutral-100 border border-neutral-200' => !$isActive,
+                ])>
+                    {{ $cfg['label'] }}
+                    <span @class([
+                        'inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all',
+                        'bg-neutral-700 text-white' => $isActive,
+                        'bg-neutral-100 text-neutral-500' => !$isActive,
+                    ])>{{ $count }}</span>
+                </span>
+            </a>
+        @endforeach
+    </div>
+
+    {{-- ============================================================ --}}
+    {{-- TABLE --}}
+    {{-- ============================================================ --}}
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-neutral-50 border-b border-neutral-100">
+                <tr>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">No. Daftar</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Referral</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-5 py-3 w-10"></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-neutral-100">
                 @forelse($registrations as $reg)
-                <tr style="border-bottom:1px solid #DEE3E9;transition:background 0.12s;"
-                    onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background=''">
-                    <td style="padding:16px 24px;font-size:14px;color:#444950;">
-                        <span style="font-family:monospace;font-weight:600;font-size:13px;color:#5D6C7B;">
-                            {{ $reg->registration_number ?? '—' }}
-                        </span>
-                    </td>
-                    <td style="padding:16px 24px;">
-                        <div style="font-size:14px;font-weight:500;color:#1C1E21;">{{ $reg->full_name }}</div>
-                        <div style="font-size:12px;color:#8595A4;margin-top:2px;">{{ $reg->user?->email }}</div>
-                    </td>
-                    <td style="padding:16px 24px;font-size:13px;color:#444950;max-width:160px;">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
-                    <td style="padding:16px 24px;">
-                        @if($reg->referrer)
-                            <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
-                        @else
-                            <span style="color:#CED0D4;font-size:14px;">—</span>
-                        @endif
-                    </td>
-                    <td style="padding:16px 24px;">
-                        @include('admin.registrations._status_badge', ['status' => $reg->status])
-                    </td>
-                    <td style="padding:16px 24px;font-size:14px;color:#8595A4;white-space:nowrap;">{{ $reg->created_at->format('d/m/Y') }}</td>
-                    <td style="padding:16px 24px;">
-                        <a href="{{ route('admin.registrations.show', $reg->id) }}"
-                           style="background:#F1F4F7;color:#082e8f;font-size:13px;font-weight:700;border-radius:9999px;padding:6px 16px;text-decoration:none;display:inline-block;transition:background 0.12s;"
-                           onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'">
-                            Detail
-                        </a>
-                    </td>
-                </tr>
+                    @php
+                        $badge = $badgeMap[$reg->status] ?? ['label' => str_replace('_', ' ', $reg->status), 'class' => 'bg-neutral-100 text-neutral-600'];
+                    @endphp
+                    <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
+                        {{-- Pendaftar (Nama + Email) --}}
+                        <td class="px-5 py-4">
+                            <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $reg->full_name }}</div>
+                            <div class="text-xs text-neutral-400 mt-0.5">{{ $reg->user?->email }}</div>
+                        </td>
+
+                        {{-- No. Daftar --}}
+                        <td class="px-5 py-4">
+                            @if($reg->registration_number)
+                                <span class="font-mono text-xs font-medium text-neutral-500">{{ $reg->registration_number }}</span>
+                            @else
+                                <span class="text-xs text-neutral-300 italic">—</span>
+                            @endif
+                        </td>
+
+                        {{-- Pilihan Prodi --}}
+                        <td class="px-5 py-4">
+                            <div class="text-sm text-neutral-600 max-w-[160px]">
+                                {{ $reg->firstChoiceProgram?->name ?? '—' }}
+                            </div>
+                        </td>
+
+                        {{-- Referral --}}
+                        <td class="px-5 py-4">
+                            @if($reg->referrer)
+                                <span class="inline-flex items-center px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded-md text-xs font-mono font-medium border border-neutral-200">
+                                    {{ $reg->referrer->code }}
+                                </span>
+                            @else
+                                <span class="text-neutral-300">—</span>
+                            @endif
+                        </td>
+
+                        {{-- Status Badge --}}
+                        <td class="px-5 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $badge['class'] }}">
+                                {{ $badge['label'] }}
+                            </span>
+                        </td>
+
+                        {{-- Tanggal --}}
+                        <td class="px-5 py-4">
+                            <div class="text-sm text-neutral-600">{{ $reg->created_at->format('d M Y') }}</div>
+                            <div class="text-xs text-neutral-400 mt-0.5">{{ $reg->created_at->format('H:i') }} WIB</div>
+                        </td>
+
+                        {{-- Aksi --}}
+                        <td class="px-5 py-4 text-center">
+                            <a href="{{ route('admin.registrations.show', $reg->id) }}"
+                               class="decoration-none inline-flex items-center justify-center w-8 h-8 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors duration-150"
+                               title="Lihat Detail">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            </a>
+                        </td>
+                    </tr>
                 @empty
-                <tr>
-                    <td colspan="7" style="padding:48px 24px;text-align:center;font-size:14px;color:#8595A4;">
-                        Tidak ada pendaftar ditemukan.
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="7" class="px-5 py-16 text-center text-sm text-neutral-400">Belum ada data pendaftar.</td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-
-    {{-- Pagination --}}
+    
     @if($registrations->hasPages())
-        <div style="padding:16px 24px;border-top:1px solid #DEE3E9;">
-            <style>
-                /* Minimal pagination styling — rounded-full buttons */
-                nav[aria-label] span, nav[aria-label] a {
-                    display: inline-flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    min-width: 36px !important;
-                    height: 36px !important;
-                    border-radius: 9999px !important;
-                    font-size: 14px !important;
-                    font-weight: 500 !important;
-                    padding: 0 8px !important;
-                    margin: 0 2px !important;
-                    text-decoration: none !important;
-                    color: #444950 !important;
-                    border: 1px solid #DEE3E9 !important;
-                    background: #FFFFFF !important;
-                    transition: background 0.12s !important;
-                }
-                nav[aria-label] span[aria-current] {
-                    background: #082e8f !important;
-                    color: #FFFFFF !important;
-                    border-color: #082e8f !important;
-                    font-weight: 700 !important;
-                }
-                nav[aria-label] a:hover {
-                    background: #F1F4F7 !important;
-                }
-                nav[aria-label] span.cursor-default {
-                    color: #CED0D4 !important;
-                    border-color: #DEE3E9 !important;
-                }
-            </style>
+        <div class="px-5 py-4 border-t border-neutral-100">
             {{ $registrations->links() }}
         </div>
     @endif

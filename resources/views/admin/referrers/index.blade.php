@@ -4,66 +4,69 @@
 
 @section('content')
 
-{{-- ── TABEL REFERRER ── --}}
-<div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;overflow:hidden;">
+{{-- PAGE HEADER --}}
+<div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Data Afiliasi</h1>
+        <p class="mt-0.5 text-sm text-neutral-400">Daftar afiliator terdaftar beserta performa referral mereka.</p>
+    </div>
+</div>
 
-    <div style="padding:14px 24px;border-bottom:1px solid #DEE3E9;">
-        <span style="font-size:14px;color:#5D6C7B;">{{ $referrers->total() }} afiliasi terdaftar</span>
+{{-- TABLE WRAPPER --}}
+<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
+        <span class="text-sm font-semibold text-neutral-500">{{ $referrers->total() }} afiliasi terdaftar</span>
     </div>
 
-    <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-            <thead>
-                <tr style="background:#F1F4F7;">
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Nama</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">Kode Referral</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">Total Klik</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Konversi</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;">Total Reward</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
-                    <th style="padding:12px 24px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Aksi</th>
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-neutral-50 border-b border-neutral-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Nama & Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Referral</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">Klik</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">Konversi</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Total Reward</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-24">Status</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-neutral-100">
                 @forelse($referrers as $referrer)
-                <tr style="border-bottom:1px solid #DEE3E9;transition:background 0.12s;"
-                    onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background=''">
-                    <td style="padding:16px 24px;">
-                        <div style="font-size:14px;font-weight:500;color:#1C1E21;">{{ $referrer->user?->name ?? '—' }}</div>
-                        <div style="font-size:12px;color:#8595A4;margin-top:2px;">{{ $referrer->user?->email }}</div>
+                <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-bold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $referrer->user?->name ?? '—' }}</div>
+                        <div class="text-xs mt-0.5 text-neutral-500">{{ $referrer->user?->email }}</div>
                     </td>
-                    <td style="padding:16px 24px;">
-                        <span style="background:#e6edfc;color:#082e8f;font-size:13px;font-weight:700;padding:4px 12px;border-radius:9999px;font-family:monospace;">
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-mono font-bold border border-primary-100">
                             {{ $referrer->code }}
                         </span>
                     </td>
-                    <td style="padding:16px 24px;">
-                        <span style="font-size:14px;font-weight:700;color:#1565C0;">{{ $referrer->total_clicks }}</span>
+                    <td class="px-6 py-4 text-center">
+                        <span class="text-sm font-bold text-neutral-600">{{ $referrer->total_clicks }}</span>
                     </td>
-                    <td style="padding:16px 24px;">
-                        <span style="font-size:14px;font-weight:700;color:#2E7D32;">{{ $referrer->total_conversions }}</span>
+                    <td class="px-6 py-4 text-center">
+                        <span class="text-sm font-bold text-neutral-900">{{ $referrer->total_conversions }}</span>
                     </td>
-                    <td style="padding:16px 24px;">
-                        <span style="font-size:14px;font-weight:700;color:#0A1317;">
+                    <td class="px-6 py-4 text-right">
+                        <span class="text-sm font-bold text-neutral-900">
                             Rp {{ number_format($referrer->rewards->whereIn('status',['approved','disbursed'])->sum('amount'), 0, ',', '.') }}
                         </span>
                     </td>
-                    <td style="padding:16px 24px;">
+                    <td class="px-6 py-4 text-center">
                         @if($referrer->status === 'active')
-                            <span style="background:#E8F5E9;color:#2E7D32;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Aktif</span>
+                            <span class="inline-flex items-center justify-center px-2.5 py-1 bg-neutral-900 text-white rounded-full text-xs font-bold">Aktif</span>
                         @else
-                            <span style="background:#FFEBEE;color:#C62828;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Nonaktif</span>
+                            <span class="inline-flex items-center justify-center px-2.5 py-1 bg-neutral-100 text-neutral-400 border border-neutral-200 rounded-full text-xs font-bold">Nonaktif</span>
                         @endif
                     </td>
-                    <td style="padding:16px 24px;">
-                        <form method="POST" action="{{ route('admin.referrers.toggle', $referrer->id) }}" class="inline">
+                    <td class="px-6 py-4 text-center">
+                        <form method="POST" action="{{ route('admin.referrers.toggle', $referrer->id) }}" class="m-0 inline-block">
                             @csrf
                             <button type="submit"
                                     onclick="return confirm('Toggle status afiliasi ini?')"
-                                    style="border-radius:9999px;padding:6px 16px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.12s;
-                                    background:{{ $referrer->status === 'active' ? '#FFEBEE' : '#E8F5E9' }};
-                                    color:{{ $referrer->status === 'active' ? '#C62828' : '#2E7D32' }};"
-                                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                    class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 border {{ $referrer->status === 'active' ? 'border-neutral-200 bg-white text-error-600 hover:bg-error-50 hover:border-error-200' : 'border-neutral-200 bg-white text-success-600 hover:bg-success-50 hover:border-success-200' }}">
                                 {{ $referrer->status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}
                             </button>
                         </form>
@@ -71,7 +74,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" style="padding:48px 24px;text-align:center;font-size:14px;color:#8595A4;">
+                    <td colspan="7" class="px-6 py-16 text-center text-sm text-neutral-400">
                         Belum ada afiliasi terdaftar.
                     </td>
                 </tr>
@@ -81,33 +84,7 @@
     </div>
 
     @if($referrers->hasPages())
-        <div style="padding:16px 24px;border-top:1px solid #DEE3E9;">
-            <style>
-                nav[aria-label] span, nav[aria-label] a {
-                    display: inline-flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    min-width: 36px !important;
-                    height: 36px !important;
-                    border-radius: 9999px !important;
-                    font-size: 14px !important;
-                    font-weight: 500 !important;
-                    padding: 0 8px !important;
-                    margin: 0 2px !important;
-                    text-decoration: none !important;
-                    color: #444950 !important;
-                    border: 1px solid #DEE3E9 !important;
-                    background: #FFFFFF !important;
-                }
-                nav[aria-label] span[aria-current] {
-                    background: #082e8f !important;
-                    color: #FFFFFF !important;
-                    border-color: #082e8f !important;
-                    font-weight: 700 !important;
-                }
-                nav[aria-label] a:hover { background: #F1F4F7 !important; }
-                nav[aria-label] span.cursor-default { color: #CED0D4 !important; }
-            </style>
+        <div class="px-6 py-4 border-t border-neutral-100">
             {{ $referrers->links() }}
         </div>
     @endif

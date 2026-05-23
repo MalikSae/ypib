@@ -26,14 +26,14 @@
     .ref-btn-copied { background:#E8F5E9 !important;border-color:#A5D6A7 !important;color:#2E7D32 !important; }
 </style>
 
-<section style="padding:48px 0;background:#F1F4F7;min-height:calc(100vh - 64px);">
+<section style="padding:48px 0;min-height:calc(100vh - 64px);" class="bg-neutral-100">
 <div class="pub-container">
 <div style="max-width:960px;margin:0 auto;">
 
     {{-- Header --}}
     <div style="margin-bottom:28px;">
-        <h1 style="font-size:24px;font-weight:700;color:#0A1317;margin:0 0 4px 0;">Dashboard Afiliasi</h1>
-        <p style="font-size:14px;color:#5D6C7B;margin:0;">Halo, {{ auth()->user()->name }}! Pantau performa referralmu di sini.</p>
+        <h1 style="font-size:24px;font-weight:700;margin:0 0 4px 0;" class="text-neutral-900">Dashboard Afiliasi</h1>
+        <p style="font-size:14px;margin:0;" class="text-neutral-500">Halo, {{ auth()->user()->name }}! Pantau performa referralmu di sini.</p>
     </div>
 
     {{-- Flash --}}
@@ -45,20 +45,20 @@
     @endif
 
     @if(empty($referrer->bank_name) || empty($referrer->bank_account_number) || empty($referrer->bank_account_name))
-        <div class="pub-card" style="margin-bottom:24px;border:2px solid #082e8f;background:#f8faff;">
+        <div class="pub-card border-primary-600" style="margin-bottom:24px;background:#f8faff;">
             <div class="onboarding-gate-header" style="display:flex;align-items:flex-start;gap:16px;">
-                <div style="width:48px;height:48px;border-radius:12px;background:#082e8f;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg style="width:24px;height:24px;color:#fff;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" /></svg>
+                <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;" class="bg-primary-600">
+                    <svg style="width:24px;height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" /></svg>
                 </div>
                 <div style="flex:1;">
-                    <h2 style="font-size:18px;font-weight:700;color:#0A1317;margin:0 0 6px 0;">Lengkapi Data Rekening Bank</h2>
-                    <p style="font-size:14px;color:#5D6C7B;margin:0 0 16px 0;">Untuk mulai membagikan link referral dan mendapatkan komisi, silakan isi data rekening pencairan Anda di bawah ini.</p>
+                    <h2 style="font-size:18px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Lengkapi Data Rekening Bank</h2>
+                    <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-500">Untuk mulai membagikan link referral dan mendapatkan komisi, silakan isi data rekening pencairan Anda di bawah ini.</p>
                     
                     <form method="POST" action="{{ route('referrer.bank.update') }}">
                         @csrf
                         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:16px;">
                             <div>
-                                <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nama Bank</label>
+                                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nama Bank</label>
                                 <select name="bank_name" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                                     <option value="">Pilih Bank</option>
                                     <option value="BCA">BCA</option>
@@ -75,11 +75,11 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nomor Rekening</label>
+                                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nomor Rekening</label>
                                 <input type="text" name="bank_account_number" placeholder="Contoh: 1234567890" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                             </div>
                             <div>
-                                <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Atas Nama</label>
+                                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Atas Nama</label>
                                 <input type="text" name="bank_account_name" placeholder="Sesuai buku tabungan" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                             </div>
                         </div>
@@ -93,12 +93,12 @@
     @else
         <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <svg style="width:20px;height:20px;color:#2E7D32;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" /></svg>
-                <div style="font-size:14px;color:#1C1E21;">
-                    Rekening Pencairan: <strong style="color:#2E7D32;">{{ $referrer->bank_name }} - {{ $referrer->bank_account_number }} (a.n {{ $referrer->bank_account_name }})</strong>
+                <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-success-700"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" /></svg>
+                <div style="font-size:14px;" class="text-neutral-900">
+                    Rekening Pencairan: <strong class="text-success-700">{{ $referrer->bank_name }} - {{ $referrer->bank_account_number }} (a.n {{ $referrer->bank_account_name }})</strong>
                 </div>
             </div>
-            <button onclick="document.getElementById('edit_bank_modal').style.display='block'" style="background:none;border:none;color:#082e8f;font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">
+            <button onclick="document.getElementById('edit_bank_modal').style.display='block'" style="background:none;border:none;font-size:13px;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;" class="text-primary-600">
                 Edit Rekening
             </button>
         </div>
@@ -106,14 +106,14 @@
         {{-- Edit Bank Modal --}}
         <div id="edit_bank_modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,19,23,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
             <div class="pub-card" style="max-width:500px;width:100%;margin:50px auto;position:relative;">
-                <button onclick="document.getElementById('edit_bank_modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:#8595A4;">
+                <button onclick="document.getElementById('edit_bank_modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;" class="text-neutral-400">
                     <svg style="width:24px;height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                 </button>
-                <h3 style="font-size:18px;font-weight:700;color:#0A1317;margin:0 0 16px 0;">Ubah Data Rekening</h3>
+                <h3 style="font-size:18px;font-weight:700;margin:0 0 16px 0;" class="text-neutral-900">Ubah Data Rekening</h3>
                 <form method="POST" action="{{ route('referrer.bank.update') }}">
                     @csrf
                     <div style="margin-bottom:16px;">
-                        <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nama Bank</label>
+                        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nama Bank</label>
                         <select name="bank_name" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                             @foreach(['BCA','Mandiri','BNI','BRI','BSI','CIMB Niaga','DANA','OVO','GoPay','ShopeePay','Lainnya'] as $bank)
                                 <option value="{{ $bank }}" {{ $referrer->bank_name === $bank ? 'selected' : '' }}>{{ $bank }}</option>
@@ -121,11 +121,11 @@
                         </select>
                     </div>
                     <div style="margin-bottom:16px;">
-                        <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nomor Rekening</label>
+                        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nomor Rekening</label>
                         <input type="text" name="bank_account_number" value="{{ $referrer->bank_account_number }}" placeholder="Contoh: 1234567890" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                     </div>
                     <div style="margin-bottom:24px;">
-                        <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Atas Nama</label>
+                        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Atas Nama</label>
                         <input type="text" name="bank_account_name" value="{{ $referrer->bank_account_name }}" placeholder="Sesuai buku tabungan" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" required>
                     </div>
                     <button type="submit" class="btn-primary" style="width:100%;justify-content:center;height:44px;">
@@ -146,30 +146,30 @@
     @endphp
     <div class="ref-stat-grid">
         @foreach($statCards as $card)
-        <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:14px;padding:20px;">
+        <div style="border-radius:14px;padding:20px;" class="bg-white border-neutral-200">
             <div style="width:36px;height:36px;border-radius:10px;background:{{ $card['bg'] }};display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
                 <svg style="width:18px;height:18px;color:{{ $card['color'] }};" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">{!! $card['svg'] !!}</svg>
             </div>
-            <div style="font-size:20px;font-weight:700;color:#0A1317;">{{ $card['value'] }}</div>
-            <div style="font-size:12px;color:#8595A4;margin-top:2px;">{{ $card['label'] }}</div>
+            <div style="font-size:20px;font-weight:700;" class="text-neutral-900">{{ $card['value'] }}</div>
+            <div style="font-size:12px;margin-top:2px;" class="text-neutral-400">{{ $card['label'] }}</div>
         </div>
         @endforeach
     </div>
 
     {{-- LINK REFERRAL --}}
     <div class="pub-card" style="margin-bottom:16px;">
-        <div style="font-size:11px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Link Referral Unikmu</div>
-        <p style="font-size:13px;color:#5D6C7B;margin:0 0 14px 0;">Bagikan link ini. Setiap klik dan pendaftaran berhasil tercatat otomatis.</p>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" class="text-neutral-400">Link Referral Unikmu</div>
+        <p style="font-size:13px;margin:0 0 14px 0;" class="text-neutral-500">Bagikan link ini. Setiap klik dan pendaftaran berhasil tercatat otomatis.</p>
 
         @php $refUrl = $baseUrl . '/ref/' . $referrer->code; @endphp
 
         <div x-data="{ copied: false }">
             {{-- Full URL Display --}}
-            <div style="background:#F1F4F7;border:1px solid #DEE3E9;border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
-                <svg style="width:16px;height:16px;color:#082e8f;flex-shrink:0;margin-top:1px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <div style="border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;" class="bg-neutral-100 border-neutral-200">
+                <svg style="width:16px;height:16px;flex-shrink:0;margin-top:1px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-600">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
                 </svg>
-                <span style="font-size:13px;font-family:monospace;color:#0A1317;word-break:break-all;line-height:1.6;user-select:all;">{{ $refUrl }}</span>
+                <span style="font-size:13px;font-family:monospace;word-break:break-all;line-height:1.6;user-select:all;" class="text-neutral-900">{{ $refUrl }}</span>
             </div>
 
             {{-- Action Buttons --}}
@@ -198,37 +198,37 @@
             {{-- Status only (kode dihapus) --}}
             <div style="margin-top:10px;display:flex;align-items:center;gap:6px;">
                 <span style="width:7px;height:7px;border-radius:50%;background:{{ $referrer->status === 'active' ? '#2E7D32' : '#C62828' }};display:inline-block;"></span>
-                <span style="font-size:12px;color:#8595A4;">Status: <strong style="color:{{ $referrer->status === 'active' ? '#2E7D32' : '#C62828' }};">{{ $referrer->status === 'active' ? 'Aktif' : 'Nonaktif' }}</strong></span>
+                <span style="font-size:12px;" class="text-neutral-400">Status: <strong style="color:{{ $referrer->status === 'active' ? '#2E7D32' : '#C62828' }};">{{ $referrer->status === 'active' ? 'Aktif' : 'Nonaktif' }}</strong></span>
             </div>
         </div>
     </div>
     @endif
 
     {{-- RIWAYAT PENDAFTAR --}}
-    <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;overflow:hidden;">
-        <div style="padding:16px 24px;border-bottom:1px solid #DEE3E9;display:flex;align-items:center;gap:8px;">
-            <svg style="width:18px;height:18px;color:#5D6C7B;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
-            <span style="font-size:15px;font-weight:700;color:#0A1317;">Riwayat Pendaftar via Linkmu</span>
+    <div style="border-radius:16px;overflow:hidden;" class="bg-white border-neutral-200">
+        <div style="padding:16px 24px;display:flex;align-items:center;gap:8px;" class="border-b-neutral-200">
+            <svg style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+            <span style="font-size:15px;font-weight:700;" class="text-neutral-900">Riwayat Pendaftar via Linkmu</span>
         </div>
 
         @if($registrations->isEmpty())
             <div style="padding:48px 24px;text-align:center;">
                 <div class="w-12 h-12 rounded-[14px] bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <svg style="width:24px;height:24px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614"/></svg>
+                    <svg style="width:24px;height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-600"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614"/></svg>
                 </div>
-                <p style="font-size:14px;color:#8595A4;margin:0 0 4px 0;">Belum ada pendaftar via link referralmu.</p>
-                <p style="font-size:13px;color:#CED0D4;margin:0;">Bagikan linkmu sekarang!</p>
+                <p style="font-size:14px;margin:0 0 4px 0;" class="text-neutral-400">Belum ada pendaftar via link referralmu.</p>
+                <p style="font-size:13px;margin:0;" class="text-neutral-300">Bagikan linkmu sekarang!</p>
             </div>
         @else
             <div style="overflow-x:auto;">
                 <table class="table-nowrap" style="width:100%;border-collapse:collapse;">
                     <thead>
-                        <tr style="background:#F1F4F7;">
-                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Tgl</th>
-                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Nama</th>
-                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Prodi</th>
-                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Reward</th>
-                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.06em;">Status</th>
+                        <tr class="bg-neutral-100">
+                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;" class="text-neutral-400">Tgl</th>
+                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;" class="text-neutral-400">Nama</th>
+                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;" class="text-neutral-400">Prodi</th>
+                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;" class="text-neutral-400">Reward</th>
+                            <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;" class="text-neutral-400">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -240,24 +240,24 @@
                             'disbursed' => ['Dicairkan', '#e6edfc', '#082e8f'],
                         ];
                         @endphp
-                        <tr style="border-bottom:1px solid #DEE3E9;transition:background 0.12s;"
-                            onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background=''">
-                            <td style="padding:14px 20px;font-size:13px;color:#8595A4;white-space:nowrap;">
+                        <tr style="transition:background 0.12s;"
+                            onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background=''" class="border-b-neutral-200">
+                            <td style="padding:14px 20px;font-size:13px;white-space:nowrap;" class="text-neutral-400">
                                 {{ $reg->created_at->format('d/m/Y') }}
                             </td>
                             <td style="padding:14px 20px;">
-                                <div style="font-size:14px;font-weight:500;color:#0A1317;">{{ $reg->full_name }}</div>
+                                <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $reg->full_name }}</div>
                                 @if($reg->registration_number)
-                                    <div style="font-size:11px;color:#8595A4;font-family:monospace;margin-top:2px;">{{ $reg->registration_number }}</div>
+                                    <div style="font-size:11px;font-family:monospace;margin-top:2px;" class="text-neutral-400">{{ $reg->registration_number }}</div>
                                 @endif
                             </td>
-                            <td style="padding:14px 20px;font-size:13px;color:#5D6C7B;">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
-                            <td style="padding:14px 20px;font-size:14px;font-weight:700;color:#0A1317;">
+                            <td style="padding:14px 20px;font-size:13px;" class="text-neutral-500">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
+                            <td style="padding:14px 20px;font-size:14px;font-weight:700;" class="text-neutral-900">
                                 @if($reg->rewards && $reg->rewards->isNotEmpty())
                                     <div style="display:flex;flex-direction:column;gap:4px;">
                                     @foreach($reg->rewards as $reward)
                                         <div>
-                                            <span style="font-size:10px;color:#8595A4;display:block;font-weight:600;text-transform:uppercase;">
+                                            <span style="font-size:10px;display:block;font-weight:600;text-transform:uppercase;" class="text-neutral-400">
                                                 {{ $reward->reward_type === 'registration' ? 'Pendaftaran' : 'Daftar Ulang' }}
                                             </span>
                                             Rp {{ number_format($reward->amount, 0, ',', '.') }}
@@ -265,7 +265,7 @@
                                     @endforeach
                                     </div>
                                 @else
-                                    <span style="color:#CED0D4;">—</span>
+                                    <span class="text-neutral-300">—</span>
                                 @endif
                             </td>
                             <td style="padding:14px 20px;">
@@ -281,7 +281,7 @@
                                     @endforeach
                                     </div>
                                 @else
-                                    <span style="color:#CED0D4;font-size:13px;">—</span>
+                                    <span style="font-size:13px;" class="text-neutral-300">—</span>
                                 @endif
                             </td>
                         </tr>

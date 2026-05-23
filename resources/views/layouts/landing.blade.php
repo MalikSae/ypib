@@ -453,13 +453,13 @@
                 <div class="desktop-user-menu" style="position:relative;" x-data="{ open: false }" @click.outside="open = false">
                     <button class="nav-user-trigger" @click="open = !open" type="button" aria-haspopup="true" :aria-expanded="open">
                         <div class="nav-user-avatar">
-                            <svg style="width:20px;height:20px;color:#FFFFFF;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-white">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                             </svg>
                         </div>
                         <span class="nav-user-name">Hi, {{ auth()->user()->name }}</span>
-                        <svg style="width:16px;height:16px;color:#8595A4;flex-shrink:0;transition:transform 0.2s;" :style="open ? 'transform:rotate(180deg)' : ''"
-                             fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <svg style="width:16px;height:16px;flex-shrink:0;transition:transform 0.2s;" :style="open ? 'transform:rotate(180deg)' : ''"
+                             fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-neutral-400">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                         </svg>
                     </button>
@@ -473,7 +473,7 @@
                         @if(in_array(auth()->user()->role, ['admin','operator']))
                             {{-- ADMIN / OPERATOR: hanya Panel Admin + Keluar --}}
                             <a href="{{ route('admin.dashboard') }}" class="nav-dropdown-item">
-                                <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                                 </svg>
                                 Panel Admin
@@ -482,7 +482,7 @@
                             {{-- MAHASISWA / REFERRER --}}
                             @if(auth()->user()->registrations()->exists())
                                 <a href="{{ route('registration.status') }}" class="nav-dropdown-item">
-                                    <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                     </svg>
                                     Status Pendaftaran
@@ -492,18 +492,18 @@
                             {{-- Dashboard Afiliasi (selalu muncul) --}}
                             @if(auth()->user()->is_referrer)
                                 <a href="{{ route('referrer.dashboard') }}" class="nav-dropdown-item">
-                                    <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                                     </svg>
                                     Dashboard Afiliasi
                                 </a>
                             @else
                                 <a href="{{ route('referrer.index') }}" class="nav-dropdown-item">
-                                    <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                                     </svg>
                                     Dashboard Afiliasi
-                                    <span style="background:#e6edfc;color:#082e8f;font-size:11px;font-weight:700;border-radius:9999px;padding:2px 8px;flex-shrink:0;margin-left:auto;">Daftar</span>
+                                    <span style="background:#e6edfc;font-size:11px;font-weight:700;border-radius:9999px;padding:2px 8px;flex-shrink:0;margin-left:auto;" class="text-primary-600">Daftar</span>
                                 </a>
                             @endif
                         @endif
@@ -511,7 +511,7 @@
                         <div class="nav-dropdown-divider"></div>
 
                         <a href="{{ route('profile.edit') }}" class="nav-dropdown-item">
-                            <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71-.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
@@ -520,7 +520,7 @@
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="nav-dropdown-item" style="color:#5D6C7B;"
+                            <button type="submit" class="nav-dropdown-item text-neutral-500"
                                     onmouseover="this.style.background='#F1F4F7';this.style.color='#E41E3F';"
                                     onmouseout="this.style.background='transparent';this.style.color='#5D6C7B';">
                                 <svg style="width:16px;height:16px;color:inherit;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -548,21 +548,21 @@
     {{-- Mobile menu --}}
     <div id="pub-mobile-menu">
         @auth
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F1F4F7;border-radius:12px;margin-bottom:8px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:#082e8f;display:flex;align-items:center;justify-content:center;color:#fff;">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;margin-bottom:8px;" class="bg-neutral-100">
+                <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;" class="bg-primary-600 text-white">
                     <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
                 </div>
-                <div style="font-weight:700;color:#0A1317;font-size:15px;">Hi, {{ auth()->user()->name }}</div>
+                <div style="font-weight:700;font-size:15px;" class="text-neutral-900">Hi, {{ auth()->user()->name }}</div>
             </div>
-            <div style="height:1px;background:#DEE3E9;margin:4px 0 8px 0;"></div>
+            <div style="height:1px;margin:4px 0 8px 0;" class="bg-neutral-200"></div>
         @endauth
         <a href="{{ route('landing') }}">Beranda</a>
         <a href="{{ route('landing') }}#prodi" onclick="closeMobileMenu()">Program Studi</a>
         <a href="{{ route('landing') }}#cara-daftar" onclick="closeMobileMenu()">Cara Daftar</a>
         <a href="{{ route('landing') }}#biaya" onclick="closeMobileMenu()">Biaya</a>
-        <div style="height:1px;background:#DEE3E9;margin:8px 0;"></div>
+        <div style="height:1px;margin:8px 0;" class="bg-neutral-200"></div>
         @guest
             <a href="{{ route('login') }}">Masuk</a>
             <a href="{{ route('landing') }}#prodi" class="mobile-cta">Daftar Sekarang</a>
@@ -579,7 +579,7 @@
                     <a href="{{ route('referrer.index') }}">Daftar Afiliasi</a>
                 @endif
             @endif
-            <div style="height:1px;background:#DEE3E9;margin:8px 0;"></div>
+            <div style="height:1px;margin:8px 0;" class="bg-neutral-200"></div>
             <a href="{{ route('profile.edit') }}">Pengaturan Akun</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -601,7 +601,7 @@
             {{-- Brand --}}
             <div>
                 <div style="margin-bottom:20px;">
-                    <div style="display:inline-flex;background:#FFFFFF;border-radius:9999px;padding:8px 16px;align-items:center;">
+                    <div style="display:inline-flex;border-radius:9999px;padding:8px 16px;align-items:center;" class="bg-white">
                         <img src="{{ asset('images/logo-ypib.png') }}" alt="Logo YPIB" style="height:36px;width:auto;object-fit:contain;">
                     </div>
                 </div>
@@ -630,13 +630,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                     </svg>
-                    <span style="font-size:14px;color:#8595A4;line-height:1.5;">Jl. Gerakan Koperasi No. 003,<br>Majalengka 45411</span>
+                    <span style="font-size:14px;line-height:1.5;" class="text-neutral-400">Jl. Gerakan Koperasi No. 003,<br>Majalengka 45411</span>
                 </div>
                 <div class="pub-footer-contact-item">
                     <svg class="pub-footer-contact-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                     </svg>
-                    <span style="font-size:14px;color:#8595A4;">pmb@ypib.ac.id</span>
+                    <span style="font-size:14px;" class="text-neutral-400">pmb@ypib.ac.id</span>
                 </div>
             </div>
 
@@ -648,7 +648,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                     </svg>
-                    <span style="font-size:14px;color:#8595A4;line-height:1.5;">Jl. Perjuangan Majasem No.10a,<br>Karyamulya, Kesambi,<br>Kota Cirebon, 45131</span>
+                    <span style="font-size:14px;line-height:1.5;" class="text-neutral-400">Jl. Perjuangan Majasem No.10a,<br>Karyamulya, Kesambi,<br>Kota Cirebon, 45131</span>
                 </div>
             </div>
         </div>

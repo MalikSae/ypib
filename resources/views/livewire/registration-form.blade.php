@@ -31,7 +31,7 @@
     @if($selectedProgram)
     <div class="mb-8 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white text-left text-gray-800">
         <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-3" style="background-color: #FAFAFA;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" style="color: #082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             <span class="text-xs font-bold tracking-widest text-gray-500 uppercase">Prodi Pilihan Anda</span>
@@ -49,8 +49,8 @@
                     </svg>
                     {{ $selectedProgram->faculty->name }}
                 </div>
-                <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-xs md:text-sm font-bold shadow-sm" style="border-color: #DBEAFE; background-color: #e6edfc; color: #082e8f; white-space: nowrap;">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" style="color: #082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-xs md:text-sm font-bold shadow-sm text-primary-600" style="border-color: #DBEAFE; background-color: #e6edfc;  white-space: nowrap;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                     </svg>
                     Akreditasi {{ $selectedProgram->accreditation }}
@@ -88,7 +88,7 @@
     @if($step === 1)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" style="color: #082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
             Data Diri
@@ -96,11 +96,11 @@
         <div class="space-y-5">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="Sesuai KTP/Ijazah">
+                <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="Sesuai KTP/Ijazah">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">NIK (16 digit) <span class="text-red-500">*</span></label>
-                <input wire:model="nik" type="text" maxlength="16" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="3201xxxxxxxx">
+                <input wire:model="nik" type="text" maxlength="16" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="3201xxxxxxxx">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {{-- TEMPAT LAHIR: Search Dropdown --}}
@@ -247,11 +247,11 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-                <textarea wire:model="address" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="Jl. Contoh No. 1, Desa, Kecamatan, Kabupaten"></textarea>
+                <textarea wire:model="address" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="Jl. Contoh No. 1, Desa, Kecamatan, Kabupaten"></textarea>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP <span class="text-red-500">*</span></label>
-                <input wire:model="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="08xxxxxxxxxx">
+                <input wire:model="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="08xxxxxxxxxx">
             </div>
         </div>
     </div>
@@ -261,7 +261,7 @@
     @if($step === 2)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" style="color: #082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
             </svg>
             Asal Sekolah
@@ -269,16 +269,16 @@
         <div class="space-y-5">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah <span class="text-red-500">*</span></label>
-                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="SMA/SMK/MA Negeri/Swasta ...">
+                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="SMA/SMK/MA Negeri/Swasta ...">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Lulus <span class="text-red-500">*</span></label>
-                    <input wire:model="graduation_year" type="number" min="2000" max="2030" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="2024">
+                    <input wire:model="graduation_year" type="number" min="2000" max="2030" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="2024">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Rata-rata Ijazah <span class="text-gray-400 text-xs">(opsional)</span></label>
-                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" style="focus:border-color:#082e8f; focus:ring-color:#082e8f;" placeholder="85.50">
+                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" style="focus: focus:ring-" placeholder="85.50">
                 </div>
             </div>
         </div>
@@ -289,7 +289,7 @@
     @if($step === 3)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" style="color: #082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             Konfirmasi Data Pendaftaran
@@ -331,7 +331,7 @@
             </div>
 
             @if($period)
-            <div class="border rounded-xl p-4 text-sm" style="background-color:#e6edfc; border-color:#DBEAFE; color:#082e8f;">
+            <div class="border rounded-xl p-4 text-sm text-primary-600" style="background-color:#e6edfc; border-color:#DBEAFE;">
                 <strong>Biaya pendaftaran: Rp {{ number_format($firstProg?->registration_fee ?? 0, 0, ',', '.') }}</strong><br>
                 Setelah submit, Anda akan mendapat nomor pendaftaran dan instruksi pembayaran.
             </div>
@@ -359,8 +359,7 @@
 
         @if($step < 3)
             <button wire:click="nextStep" type="button"
-                class="flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-xl shadow transition hover:opacity-90"
-                style="background-color:#082e8f">
+                class="flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-xl shadow transition hover:opacity-90 bg-primary-600">
                 Selanjutnya
                 <svg xmlns="http://www.w3.org/2000/svg" style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -369,8 +368,7 @@
         @else
             <button type="submit"
                 wire:loading.attr="disabled"
-                class="flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-xl shadow transition hover:opacity-90 disabled:opacity-60"
-                style="background-color:#082e8f">
+                class="flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-xl shadow transition hover:opacity-90 disabled:opacity-60 bg-primary-600">
                 <span wire:loading.remove class="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />

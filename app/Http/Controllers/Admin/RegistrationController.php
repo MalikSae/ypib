@@ -35,7 +35,14 @@ class RegistrationController extends Controller
 
         $registrations = $query->latest()->paginate(20)->withQueryString();
 
-        return view('admin.registrations.index', compact('registrations'));
+        // Calculate counts for the tabs
+        $statusCounts = Registration::select('status', \DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+        $totalRegistrations = array_sum($statusCounts);
+
+        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations'));
     }
 
     public function show(int $id)

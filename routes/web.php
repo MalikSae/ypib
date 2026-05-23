@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 
 // ── Public Landing ─────────────────────────────────────────────────────────
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/landing-preview', [LandingController::class, 'preview'])->name('landing.preview');
+
+// ── Temporary Brand Visualization ──────────────────────────────────────────
+Route::get('/brand', function () {
+    return view('brand');
+});
 Route::get('/prodi/{slug}', [LandingController::class, 'prodi'])->name('prodi.show');
 
 // ── Referral Tracking (public, tanpa auth) ──────────────────────────────────
@@ -74,7 +80,10 @@ Route::prefix('admin')
         Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
         Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
         Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
+        Route::patch('partners/{partner}/toggle', [\App\Http\Controllers\Admin\PartnerController::class, 'toggleActive'])->name('partners.toggle');
         Route::delete('programs/gallery/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'destroyGallery'])->name('programs.gallery.destroy');
+        Route::resource('facilities', \App\Http\Controllers\Admin\FacilityController::class)->except(['show']);
+        Route::patch('facilities/{facility}/toggle', [\App\Http\Controllers\Admin\FacilityController::class, 'toggleActive'])->name('facilities.toggle');
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');

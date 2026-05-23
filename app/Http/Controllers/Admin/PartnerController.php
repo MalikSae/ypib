@@ -81,4 +81,12 @@ class PartnerController extends Controller
 
         return redirect()->route('admin.partners.index')->with('success', 'Partner berhasil dihapus.');
     }
+
+    public function toggleActive(Partner $partner)
+    {
+        $partner->is_active = !$partner->is_active;
+        $partner->save();
+
+        return redirect()->route('admin.partners.index')->with('success', 'Status partner berhasil diubah.');
+    }
 }

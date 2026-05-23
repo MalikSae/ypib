@@ -19,8 +19,8 @@
 
     {{-- Page header --}}
     <div style="text-align:center;margin-bottom:32px;">
-        <h1 style="font-size:26px;font-weight:700;color:#0A1317;margin:0 0 6px 0;">Status Pendaftaran</h1>
-        <p style="font-size:14px;color:#5D6C7B;margin:0;">PMB YPIB Majalengka 2025/2026</p>
+        <h1 style="font-size:26px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Status Pendaftaran</h1>
+        <p style="font-size:14px;margin:0;" class="text-neutral-500">PMB YPIB Majalengka 2025/2026</p>
     </div>
 
     {{-- Flash --}}
@@ -51,12 +51,12 @@
     {{-- Belum daftar --}}
     <div class="pub-card" style="text-align:center;padding:48px 24px;">
         <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <svg style="width:28px;height:28px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg style="width:28px;height:28px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-600">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/>
             </svg>
         </div>
-        <h2 style="font-size:18px;font-weight:700;color:#0A1317;margin:0 0 8px 0;">Belum Ada Pendaftaran</h2>
-        <p style="font-size:14px;color:#5D6C7B;margin:0 0 24px 0;">Anda belum mengisi formulir pendaftaran PMB YPIB.</p>
+        <h2 style="font-size:18px;font-weight:700;margin:0 0 8px 0;" class="text-neutral-900">Belum Ada Pendaftaran</h2>
+        <p style="font-size:14px;margin:0 0 24px 0;" class="text-neutral-500">Anda belum mengisi formulir pendaftaran PMB YPIB.</p>
         <a href="{{ route('registration.create') }}" class="btn-primary inline-flex">
             <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Z"/></svg>
             Isi Formulir Sekarang
@@ -76,7 +76,7 @@
 
     {{-- Timeline Card --}}
     <div class="pub-card" style="margin-bottom:16px;">
-        <div style="font-size:11px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;">Tahapan Pendaftaran</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px;" class="text-neutral-400">Tahapan Pendaftaran</div>
 
         <div style="position:relative;padding-left:40px;">
             <div class="timeline-line"></div>
@@ -86,8 +86,8 @@
                 <div style="position:absolute;left:-40px;top:0;width:38px;height:38px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;" class="timeline-dot-done">
                     <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                 </div>
-                <div style="font-size:14px;font-weight:600;color:#0A1317;">Formulir Dikirim</div>
-                <div style="font-size:12px;color:#8595A4;margin-top:2px;">{{ $registration->created_at->isoFormat('D MMMM Y, HH:mm') }}</div>
+                <div style="font-size:14px;font-weight:600;" class="text-neutral-900">Formulir Dikirim</div>
+                <div style="font-size:12px;margin-top:2px;" class="text-neutral-400">{{ $registration->created_at->isoFormat('D MMMM Y, HH:mm') }}</div>
             </div>
 
             {{-- Step 2 --}}
@@ -103,7 +103,7 @@
                 <div style="font-size:14px;font-weight:600;color:{{ $step2Active ? '#E65100' : ($step2Done ? '#0A1317' : '#8595A4') }};display:flex;align-items:center;">
                     Pembayaran
                     @if($status === 'menunggu_konfirmasi')
-                        <span style="background:#e6edfc;color:#082e8f;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;">Menunggu Konfirmasi</span>
+                        <span style="background:#e6edfc;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;" class="text-primary-600">Menunggu Konfirmasi</span>
                     @elseif($status === 'menunggu_pembayaran')
                         <span style="background:#FFF3E0;color:#E65100;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;">Belum Dibayar</span>
                     @endif
@@ -138,9 +138,9 @@
                 <div style="margin-top:12px;">
                     @if($registration->payment_proof)
                         <div style="display:flex;align-items:center;gap:10px;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:10px;">
-                            <svg style="width:16px;height:16px;color:#2E7D32;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                            <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-success-700"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
                             <div>
-                                <div style="font-weight:600;color:#2E7D32;">Bukti sudah diunggah</div>
+                                <div style="font-weight:600;" class="text-success-700">Bukti sudah diunggah</div>
                                 <div style="font-size:11px;color:#388E3C;">{{ basename($registration->payment_proof) }}</div>
                             </div>
                             <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
@@ -151,15 +151,15 @@
                         @csrf
                         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
                             <div style="flex:1;min-width:200px;">
-                                <label style="display:flex;align-items:center;gap:10px;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;cursor:pointer;background:#FFFFFF;transition:background 0.15s;" onmouseover="this.style.background='#F1F4F7'" onmouseout="this.style.background='#FFFFFF'">
-                                    <svg style="width:18px;height:18px;color:#082e8f;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                                    <span id="file-name" style="font-size:13px;color:#5D6C7B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Pilih file bukti bayar...</span>
+                                <label style="display:flex;align-items:center;gap:10px;border-radius:8px;padding:8px 12px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F1F4F7'" onmouseout="this.style.background='#FFFFFF'" class="border-neutral-300 bg-white">
+                                    <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-primary-600"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                                    <span id="file-name" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="text-neutral-500">Pilih file bukti bayar...</span>
                                     <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih file bukti bayar...'; document.getElementById('file-name').style.color = '#0A1317';">
                                 </label>
                             </div>
                             <button type="submit" class="btn-primary" style="height:40px;padding:0 20px;font-size:14px;flex-shrink:0;">Upload</button>
                         </div>
-                        <div style="font-size:11px;color:#8595A4;margin-top:8px;line-height:1.5;">
+                        <div style="font-size:11px;margin-top:8px;line-height:1.5;" class="text-neutral-400">
                             <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
                             <div style="margin-top:2px;">Atau konfirmasi ke admin: <strong>{{ $registration->period->admin_whatsapp ?? '(0233) 123456' }}</strong></div>
                         </div>
@@ -182,29 +182,29 @@
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                     @else 3 @endif
                 </div>
-                <div style="font-size:14px;font-weight:600;color:{{ $step3Done ? '#0A1317' : '#8595A4' }};">Pembayaran Dikonfirmasi</div>
+                <div style="font-size:14px;font-weight:600;" class="text-neutral-900">Pembayaran Dikonfirmasi</div>
                 @if($step3Done && $registration->registration_number)
                     <div class="mt-2.5 bg-primary/10 border border-[#DEE3E9] rounded-xl px-[18px] py-[14px] inline-block">
-                        <div style="font-size:11px;color:#082e8f;font-weight:700;margin-bottom:4px;">NOMOR PENDAFTARAN RESMI</div>
-                        <div style="font-size:22px;font-weight:700;color:#0A1317;font-family:monospace;letter-spacing:0.08em;">{{ $registration->registration_number }}</div>
+                        <div style="font-size:11px;font-weight:700;margin-bottom:4px;" class="text-primary-600">NOMOR PENDAFTARAN RESMI</div>
+                        <div style="font-size:22px;font-weight:700;font-family:monospace;letter-spacing:0.08em;" class="text-neutral-900">{{ $registration->registration_number }}</div>
                     </div>
-                    <div style="font-size:12px;color:#8595A4;margin-top:8px;">Simpan nomor ini untuk keperluan administrasi.</div>
+                    <div style="font-size:12px;margin-top:8px;" class="text-neutral-400">Simpan nomor ini untuk keperluan administrasi.</div>
                 @elseif(!$step3Done)
-                    <div style="font-size:12px;color:#CED0D4;margin-top:2px;">Aktif setelah pembayaran dikonfirmasi admin.</div>
+                    <div style="font-size:12px;margin-top:2px;" class="text-neutral-300">Aktif setelah pembayaran dikonfirmasi admin.</div>
                 @endif
             </div>
 
             {{-- Step 4 --}}
             <div style="position:relative;margin-bottom:24px;">
-                <div style="position:absolute;left:-40px;top:0;width:38px;height:38px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:3px solid #FFFFFF;z-index:10;background:{{ $step4Done ? '#2E7D32' : ($status === 'ditolak' ? '#C62828' : ($status === 'perlu_revisi' ? '#E65100' : '#DEE3E9')) }};color:{{ $step4Done ? '#FFFFFF' : '#8595A4' }};">
+                <div style="position:absolute;left:-40px;top:0;width:38px;height:38px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:10;" class="border-white bg-success-700 text-white">
                     @if($step4Done)
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                     @else 4 @endif
                 </div>
-                <div style="font-size:14px;font-weight:600;color:{{ $step4Done ? '#0A1317' : '#8595A4' }};">Hasil Seleksi</div>
+                <div style="font-size:14px;font-weight:600;" class="text-neutral-900">Hasil Seleksi</div>
                 @if($step4Done && $status !== 'ditolak' && $status !== 'perlu_revisi')
                     <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:14px;margin-top:10px;">
-                        <div style="font-weight:700;color:#2E7D32;font-size:15px;display:flex;align-items:center;gap:6px;">
+                        <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px;" class="text-success-700">
                             <svg style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                             Selamat! Anda DITERIMA
                         </div>
@@ -227,13 +227,13 @@
                         <div style="font-size:13px;color:#BF360C;margin-top:4px;">Hubungi admin PMB untuk instruksi revisi.</div>
                     </div>
                 @else
-                    <div style="font-size:12px;color:#CED0D4;margin-top:2px;">Akan diumumkan setelah verifikasi selesai.</div>
+                    <div style="font-size:12px;margin-top:2px;" class="text-neutral-300">Akan diumumkan setelah verifikasi selesai.</div>
                 @endif
             </div>
 
             {{-- Step 5 --}}
             <div style="position:relative;">
-                <div style="position:absolute;left:-40px;top:0;width:38px;height:38px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:3px solid #FFFFFF;z-index:10;background:{{ $step5Done ? '#082e8f' : ($step5Active ? '#E65100' : '#DEE3E9') }};color:{{ ($step5Done || $step5Active) ? '#FFFFFF' : '#8595A4' }};">
+                <div style="position:absolute;left:-40px;top:0;width:38px;height:38px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:10;" class="border-white bg-primary-600 text-white">
                     @if($step5Done)
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                     @else 5 @endif
@@ -241,7 +241,7 @@
                 <div style="font-size:14px;font-weight:600;color:{{ $step5Active ? '#E65100' : ($step5Done ? '#0A1317' : '#8595A4') }};display:flex;align-items:center;">
                     Daftar Ulang
                     @if($status === 'menunggu_konfirmasi_daftar_ulang' && $registration->re_registration_payment_proof)
-                        <span style="background:#e6edfc;color:#082e8f;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;">Menunggu Konfirmasi</span>
+                        <span style="background:#e6edfc;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;" class="text-primary-600">Menunggu Konfirmasi</span>
                     @elseif($status === 'diterima')
                         <span style="background:#FFF3E0;color:#E65100;font-size:11px;font-weight:700;padding:2px 10px;border-radius:9999px;margin-left:8px;line-height:1.2;">Belum Dibayar</span>
                     @endif
@@ -294,15 +294,15 @@
                         @csrf
                         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
                             <div style="flex:1;min-width:200px;">
-                                <label style="display:flex;align-items:center;gap:10px;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;cursor:pointer;background:#FFFFFF;transition:background 0.15s;" onmouseover="this.style.background='#F1F4F7'" onmouseout="this.style.background='#FFFFFF'">
-                                    <svg style="width:18px;height:18px;color:#082e8f;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                                    <span id="file-name-re" style="font-size:13px;color:#5D6C7B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Pilih file bukti bayar...</span>
+                                <label style="display:flex;align-items:center;gap:10px;border-radius:8px;padding:8px 12px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#F1F4F7'" onmouseout="this.style.background='#FFFFFF'" class="border-neutral-300 bg-white">
+                                    <svg style="width:18px;height:18px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="text-primary-600"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                                    <span id="file-name-re" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="text-neutral-500">Pilih file bukti bayar...</span>
                                     <input type="file" name="re_registration_payment_proof" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="document.getElementById('file-name-re').textContent = this.files[0] ? this.files[0].name : 'Pilih file bukti bayar...'; document.getElementById('file-name-re').style.color = '#0A1317';">
                                 </label>
                             </div>
                             <button type="submit" class="btn-primary" style="height:40px;padding:0 20px;font-size:14px;flex-shrink:0;">Upload</button>
                         </div>
-                        <div style="font-size:11px;color:#8595A4;margin-top:8px;line-height:1.5;">
+                        <div style="font-size:11px;margin-top:8px;line-height:1.5;" class="text-neutral-400">
                             <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
                         </div>
                     </form>
@@ -310,18 +310,18 @@
 
                 @elseif(($step5Active || $step5Done) && $registration->re_registration_payment_proof)
                     <div style="display:flex;align-items:center;gap:10px;background:#E8F5E9;border:1px solid #A5D6A7;border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:10px;margin-top:12px;">
-                        <svg style="width:16px;height:16px;color:#2E7D32;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                        <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-success-700"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
                         <div>
-                            <div style="font-weight:600;color:#2E7D32;">Bukti Daftar Ulang sudah diunggah</div>
+                            <div style="font-weight:600;" class="text-success-700">Bukti Daftar Ulang sudah diunggah</div>
                             <div style="font-size:11px;color:#388E3C;">{{ basename($registration->re_registration_payment_proof) }}</div>
                         </div>
                         <a href="{{ Storage::url($registration->re_registration_payment_proof) }}" target="_blank"
                            style="margin-left:auto;font-size:12px;color:#2E7D32;text-decoration:underline;">Lihat</a>
                     </div>
                 @elseif(!$step5Done)
-                    <div style="font-size:12px;color:#CED0D4;margin-top:2px;">Akan aktif setelah Anda diterima.</div>
+                    <div style="font-size:12px;margin-top:2px;" class="text-neutral-300">Akan aktif setelah Anda diterima.</div>
                 @else
-                    <div style="font-size:12px;color:#2E7D32;font-weight:600;margin-top:4px;">Daftar ulang berhasil dikonfirmasi.</div>
+                    <div style="font-size:12px;font-weight:600;margin-top:4px;" class="text-success-700">Daftar ulang berhasil dikonfirmasi.</div>
                 @endif
             </div>
         </div>
@@ -329,11 +329,11 @@
 
     {{-- Ringkasan Pendaftaran --}}
     <div class="pub-card">
-        <div style="font-size:11px;font-weight:700;color:#8595A4;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;">Ringkasan Pendaftaran</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Ringkasan Pendaftaran</div>
         <div class="reg-summary-grid">
-            <div><div style="font-size:12px;color:#8595A4;margin-bottom:3px;">Nama</div><div style="font-size:14px;font-weight:500;color:#0A1317;">{{ $registration->full_name }}</div></div>
-            <div><div style="font-size:12px;color:#8595A4;margin-bottom:3px;">Tanggal Daftar</div><div style="font-size:14px;font-weight:500;color:#0A1317;">{{ $registration->created_at->isoFormat('D MMM Y') }}</div></div>
-            <div><div style="font-size:12px;color:#8595A4;margin-bottom:3px;">Program Studi</div><div style="font-size:14px;font-weight:500;color:#0A1317;">{{ $registration->firstChoiceProgram?->name ?? '—' }}</div></div>
+            <div><div style="font-size:12px;margin-bottom:3px;" class="text-neutral-400">Nama</div><div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->full_name }}</div></div>
+            <div><div style="font-size:12px;margin-bottom:3px;" class="text-neutral-400">Tanggal Daftar</div><div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->created_at->isoFormat('D MMM Y') }}</div></div>
+            <div><div style="font-size:12px;margin-bottom:3px;" class="text-neutral-400">Program Studi</div><div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->firstChoiceProgram?->name ?? '—' }}</div></div>
         </div>
     </div>
     @endif

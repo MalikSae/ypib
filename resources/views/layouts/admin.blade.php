@@ -7,11 +7,12 @@
     <title>@yield('title', 'Admin PMB YPIB')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        *, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; padding: 0; background: #F1F4F7; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: #F1F4F7; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         /* ─────────────────────────────────────────
            SIDEBAR
@@ -126,11 +127,11 @@
             transition: color 0.15s;
         }
         .nav-item.active {
-            background: #e6edfc;
-            color: #082e8f;
+            background: #F2F5FD;
+            color: #0B41CB;
             font-weight: 700;
         }
-        .nav-item.active .nav-icon { color: #082e8f; }
+        .nav-item.active .nav-icon { color: #0B41CB; }
 
         /* ─────────────────────────────────────────
            CONTENT AREA
@@ -199,8 +200,8 @@
             border: 1px solid #DEE3E9 !important; background: #FFFFFF !important;
         }
         nav[aria-label] span[aria-current] {
-            background: #082e8f !important; color: #FFFFFF !important;
-            border-color: #082e8f !important; font-weight: 700 !important;
+            background: #0B41CB !important; color: #FFFFFF !important;
+            border-color: #0B41CB !important; font-weight: 700 !important;
         }
         nav[aria-label] a:hover { background: #F1F4F7 !important; }
         nav[aria-label] span.cursor-default { color: #CED0D4 !important; }
@@ -406,11 +407,11 @@
     </div>
 
     {{-- Divider --}}
-    <div style="height:1px;background:#DEE3E9;margin:0 0 16px 0;"></div>
+    <div style="height:1px;margin:0 0 16px 0;" class="bg-neutral-200"></div>
 
     {{-- Navigation --}}
     <nav style="flex:1;">
-        <div class="nav-section-label" style="font-size:11px;font-weight:700;color:#8595A4;letter-spacing:0.08em;margin-bottom:8px;padding:0 12px;">MENU UTAMA</div>
+        <div class="nav-section-label text-neutral-400" style="font-size:11px;font-weight:700;letter-spacing:0.08em;margin-bottom:8px;padding:0 12px;">MENU UTAMA</div>
 
         {{-- Dashboard --}}
         <a href="{{ route('admin.dashboard') }}"
@@ -444,12 +445,22 @@
 
         {{-- Kelola Prodi --}}
         <a href="{{ route('admin.programs.index') }}"
-           data-label="Program Studi"
+           data-label="Kelola Program Studi"
            class="nav-item {{ request()->routeIs('admin.programs.*') ? 'active' : '' }}">
             <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
             </svg>
-            <span class="sidebar-label">Program Studi</span>
+            <span class="sidebar-label">Kelola Program Studi</span>
+        </a>
+
+        {{-- Kelola Fasilitas --}}
+        <a href="{{ route('admin.facilities.index') }}"
+           data-label="Fasilitas"
+           class="nav-item {{ request()->routeIs('admin.facilities.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M15 6.75h.75m-.75 3h.75m-.75 3h.75" />
+            </svg>
+            <span class="sidebar-label">Kelola Fasilitas</span>
         </a>
 
         {{-- Kelola Partner --}}
@@ -495,14 +506,14 @@
 
     {{-- Bottom: Logout --}}
     <div>
-        <div style="height:1px;background:#DEE3E9;margin:16px 0;"></div>
+        <div style="height:1px;margin:16px 0;" class="bg-neutral-200"></div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="nav-item" style="width:100%;border:none;cursor:pointer;color:#E41E3F;background:transparent;" data-label="Logout">
-                <svg class="nav-icon" style="color:#E41E3F;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <button type="submit" class="nav-item text-error" style="width:100%;border:none;cursor:pointer;background:transparent;" data-label="Logout">
+                <svg class="nav-icon text-error" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
                 </svg>
-                <span class="sidebar-label" style="color:#E41E3F;">Logout</span>
+                <span class="sidebar-label text-error">Logout</span>
             </button>
         </form>
     </div>
@@ -526,11 +537,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
-            <h1 class="topbar-page-title" style="font-size:20px;font-weight:700;color:#0A1317;margin:0;">@yield('page-title', 'Dashboard')</h1>
+            <h1 class="topbar-page-title text-neutral-900" style="font-size:20px;font-weight:700;margin:0;">@yield('page-title', 'Dashboard')</h1>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-            <span class="topbar-username" style="font-size:14px;font-weight:500;color:#444950;">{{ auth()->user()->name }}</span>
-            <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;">{{ ucfirst(auth()->user()->role) }}</span>
+            <span class="topbar-username text-neutral-600" style="font-size:14px;font-weight:500;">{{ auth()->user()->name }}</span>
+            <span style="background:#F2F5FD;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;" class="text-primary-600">{{ ucfirst(auth()->user()->role) }}</span>
         </div>
     </header>
 

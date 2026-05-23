@@ -2,39 +2,39 @@
 @section('title', 'Program Afiliasi — PMB YPIB Majalengka')
 
 @section('content')
-<section style="padding:64px 0;background:#F1F4F7;min-height:calc(100vh - 64px);">
+<section style="padding:64px 0;min-height:calc(100vh - 64px);" class="bg-neutral-100">
 <div class="pub-container">
     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:48px;align-items:start;">
         
         {{-- KIRI: Informasi & Benefit --}}
         <div>
             <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                <svg style="width:28px;height:28px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg style="width:28px;height:28px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-600">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
                 </svg>
             </div>
-            <h1 style="font-size:36px;font-weight:700;color:#0A1317;margin:0 0 16px 0;line-height:1.2;">Ajak teman kuliah,<br>dapatkan reward!</h1>
-            <p style="font-size:16px;color:#5D6C7B;margin:0 0 32px 0;line-height:1.6;">Program Afiliasi YPIB memberikan keuntungan untuk kamu dan temanmu. Cukup bagikan link unikmu.</p>
+            <h1 style="font-size:36px;font-weight:700;margin:0 0 16px 0;line-height:1.2;" class="text-neutral-900">Ajak teman kuliah,<br>dapatkan reward!</h1>
+            <p style="font-size:16px;margin:0 0 32px 0;line-height:1.6;" class="text-neutral-500">Program Afiliasi YPIB memberikan keuntungan untuk kamu dan temanmu. Cukup bagikan link unikmu.</p>
             
             <div style="display:flex;flex-direction:column;gap:24px;">
                 {{-- Point 1 --}}
                 <div style="display:flex;align-items:flex-start;gap:16px;">
                     <div style="width:48px;height:48px;border-radius:16px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg style="width:24px;height:24px;color:#1a43a8;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                        <svg style="width:24px;height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-700"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                     </div>
                     <div>
-                        <div style="font-size:16px;font-weight:700;color:#0A1317;margin-bottom:4px;">Kamu dapat Rp 50.000</div>
-                        <div style="font-size:14px;color:#5D6C7B;line-height:1.5;">Untuk setiap pendaftar yang berhasil membayar biaya pendaftaran melalui link referral-mu.</div>
+                        <div style="font-size:16px;font-weight:700;margin-bottom:4px;" class="text-neutral-900">Kamu dapat Rp 50.000</div>
+                        <div style="font-size:14px;line-height:1.5;" class="text-neutral-500">Untuk setiap pendaftar yang berhasil membayar biaya pendaftaran melalui link referral-mu.</div>
                     </div>
                 </div>
                 {{-- Point 2 --}}
                 <div style="display:flex;align-items:flex-start;gap:16px;">
                     <div style="width:48px;height:48px;border-radius:16px;background:#e6f4ea;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg style="width:24px;height:24px;color:#31a24c;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                        <svg style="width:24px;height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-success"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                     </div>
                     <div>
-                        <div style="font-size:16px;font-weight:700;color:#0A1317;margin-bottom:4px;">Mudah & Transparan</div>
-                        <div style="font-size:14px;color:#5D6C7B;line-height:1.5;">Pantau jumlah klik, pendaftar, dan komisi yang kamu kumpulkan langsung melalui Dashboard Afiliasi.</div>
+                        <div style="font-size:16px;font-weight:700;margin-bottom:4px;" class="text-neutral-900">Mudah & Transparan</div>
+                        <div style="font-size:14px;line-height:1.5;" class="text-neutral-500">Pantau jumlah klik, pendaftar, dan komisi yang kamu kumpulkan langsung melalui Dashboard Afiliasi.</div>
                     </div>
                 </div>
             </div>
@@ -46,8 +46,8 @@
                 @auth
                     {{-- State: Sudah Login tapi belum aktif afiliasi --}}
                     <div style="text-align:center;margin-bottom:24px;">
-                        <h2 style="font-size:24px;font-weight:700;color:#0A1317;margin:0 0 8px 0;">Halo, {{ auth()->user()->name }}!</h2>
-                        <p style="font-size:14px;color:#5D6C7B;margin:0;">Satu langkah lagi untuk menjadi mitra afiliasi kami.</p>
+                        <h2 style="font-size:24px;font-weight:700;margin:0 0 8px 0;" class="text-neutral-900">Halo, {{ auth()->user()->name }}!</h2>
+                        <p style="font-size:14px;margin:0;" class="text-neutral-500">Satu langkah lagi untuk menjadi mitra afiliasi kami.</p>
                     </div>
 
                     <form method="POST" action="{{ route('referrer.store') }}">
@@ -59,52 +59,52 @@
                 @else
                     {{-- State: Belum Login (Form Registrasi Publik) --}}
                     <div style="margin-bottom:24px;">
-                        <h2 style="font-size:24px;font-weight:700;color:#0A1317;margin:0 0 8px 0;">Daftar Sekarang</h2>
-                        <p style="font-size:14px;color:#5D6C7B;margin:0;">Buat akun untuk mendapatkan link unikmu.</p>
+                        <h2 style="font-size:24px;font-weight:700;margin:0 0 8px 0;" class="text-neutral-900">Daftar Sekarang</h2>
+                        <p style="font-size:14px;margin:0;" class="text-neutral-500">Buat akun untuk mendapatkan link unikmu.</p>
                     </div>
 
                     <form id="referrer_form" method="POST" action="{{ route('referrer.register') }}">
                         @csrf
                         
                         <div style="margin-bottom:16px;">
-                            <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nama Lengkap</label>
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nama Lengkap</label>
                             <input type="text" name="name" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" value="{{ old('name') }}" placeholder="Contoh: Budi Santoso" required autofocus>
-                            @error('name')<div style="font-size:12px;color:#e41e3f;margin-top:4px;">{{ $message }}</div>@enderror
+                            @error('name')<div style="font-size:12px;margin-top:4px;" class="text-error">{{ $message }}</div>@enderror
                         </div>
 
                         <div style="margin-bottom:16px;">
-                            <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Email</label>
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Email</label>
                             <input type="email" id="reg_email" name="email" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" value="{{ old('email') }}" placeholder="Contoh: budi@gmail.com" onblur="validateLiveEmail(this)" oninput="clearLiveError(this, 'email_live_error')" required>
-                            <div id="email_live_error" style="display:none;font-size:12px;color:#e41e3f;margin-top:4px;">Format email tidak valid (harus menggunakan domain lengkap seperti .com, .id, dll).</div>
-                            @error('email')<div style="font-size:12px;color:#e41e3f;margin-top:4px;">{{ $message }}</div>@enderror
+                            <div id="email_live_error" style="display:none;font-size:12px;margin-top:4px;" class="text-error">Format email tidak valid (harus menggunakan domain lengkap seperti .com, .id, dll).</div>
+                            @error('email')<div style="font-size:12px;margin-top:4px;" class="text-error">{{ $message }}</div>@enderror
                         </div>
 
                         <div style="margin-bottom:16px;">
-                            <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Nomor HP / WhatsApp</label>
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Nomor HP / WhatsApp</label>
                             <input type="tel" id="reg_phone" name="phone" class="w-full h-11 px-3 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" value="{{ old('phone') }}" placeholder="Contoh: 081234567890" onblur="validateLivePhone(this)" oninput="this.value = this.value.replace(/[^0-9]/g, ''); clearLiveError(this, 'phone_live_error');" required>
-                            <div id="phone_live_error" style="display:none;font-size:12px;color:#e41e3f;margin-top:4px;">Nomor HP harus berupa angka dan minimal 10 digit.</div>
-                            @error('phone')<div style="font-size:12px;color:#e41e3f;margin-top:4px;">{{ $message }}</div>@enderror
+                            <div id="phone_live_error" style="display:none;font-size:12px;margin-top:4px;" class="text-error">Nomor HP harus berupa angka dan minimal 10 digit.</div>
+                            @error('phone')<div style="font-size:12px;margin-top:4px;" class="text-error">{{ $message }}</div>@enderror
                         </div>
 
                         <div style="margin-bottom:16px;">
-                            <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Password</label>
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Password</label>
                             <div style="position:relative;">
                                 <input type="password" id="reg_password" name="password" class="w-full h-11 px-3 pr-10 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" placeholder="Minimal 8 karakter" required>
-                                <button type="button" onclick="togglePassword('reg_password', 'icon_reg_password')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#8595A4;background:none;border:none;cursor:pointer;padding:0;">
+                                <button type="button" onclick="togglePassword('reg_password', 'icon_reg_password')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;" class="text-neutral-400">
                                     <svg id="icon_reg_password" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
                             </div>
-                            @error('password')<div style="font-size:12px;color:#e41e3f;margin-top:4px;">{{ $message }}</div>@enderror
+                            @error('password')<div style="font-size:12px;margin-top:4px;" class="text-error">{{ $message }}</div>@enderror
                         </div>
 
                         <div style="margin-bottom:24px;">
-                            <label style="display:block;font-size:13px;font-weight:600;color:#0A1317;margin-bottom:6px;">Konfirmasi Password</label>
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;" class="text-neutral-900">Konfirmasi Password</label>
                             <div style="position:relative;">
                                 <input type="password" id="reg_password_confirmation" name="password_confirmation" class="w-full h-11 px-3 pr-10 rounded-lg border border-[#ced0d4] text-[15px] focus:outline-none focus:border-[#1a43a8] focus:ring-1 focus:ring-[#1a43a8]" placeholder="Ulangi password" required>
-                                <button type="button" onclick="togglePassword('reg_password_confirmation', 'icon_reg_password_confirmation')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#8595A4;background:none;border:none;cursor:pointer;padding:0;">
+                                <button type="button" onclick="togglePassword('reg_password_confirmation', 'icon_reg_password_confirmation')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;" class="text-neutral-400">
                                     <svg id="icon_reg_password_confirmation" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -117,8 +117,8 @@
                             Daftar & Dapatkan Link
                         </button>
                         
-                        <div style="margin-top:20px;text-align:center;font-size:14px;color:#5D6C7B;">
-                            Sudah punya akun? <a href="{{ route('referrer.dashboard') }}" style="color:#20449e;font-weight:600;text-decoration:none;">Login</a>
+                        <div style="margin-top:20px;text-align:center;font-size:14px;" class="text-neutral-500">
+                            Sudah punya akun? <a href="{{ route('referrer.dashboard') }}" style="font-weight:600;text-decoration:none;" class="text-primary-700">Login</a>
                         </div>
                     </form>
                 @endauth

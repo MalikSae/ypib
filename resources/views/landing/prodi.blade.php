@@ -25,9 +25,9 @@
     .rich-text-content em, .rich-text-content i { font-style: italic; }
     .rich-text-content a { color: #082e8f; text-decoration: underline; }
 </style>
-<section style="background:#FFFFFF; min-height:calc(100vh - 64px);">
+<section style="min-height:calc(100vh - 64px);" class="bg-white">
     {{-- Hero Section --}}
-    <div style="background:linear-gradient(135deg, #0056b3 0%, #002d62 100%); color:#ffffff; padding: 64px 0; position:relative; overflow:hidden;">
+    <div style="background:linear-gradient(135deg, #0056b3 0%, #002d62 100%);  padding: 64px 0; position:relative; overflow:hidden;" class="text-white">
         <div style="position:absolute; top:-50%; right:-10%; width:600px; height:600px; background:radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%); border-radius:50%;"></div>
         
         <div class="pub-container" style="position:relative; z-index:10;">
@@ -37,7 +37,7 @@
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                 <a href="{{ route('landing') }}#prodi" style="color:rgba(255,255,255,0.7);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">Program Studi</a>
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                <span style="color:#ffffff;font-weight:600;">{{ $program->name }}</span>
+                <span style="font-weight:600;" class="text-white">{{ $program->name }}</span>
             </nav>
 
             <div style="max-width: 700px;">
@@ -60,28 +60,28 @@
             
             {{-- Left Column --}}
             <div class="prodi-main">
-                <h2 style="font-size:28px; font-weight:700; color:#0A1317; margin:0 0 24px 0; letter-spacing:-0.5px;">
+                <h2 style="font-size:28px; font-weight:700;  margin:0 0 24px 0; letter-spacing:-0.5px;" class="text-neutral-900">
                     Mengapa Memilih {{ $program->name }}?
                 </h2>
                 
                 @if($program->description)
-                    <div class="rich-text-content" style="font-size:16px; color:#444950; line-height:1.8; margin-bottom:48px;">
+                    <div class="rich-text-content text-neutral-600" style="font-size:16px;  line-height:1.8; margin-bottom:48px;">
                         {!! $program->description !!}
                     </div>
                 @else
-                    <p style="font-size:16px; color:#8595A4; font-style:italic; margin-bottom:48px;">
+                    <p style="font-size:16px;  font-style:italic; margin-bottom:48px;" class="text-neutral-400">
                         Deskripsi program studi akan segera tersedia.
                     </p>
                 @endif
 
                 @if(!empty($program->re_registration_fee_details) && count($program->re_registration_fee_details) > 0)
                 <div style="margin-bottom:48px;">
-                    <h3 style="font-size:22px; font-weight:700; color:#0A1317; margin:0 0 24px 0; letter-spacing:-0.5px;">
+                    <h3 style="font-size:22px; font-weight:700;  margin:0 0 24px 0; letter-spacing:-0.5px;" class="text-neutral-900">
                         Rincian Biaya Daftar Ulang
                     </h3>
-                    <div style="border-radius:12px; overflow:hidden; border:1px solid #DEE3E9; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                    <div style="border-radius:12px; overflow:hidden;  box-shadow: 0 4px 12px rgba(0,0,0,0.02);" class="border-neutral-200">
                         <table style="width:100%; border-collapse:collapse; text-align:left;">
-                            <thead style="background:#082e8f; color:#ffffff;">
+                            <thead class="bg-primary-600 text-white">
                                 <tr>
                                     <th style="padding:16px 24px; font-weight:600; font-size:14px; width:60px; text-align:center;">NO</th>
                                     <th style="padding:16px 24px; font-weight:600; font-size:14px; text-transform:uppercase;">Jenis Biaya</th>
@@ -91,18 +91,18 @@
                             <tbody>
                                 @foreach($program->re_registration_fee_details as $index => $detail)
                                 <tr style="border-bottom:1px solid #DEE3E9; background:{{ $loop->even ? '#F9FAFB' : '#FFFFFF' }};">
-                                    <td style="padding:16px 24px; font-size:14px; color:#5D6C7B; text-align:center;">{{ $index + 1 }}</td>
-                                    <td style="padding:16px 24px; font-size:14px; font-weight:500; color:#0A1317; text-transform:uppercase;">{{ $detail['name'] }}</td>
-                                    <td style="padding:16px 24px; font-size:15px; font-weight:600; color:#444950; text-align:right;">
+                                    <td style="padding:16px 24px; font-size:14px;  text-align:center;" class="text-neutral-500">{{ $index + 1 }}</td>
+                                    <td style="padding:16px 24px; font-size:14px; font-weight:500;  text-transform:uppercase;" class="text-neutral-900">{{ $detail['name'] }}</td>
+                                    <td style="padding:16px 24px; font-size:15px; font-weight:600;  text-align:right;" class="text-neutral-600">
                                         {{ number_format($detail['amount'], 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
-                            <tfoot style="background:#F1F4F7;">
+                            <tfoot class="bg-neutral-100">
                                 <tr>
-                                    <td colspan="2" style="padding:16px 24px; text-align:right; font-weight:800; font-size:15px; color:#0A1317;">JUMLAH</td>
-                                    <td style="padding:16px 24px; text-align:right; font-weight:800; font-size:18px; color:#082e8f;">
+                                    <td colspan="2" style="padding:16px 24px; text-align:right; font-weight:800; font-size:15px;" class="text-neutral-900">JUMLAH</td>
+                                    <td style="padding:16px 24px; text-align:right; font-weight:800; font-size:18px;" class="text-primary-600">
                                         {{ number_format($program->re_registration_fee, 0, ',', '.') }}
                                     </td>
                                 </tr>
@@ -114,7 +114,7 @@
 
                 @if($program->galleries->count() > 0)
                 <div style="margin-bottom:48px;">
-                    <h3 style="font-size:22px; font-weight:700; color:#0A1317; margin:0 0 24px 0; letter-spacing:-0.5px;">
+                    <h3 style="font-size:22px; font-weight:700;  margin:0 0 24px 0; letter-spacing:-0.5px;" class="text-neutral-900">
                         Galeri Kegiatan
                     </h3>
                     <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
@@ -127,25 +127,25 @@
                 </div>
                 @endif
 
-                <div style="height:1px; background:#F1F4F7; margin-bottom:40px;"></div>
+                <div style="height:1px;  margin-bottom:40px;" class="bg-neutral-100"></div>
 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:32px;">
                     <div style="display:flex; gap:16px;">
-                        <div style="width:48px; height:48px; border-radius:12px; background:#eff6ff; color:#082e8f; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <div style="width:48px; height:48px; border-radius:12px; background:#eff6ff;  display:flex; align-items:center; justify-content:center; flex-shrink:0;" class="text-primary-600">
                             <svg style="width:24px; height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
                         </div>
                         <div>
-                            <h3 style="font-size:16px; font-weight:700; color:#0A1317; margin:0 0 6px 0;">Kurikulum Relevan</h3>
-                            <p style="font-size:14px; color:#5D6C7B; margin:0; line-height:1.5;">Kurikulum dirancang khusus untuk memenuhi standar industri dan kebutuhan profesional masa kini.</p>
+                            <h3 style="font-size:16px; font-weight:700;  margin:0 0 6px 0;" class="text-neutral-900">Kurikulum Relevan</h3>
+                            <p style="font-size:14px;  margin:0; line-height:1.5;" class="text-neutral-500">Kurikulum dirancang khusus untuk memenuhi standar industri dan kebutuhan profesional masa kini.</p>
                         </div>
                     </div>
                     <div style="display:flex; gap:16px;">
-                        <div style="width:48px; height:48px; border-radius:12px; background:#eff6ff; color:#082e8f; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <div style="width:48px; height:48px; border-radius:12px; background:#eff6ff;  display:flex; align-items:center; justify-content:center; flex-shrink:0;" class="text-primary-600">
                             <svg style="width:24px; height:24px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"/></svg>
                         </div>
                         <div>
-                            <h3 style="font-size:16px; font-weight:700; color:#0A1317; margin:0 0 6px 0;">Pengajar Ahli</h3>
-                            <p style="font-size:14px; color:#5D6C7B; margin:0; line-height:1.5;">Dibimbing langsung oleh praktisi terkemuka dan dosen yang kompeten di bidangnya.</p>
+                            <h3 style="font-size:16px; font-weight:700;  margin:0 0 6px 0;" class="text-neutral-900">Pengajar Ahli</h3>
+                            <p style="font-size:14px;  margin:0; line-height:1.5;" class="text-neutral-500">Dibimbing langsung oleh praktisi terkemuka dan dosen yang kompeten di bidangnya.</p>
                         </div>
                     </div>
                 </div>
@@ -153,28 +153,28 @@
 
             {{-- Right Column (Sticky Card) --}}
             <div class="prodi-sidebar">
-                <div style="background:#ffffff; border-radius:24px; box-shadow: 0 12px 32px rgba(0,0,0,0.06); border: 1px solid #E8ECEF; padding:32px; display:flex; flex-direction:column; gap:24px;">
+                <div style="border-radius:24px; box-shadow: 0 12px 32px rgba(0,0,0,0.06); border: 1px solid #E8ECEF; padding:32px; display:flex; flex-direction:column; gap:24px;" class="bg-white">
                     
                     <div>
-                        <div style="font-size:14px; color:#8595A4; margin-bottom:4px; font-weight:500;">Biaya Pendaftaran</div>
-                        <div style="font-size:32px; font-weight:800; color:#0A1317; letter-spacing:-1px;">
+                        <div style="font-size:14px;  margin-bottom:4px; font-weight:500;" class="text-neutral-400">Biaya Pendaftaran</div>
+                        <div style="font-size:32px; font-weight:800;  letter-spacing:-1px;" class="text-neutral-900">
                             Rp {{ number_format($program->registration_fee,0,',','.') }}
                         </div>
 
 
-                    <div style="height:1px; background:#F1F4F7;"></div>
+                    <div style="height:1px;" class="bg-neutral-100"></div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:13px; color:#8595A4; margin-bottom:4px;">Akreditasi</div>
-                            <div style="font-size:18px; font-weight:700; color:#082e8f; display:flex; align-items:center; gap:6px;">
+                            <div style="font-size:13px;  margin-bottom:4px;" class="text-neutral-400">Akreditasi</div>
+                            <div style="font-size:18px; font-weight:700;  display:flex; align-items:center; gap:6px;" class="text-primary-600">
                                 {{ $program->accreditation }}
                             </div>
                         </div>
-                        <div style="width:1px; height:40px; background:#F1F4F7;"></div>
+                        <div style="width:1px; height:40px;" class="bg-neutral-100"></div>
                         <div>
-                            <div style="font-size:13px; color:#8595A4; margin-bottom:4px;">Kuota Mahasiswa</div>
-                            <div style="font-size:18px; font-weight:700; color:#0A1317; display:flex; align-items:center; gap:6px;">
+                            <div style="font-size:13px;  margin-bottom:4px;" class="text-neutral-400">Kuota Mahasiswa</div>
+                            <div style="font-size:18px; font-weight:700;  display:flex; align-items:center; gap:6px;" class="text-neutral-900">
                                 {{ $program->quota }}
                             </div>
                         </div>
