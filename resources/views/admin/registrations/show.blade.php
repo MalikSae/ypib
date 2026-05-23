@@ -229,9 +229,32 @@
         <div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;padding:24px;">
             <h3 style="font-size:16px;font-weight:700;color:#0A1317;margin:0 0 6px 0;">Konfirmasi Pembayaran</h3>
             <p style="font-size:13px;color:#5D6C7B;margin:0 0 16px 0;">Konfirmasi pembayaran dan generate nomor pendaftaran.</p>
+
+            @if ($errors->any())
+                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                    <ul style="margin:0;padding-left:20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST"
-                  action="{{ route('admin.registrations.confirm-payment', $registration->id) }}">
+                  action="{{ route('admin.registrations.confirm-payment', $registration->id) }}" enctype="multipart/form-data">
                 @csrf
+                
+                @if(!$registration->payment_proof)
+                    <div style="margin-bottom: 12px;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:#5D6C7B;margin-bottom:4px;">Upload Bukti (Opsional jika ada catatan)</label>
+                        <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf" style="width:100%;font-size:13px;color:#5D6C7B;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:#5D6C7B;margin-bottom:4px;">Catatan (Wajib jika tidak upload bukti)</label>
+                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Bayar tunai di kampus..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'">{{ old('note') }}</textarea>
+                    </div>
+                @endif
+
                 <button type="submit"
                         onclick="return confirm('Konfirmasi pembayaran dan generate nomor pendaftaran?')"
                         style="width:100%;height:44px;border-radius:9999px;background:#082e8f;color:#FFFFFF;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
@@ -266,13 +289,35 @@
         @endif
 
         {{-- Card Aksi: Konfirmasi Daftar Ulang --}}
-        @if($registration->status === 'menunggu_konfirmasi_daftar_ulang')
+        @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang']))
         <div style="background:#FFFFFF;border-radius:16px;border:1px solid #DEE3E9;padding:24px;">
             <h3 style="font-size:16px;font-weight:700;color:#0A1317;margin:0 0 6px 0;">Konfirmasi Daftar Ulang</h3>
             <p style="font-size:13px;color:#5D6C7B;margin:0 0 16px 0;">Konfirmasi pembayaran daftar ulang pendaftar.</p>
+
+            @if ($errors->has('bukti_daftar_ulang') || $errors->has('note'))
+                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                    <ul style="margin:0;padding-left:20px;">
+                        @if($errors->has('bukti_daftar_ulang')) <li>{{ $errors->first('bukti_daftar_ulang') }}</li> @endif
+                        @if($errors->has('note')) <li>{{ $errors->first('note') }}</li> @endif
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST"
-                  action="{{ route('admin.registrations.confirm-re-registration', $registration->id) }}">
+                  action="{{ route('admin.registrations.confirm-re-registration', $registration->id) }}" enctype="multipart/form-data">
                 @csrf
+
+                @if(!$registration->re_registration_payment_proof)
+                    <div style="margin-bottom: 12px;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:#5D6C7B;margin-bottom:4px;">Upload Bukti Daftar Ulang (Opsional jika ada catatan)</label>
+                        <input type="file" name="bukti_daftar_ulang" accept=".jpg,.jpeg,.png,.pdf" style="width:100%;font-size:13px;color:#5D6C7B;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:#5D6C7B;margin-bottom:4px;">Catatan (Wajib jika tidak upload bukti)</label>
+                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border:1px solid #CED0D4;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Bayar tunai untuk daftar ulang..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'">{{ old('note') }}</textarea>
+                    </div>
+                @endif
+
                 <button type="submit"
                         onclick="return confirm('Konfirmasi pembayaran daftar ulang?')"
                         style="width:100%;height:44px;border-radius:9999px;background:#082e8f;color:#FFFFFF;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"

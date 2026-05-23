@@ -49,9 +49,26 @@ class RegistrationController extends Controller
         return view('admin.registrations.show', compact('registration'));
     }
 
-    public function confirmPayment(int $id)
+    public function confirmPayment(Request $request, int $id)
     {
         $registration = Registration::with('period')->findOrFail($id);
+
+        if (!$registration->payment_proof) {
+            $request->validate([
+                'bukti_bayar' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
+                'note'        => 'required_without:bukti_bayar|string|max:1000',
+            ], [
+                'bukti_bayar.required_without' => 'Bukti bayar wajib diupload jika catatan kosong.',
+                'note.required_without'        => 'Catatan wajib diisi jika bukti bayar tidak diupload.',
+                'bukti_bayar.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
+                'bukti_bayar.max'              => 'Ukuran file maksimal 2MB.',
+            ]);
+
+            if ($request->hasFile('bukti_bayar')) {
+                $path = $request->file('bukti_bayar')->store('bukti-bayar', 'public');
+                $registration->payment_proof = $path;
+            }
+        }
 
         // Generate nomor pendaftaran unik jika belum ada
         if (!$registration->registration_number) {
@@ -66,12 +83,17 @@ class RegistrationController extends Controller
         $registration->status = 'terdaftar';
         $registration->save();
 
+        $actionNote = 'Pembayaran dikonfirmasi oleh ' . Auth::user()->name . '. Nomor pendaftaran: ' . $registration->registration_number;
+        if ($request->filled('note')) {
+            $actionNote .= ' | Catatan: ' . $request->note;
+        }
+
         // Audit log
         PaymentLog::create([
             'registration_id' => $registration->id,
             'acted_by'        => Auth::id(),
             'action'          => 'payment_confirmed',
-            'note'            => 'Pembayaran dikonfirmasi oleh ' . Auth::user()->name . '. Nomor pendaftaran: ' . $registration->registration_number,
+            'note'            => $actionNote,
         ]);
 
         // Referral reward
@@ -166,22 +188,44 @@ class RegistrationController extends Controller
         return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi ' . ($labels[$request->status] ?? $request->status) . '.');
     }
 
-    public function confirmReRegistration(int $id)
+    public function confirmReRegistration(Request $request, int $id)
     {
         $registration = Registration::with('period')->findOrFail($id);
 
-        if ($registration->status !== 'menunggu_konfirmasi_daftar_ulang') {
-            return redirect()->back()->with('error', 'Status pendaftar belum mengunggah bukti daftar ulang.');
+        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang'])) {
+            return redirect()->back()->with('error', 'Status pendaftar belum memenuhi syarat untuk daftar ulang.');
+        }
+
+        if (!$registration->re_registration_payment_proof) {
+            $request->validate([
+                'bukti_daftar_ulang' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
+                'note'               => 'required_without:bukti_daftar_ulang|string|max:1000',
+            ], [
+                'bukti_daftar_ulang.required_without' => 'Bukti daftar ulang wajib diupload jika catatan kosong.',
+                'note.required_without'               => 'Catatan wajib diisi jika bukti daftar ulang tidak diupload.',
+                'bukti_daftar_ulang.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
+                'bukti_daftar_ulang.max'              => 'Ukuran file maksimal 2MB.',
+            ]);
+
+            if ($request->hasFile('bukti_daftar_ulang')) {
+                $path = $request->file('bukti_daftar_ulang')->store('bukti-daftar-ulang', 'public');
+                $registration->re_registration_payment_proof = $path;
+            }
         }
 
         $registration->status = 'daftar_ulang_selesai';
         $registration->save();
 
+        $actionNote = 'Pembayaran daftar ulang dikonfirmasi oleh ' . Auth::user()->name;
+        if ($request->filled('note')) {
+            $actionNote .= ' | Catatan: ' . $request->note;
+        }
+
         PaymentLog::create([
             'registration_id' => $registration->id,
             'acted_by'        => Auth::id(),
             'action'          => 're_registration_confirmed',
-            'note'            => 'Pembayaran daftar ulang dikonfirmasi oleh ' . Auth::user()->name,
+            'note'            => $actionNote,
         ]);
 
         // Referral reward untuk Daftar Ulang

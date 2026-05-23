@@ -118,7 +118,17 @@
                     </div>
                     <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;font-size:13px;color:#5D4037;">
                         <span>Bank</span><strong>{{ $registration->period->university_bank_name ?? '-' }}</strong>
-                        <span>No. Rekening</span><strong style="font-family:monospace;">{{ $registration->period->university_bank_account ?? '-' }}</strong>
+                        <span>No. Rekening</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <strong style="font-family:monospace;">{{ $registration->period->university_bank_account ?? '-' }}</strong>
+                            @if(!empty($registration->period->university_bank_account))
+                                <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->period->university_bank_account }}').then(() => alert('Nomor rekening berhasil disalin!'))" style="background:none;border:none;padding:2px;cursor:pointer;color:#795548;display:flex;align-items:center;justify-content:center;transition:color 0.15s;" onmouseover="this.style.color='#082e8f'" onmouseout="this.style.color='#795548'" title="Salin nomor rekening">
+                                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
                         <span>Atas Nama</span><strong>{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
                         <span>Nominal</span><strong style="color:#BF360C;">Rp {{ number_format($registration->period->registration_fee ?? 0, 0, ',', '.') }}</strong>
                     </div>
@@ -246,7 +256,17 @@
                     </div>
                     <div style="display:grid;grid-template-columns:100px 1fr;gap:8px;font-size:13px;color:#5D4037;">
                         <span>Bank</span><strong>{{ $registration->period->university_bank_name ?? '-' }}</strong>
-                        <span>No. Rekening</span><strong style="font-family:monospace;">{{ $registration->period->university_bank_account ?? '-' }}</strong>
+                        <span>No. Rekening</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <strong style="font-family:monospace;">{{ $registration->period->university_bank_account ?? '-' }}</strong>
+                            @if(!empty($registration->period->university_bank_account))
+                                <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->period->university_bank_account }}').then(() => alert('Nomor rekening berhasil disalin!'))" style="background:none;border:none;padding:2px;cursor:pointer;color:#795548;display:flex;align-items:center;justify-content:center;transition:color 0.15s;" onmouseover="this.style.color='#082e8f'" onmouseout="this.style.color='#795548'" title="Salin nomor rekening">
+                                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
                         <span>Atas Nama</span><strong>{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
                         <span>Nominal</span><strong style="color:#BF360C;font-size:16px;">Rp {{ number_format($registration->firstChoiceProgram?->re_registration_fee ?? 25000000, 0, ',', '.') }}</strong>
                     </div>

@@ -73,6 +73,7 @@ Route::prefix('admin')
         // Master Data
         Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
         Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
+        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
         Route::delete('programs/gallery/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'destroyGallery'])->name('programs.gallery.destroy');
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
