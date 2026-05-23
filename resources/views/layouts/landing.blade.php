@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'PMB YPIB Majalengka 2025/2026')</title>
     <meta name="description" content="@yield('meta-description', 'Penerimaan Mahasiswa Baru YPIB Majalengka 2025/2026. Daftarkan dirimu sekarang dan raih masa depan bersama kami.')">

@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin PMB YPIB')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -205,6 +206,68 @@
         nav[aria-label] span.cursor-default { color: #CED0D4 !important; }
 
         /* ═══════════════════════════════════════
+           DESKTOP COLLAPSED STATE (>= 1024px)
+        ═══════════════════════════════════════ */
+        #btn-collapse {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #444950;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        #btn-collapse:hover { background: #F1F4F7; }
+
+        @media (min-width: 1024px) {
+            #btn-collapse { display: flex; }
+            #admin-sidebar.collapsed {
+                width: 68px;
+                padding: 24px 12px;
+                overflow: visible;
+            }
+            #admin-main.collapsed { margin-left: 68px; }
+            #admin-sidebar.collapsed .sidebar-label { opacity: 0; width: 0; pointer-events: none; }
+            #admin-sidebar.collapsed .sidebar-meta  { opacity: 0; pointer-events: none; }
+            #admin-sidebar.collapsed .nav-section-label { display: none; }
+            
+            #admin-sidebar.collapsed .sidebar-brand-full { display: none !important; }
+            #admin-sidebar.collapsed .sidebar-brand-icon { display: block !important; }
+            
+            #admin-sidebar.collapsed .nav-item {
+                justify-content: center;
+                padding: 10px;
+                gap: 0;
+                position: relative;
+            }
+            
+            #admin-sidebar.collapsed .nav-item::after {
+                content: attr(data-label);
+                position: absolute;
+                left: calc(100% + 12px);
+                top: 50%;
+                transform: translateY(-50%);
+                background: #0A1317;
+                color: #FFFFFF;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 6px 12px;
+                border-radius: 8px;
+                white-space: nowrap;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.15s;
+                z-index: 100;
+            }
+            #admin-sidebar.collapsed .nav-item:hover::after { opacity: 1; }
+        }
+
+        /* ═══════════════════════════════════════
            TABLET  768px – 1023px
            Sidebar collapsed to icon-only (68px)
         ═══════════════════════════════════════ */
@@ -220,7 +283,8 @@
             .nav-section-label { display: none; }
 
             /* Logo: hanya tampilkan kotak PMB */
-            .sidebar-brand-text { display: none; }
+            .sidebar-brand-full { display: none !important; }
+            .sidebar-brand-icon { display: block !important; }
 
             /* User info bottom: avatar saja */
             .sidebar-user-name, .sidebar-user-role { display: none; }
@@ -336,8 +400,9 @@
 <aside id="admin-sidebar">
 
     {{-- Logo + Brand --}}
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;">
-        <img src="{{ asset('images/logo-ypib.png') }}" alt="PMB YPIB" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;justify-content:center;">
+        <img src="{{ asset('images/logo-ypib.png') }}" alt="PMB YPIB" class="sidebar-brand-full" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;">
+        <img src="{{ asset('images/favicon.png') }}" alt="PMB YPIB" class="sidebar-brand-icon" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;display:none;">
     </div>
 
     {{-- Divider --}}
@@ -455,6 +520,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
+            {{-- Collapse button (desktop only) --}}
+            <button id="btn-collapse" onclick="toggleDesktopSidebar()" aria-label="Minimize sidebar">
+                <svg style="width:22px;height:22px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
             <h1 class="topbar-page-title" style="font-size:20px;font-weight:700;color:#0A1317;margin:0;">@yield('page-title', 'Dashboard')</h1>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
@@ -489,6 +560,27 @@
 </div>
 
 <script>
+    /* ── Desktop sidebar toggle ── */
+    function toggleDesktopSidebar() {
+        document.getElementById('admin-sidebar').classList.toggle('collapsed');
+        document.getElementById('admin-main').classList.toggle('collapsed');
+        
+        // Save state to localStorage
+        const isCollapsed = document.getElementById('admin-sidebar').classList.contains('collapsed');
+        localStorage.setItem('adminSidebarCollapsed', isCollapsed ? 'true' : 'false');
+    }
+
+    // Load state on mount
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth >= 1024) {
+            const isCollapsed = localStorage.getItem('adminSidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                document.getElementById('admin-sidebar').classList.add('collapsed');
+                document.getElementById('admin-main').classList.add('collapsed');
+            }
+        }
+    });
+
     /* ── Mobile sidebar toggle ── */
     function openSidebar() {
         document.getElementById('admin-sidebar').classList.add('open');
