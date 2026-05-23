@@ -15,6 +15,9 @@ class Referrer extends Model
         'total_clicks',
         'total_conversions',
         'status',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
     ];
 
     public function user()

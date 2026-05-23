@@ -13,6 +13,7 @@ class Reward extends Model
         'referrer_id',
         'registration_id',
         'amount',
+        'reward_type',
         'status',
         'approved_by',
         'approved_at',

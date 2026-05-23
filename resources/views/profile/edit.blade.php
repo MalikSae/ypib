@@ -103,6 +103,6 @@
     </div>
 </div>
 <style>
-    .pub-container input:focus { border: 2px solid #0064E0 !important; }
+    .pub-container input:focus { border: 2px solid #082e8f !important; }
 </style>
 @endsection

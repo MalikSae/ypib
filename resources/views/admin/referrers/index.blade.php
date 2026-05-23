@@ -33,7 +33,7 @@
                         <div style="font-size:12px;color:#8595A4;margin-top:2px;">{{ $referrer->user?->email }}</div>
                     </td>
                     <td style="padding:16px 24px;">
-                        <span style="background:#EFF4FF;color:#0064E0;font-size:13px;font-weight:700;padding:4px 12px;border-radius:9999px;font-family:monospace;">
+                        <span style="background:#e6edfc;color:#082e8f;font-size:13px;font-weight:700;padding:4px 12px;border-radius:9999px;font-family:monospace;">
                             {{ $referrer->code }}
                         </span>
                     </td>
@@ -100,9 +100,9 @@
                     background: #FFFFFF !important;
                 }
                 nav[aria-label] span[aria-current] {
-                    background: #0064E0 !important;
+                    background: #082e8f !important;
                     color: #FFFFFF !important;
-                    border-color: #0064E0 !important;
+                    border-color: #082e8f !important;
                     font-weight: 700 !important;
                 }
                 nav[aria-label] a:hover { background: #F1F4F7 !important; }

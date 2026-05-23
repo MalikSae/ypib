@@ -10,8 +10,8 @@
     {{-- Card 1: Total Pendaftar --}}
     <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;">
-                <svg style="width:24px;height:24px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <div style="width:44px;height:44px;border-radius:12px;background:#e6edfc;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
             </div>
@@ -49,8 +49,8 @@
     {{-- Card 4: Total Referrer --}}
     <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
-            <div style="width:44px;height:44px;border-radius:12px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;">
-                <svg style="width:24px;height:24px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <div style="width:44px;height:44px;border-radius:12px;background:#e6edfc;display:flex;align-items:center;justify-content:center;">
+                <svg style="width:24px;height:24px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                 </svg>
             </div>
@@ -66,7 +66,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <h2 style="font-size:18px;font-weight:700;color:#0A1317;margin:0;">Pendaftar Terbaru</h2>
         <a href="{{ route('admin.registrations.index') }}"
-           style="font-size:14px;font-weight:500;color:#0064E0;text-decoration:none;display:flex;align-items:center;gap:4px;">
+           style="font-size:14px;font-weight:500;color:#082e8f;text-decoration:none;display:flex;align-items:center;gap:4px;">
             Lihat Semua
             <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -93,7 +93,7 @@
                         <td style="padding:16px 24px;font-size:14px;color:#444950;">
                             @if($reg->registration_number)
                                 <a href="{{ route('admin.registrations.show', $reg->id) }}"
-                                   style="font-family:monospace;font-weight:600;color:#0064E0;text-decoration:none;">{{ $reg->registration_number }}</a>
+                                   style="font-family:monospace;font-weight:600;color:#082e8f;text-decoration:none;">{{ $reg->registration_number }}</a>
                             @else
                                 <span style="color:#8595A4;font-size:12px;">—</span>
                             @endif
@@ -102,7 +102,7 @@
                         <td style="padding:16px 24px;font-size:14px;color:#444950;">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
                         <td style="padding:16px 24px;font-size:14px;color:#444950;">
                             @if($reg->referrer)
-                                <span style="background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
+                                <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
                             @else
                                 <span style="color:#CED0D4;">—</span>
                             @endif

@@ -15,8 +15,8 @@
 
     @if(!auth()->check())
         <div style="background:#FFFFFF;border:1px solid #DEE3E9;border-radius:16px;padding:40px 24px;text-align:center;max-width:480px;margin:0 auto;">
-            <div style="width:56px;height:56px;border-radius:16px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                <svg style="width:28px;height:28px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <svg style="width:28px;height:28px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
                 </svg>
             </div>

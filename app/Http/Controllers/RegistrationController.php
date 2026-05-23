@@ -78,4 +78,36 @@ class RegistrationController extends Controller
         return redirect()->route('registration.status')
             ->with('success', 'Bukti transfer berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
     }
+
+    public function uploadReRegistrationProof(Request $request)
+    {
+        $request->validate([
+            're_registration_payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ], [
+            're_registration_payment_proof.required' => 'File bukti bayar daftar ulang wajib diupload.',
+            're_registration_payment_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
+            're_registration_payment_proof.max'      => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        if ($registration->status !== 'diterima' && $registration->status !== 'menunggu_konfirmasi_daftar_ulang') {
+            return redirect()->route('registration.status')->with('error', 'Status pendaftaran belum memenuhi syarat untuk daftar ulang.');
+        }
+
+        // Hapus file lama jika ada
+        if ($registration->re_registration_payment_proof && Storage::disk('public')->exists($registration->re_registration_payment_proof)) {
+            Storage::disk('public')->delete($registration->re_registration_payment_proof);
+        }
+
+        $path = $request->file('re_registration_payment_proof')->store('bukti-bayar-daftar-ulang', 'public');
+
+        $registration->update([
+            're_registration_payment_proof' => $path,
+            'status'                        => 'menunggu_konfirmasi_daftar_ulang',
+        ]);
+
+        return redirect()->route('registration.status')
+            ->with('success', 'Bukti transfer daftar ulang berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
+    }
 }

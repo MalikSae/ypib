@@ -43,7 +43,7 @@ class RegistrationController extends Controller
         $registration = Registration::with([
             'user', 'referrer.user',
             'firstChoiceProgram', 'secondChoiceProgram',
-            'period', 'paymentLogs.actor', 'reward'
+            'period', 'paymentLogs.actor', 'rewards'
         ])->findOrFail($id);
 
         return view('admin.registrations.show', compact('registration'));
@@ -86,12 +86,13 @@ class RegistrationController extends Controller
 
             Referrer::where('id', $registration->referrer_id)->increment('total_conversions');
 
-            if (!$registration->reward) {
+            if (!$registration->rewards()->where('reward_type', 'registration')->exists()) {
                 $amount = $registration->period?->referral_reward_amount ?? 50000;
                 Reward::create([
                     'referrer_id'     => $registration->referrer_id,
                     'registration_id' => $registration->id,
                     'amount'          => $amount,
+                    'reward_type'     => 'registration',
                     'status'          => 'approved',
                     'approved_by'     => Auth::id(),
                     'approved_at'     => now(),
@@ -163,6 +164,49 @@ class RegistrationController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi ' . ($labels[$request->status] ?? $request->status) . '.');
+    }
+
+    public function confirmReRegistration(int $id)
+    {
+        $registration = Registration::with('period')->findOrFail($id);
+
+        if ($registration->status !== 'menunggu_konfirmasi_daftar_ulang') {
+            return redirect()->back()->with('error', 'Status pendaftar belum mengunggah bukti daftar ulang.');
+        }
+
+        $registration->status = 'daftar_ulang_selesai';
+        $registration->save();
+
+        PaymentLog::create([
+            'registration_id' => $registration->id,
+            'acted_by'        => Auth::id(),
+            'action'          => 're_registration_confirmed',
+            'note'            => 'Pembayaran daftar ulang dikonfirmasi oleh ' . Auth::user()->name,
+        ]);
+
+        // Referral reward untuk Daftar Ulang
+        if ($registration->referrer_id) {
+            $existingReward = Reward::where('registration_id', $registration->id)
+                ->where('reward_type', 're_registration')
+                ->first();
+
+            if (!$existingReward) {
+                $amount = $registration->period?->re_registration_reward_amount ?? 0;
+                if ($amount > 0) {
+                    Reward::create([
+                        'referrer_id'     => $registration->referrer_id,
+                        'registration_id' => $registration->id,
+                        'amount'          => $amount,
+                        'reward_type'     => 're_registration',
+                        'status'          => 'approved',
+                        'approved_by'     => Auth::id(),
+                        'approved_at'     => now(),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pembayaran daftar ulang berhasil dikonfirmasi.');
     }
 
     public function addNote(Request $request, int $id)

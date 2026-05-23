@@ -6,7 +6,7 @@
 <style>
     /* Hero */
     .hero-section {
-        background: linear-gradient(135deg, rgba(0, 100, 224, 0.85) 0%, rgba(4, 87, 203, 0.85) 60%, rgba(10, 19, 23, 0.9) 100%), url('{{ asset('images/hero.png') }}');
+        background: linear-gradient(135deg, rgba(8, 46, 143, 0.85) 0%, rgba(5, 32, 102, 0.85) 60%, rgba(10, 19, 23, 0.9) 100%), url('{{ asset('images/hero.png') }}');
         background-size: cover;
         background-position: center;
         min-height: 88vh;
@@ -35,7 +35,7 @@
         cursor: pointer; transition: all 0.2s ease;
     }
     .prog-tab-btn.active {
-        background: #0064E0; border-color: #0064E0; color: #FFFFFF;
+        background: #082e8f; border-color: #082e8f; color: #FFFFFF;
     }
     .prog-tab-btn:hover:not(.active) {
         background: #F8FAFC; color: #0A1317; border-color: #0A1317;
@@ -77,15 +77,15 @@
         justify-content:center;
         width:40px;height:40px;
         border-radius:9999px;
-        background:#EFF4FF;
-        color:#0064E0;
+        background:#e6edfc;
+        color:#082e8f;
         font-size:14px;
         font-weight:700;
         margin:0 auto 16px;
     }
     /* CTA section */
     .cta-card {
-        background:linear-gradient(135deg,#0064E0,#0457CB);
+        background:linear-gradient(135deg,#082e8f,#052066);
         border-radius:32px;
         padding:64px 48px;
         text-align:center;
@@ -166,7 +166,7 @@
 <section style="padding:80px 0;background:#FFFFFF;">
     <div class="pub-container">
         <div style="max-width:800px;margin:0 auto;text-align:center;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
                 Profil Universitas
             </div>
             <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#0A1317;margin:0 0 24px 0;">Tentang YPIB Majalengka</h2>
@@ -181,7 +181,7 @@
 <section id="prodi" style="padding:80px 0;background:#F8FAFC;">
     <div class="pub-container">
         <div style="text-align:center;margin-bottom:48px;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 3.741-1.342m-7.48 0a49.994 49.994 0 0 1 3.74 1.342" /></svg>
                 Akademik
             </div>
@@ -199,18 +199,18 @@
 
             <div class="prog-grid">
                 @foreach($programs as $program)
-                <div x-show="activeTab === 'Semua' || activeTab === '{{ $program->faculty }}'" class="prog-card" style="display:none;" x-transition.opacity.duration.300ms>
-                    <h3 style="font-size:20px;font-weight:700;color:#0A1317;margin:0 0 4px 0;">{{ $program->name }}</h3>
-                    <p style="font-size:13px;color:#8595A4;margin:0 0 16px 0;">{{ $program->faculty }}</p>
+                <div x-show="activeTab === 'Semua' || activeTab === '{{ $program->faculty->name }}'" class="prog-card" style="display:none;" x-transition.opacity.duration.300ms>
+                    <h3 style="font-size:18px;font-weight:700;margin:0 0 4px 0;color:#0A1317;">{{ $program->name }}</h3>
+                    <p style="font-size:13px;color:#8595A4;margin:0 0 16px 0;">{{ $program->faculty->name }}</p>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
                         <span style="background:#E8F5E9;color:#2E7D32;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Akreditasi {{ $program->accreditation }}</span>
-                        <span style="background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Kuota {{ $program->quota }}</span>
+                        <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;">Kuota {{ $program->quota }}</span>
                     </div>
                     <div style="margin-top:auto;padding-top:16px;border-top:1px solid #F1F4F7;">
                         <a href="{{ route('prodi.show', $program->slug) }}"
-                           style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#0064E0;text-decoration:none;transition:color 0.15s;"
-                           onmouseover="this.style.color='#0457CB';"
-                           onmouseout="this.style.color='#0064E0';">
+                           style="display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#082e8f;text-decoration:none;transition:color 0.15s;"
+                           onmouseover="this.style.color='#052066';"
+                           onmouseout="this.style.color='#082e8f';">
                             Lihat Detail <span style="font-size:16px;">&rarr;</span>
                         </a>
                     </div>
@@ -225,7 +225,7 @@
 <section id="cara-daftar" style="padding:80px 0;background:#F1F4F7;">
     <div class="pub-container">
         <div style="text-align:center;margin-bottom:48px;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:12px;font-weight:700;padding:5px 14px;border-radius:9999px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.06em;">
                 <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
                 Panduan
             </div>
@@ -246,8 +246,8 @@
             @foreach($steps as $step)
             <div class="step-card">
                 <div class="step-num">{{ $step['num'] }}</div>
-                <div style="width:44px;height:44px;border-radius:12px;background:#EFF4FF;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-                    <svg style="width:22px;height:22px;color:#0064E0;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">{!! $step['svg'] !!}</svg>
+                <div style="width:44px;height:44px;border-radius:12px;background:#e6edfc;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                    <svg style="width:22px;height:22px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">{!! $step['svg'] !!}</svg>
                 </div>
                 <h3 style="font-size:16px;font-weight:700;color:#0A1317;margin:0 0 8px 0;">{{ $step['title'] }}</h3>
                 <p style="font-size:13px;color:#5D6C7B;margin:0;line-height:1.5;">{{ $step['desc'] }}</p>
@@ -268,11 +268,12 @@
                     {{ $period->name }}
                 </div>
                 <h2 style="font-size:clamp(1.75rem,4vw,2.5rem);font-weight:700;color:#FFFFFF;margin:0 0 8px 0;">Biaya Pendaftaran</h2>
-                <div style="font-size:clamp(2.5rem,6vw,4rem);font-weight:700;color:#FFFFFF;margin:20px 0;">
-                    Rp {{ number_format($period->registration_fee, 0, ',', '.') }}
+                <div style="font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;color:#FFFFFF;margin:20px 0;">
+                    Bervariasi Tiap Program Studi
                 </div>
                 <p style="font-size:15px;color:rgba(255,255,255,0.7);margin:0 0 32px 0;">
-                    Masa pendaftaran: {{ \Carbon\Carbon::parse($period->open_date)->isoFormat('D MMM Y') }} s/d {{ \Carbon\Carbon::parse($period->close_date)->isoFormat('D MMM Y') }}
+                    Masa pendaftaran: {{ \Carbon\Carbon::parse($period->open_date)->isoFormat('D MMM Y') }} s/d {{ \Carbon\Carbon::parse($period->close_date)->isoFormat('D MMM Y') }}<br>
+                    Silakan lihat rincian biaya pendaftaran pada masing-masing Program Studi.
                 </p>
                 <a href="#prodi" class="btn-white">
                     <svg style="width:18px;height:18px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

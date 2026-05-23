@@ -16,7 +16,12 @@ class PmbPeriod extends Model
         'close_date',
         'registration_fee',
         'referral_reward_amount',
+        're_registration_reward_amount',
         'is_active',
+        'university_bank_name',
+        'university_bank_account',
+        'university_bank_account_name',
+        'admin_whatsapp',
     ];
 
     protected $casts = [

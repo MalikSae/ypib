@@ -22,7 +22,7 @@
         <input type="text" name="search" value="{{ request('search') }}"
                placeholder="Cari nama / nomor pendaftaran..."
                style="height:44px;border-radius:8px;border:1px solid #CED0D4;padding:0 16px;font-size:14px;color:#1C1E21;width:320px;outline:none;font-family:inherit;transition:border 0.15s;"
-               onfocus="this.style.border='2px solid #0064E0'" onblur="this.style.border='1px solid #CED0D4'">
+               onfocus="this.style.border='2px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'">
 
         {{-- Status filter --}}
         <select name="status"
@@ -42,8 +42,8 @@
 
         {{-- Tombol Filter --}}
         <button type="submit"
-                style="height:44px;border-radius:9999px;padding:0 24px;background:#0064E0;color:#FFFFFF;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                onmouseover="this.style.background='#0457CB'" onmouseout="this.style.background='#0064E0'">
+                style="height:44px;border-radius:9999px;padding:0 24px;background:#082e8f;color:#FFFFFF;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
+                onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'">
             Filter
         </button>
 
@@ -93,7 +93,7 @@
                     <td style="padding:16px 24px;font-size:13px;color:#444950;max-width:160px;">{{ $reg->firstChoiceProgram?->name ?? '—' }}</td>
                     <td style="padding:16px 24px;">
                         @if($reg->referrer)
-                            <span style="background:#EFF4FF;color:#0064E0;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
+                            <span style="background:#e6edfc;color:#082e8f;font-size:12px;font-weight:600;padding:3px 10px;border-radius:9999px;">{{ $reg->referrer->code }}</span>
                         @else
                             <span style="color:#CED0D4;font-size:14px;">—</span>
                         @endif
@@ -104,8 +104,8 @@
                     <td style="padding:16px 24px;font-size:14px;color:#8595A4;white-space:nowrap;">{{ $reg->created_at->format('d/m/Y') }}</td>
                     <td style="padding:16px 24px;">
                         <a href="{{ route('admin.registrations.show', $reg->id) }}"
-                           style="background:#F1F4F7;color:#0064E0;font-size:13px;font-weight:700;border-radius:9999px;padding:6px 16px;text-decoration:none;display:inline-block;transition:background 0.12s;"
-                           onmouseover="this.style.background='#EFF4FF'" onmouseout="this.style.background='#F1F4F7'">
+                           style="background:#F1F4F7;color:#082e8f;font-size:13px;font-weight:700;border-radius:9999px;padding:6px 16px;text-decoration:none;display:inline-block;transition:background 0.12s;"
+                           onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'">
                             Detail
                         </a>
                     </td>
@@ -144,9 +144,9 @@
                     transition: background 0.12s !important;
                 }
                 nav[aria-label] span[aria-current] {
-                    background: #0064E0 !important;
+                    background: #082e8f !important;
                     color: #FFFFFF !important;
-                    border-color: #0064E0 !important;
+                    border-color: #082e8f !important;
                     font-weight: 700 !important;
                 }
                 nav[aria-label] a:hover {

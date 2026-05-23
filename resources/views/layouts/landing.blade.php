@@ -74,7 +74,7 @@
         .numInputWrapper span {
             border-color: #DEE3E9 !important;
         }
-        .numInputWrapper span:hover { background: #EFF4FF !important; }
+        .numInputWrapper span:hover { background: #e6edfc !important; }
         .numInputWrapper span svg { fill: #5D6C7B !important; }
 
         /* Nav arrows */
@@ -84,10 +84,10 @@
             border-radius: 8px !important;
         }
         .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg {
-            fill: #0064E0 !important;
+            fill: #082e8f !important;
         }
         .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
-            background: #EFF4FF !important;
+            background: #e6edfc !important;
         }
 
         /* Weekdays header */
@@ -116,18 +116,18 @@
             max-width: 36px !important;
         }
         .flatpickr-day:hover {
-            background: #EFF4FF !important;
-            color: #0064E0 !important;
+            background: #e6edfc !important;
+            color: #082e8f !important;
         }
         .flatpickr-day.selected,
         .flatpickr-day.selected:hover {
-            background: #0064E0 !important;
+            background: #082e8f !important;
             color: #fff !important;
             border-radius: 8px !important;
         }
         .flatpickr-day.today {
-            border: 2px solid #0064E0 !important;
-            color: #0064E0 !important;
+            border: 2px solid #082e8f !important;
+            color: #082e8f !important;
             font-weight: 700 !important;
         }
         .flatpickr-day.today.selected { color: #fff !important; }
@@ -170,7 +170,7 @@
         .pub-nav-logo-box {
             width: 36px;
             height: 36px;
-            background: #0064E0;
+            background: #082e8f;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -222,7 +222,7 @@
         .nav-user-trigger:hover { background: #F1F4F7; }
         .nav-user-avatar {
             width: 36px; height: 36px; border-radius: 9999px;
-            background: #0064E0; display: flex; align-items: center;
+            background: #082e8f; display: flex; align-items: center;
             justify-content: center; flex-shrink: 0;
         }
         .nav-user-name {
@@ -285,11 +285,11 @@
         }
         #pub-mobile-menu a:hover { background: #F1F4F7; }
         #pub-mobile-menu .mobile-cta {
-            background: #0064E0; color: #FFFFFF;
+            background: #082e8f; color: #FFFFFF;
             font-weight: 700; text-align: center;
             border: none; cursor: pointer; margin-top: 4px;
         }
-        #pub-mobile-menu .mobile-cta:hover { background: #0457CB; }
+        #pub-mobile-menu .mobile-cta:hover { background: #052066; }
         #pub-mobile-menu .mobile-danger { color: #E41E3F; background: transparent; border: none; cursor: pointer; }
         #pub-mobile-menu .mobile-danger:hover { background: #FFEBEE; }
 
@@ -363,12 +363,12 @@
         /* Buttons */
         .btn-primary {
             display: inline-flex; align-items: center; gap: 8px;
-            background: #0064E0; color: #FFFFFF;
+            background: #082e8f; color: #FFFFFF;
             font-size: 15px; font-weight: 700; border-radius: 9999px;
             padding: 14px 28px; text-decoration: none; border: none;
             cursor: pointer; transition: background 0.15s;
         }
-        .btn-primary:hover { background: #0457CB; }
+        .btn-primary:hover { background: #052066; }
         .btn-secondary {
             display: inline-flex; align-items: center; gap: 8px;
             background: transparent; color: #0A1317;
@@ -380,7 +380,7 @@
         .btn-secondary:hover { background: rgba(10,19,23,0.06); }
         .btn-white {
             display: inline-flex; align-items: center; gap: 8px;
-            background: #FFFFFF; color: #0064E0;
+            background: #FFFFFF; color: #082e8f;
             font-size: 15px; font-weight: 700; border-radius: 9999px;
             padding: 14px 28px; text-decoration: none; border: none;
             cursor: pointer; transition: background 0.15s;
@@ -497,12 +497,12 @@
                                     Dashboard Afiliasi
                                 </a>
                             @else
-                                <a href="{{ route('referrer.create') }}" class="nav-dropdown-item">
+                                <a href="{{ route('referrer.index') }}" class="nav-dropdown-item">
                                     <svg style="width:16px;height:16px;color:#5D6C7B;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                                     </svg>
                                     Dashboard Afiliasi
-                                    <span style="background:#EFF4FF;color:#0064E0;font-size:11px;font-weight:700;border-radius:9999px;padding:2px 8px;flex-shrink:0;margin-left:auto;">Daftar</span>
+                                    <span style="background:#e6edfc;color:#082e8f;font-size:11px;font-weight:700;border-radius:9999px;padding:2px 8px;flex-shrink:0;margin-left:auto;">Daftar</span>
                                 </a>
                             @endif
                         @endif
@@ -548,7 +548,7 @@
     <div id="pub-mobile-menu">
         @auth
             <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F1F4F7;border-radius:12px;margin-bottom:8px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:#0064E0;display:flex;align-items:center;justify-content:center;color:#fff;">
+                <div style="width:36px;height:36px;border-radius:50%;background:#082e8f;display:flex;align-items:center;justify-content:center;color:#fff;">
                     <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                     </svg>
@@ -575,7 +575,7 @@
                 @if(auth()->user()->is_referrer)
                     <a href="{{ route('referrer.dashboard') }}">Dashboard Afiliasi</a>
                 @else
-                    <a href="{{ route('referrer.create') }}">Daftar Afiliasi</a>
+                    <a href="{{ route('referrer.index') }}">Daftar Afiliasi</a>
                 @endif
             @endif
             <div style="height:1px;background:#DEE3E9;margin:8px 0;"></div>

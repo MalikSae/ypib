@@ -84,7 +84,7 @@ class RegistrationForm extends Component
     public function mount(): void
     {
         $this->period   = PmbPeriod::active()->first();
-        $this->programs = Program::active()->get();
+        $this->programs = Program::with('faculty')->active()->get();
 
         // Pre-fill phone from logged-in user
         if ($user = Auth::user()) {

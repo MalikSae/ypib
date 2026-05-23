@@ -77,7 +77,7 @@
 - **Auth**       : Guest only
 - **View**       : `resources/views/auth/login.blade.php`
 - **Controller** : `App\Http\Controllers\Auth\AuthenticatedSessionController@create` / `@store`
-- **Deskripsi**  : Halaman login dengan email dan password. Setelah berhasil login, sistem akan redirect berdasarkan role: admin/operator → `/admin/dashboard`, is_referrer → `/referrer/dashboard`, mahasiswa → `/pendaftaran/status`.
+- **Deskripsi**  : Halaman login dengan email dan password. Setelah berhasil login, sistem akan redirect berdasarkan role: admin/operator → `/admin/dashboard`, is_referrer → `/afiliasi/dashboard`, mahasiswa → `/pendaftaran/status`.
 
 ---
 
@@ -125,7 +125,7 @@
 - **Auth**       : Auth + Verified
 - **View**       : *(tidak ada, langsung redirect)*
 - **Controller** : *(closure di `web.php`)*
-- **Deskripsi**  : Halaman redirect cerdas berdasarkan role user. Admin/Operator → `/admin/dashboard`, is_referrer = true → `/referrer/dashboard`, mahasiswa biasa → `/pendaftaran/status`. Route ini dipertahankan untuk kompatibilitas dengan Laravel Breeze.
+- **Deskripsi**  : Halaman redirect cerdas berdasarkan role user. Admin/Operator → `/admin/dashboard`, is_referrer = true → `/afiliasi/dashboard`, mahasiswa biasa → `/pendaftaran/status`. Route ini dipertahankan untuk kompatibilitas dengan Laravel Breeze.
 
 ---
 
@@ -221,25 +221,25 @@
 
 ---
 
-### Daftar Jadi Referrer
+### Pendaftaran Afiliasi Publik
 
-- **URL**        : `/referrer/daftar`
+- **URL**        : `/afiliasi`
 - **Method**     : GET / POST
-- **Auth**       : Auth (semua role bisa mendaftar)
-- **View**       : `resources/views/referrer/create.blade.php`
-- **Controller** : `App\Http\Controllers\ReferrerController@create` / `@store`
-- **Deskripsi**  : Halaman pendaftaran sebagai referrer. GET menampilkan form pendaftaran (jika sudah punya referrer record, redirect ke dashboard). POST memproses pendaftaran: generate kode unik `REF-XXXXXX`, buat record di tabel `referrers`, set `users.is_referrer = true`, lalu redirect ke dashboard referrer.
+- **Auth**       : Public (Guest untuk pendaftaran baru, Auth untuk aktivasi)
+- **View**       : `resources/views/referrer/index.blade.php`
+- **Controller** : `App\Http\Controllers\ReferrerController@index` / `@register` / `@store`
+- **Deskripsi**  : Halaman publik pendaftaran afiliasi. Menampilkan benefit dan form registrasi. POST ke `/afiliasi` membuat akun baru sekaligus mengaktifkan afiliasi. Bagi yang sudah login, tersedia tombol aktivasi via POST ke `/afiliasi/aktifkan`. Setelah sukses, akan diarahkan ke dashboard afiliasi.
 
 ---
 
 ### Dashboard Referrer
 
-- **URL**        : `/referrer/dashboard`
+- **URL**        : `/afiliasi/dashboard`
 - **Method**     : GET
 - **Auth**       : Auth + is_referrer = true
 - **View**       : `resources/views/referrer/dashboard.blade.php`
 - **Controller** : `App\Http\Controllers\ReferrerController@dashboard`
-- **Deskripsi**  : Dashboard utama referrer. Menampilkan: kode referral unik, statistik (total klik, total konversi, total reward diterima, reward pending), tabel daftar pendaftar yang masuk melalui link referral, dan status reward masing-masing. Jika user belum jadi referrer, redirect ke `/referrer/daftar`.
+- **Deskripsi**  : Dashboard utama referrer. Menampilkan: kode referral unik, statistik (total klik, total konversi, total reward diterima, reward pending), tabel daftar pendaftar yang masuk melalui link referral, dan status reward masing-masing. Jika user belum jadi referrer, redirect ke `/afiliasi`.
 
 ---
 
@@ -328,7 +328,7 @@ Semua route admin menggunakan prefix `/admin` dengan middleware `auth` + `role:a
 
 ### Manajemen Referrer
 
-- **URL**        : `/admin/referrer`
+- **URL**        : `/admin/afiliasi`
 - **Method**     : GET
 - **Auth**       : Admin / Operator
 - **View**       : `resources/views/admin/referrers/index.blade.php`
@@ -339,7 +339,7 @@ Semua route admin menggunakan prefix `/admin` dengan middleware `auth` + `role:a
 
 ### Toggle Status Referrer
 
-- **URL**        : `/admin/referrer/{id}/toggle`
+- **URL**        : `/admin/afiliasi/{id}/toggle`
 - **Method**     : POST
 - **Auth**       : Admin / Operator
 - **View**       : *(redirect ke daftar referrer)*

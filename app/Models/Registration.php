@@ -27,6 +27,7 @@ class Registration extends Model
         'graduation_year',
         'school_grade',
         'payment_proof',
+        're_registration_payment_proof',
         'status',
         'internal_notes',
     ];
@@ -65,8 +66,8 @@ class Registration extends Model
         return $this->hasMany(PaymentLog::class);
     }
 
-    public function reward()
+    public function rewards()
     {
-        return $this->hasOne(Reward::class);
+        return $this->hasMany(Reward::class);
     }
 }

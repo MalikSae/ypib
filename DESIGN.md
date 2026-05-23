@@ -1,17 +1,17 @@
 ---
 version: alpha
 name: Meta-design-analysis
-description: Meta's design system spans hardware commerce (Quest VR, Ray-Ban Meta AI glasses) and brand surfaces with a confident product-merchandising voice. The system pairs a stark white canvas with full-bleed photographic product cards, a confident Optimistic VF wordmark/headline face, dual-CTA hero patterns (black primary + outlined secondary), and a saturated cobalt blue (#0064E0) for in-product purchase actions. Pill-shaped 100px-radius buttons, generous 24-32px card rounding, and tight three-tier text hierarchy carry across homepage, product detail (PDP), buy-now configurator, and accessory subpages.
+description: Meta's design system spans hardware commerce (Quest VR, Ray-Ban Meta AI glasses) and brand surfaces with a confident product-merchandising voice. The system pairs a stark white canvas with full-bleed photographic product cards, a confident Optimistic VF wordmark/headline face, dual-CTA hero patterns (black primary + outlined secondary), and a deep navy blue (#082e8f) for in-product purchase actions. Pill-shaped 100px-radius buttons, generous 24-32px card rounding, and tight three-tier text hierarchy carry across homepage, product detail (PDP), buy-now configurator, and accessory subpages.
 
 colors:
-  primary: "#0064e0"
-  primary-deep: "#0457cb"
-  primary-soft: "#0091ff"
+  primary: "#082e8f"
+  primary-deep: "#052066"
+  primary-soft: "#4b6ecc"
   on-primary: "#ffffff"
   ink-button: "#000000"
   on-ink-button: "#ffffff"
-  fb-blue: "#1876f2"
-  meta-link: "#385898"
+  focus-blue: "#1a43a8"
+  link-blue: "#20449e"
   oculus-purple: "#a121ce"
   success: "#31a24c"
   success-bg: "#24e400"
@@ -239,7 +239,7 @@ components:
   text-input-focused:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    border: "2px solid {colors.fb-blue}"
+    border: "2px solid {colors.focus-blue}"
   text-input-error:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
@@ -259,7 +259,7 @@ components:
   radio-option-selected:
     backgroundColor: "{colors.canvas}"
     rounded: "{rounded.lg}"
-    border: "2px solid #0143b5"
+    border: "2px solid {colors.primary-deep}"
   color-swatch-circle:
     rounded: "{rounded.circle}"
     size: 32px
@@ -350,13 +350,13 @@ components:
 
 ## Overview
 
-Meta's commerce surfaces (homepage, Quest configurator, Ray-Ban product detail, prescription page) read as a confident hardware merchandiser. The brand voice is photography-first: large, full-bleed product imagery dominates above-the-fold real estate, with white space and tight typographic hierarchy carrying the rest. The system has a recognizable dual-CTA pattern — a black pill-shaped primary on marketing surfaces shifting to a saturated cobalt blue ({colors.primary}) inside the buy-now flows, paired with an outlined ghost button for secondary navigation.
+Meta's commerce surfaces (homepage, Quest configurator, Ray-Ban product detail, prescription page) read as a confident hardware merchandiser. The brand voice is photography-first: large, full-bleed product imagery dominates above-the-fold real estate, with white space and tight typographic hierarchy carrying the rest. The system has a recognizable dual-CTA pattern — a black pill-shaped primary on marketing surfaces shifting to a deep navy blue ({colors.primary}) inside the buy-now flows, paired with an outlined ghost button for secondary navigation.
 
 Optimistic VF — Meta's variable display face — anchors the entire system, ranging from a 64px hero display down to a 12px caption. The face's `ss01` and `ss02` stylistic sets are switched on across every heading role, contributing to the brand's slightly humanist, friendly geometric character. Below 768px the system collapses cleanly: hero stacks, pill nav becomes a hamburger, three-up feature grids flatten to a single column, and product configurators drop their right-rail summary into a sticky bottom bar.
 
 **Key Characteristics:**
 - Stark white canvas ({colors.canvas}) carrying full-bleed product photography with `{rounded.xxxl}` (32px) corner softening on showcase tiles
-- Two-tier primary button system: marketing CTAs use {colors.ink-button} pills; commerce CTAs use {colors.primary} cobalt pills inside buy-now panels
+- Two-tier primary button system: marketing CTAs use {colors.ink-button} pills; commerce CTAs use {colors.primary} navy pills inside buy-now panels
 - Optimistic VF as the universal display + body face with consistent `ss01, ss02` OpenType features
 - Pill-shaped buttons ({rounded.full}) and `{rounded.xxxl}`/`{rounded.feature}` cards as the dominant geometric signature
 - Saturated promotional banners (yellow {colors.warning}, dark {colors.ink-deep}) used sparingly above the nav for time-bound offers
@@ -367,11 +367,11 @@ Optimistic VF — Meta's variable display face — anchors the entire system, ra
 > Source pages: meta.com/ (homepage), /ai-glasses/ray-ban-meta-skyler-gen-2/ (PDP), /quest/quest-3s/buy-now/ (configurator), /ai-glasses/prescription/ (lens upsell). Token coverage was identical across all four pages — the design system is genuinely unified.
 
 ### Brand & Accent
-- **Cobalt Primary** ({colors.primary}): The buy-now CTA color. Used on every "Add to cart", "Configure", "Pre-order" button inside the commerce flow and the right-rail purchase panel.
-- **Deep Cobalt** ({colors.primary-deep}): Pressed-state and dark-surface variant of the cobalt primary; also the active link color.
-- **Soft Cobalt** ({colors.primary-soft}): Translucent background tint for informational callouts (`{colors.primary-soft}` at 15% alpha).
-- **Facebook Blue** ({colors.fb-blue}): Selected radio/checkbox state and inline form-control activation color.
-- **Meta Link Blue** ({colors.meta-link}): Reserved for legacy navigation and footer link affordances.
+- **Navy Primary** ({colors.primary}): The buy-now CTA color. Used on every "Add to cart", "Configure", "Pre-order" button inside the commerce flow and the right-rail purchase panel.
+- **Deep Navy** ({colors.primary-deep}): Pressed-state and dark-surface variant of the navy primary; also the active link color.
+- **Soft Navy** ({colors.primary-soft}): Translucent background tint for informational callouts (`{colors.primary-soft}` at 15% alpha).
+- **Focus Blue** ({colors.focus-blue}): Selected radio/checkbox state and inline form-control activation color.
+- **Link Blue** ({colors.link-blue}): Reserved for legacy navigation and footer link affordances.
 - **Oculus Purple** ({colors.oculus-purple}): VR product accent — used inside Quest-branded surfaces for category emphasis.
 
 ### Surface
@@ -493,7 +493,7 @@ The system runs predominantly flat. Elevation is reserved for two interaction la
 - Pressed state `button-primary-pressed` flips background to `{colors.charcoal}`.
 - Disabled state `button-primary-disabled` uses `{colors.disabled-text}` background.
 
-**`button-buy-cta`** — Cobalt pill primary CTA for commerce flows ("Add to cart", "Configure", "Continue").
+**`button-buy-cta`** — Navy pill primary CTA for commerce flows ("Add to cart", "Configure", "Continue").
 - Background `{colors.primary}`, text `{colors.on-primary}`, typography `{typography.button-md}`, padding `14px 30px`, rounded `{rounded.full}`.
 - Pressed state `button-buy-cta-pressed` deepens background to `{colors.primary-deep}`.
 - This variant ONLY appears inside the buy-now configurator and PDP purchase rail. Marketing surfaces use `button-primary` instead.
@@ -553,7 +553,7 @@ The system runs predominantly flat. Elevation is reserved for two interaction la
 
 **`radio-option`** + **`radio-option-selected`** — Configurator option cards (storage, color variant, shipping option).
 - Inactive: background `{colors.canvas}`, rounded `{rounded.lg}`, padding `{spacing.lg}`, border `1px solid rgba(10, 19, 23, 0.12)`.
-- Selected: border switches to `2px solid #0143b5` (deep cobalt) — the cobalt theme persists into form-control selection signaling.
+- Selected: border switches to `2px solid {colors.primary-deep}` (deep navy) — the navy theme persists into form-control selection signaling.
 
 **`color-swatch-circle`** — Round color/material picker (Ray-Ban frame finishes, glass colors).
 - 32px diameter, `{rounded.circle}`, `2px solid {colors.canvas}` ring on selection over the swatch's own fill color.
@@ -620,7 +620,7 @@ The system runs predominantly flat. Elevation is reserved for two interaction la
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{colors.primary}` (cobalt) for buy-now CTAs only — its visual weight is meaningful precisely because it doesn't appear on marketing pages.
+- Reserve `{colors.primary}` (navy) for buy-now CTAs only — its visual weight is meaningful precisely because it doesn't appear on marketing pages.
 - Use `{colors.ink-button}` (black) for marketing-surface primary CTAs. Pair with `{colors.button-secondary}` ghost outline for the secondary action.
 - Apply `{rounded.full}` to every button, every category pill, every badge, every chip — buttons are NEVER squared in Meta's system.
 - Apply `{rounded.xxxl}` to photographic product cards and `{rounded.xl}` to icon-feature tiles to maintain the visible card-hierarchy contrast.
@@ -628,7 +628,7 @@ The system runs predominantly flat. Elevation is reserved for two interaction la
 - Use the 300-weight `{typography.heading-md}` for editorial subheads — it creates the brand's signature visual rhythm against the 500-weight displays.
 
 ### Don't
-- Don't use `{colors.primary}` (cobalt) for marketing-surface primary buttons — it conflicts with Meta's brand-history positioning of black-CTA-on-white-canvas marketing.
+- Don't use `{colors.primary}` (navy) for marketing-surface primary buttons — it conflicts with Meta's brand-history positioning of black-CTA-on-white-canvas marketing.
 - Don't introduce additional accent colors beyond cobalt + Oculus purple. The hardware brand is deliberately monochromatic outside its product photography.
 - Don't soften the corners of pill buttons below `{rounded.full}`. The pill is a brand signature.
 - Don't run feature cards without rounding — `{rounded.xxxl}` is the minimum for any photographic surface.
@@ -672,7 +672,7 @@ The system runs predominantly flat. Elevation is reserved for two interaction la
 3. Run `npx @google/design.md lint DESIGN.md` after edits to catch broken refs, contrast issues, orphaned tokens.
 4. Add new variants as separate `components:` entries (`-pressed`, `-disabled`, `-focused`) — do not bury them inside prose.
 5. Default to `{typography.body-md}` for body and `{typography.subtitle-lg}` for emphasis. Headlines step down through `hero-display → display-lg → heading-lg → heading-md → heading-sm`.
-6. Keep `{colors.primary}` (cobalt) scarce. If it appears outside the buy-now flow on a viewport, ask whether the surface really needs to look like a checkout panel.
+6. Keep `{colors.primary}` (navy) scarce. If it appears outside the buy-now flow on a viewport, ask whether the surface really needs to look like a checkout panel.
 7. Pill-shaped buttons (`{rounded.full}`) always; squared buttons signal "third-party widget" in this design language and should be filtered out of any work surface.
 
 ## Known Gaps

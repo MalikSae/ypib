@@ -49,7 +49,7 @@
         {{-- Remember me --}}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;">
             <input id="remember_me" type="checkbox" name="remember"
-                   style="width:16px;height:16px;accent-color:#0064E0;cursor:pointer;">
+                   style="width:16px;height:16px;accent-color:#082e8f;cursor:pointer;">
             <label for="remember_me" style="font-size:14px;color:#444950;cursor:pointer;">Ingat saya</label>
         </div>
 
