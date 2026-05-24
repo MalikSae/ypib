@@ -171,10 +171,10 @@
                         </div>
                         <!-- Accreditation Logo -->
                         <div style="height: 44px; display:flex; justify-content:flex-end;">
-                            @if(strtoupper($program->accreditation) === 'A')
-                                <img src="{{ asset('images/akreditasi-a.webp') }}" alt="Akreditasi A" style="height:44px; width:auto; object-fit:contain;">
-                            @elseif(strtoupper($program->accreditation) === 'B')
-                                <img src="{{ asset('images/akreditasi-b.jpg') }}" alt="Akreditasi B" style="height:44px; width:auto; object-fit:contain; border-radius: 4px;">
+                            @if(strtoupper($program->accreditation) === 'BAIK')
+                                <img src="{{ asset('images/baik.png') }}" alt="Akreditasi Baik" style="height:44px; width:auto; object-fit:contain;">
+                            @elseif(strtoupper($program->accreditation) === 'BAIK SEKALI')
+                                <img src="{{ asset('images/baik-sekali.png') }}" alt="Akreditasi Baik Sekali" style="height:44px; width:auto; object-fit:contain;">
                             @elseif(strtoupper($program->accreditation) === 'UNGGUL')
                                 <img src="{{ asset('images/akreditasi-unggul.webp') }}" alt="Akreditasi Unggul" style="height:44px; width:auto; object-fit:contain;">
                             @else

@@ -52,9 +52,9 @@
                     <x-input-label for="accreditation" value="Akreditasi" />
                     <x-select id="accreditation" name="accreditation" :error="$errors->has('accreditation')">
                         <option value="">-- Pilih Akreditasi --</option>
-                        <option value="B" {{ old('accreditation', $program->accreditation ?? '') == 'B' ? 'selected' : '' }}>Akreditasi B</option>
-                        <option value="A" {{ old('accreditation', $program->accreditation ?? '') == 'A' ? 'selected' : '' }}>Akreditasi A</option>
-                        <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Akreditasi Unggul</option>
+                        <option value="Baik" {{ old('accreditation', $program->accreditation ?? '') == 'Baik' ? 'selected' : '' }}>Baik</option>
+                        <option value="Baik Sekali" {{ old('accreditation', $program->accreditation ?? '') == 'Baik Sekali' ? 'selected' : '' }}>Baik Sekali</option>
+                        <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Unggul</option>
                     </x-select>
                     <x-input-error :messages="$errors->get('accreditation')" />
                 </div>

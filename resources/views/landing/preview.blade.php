@@ -355,18 +355,18 @@
             <div class="animate-marquee whitespace-nowrap flex items-center group-hover:[animation-play-state:paused]">
                 @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-12 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
                 <!-- Duplicate for seamless loop -->
                 @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-12 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
                  @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-12 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
             </div>
