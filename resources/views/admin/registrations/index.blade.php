@@ -162,6 +162,7 @@ $activeStatus = request('status', '');
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">No. Daftar</th>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Jalur</th>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Referral</th>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tanggal</th>
@@ -194,6 +195,21 @@ $activeStatus = request('status', '');
                             <div class="text-sm text-neutral-600 max-w-[160px]">
                                 {{ $reg->firstChoiceProgram?->name ?? '—' }}
                             </div>
+                        </td>
+
+                        {{-- Jalur Pendaftaran --}}
+                        <td class="px-5 py-4">
+                            @php
+                                $pathLabels = ['umum' => 'Reguler', 'prestasi' => 'Prestasi', 'tahfidz' => 'Tahfidz'];
+                                $pathColors = [
+                                    'umum'     => 'bg-neutral-100 text-neutral-600',
+                                    'prestasi' => 'bg-primary-50 text-primary-700',
+                                    'tahfidz'  => 'bg-primary-100 text-primary-800',
+                                ];
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $pathColors[$reg->admission_path] ?? 'bg-neutral-100 text-neutral-600' }}">
+                                {{ $pathLabels[$reg->admission_path] ?? $reg->admission_path ?? '—' }}
+                            </span>
                         </td>
 
                         {{-- Referral --}}
@@ -234,7 +250,7 @@ $activeStatus = request('status', '');
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-16 text-center text-sm text-neutral-400">Belum ada data pendaftar.</td>
+                        <td colspan="8" class="px-5 py-16 text-center text-sm text-neutral-400">Belum ada data pendaftar.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -51,36 +51,6 @@
             </div>
         </div>
 
-        {{-- SECTION 2: Pengaturan Komisi Afiliasi --}}
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
-                <h2 class="text-sm font-bold text-neutral-900">Pengaturan Komisi Afiliasi</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">Besaran komisi yang akan diberikan kepada afiliator.</p>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="referral_reward_display" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Komisi Pendaftaran Awal <span class="text-error-500">*</span></label>
-                    <div class="relative">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-neutral-400">Rp</div>
-                        <input type="text" id="referral_reward_display" value="{{ number_format(old('referral_reward_amount', $period->referral_reward_amount), 0, '', '.') }}" required
-                               class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('referral_reward_amount') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                        <input type="hidden" name="referral_reward_amount" id="referral_reward_amount" value="{{ old('referral_reward_amount', $period->referral_reward_amount) }}">
-                    </div>
-                    @error('referral_reward_amount')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="re_registration_reward_display" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Komisi Daftar Ulang <span class="text-error-500">*</span></label>
-                    <div class="relative">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-neutral-400">Rp</div>
-                        <input type="text" id="re_registration_reward_display" value="{{ number_format(old('re_registration_reward_amount', $period->re_registration_reward_amount), 0, '', '.') }}" required
-                               class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('re_registration_reward_amount') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                        <input type="hidden" name="re_registration_reward_amount" id="re_registration_reward_amount" value="{{ old('re_registration_reward_amount', $period->re_registration_reward_amount) }}">
-                    </div>
-                    @error('re_registration_reward_amount')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-            </div>
-        </div>
-
         {{-- SECTION 3: Rekening Pembayaran --}}
         <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
@@ -152,8 +122,7 @@
             });
         }
 
-        setupCurrency('referral_reward_display', 'referral_reward_amount');
-        setupCurrency('re_registration_reward_display', 're_registration_reward_amount');
+
     });
 </script>
 @endsection

@@ -19,6 +19,8 @@ class Program extends Model
         'registration_fee',
         're_registration_fee',
         're_registration_fee_details',
+        'referral_reward_amount',
+        're_registration_reward_amount',
         'description',
         'is_active',
     ];

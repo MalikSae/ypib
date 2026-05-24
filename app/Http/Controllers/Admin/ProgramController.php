@@ -52,6 +52,8 @@ class ProgramController extends Controller
             'accreditation' => 'nullable|string|max:50',
             'quota' => 'required|integer|min:0',
             'registration_fee' => 'required|integer|min:0',
+            'referral_reward_amount' => 'required|integer|min:0',
+            're_registration_reward_amount' => 'required|integer|min:0',
             'is_active' => 'boolean',
             'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -75,11 +77,13 @@ class ProgramController extends Controller
             }
 
             $program = new Program();
-            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee']));
+            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
             $program->slug = Str::slug($request->name);
             $program->is_active = $request->has('is_active');
             $program->re_registration_fee_details = $feeDetails;
             $program->re_registration_fee = $totalReRegistrationFee;
+            $program->referral_reward_amount = $request->referral_reward_amount;
+            $program->re_registration_reward_amount = $request->re_registration_reward_amount;
             $program->save();
 
             // Handle Galleries
@@ -128,6 +132,8 @@ class ProgramController extends Controller
             'accreditation' => 'nullable|string|max:50',
             'quota' => 'required|integer|min:0',
             'registration_fee' => 'required|integer|min:0',
+            'referral_reward_amount' => 'required|integer|min:0',
+            're_registration_reward_amount' => 'required|integer|min:0',
             'is_active' => 'boolean',
             'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -152,11 +158,13 @@ class ProgramController extends Controller
                 }
             }
 
-            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee']));
+            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
             $program->slug = Str::slug($request->name);
             $program->is_active = $request->has('is_active');
             $program->re_registration_fee_details = $feeDetails;
             $program->re_registration_fee = $totalReRegistrationFee;
+            $program->referral_reward_amount = $request->referral_reward_amount;
+            $program->re_registration_reward_amount = $request->re_registration_reward_amount;
             $program->save();
 
             // Handle Galleries

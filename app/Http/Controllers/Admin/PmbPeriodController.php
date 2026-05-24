@@ -19,9 +19,6 @@ class PmbPeriodController extends Controller
                 'year'                  => date('Y'),
                 'open_date'             => date('Y-m-d'),
                 'close_date'            => date('Y-m-t'),
-                'registration_fee'      => 0,
-                'referral_reward_amount'=> 0,
-                're_registration_reward_amount' => 0,
                 'is_active'             => true,
             ]);
         }
@@ -38,8 +35,6 @@ class PmbPeriodController extends Controller
             'year'                          => 'required|integer',
             'open_date'                     => 'required|date',
             'close_date'                    => 'required|date|after_or_equal:open_date',
-            'referral_reward_amount'        => 'required|numeric|min:0',
-            're_registration_reward_amount' => 'required|numeric|min:0',
             'university_bank_name'          => 'nullable|string|max:255',
             'university_bank_account'       => 'nullable|string|max:255',
             'university_bank_account_name'  => 'nullable|string|max:255',

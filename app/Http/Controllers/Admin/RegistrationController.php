@@ -58,7 +58,7 @@ class RegistrationController extends Controller
 
     public function confirmPayment(Request $request, int $id)
     {
-        $registration = Registration::with('period')->findOrFail($id);
+        $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
 
         if (!$registration->payment_proof) {
             $request->validate([
@@ -116,7 +116,7 @@ class RegistrationController extends Controller
             Referrer::where('id', $registration->referrer_id)->increment('total_conversions');
 
             if (!$registration->rewards()->where('reward_type', 'registration')->exists()) {
-                $amount = $registration->period?->referral_reward_amount ?? 50000;
+                $amount = $registration->firstChoiceProgram?->referral_reward_amount ?? 50000;
                 Reward::create([
                     'referrer_id'     => $registration->referrer_id,
                     'registration_id' => $registration->id,
@@ -197,7 +197,7 @@ class RegistrationController extends Controller
 
     public function confirmReRegistration(Request $request, int $id)
     {
-        $registration = Registration::with('period')->findOrFail($id);
+        $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
 
         if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang'])) {
             return redirect()->back()->with('error', 'Status pendaftar belum memenuhi syarat untuk daftar ulang.');
@@ -242,7 +242,7 @@ class RegistrationController extends Controller
                 ->first();
 
             if (!$existingReward) {
-                $amount = $registration->period?->re_registration_reward_amount ?? 0;
+                $amount = $registration->firstChoiceProgram?->re_registration_reward_amount ?? 0;
                 if ($amount > 0) {
                     Reward::create([
                         'referrer_id'     => $registration->referrer_id,

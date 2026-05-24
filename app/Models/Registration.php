@@ -14,6 +14,7 @@ class Registration extends Model
         'user_id',
         'referrer_id',
         'registration_number',
+        'admission_path',
         'first_choice_program_id',
         'second_choice_program_id',
         'full_name',

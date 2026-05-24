@@ -88,6 +88,17 @@
                     <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->firstChoiceProgram?->name ?? '—' }}</div>
                 </div>
                 <div>
+                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Jalur Pendaftaran</div>
+                    <div style="font-size:14px;font-weight:500;" class="text-neutral-900">
+                        @php
+                            $pathLabels = ['umum' => 'Jalur Reguler', 'prestasi' => 'Jalur Prestasi', 'tahfidz' => 'Jalur Tahfidz'];
+                        @endphp
+                        <span style="display:inline-flex;align-items:center;gap:6px;background:#e6edfc;color:#082e8f;font-size:13px;font-weight:700;padding:4px 14px;border-radius:9999px;">
+                            {{ $pathLabels[$registration->admission_path] ?? $registration->admission_path ?? '—' }}
+                        </span>
+                    </div>
+                </div>
+                <div>
                     <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Asal Sekolah</div>
                     <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->school_name ?? '—' }}</div>
                 </div>
@@ -145,6 +156,40 @@
                 </form>
             @endif
         </div>
+
+        {{-- Card 4.4: Tagihan Daftar Ulang --}}
+        @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Tagihan Daftar Ulang</div>
+            
+            <div style="margin-bottom: 16px;">
+                <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Program Studi</div>
+                <div style="font-size:14px;font-weight:700;" class="text-neutral-900">{{ $registration->firstChoiceProgram?->name ?? '—' }}</div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Total Tagihan</div>
+                <div style="font-size:20px;font-weight:700;color:#BF360C;">Rp {{ number_format($registration->firstChoiceProgram?->re_registration_fee ?? 0, 0, ',', '.') }}</div>
+            </div>
+
+            @if($registration->firstChoiceProgram && !empty($registration->firstChoiceProgram->re_registration_fee_details) && count($registration->firstChoiceProgram->re_registration_fee_details) > 0)
+                <div style="border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <tbody>
+                            @foreach($registration->firstChoiceProgram->re_registration_fee_details as $detail)
+                            <tr style="border-bottom:1px solid #E5E7EB;">
+                                <td style="padding:10px 16px;" class="text-neutral-600">{{ $detail['name'] }}</td>
+                                <td style="padding:10px 16px;text-align:right;font-weight:600;" class="text-neutral-900">Rp {{ number_format($detail['amount'], 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p style="font-size:13px;margin:0;" class="text-neutral-400">Tidak ada rincian biaya.</p>
+            @endif
+        </div>
+        @endif
 
         {{-- Card 4.5: Bukti Pembayaran Daftar Ulang --}}
         @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))

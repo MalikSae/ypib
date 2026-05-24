@@ -81,6 +81,36 @@
             </div>
 
             <div class="mb-6">
+                <label class="block text-sm font-semibold text-neutral-900 mb-2">Pengaturan Komisi Afiliasi</label>
+                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <x-input-label for="referral_reward_display" value="Komisi Pendaftaran Awal" required="true" />
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                <x-text-input type="text" id="referral_reward_display" :value="number_format(old('referral_reward_amount', $program->referral_reward_amount ?? 0), 0, '', '.')" required
+                                            placeholder="50.000" style="padding-left: 3rem;" :error="$errors->has('referral_reward_amount')" />
+                                <input type="hidden" name="referral_reward_amount" id="referral_reward_amount" value="{{ old('referral_reward_amount', $program->referral_reward_amount ?? 0) }}">
+                            </div>
+                            <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa membayar pendaftaran.</div>
+                            <x-input-error :messages="$errors->get('referral_reward_amount')" />
+                        </div>
+                        <div>
+                            <x-input-label for="re_registration_reward_display" value="Komisi Daftar Ulang" required="true" />
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                <x-text-input type="text" id="re_registration_reward_display" :value="number_format(old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0), 0, '', '.')" required
+                                            placeholder="200.000" style="padding-left: 3rem;" :error="$errors->has('re_registration_reward_amount')" />
+                                <input type="hidden" name="re_registration_reward_amount" id="re_registration_reward_amount" value="{{ old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0) }}">
+                            </div>
+                            <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa melunasi daftar ulang.</div>
+                            <x-input-error :messages="$errors->get('re_registration_reward_amount')" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
                 <label class="block text-sm font-semibold text-neutral-900 mb-2">Rincian Biaya Daftar Ulang</label>
                 <div class="rounded-lg overflow-hidden border border-neutral-200">
                     <table class="w-full text-left border-collapse" id="fee-table">
@@ -271,6 +301,20 @@
             let cleanVal = val.replace(/\D/g, "");
             $(this).val(formatNumber(val));
             $('#registration_fee').val(cleanVal);
+        });
+
+        $('#referral_reward_display').on('input', function() {
+            let val = $(this).val();
+            let cleanVal = val.replace(/\D/g, "");
+            $(this).val(formatNumber(val));
+            $('#referral_reward_amount').val(cleanVal);
+        });
+
+        $('#re_registration_reward_display').on('input', function() {
+            let val = $(this).val();
+            let cleanVal = val.replace(/\D/g, "");
+            $(this).val(formatNumber(val));
+            $('#re_registration_reward_amount').val(cleanVal);
         });
 
         // Dynamic Fee Table Logic

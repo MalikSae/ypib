@@ -152,9 +152,7 @@ class DatabaseSeeder extends Seeder
             'year'                  => 2025,
             'open_date'             => '2025-06-01',
             'close_date'            => '2025-09-30',
-            'registration_fee'      => 250000,
             'referral_reward_amount'=> 50000,
-            're_registration_fee'   => 25000000,
             're_registration_reward_amount' => 500000,
             'is_active'             => true,
         ]);
