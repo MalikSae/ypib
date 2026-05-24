@@ -57,9 +57,9 @@
         </div>
         <h2 style="font-size:18px;font-weight:700;margin:0 0 8px 0;" class="text-neutral-900">Belum Ada Pendaftaran</h2>
         <p style="font-size:14px;margin:0 0 24px 0;" class="text-neutral-500">Anda belum mengisi formulir pendaftaran PMB YPIB.</p>
-        <a href="{{ route('registration.create') }}" class="btn-primary inline-flex">
-            <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487Z"/></svg>
-            Isi Formulir Sekarang
+        <a href="{{ route('landing') }}#program-studi" class="btn-primary inline-flex" style="gap: 8px; align-items: center;">
+            <i class="ti ti-book" style="font-size: 18px;"></i>
+            Pilih Program Studi
         </a>
     </div>
 

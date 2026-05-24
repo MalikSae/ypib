@@ -11,6 +11,7 @@ class Program extends Model
 
     protected $fillable = [
         'name',
+        'icon',
         'slug',
         'faculty_id',
         'accreditation',

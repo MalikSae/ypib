@@ -167,7 +167,7 @@ $newSections = <<<'HTML'
                         <i class="ti ti-clipboard-list text-3xl"></i>
                     </div>
                     <div class="inline-block px-3 py-1 mb-4 rounded-full bg-neutral-100 text-neutral-600 text-xs font-bold w-max">Terbuka untuk semua</div>
-                    <h3 class="text-2xl font-black text-neutral-900 mb-4">Jalur Umum & Tes</h3>
+                    <h3 class="text-2xl font-black text-neutral-900 mb-4">Jalur Reguler</h3>
                     <p class="text-neutral-500 font-medium leading-relaxed mb-8 flex-grow">Jalur masuk reguler dengan sistem seleksi melalui tes tertulis (CBT).</p>
                     <a href="{{ route('registration.create') }}" class="block w-full text-center py-4 rounded-xl bg-neutral-100 text-neutral-900 font-bold hover:bg-neutral-200 transition-colors">
                         Pilih Jalur Ini

@@ -8,20 +8,38 @@ use App\Models\Program;
 use App\Models\ProgramGallery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $programs = Program::with('faculty')->orderBy('name')->paginate(10);
+        $query = Program::with('faculty')->orderBy('name');
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('faculty', function($q) use ($searchTerm) {
+                      $q->where('name', 'like', '%' . $searchTerm . '%');
+                  });
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $programs = $query->paginate($perPage)->appends($request->query());
+
         return view('admin.programs.index', compact('programs'));
     }
 
     public function create()
     {
         $faculties = Faculty::orderBy('name')->get();
-        return view('admin.programs.form', compact('faculties'));
+        $icons = [];
+        $iconPath = public_path('images/icons');
+        if (File::exists($iconPath)) {
+            $icons = array_map('basename', File::files($iconPath));
+        }
+        return view('admin.programs.form', compact('faculties', 'icons'));
     }
 
     public function store(Request $request)
@@ -33,6 +51,7 @@ class ProgramController extends Controller
             'quota' => 'required|integer|min:0',
             'registration_fee' => 'required|integer|min:0',
             'is_active' => 'boolean',
+            'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'gallery.*' => 'image|mimes:jpeg,png,jpg|max:2048'
         ]);
@@ -82,7 +101,12 @@ class ProgramController extends Controller
     {
         $program = Program::with('galleries')->findOrFail($id);
         $faculties = Faculty::all();
-        return view('admin.programs.form', compact('program', 'faculties'));
+        $icons = [];
+        $iconPath = public_path('images/icons');
+        if (File::exists($iconPath)) {
+            $icons = array_map('basename', File::files($iconPath));
+        }
+        return view('admin.programs.form', compact('program', 'faculties', 'icons'));
     }
 
     public function update(Request $request, $id)
@@ -94,6 +118,7 @@ class ProgramController extends Controller
             'quota' => 'required|integer|min:0',
             'registration_fee' => 'required|integer|min:0',
             'is_active' => 'boolean',
+            'icon' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'gallery.*' => 'image|mimes:jpeg,png,jpg|max:2048'
         ]);

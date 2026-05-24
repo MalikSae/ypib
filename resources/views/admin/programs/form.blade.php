@@ -21,7 +21,7 @@
     </div>
 
     <x-card class="p-6 md:p-8">
-        <form action="{{ isset($program) ? route('admin.programs.update', $program->id) : route('admin.programs.store') }}" method="POST" enctype="multipart/form-data" x-data="{ submitting: false }" @submit="submitting = true">
+        <form action="{{ isset($program) ? route('admin.programs.update', $program->id) : route('admin.programs.store') }}" method="POST" enctype="multipart/form-data" x-data="{ submitting: false, selectedIcon: '{{ old('icon', $program->icon ?? '') }}' }" @submit="submitting = true">
             @csrf
             @if(isset($program)) @method('PUT') @endif
 
@@ -50,8 +50,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <x-input-label for="accreditation" value="Akreditasi" />
-                    <x-text-input type="text" id="accreditation" name="accreditation" :value="old('accreditation', $program->accreditation ?? '')"
-                                  placeholder="Contoh: B atau Unggul" :error="$errors->has('accreditation')" />
+                    <x-select id="accreditation" name="accreditation" :error="$errors->has('accreditation')">
+                        <option value="">-- Pilih Akreditasi --</option>
+                        <option value="B" {{ old('accreditation', $program->accreditation ?? '') == 'B' ? 'selected' : '' }}>Akreditasi B</option>
+                        <option value="A" {{ old('accreditation', $program->accreditation ?? '') == 'A' ? 'selected' : '' }}>Akreditasi A</option>
+                        <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Akreditasi Unggul</option>
+                    </x-select>
                     <x-input-error :messages="$errors->get('accreditation')" />
                 </div>
 
@@ -164,6 +168,30 @@
                     <span class="text-sm text-neutral-600">Tampilkan di publik</span>
                 </label>
                 <x-input-error :messages="$errors->get('is_active')" />
+            </div>
+
+            <div class="mb-6">
+                <x-input-label for="icon" value="Ikon Program Studi" />
+                <div class="text-xs text-neutral-500 mb-2">Pilih ikon yang akan ditampilkan di kartu program studi. Jika tidak dipilih, akan menampilkan inisial huruf pertama.</div>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-64 overflow-y-auto p-4 border border-neutral-200 rounded-lg bg-neutral-50">
+                    <label class="cursor-pointer relative group" title="Inisial Teks">
+                        <input type="radio" name="icon" value="" class="peer hidden" {{ old('icon', $program->icon ?? '') == '' ? 'checked' : '' }}>
+                        <div class="flex flex-col items-center justify-center p-2 rounded-lg border-2 border-transparent peer-checked:border-primary-500 peer-checked:bg-primary-50 group-hover:bg-neutral-100 peer-checked:group-hover:bg-primary-50 transition-all">
+                            <div class="w-8 h-8 flex items-center justify-center text-xs font-bold text-neutral-400 border border-neutral-300 rounded bg-white">Aa</div>
+                        </div>
+                    </label>
+                    @if(isset($icons))
+                        @foreach($icons as $iconFile)
+                            <label class="cursor-pointer relative group" title="{{ $iconFile }}">
+                                <input type="radio" name="icon" value="{{ $iconFile }}" class="peer hidden" {{ old('icon', $program->icon ?? '') == $iconFile ? 'checked' : '' }}>
+                                <div class="flex flex-col items-center justify-center p-2 rounded-lg border-2 border-transparent peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:shadow-sm group-hover:bg-neutral-100 peer-checked:group-hover:bg-primary-50 transition-all">
+                                    <img src="{{ asset('images/icons/' . $iconFile) }}" alt="{{ $iconFile }}" class="w-8 h-8 object-contain">
+                                </div>
+                            </label>
+                        @endforeach
+                    @endif
+                </div>
+                <x-input-error :messages="$errors->get('icon')" />
             </div>
 
             <div class="mb-6">

@@ -27,8 +27,14 @@
 </style>
 <section style="min-height:calc(100vh - 64px);" class="bg-white">
     {{-- Hero Section --}}
-    <div style="background:linear-gradient(135deg, #0056b3 0%, #002d62 100%);  padding: 64px 0; position:relative; overflow:hidden;" class="text-white">
-        <div style="position:absolute; top:-50%; right:-10%; width:600px; height:600px; background:radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%); border-radius:50%;"></div>
+    <div class="relative py-16 overflow-hidden bg-gradient-to-br from-[#0B2B7F] to-[#09183E] text-white">
+        <!-- Glow Orbs -->
+        <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-[#0B41CB] rounded-full mix-blend-screen filter blur-[120px] opacity-40"></div>
+            <div class="absolute top-1/2 right-0 w-[400px] h-[400px] bg-[#F1B10E] rounded-full mix-blend-screen filter blur-[150px] opacity-15"></div>
+            <!-- Dot Grid -->
+            <div class="absolute inset-0 opacity-[0.07]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 28px 28px;"></div>
+        </div>
         
         <div class="pub-container" style="position:relative; z-index:10;">
             {{-- Breadcrumb --}}
@@ -153,36 +159,49 @@
 
             {{-- Right Column (Sticky Card) --}}
             <div class="prodi-sidebar">
-                <div style="border-radius:24px; box-shadow: 0 12px 32px rgba(0,0,0,0.06); border: 1px solid #E8ECEF; padding:32px; display:flex; flex-direction:column; gap:24px;" class="bg-white">
+                <div class="bg-white border border-neutral-200" style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); padding: 24px; display:flex; flex-direction:column; gap:20px;">
                     
-                    <div>
-                        <div style="font-size:14px;  margin-bottom:4px; font-weight:500;" class="text-neutral-400">Biaya Pendaftaran</div>
-                        <div style="font-size:32px; font-weight:800;  letter-spacing:-1px;" class="text-neutral-900">
-                            Rp {{ number_format($program->registration_fee,0,',','.') }}
-                        </div>
-
-
-                    <div style="height:1px;" class="bg-neutral-100"></div>
-
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <!-- Header: Title & Accreditation -->
+                    <div class="flex justify-between items-start">
                         <div>
-                            <div style="font-size:13px;  margin-bottom:4px;" class="text-neutral-400">Akreditasi</div>
-                            <div style="font-size:18px; font-weight:700;  display:flex; align-items:center; gap:6px;" class="text-primary-600">
-                                {{ $program->accreditation }}
+                            <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;" class="text-neutral-500 mb-1">Biaya Pendaftaran</div>
+                            <div style="font-size:32px; font-weight:700; letter-spacing:-1px; line-height:1;" class="text-neutral-900">
+                                Rp {{ number_format($program->registration_fee,0,',','.') }}
                             </div>
                         </div>
-                        <div style="width:1px; height:40px;" class="bg-neutral-100"></div>
-                        <div>
-                            <div style="font-size:13px;  margin-bottom:4px;" class="text-neutral-400">Kuota Mahasiswa</div>
-                            <div style="font-size:18px; font-weight:700;  display:flex; align-items:center; gap:6px;" class="text-neutral-900">
-                                {{ $program->quota }}
-                            </div>
+                        <!-- Accreditation Logo -->
+                        <div style="height: 44px; display:flex; justify-content:flex-end;">
+                            @if(strtoupper($program->accreditation) === 'A')
+                                <img src="{{ asset('images/akreditasi-a.webp') }}" alt="Akreditasi A" style="height:44px; width:auto; object-fit:contain;">
+                            @elseif(strtoupper($program->accreditation) === 'B')
+                                <img src="{{ asset('images/akreditasi-b.jpg') }}" alt="Akreditasi B" style="height:44px; width:auto; object-fit:contain; border-radius: 4px;">
+                            @elseif(strtoupper($program->accreditation) === 'UNGGUL')
+                                <img src="{{ asset('images/akreditasi-unggul.webp') }}" alt="Akreditasi Unggul" style="height:44px; width:auto; object-fit:contain;">
+                            @else
+                                <div class="bg-primary-50 text-primary-700 font-semibold px-3 py-1 rounded border border-primary-200 text-sm">
+                                    Akreditasi {{ $program->accreditation ?? '-' }}
+                                </div>
+                            @endif
                         </div>
                     </div>
 
-                    <a href="{{ route('registration.create', ['prodi' => $program->id]) }}" class="btn-primary" style="justify-content:center; padding:16px 24px; font-size:16px; margin-top:8px;">
+                    <div style="height:1px;" class="bg-neutral-200 w-full"></div>
+
+                    <!-- Quota -->
+                    <div class="flex justify-between items-center">
+                        <div style="font-size:14px; font-weight:500;" class="text-neutral-600">Kuota Mahasiswa</div>
+                        <div style="font-size:16px; font-weight:700;" class="text-neutral-900 flex items-center gap-2">
+                            <svg style="width:18px;height:18px;" class="text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+                            {{ $program->quota }} Kursi
+                        </div>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <a href="{{ route('registration.create', ['prodi' => $program->id]) }}" 
+                       class="flex items-center justify-center gap-2 w-full py-3 mt-1 rounded-lg text-white font-semibold text-base transition-colors hover:bg-[#071f5c]" 
+                       style="background: #0B2B7F;">
                         Daftar ke Prodi Ini
-                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"/></svg>
+                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                     </a>
                 </div>
             </div>

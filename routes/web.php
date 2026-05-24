@@ -12,8 +12,7 @@ use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public Landing ─────────────────────────────────────────────────────────
-Route::get('/', [LandingController::class, 'index'])->name('landing');
-Route::get('/landing-preview', [LandingController::class, 'preview'])->name('landing.preview');
+Route::get('/', [LandingController::class, 'preview'])->name('landing');
 
 // ── Temporary Brand Visualization ──────────────────────────────────────────
 Route::get('/brand', function () {

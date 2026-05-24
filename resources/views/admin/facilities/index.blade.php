@@ -1,21 +1,21 @@
 @extends('layouts.admin')
-@section('title', 'Kelola Fasilitas — Admin PMB YPIB')
-@section('page-title', 'Kelola Fasilitas')
+@section('title', 'Gallery Image — Admin PMB YPIB')
+@section('page-title', 'Gallery Image')
 
 @section('content')
 
 {{-- PAGE HEADER --}}
 <div class="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
     <div>
-        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Kelola Fasilitas</h1>
-        <p class="mt-0.5 text-sm text-neutral-400">Daftar fasilitas kampus untuk ditampilkan di landing page.</p>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Gallery Image</h1>
+        <p class="mt-0.5 text-sm text-neutral-400">Kelola gambar gallery untuk ditampilkan di halaman depan.</p>
     </div>
     <a href="{{ route('admin.facilities.create') }}" class="decoration-none shrink-0">
         <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200 shadow-sm">
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            Tambah Fasilitas
+            Tambah Gambar
         </button>
     </a>
 </div>
@@ -36,8 +36,9 @@
         <table class="min-w-full">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Icon & Nama</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Gambar & Judul</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Deskripsi</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Urutan</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
@@ -46,14 +47,14 @@
                 @forelse($facilities as $facility)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-neutral-100 text-neutral-500 border border-neutral-200">
-                                @if($facility->icon)
-                                    <i class="ti {{ $facility->icon }} text-xl"></i>
-                                @else
-                                    <i class="ti ti-star text-xl"></i>
-                                @endif
-                            </div>
+                        <div class="flex items-center gap-4">
+                            @if($facility->image_path)
+                                <img src="{{ Storage::url($facility->image_path) }}" alt="{{ $facility->name }}" class="w-16 h-12 rounded-lg object-cover border border-neutral-200 shadow-sm">
+                            @else
+                                <div class="w-16 h-12 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-400">
+                                    <i class="ti ti-photo text-xl"></i>
+                                </div>
+                            @endif
                             <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $facility->name }}</div>
                         </div>
                     </td>
@@ -62,14 +63,17 @@
                             {{ $facility->description ?: '—' }}
                         </div>
                     </td>
+                    <td class="px-6 py-4 text-sm text-neutral-600 font-medium">
+                        {{ $facility->order }}
+                    </td>
                     <td class="px-6 py-4">
                         <form action="{{ route('admin.facilities.toggle', $facility) }}" method="POST" class="m-0 inline-block">
                             @csrf @method('PATCH')
                             <button type="submit" class="border-none cursor-pointer p-0 hover:opacity-80 transition-opacity focus:outline-none rounded-full">
                                 @if($facility->is_active)
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-neutral-900 text-white rounded-full text-xs font-semibold">Aktif</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-success-50 text-success-700 border border-success-200 rounded-full text-xs font-semibold">Tampil</span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-neutral-500 border border-neutral-200 rounded-full text-xs font-semibold">Nonaktif</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-neutral-500 border border-neutral-200 rounded-full text-xs font-semibold">Sembunyi</span>
                                 @endif
                             </button>
                         </form>
@@ -83,7 +87,7 @@
                                 </svg>
                             </a>
                             
-                            <form action="{{ route('admin.facilities.destroy', $facility) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?')">
+                            <form action="{{ route('admin.facilities.destroy', $facility) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus gambar ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-neutral-400 hover:bg-error-50 hover:text-error-600 transition-colors duration-150" title="Hapus">
@@ -97,8 +101,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-6 py-16 text-center text-sm text-neutral-400">
-                        Belum ada fasilitas terdaftar.
+                    <td colspan="5" class="px-6 py-16 text-center text-sm text-neutral-400">
+                        Belum ada gambar gallery terdaftar.
                     </td>
                 </tr>
                 @endforelse
