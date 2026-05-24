@@ -170,13 +170,13 @@
                             </div>
                         </div>
                         <!-- Accreditation Logo -->
-                        <div style="height: 44px; display:flex; justify-content:flex-end;">
+                        <div style="height: 64px; display:flex; justify-content:flex-end;">
                             @if(strtoupper($program->accreditation) === 'BAIK')
-                                <img src="{{ asset('images/baik.png') }}" alt="Akreditasi Baik" style="height:44px; width:auto; object-fit:contain;">
+                                <img src="{{ asset('images/baik.png') }}" alt="Akreditasi Baik" style="height:64px; width:auto; object-fit:contain;">
                             @elseif(strtoupper($program->accreditation) === 'BAIK SEKALI')
-                                <img src="{{ asset('images/baik-sekali.png') }}" alt="Akreditasi Baik Sekali" style="height:44px; width:auto; object-fit:contain;">
+                                <img src="{{ asset('images/baik-sekali.png') }}" alt="Akreditasi Baik Sekali" style="height:64px; width:auto; object-fit:contain;">
                             @elseif(strtoupper($program->accreditation) === 'UNGGUL')
-                                <img src="{{ asset('images/akreditasi-unggul.webp') }}" alt="Akreditasi Unggul" style="height:44px; width:auto; object-fit:contain;">
+                                <img src="{{ asset('images/akreditasi-unggul.webp') }}" alt="Akreditasi Unggul" style="height:64px; width:auto; object-fit:contain;">
                             @else
                                 <div class="bg-primary-50 text-primary-700 font-semibold px-3 py-1 rounded border border-primary-200 text-sm">
                                     Akreditasi {{ $program->accreditation ?? '-' }}
