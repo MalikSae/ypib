@@ -387,19 +387,17 @@
                 <p class="text-lg text-neutral-500 font-medium">Jelajahi potret kegiatan mahasiswa, fasilitas, dan kehidupan kampus di YPIB Majalengka.</p>
             </div>
 
-            <div class="columns-2 lg:columns-3 gap-3 sm:gap-6 space-y-3 sm:space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                 @if(isset($facilities) && $facilities->where('is_active', true)->count() > 0)
                     @foreach($facilities->where('is_active', true)->values() as $index => $gallery)
-                    <div class="break-inside-avoid relative group rounded-[2rem] overflow-hidden bg-neutral-100 mb-6"
+                    <div class="relative group rounded-[2rem] overflow-hidden bg-neutral-100 aspect-video shadow-sm hover:shadow-xl transition-all duration-300"
                          x-show="{{ $index }} < limit"
                          x-transition:enter="transition ease-out duration-500"
                          x-transition:enter-start="opacity-0 translate-y-8"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         {{-- Assign varied heights to placeholders to simulate masonry --}}
-                         style="{{ !$gallery->image_path ? 'min-height: ' . rand(250, 450) . 'px;' : '' }}">
+                         x-transition:enter-end="opacity-100 translate-y-0">
                         
                         @if($gallery->image_path)
-                            <img src="{{ Storage::url($gallery->image_path) }}" loading="lazy" alt="{{ $gallery->name }}" class="w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <img src="{{ Storage::url($gallery->image_path) }}" loading="lazy" alt="{{ $gallery->name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                         @else
                             <div class="w-full h-full absolute inset-0 flex flex-col items-center justify-center bg-neutral-100 text-neutral-300">
                                 <i class="ti ti-photo text-5xl mb-2"></i>
