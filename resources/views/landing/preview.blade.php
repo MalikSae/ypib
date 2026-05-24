@@ -88,12 +88,12 @@
                     
                     <!-- Main Image (Solid Cutout, sits at bottom) -->
                     <div class="relative z-20 flex justify-center pb-0">
-                        <img src="{{ asset('images/mahasiswa.png') }}" alt="Mahasiswa YPIB" class="w-[110%] -ml-[5%] max-w-[500px] lg:max-w-none lg:w-[135%] lg:-ml-[15%] h-auto object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.3)]">
+                        <img src="{{ asset('images/mahasiswa.png') }}" fetchpriority="high" loading="eager" alt="Mahasiswa YPIB" class="w-[110%] -ml-[5%] max-w-[500px] lg:max-w-none lg:w-[135%] lg:-ml-[15%] h-auto object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.3)]">
                     </div>
 
                     <!-- Floating Card 1: Badge Unggul -->
                     <div class="absolute top-16 right-0 lg:-right-12 z-30 animate-float" style="animation-delay: 0s;">
-                        <img src="{{ asset('images/badge-unggul.png') }}" alt="Akreditasi Unggul" class="w-24 h-24 lg:w-28 lg:h-28 object-cover rounded-2xl shadow-[0_20px_50px_-12px_rgba(11,65,203,0.4)] border-2 border-white/80">
+                        <img src="{{ asset('images/badge-unggul.png') }}" fetchpriority="high" loading="eager" alt="Akreditasi Unggul" class="w-24 h-24 lg:w-28 lg:h-28 object-cover rounded-2xl shadow-[0_20px_50px_-12px_rgba(11,65,203,0.4)] border-2 border-white/80">
                     </div>
 
                     <!-- Floating Card 2: Job available style (Beasiswa) -->
@@ -156,7 +156,7 @@
                         <!-- Top Header: Logo/Icon & Decorative Icon -->
                         <div class="flex items-start justify-between mb-8">
                             @if($program->icon)
-                                <img src="{{ asset('images/icons/' . $program->icon) }}" alt="{{ $program->name }}" class="w-16 h-16 object-contain shrink-0 drop-shadow-sm">
+                                <img src="{{ asset('images/icons/' . $program->icon) }}" loading="lazy" alt="{{ $program->name }}" class="w-16 h-16 object-contain shrink-0 drop-shadow-sm">
                             @else
                                 <div class="w-16 h-16 rounded-full flex items-center justify-center bg-primary-50 text-primary-600 font-black text-2xl shrink-0">
                                     {{ substr($program->name, 0, 1) }}
@@ -355,18 +355,18 @@
             <div class="animate-marquee whitespace-nowrap flex items-center group-hover:[animation-play-state:paused]">
                 @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" loading="lazy" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
                 <!-- Duplicate for seamless loop -->
                 @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" loading="lazy" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
                  @foreach($partners as $partner)
                     <div class="mx-10 flex-shrink-0">
-                        <img src="{{ Storage::url($partner->logo_path) }}" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                        <img src="{{ Storage::url($partner->logo_path) }}" loading="lazy" alt="{{ $partner->name }}" class="h-20 md:h-24 w-auto object-contain grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
                     </div>
                 @endforeach
             </div>
@@ -399,7 +399,7 @@
                          style="{{ !$gallery->image_path ? 'min-height: ' . rand(250, 450) . 'px;' : '' }}">
                         
                         @if($gallery->image_path)
-                            <img src="{{ Storage::url($gallery->image_path) }}" alt="{{ $gallery->name }}" class="w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <img src="{{ Storage::url($gallery->image_path) }}" loading="lazy" alt="{{ $gallery->name }}" class="w-full object-cover transition-transform duration-700 group-hover:scale-105">
                         @else
                             <div class="w-full h-full absolute inset-0 flex flex-col items-center justify-center bg-neutral-100 text-neutral-300">
                                 <i class="ti ti-photo text-5xl mb-2"></i>

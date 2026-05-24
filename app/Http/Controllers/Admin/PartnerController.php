@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PartnerController extends Controller
 {
@@ -33,7 +36,15 @@ class PartnerController extends Controller
         $partner->is_active = $request->has('is_active');
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('partners', 'public');
+            $manager = new ImageManager(new Driver());
+            $filename = Str::uuid() . '.webp';
+            $path = 'partners/' . $filename;
+            
+            $image = $manager->read($request->file('logo'));
+            $image->scaleDown(width: 400); // Logo tak perlu terlalu besar
+            $encoded = $image->toWebp(80);
+            
+            Storage::disk('public')->put($path, (string) $encoded);
             $partner->logo_path = $path;
         }
 
@@ -63,7 +74,15 @@ class PartnerController extends Controller
             if ($partner->logo_path) {
                 Storage::disk('public')->delete($partner->logo_path);
             }
-            $path = $request->file('logo')->store('partners', 'public');
+            $manager = new ImageManager(new Driver());
+            $filename = Str::uuid() . '.webp';
+            $path = 'partners/' . $filename;
+            
+            $image = $manager->read($request->file('logo'));
+            $image->scaleDown(width: 400);
+            $encoded = $image->toWebp(80);
+            
+            Storage::disk('public')->put($path, (string) $encoded);
             $partner->logo_path = $path;
         }
 

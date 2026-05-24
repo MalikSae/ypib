@@ -126,7 +126,7 @@
                     <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
                         @foreach($program->galleries as $gallery)
                             <div style="border-radius:12px; overflow:hidden; aspect-ratio:4/3; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                                <img src="{{ asset('storage/' . $gallery->image_path) }}" alt="Galeri {{ $program->name }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                <img src="{{ asset('storage/' . $gallery->image_path) }}" loading="lazy" alt="Galeri {{ $program->name }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             </div>
                         @endforeach
                     </div>

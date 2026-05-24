@@ -231,6 +231,17 @@
 </head>
 <body class="font-sans text-neutral-900 bg-neutral-50 antialiased selection:bg-primary-200 selection:text-primary-900 overflow-x-hidden flex flex-col min-h-screen {{ !request()->routeIs('landing') ? 'pt-20' : '' }}">
 
+    <!-- Page Loader -->
+    <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-neutral-50 transition-opacity duration-500">
+        <div class="relative flex flex-col items-center">
+            <img src="{{ asset('images/favicon.png') }}" alt="Loading..." class="w-20 h-20 animate-pulse drop-shadow-md">
+            <div class="mt-5 flex gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-primary-600 animate-bounce" style="animation-delay: -0.3s"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-primary-600 animate-bounce" style="animation-delay: -0.15s"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-primary-600 animate-bounce"></div>
+            </div>
+        </div>
+    </div>
     <!-- NAVBAR -->
     <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" x-data="{ isHome: {{ request()->routeIs('landing') ? 'true' : 'false' }}, scrolled: {{ request()->routeIs('landing') ? 'false' : 'true' }}, mobileOpen: false }" @scroll.window="scrolled = !isHome || window.scrollY > 20">
         <div :class="scrolled ? 'bg-white/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)] border-b border-neutral-100' : 'bg-transparent'" class="transition-all duration-300">
@@ -427,6 +438,18 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Page Loader
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500); // Wait for transition duration
+            }
+        });
+    </script>
     @livewireScripts
 </body>
 </html>

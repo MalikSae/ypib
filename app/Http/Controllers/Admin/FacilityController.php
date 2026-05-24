@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class FacilityController extends Controller
 {
@@ -34,7 +37,16 @@ class FacilityController extends Controller
         $validated['order'] = $validated['order'] ?? 0;
 
         if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('facilities', 'public');
+            $manager = new ImageManager(new Driver());
+            $filename = Str::uuid() . '.webp';
+            $path = 'facilities/' . $filename;
+            
+            $image = $manager->read($request->file('image'));
+            $image->scaleDown(width: 1200);
+            $encoded = $image->toWebp(80);
+            
+            Storage::disk('public')->put($path, (string) $encoded);
+            $validated['image_path'] = $path;
         }
 
         Facility::create($validated);
@@ -64,7 +76,16 @@ class FacilityController extends Controller
             if ($facility->image_path) {
                 Storage::disk('public')->delete($facility->image_path);
             }
-            $validated['image_path'] = $request->file('image')->store('facilities', 'public');
+            $manager = new ImageManager(new Driver());
+            $filename = Str::uuid() . '.webp';
+            $path = 'facilities/' . $filename;
+            
+            $image = $manager->read($request->file('image'));
+            $image->scaleDown(width: 1200);
+            $encoded = $image->toWebp(80);
+            
+            Storage::disk('public')->put($path, (string) $encoded);
+            $validated['image_path'] = $path;
         }
 
         $facility->update($validated);

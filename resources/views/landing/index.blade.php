@@ -119,7 +119,7 @@
     {{-- Image Container for Bottom Anchoring --}}
     <div class="pub-container hero-img-container" style="position:absolute; bottom:0; left:0; right:0; height:100%; pointer-events:none;">
         <div style="position:relative; width:100%; height:100%;">
-            <img src="{{ asset('images/mahasiswa.png') }}" class="hero-image" alt="Mahasiswa YPIB" style="position:absolute; bottom:0; right:0; max-height: 90%; width: auto; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); pointer-events:auto;">
+            <img src="{{ asset('images/mahasiswa.png') }}" fetchpriority="high" loading="eager" class="hero-image" alt="Mahasiswa YPIB" style="position:absolute; bottom:0; right:0; max-height: 90%; width: auto; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); pointer-events:auto;">
         </div>
     </div>
 

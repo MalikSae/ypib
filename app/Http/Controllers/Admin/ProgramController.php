@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ProgramController extends Controller
 {
@@ -82,8 +84,17 @@ class ProgramController extends Controller
 
             // Handle Galleries
             if ($request->hasFile('gallery')) {
+                $manager = new ImageManager(new Driver());
                 foreach ($request->file('gallery') as $file) {
-                    $path = $file->store('programs', 'public');
+                    $filename = Str::uuid() . '.webp';
+                    $path = 'programs/' . $filename;
+                    
+                    $image = $manager->read($file);
+                    $image->scaleDown(width: 1200);
+                    $encoded = $image->toWebp(80);
+                    
+                    Storage::disk('public')->put($path, (string) $encoded);
+                    
                     ProgramGallery::create([
                         'program_id' => $program->id,
                         'image_path' => $path
@@ -150,8 +161,17 @@ class ProgramController extends Controller
 
             // Handle Galleries
             if ($request->hasFile('gallery')) {
+                $manager = new ImageManager(new Driver());
                 foreach ($request->file('gallery') as $file) {
-                    $path = $file->store('programs', 'public');
+                    $filename = Str::uuid() . '.webp';
+                    $path = 'programs/' . $filename;
+                    
+                    $image = $manager->read($file);
+                    $image->scaleDown(width: 1200);
+                    $encoded = $image->toWebp(80);
+                    
+                    Storage::disk('public')->put($path, (string) $encoded);
+                    
                     ProgramGallery::create([
                         'program_id' => $program->id,
                         'image_path' => $path
