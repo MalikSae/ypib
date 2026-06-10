@@ -21,7 +21,10 @@ class ReferrerController extends Controller
             return redirect()->route('referrer.dashboard');
         }
 
-        return view('referrer.index');
+        $maxReferralReward = \App\Models\Program::max('referral_reward_amount') ?? 50000;
+        $maxReRegistrationReward = \App\Models\Program::max('re_registration_reward_amount') ?? 1000000;
+
+        return view('referrer.index', compact('maxReferralReward', 'maxReRegistrationReward'));
     }
 
     public function register(Request $request)

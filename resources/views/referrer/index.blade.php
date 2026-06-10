@@ -2,6 +2,20 @@
 @section('title', 'Program Afiliasi — PMB YPIB Majalengka')
 
 @section('content')
+@php
+if (!function_exists('formatJuta')) {
+    function formatJuta($amount) {
+        if ($amount >= 1000000) {
+            $juta = $amount / 1000000;
+            if ($juta == (int)$juta) {
+                return 'Rp ' . number_format($juta, 0, ',', '.') . ' Juta';
+            }
+            return 'Rp ' . str_replace('.', ',', (string)round($juta, 1)) . ' Juta';
+        }
+        return 'Rp ' . number_format($amount, 0, ',', '.');
+    }
+}
+@endphp
 <style>
     /* Global Variables based on new UI */
     :root {
@@ -473,7 +487,7 @@
                 </div>
                 <h3 style="font-size:18px;font-weight:800;margin:0 0 8px 0;color:var(--ypib-dark);">Guru / BK SMA-SMK</h3>
                 <p style="font-weight:600;font-size:14px;margin:0 0 12px 0;color:#1D4ED8;">Bantu siswa, dapat apresiasi.</p>
-                <p style="font-size:14px;color:var(--ypib-gray);margin:0;line-height:1.6;">Bantu siswa kamu menemukan pilihan kuliah di YPIB. Setiap siswa yang mendaftar dan diterima, kamu dapat komisi hingga Rp1.050.000 per orang.</p>
+                <p style="font-size:14px;color:var(--ypib-gray);margin:0;line-height:1.6;">Bantu siswa kamu menemukan pilihan kuliah di YPIB. Setiap siswa yang mendaftar dan diterima, kamu dapat komisi hingga Rp{{ number_format($maxReferralReward + $maxReRegistrationReward, 0, ',', '.') }} per orang.</p>
             </div>
 
             <div class="persona-card">
@@ -523,22 +537,22 @@
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Pendaftaran</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp50.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReferralReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 1 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReferralReward * 20) }}</span>
                         </div>
                         <div style="border-bottom:1px dashed #E2E8F0;margin:12px 0;"></div>
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Daftar Ulang</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp1.000.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReRegistrationReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 20 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReRegistrationReward * 20) }}</span>
                         </div>
                     </div>
                     <div class="tier-footer">
                         <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.7);margin-bottom:4px;">Total Pendapatan</div>
-                        <div style="font-size:24px;font-weight:800;">Rp 21.000.000</div>
+                        <div style="font-size:24px;font-weight:800;">Rp {{ number_format(($maxReferralReward + $maxReRegistrationReward) * 20, 0, ',', '.') }}</div>
                     </div>
                 </div>
 
@@ -552,22 +566,22 @@
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Pendaftaran</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp50.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReferralReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 2,5 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReferralReward * 50) }}</span>
                         </div>
                         <div style="border-bottom:1px dashed #E2E8F0;margin:12px 0;"></div>
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Daftar Ulang</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp1.000.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReRegistrationReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 50 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReRegistrationReward * 50) }}</span>
                         </div>
                     </div>
                     <div class="tier-footer tier-footer-highlight">
                         <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:rgba(0,0,0,0.6);margin-bottom:4px;">Total Pendapatan</div>
-                        <div style="font-size:28px;font-weight:800;">Rp 52.500.000</div>
+                        <div style="font-size:28px;font-weight:800;">Rp {{ number_format(($maxReferralReward + $maxReRegistrationReward) * 50, 0, ',', '.') }}</div>
                     </div>
                 </div>
 
@@ -581,22 +595,22 @@
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Pendaftaran</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp50.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReferralReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 5 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReferralReward * 100) }}</span>
                         </div>
                         <div style="border-bottom:1px dashed #E2E8F0;margin:12px 0;"></div>
                         <div class="tier-item" style="align-items:center;">
                             <div>
                                 <div style="color:var(--ypib-dark);font-weight:600;">Komisi Daftar Ulang</div>
-                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp1.000.000/orang</div>
+                                <div style="font-size:12px;color:var(--ypib-gray);margin-top:2px;">Rp{{ number_format($maxReRegistrationReward, 0, ',', '.') }}/orang</div>
                             </div>
-                            <span style="font-weight:700;color:var(--ypib-dark);">Rp 100 Juta</span>
+                            <span style="font-weight:700;color:var(--ypib-dark);">{{ formatJuta($maxReRegistrationReward * 100) }}</span>
                         </div>
                     </div>
                     <div class="tier-footer">
                         <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:rgba(255,255,255,0.7);margin-bottom:4px;">Total Pendapatan</div>
-                        <div style="font-size:24px;font-weight:800;">Rp 105.000.000</div>
+                        <div style="font-size:24px;font-weight:800;">Rp {{ number_format(($maxReferralReward + $maxReRegistrationReward) * 100, 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>
@@ -783,7 +797,7 @@
                 "Siapa saja yang bisa jadi affiliator?" => "Siapa pun bisa — mahasiswa aktif, alumni, guru, konten kreator, maupun masyarakat umum. Tidak ada syarat khusus untuk bergabung.",
                 "Kapan komisi saya cair?" => "Komisi dicairkan otomatis setiap bulan langsung ke rekening yang kamu daftarkan. Tidak perlu request manual.",
                 "Bagaimana sistem tahu pendaftar berasal dari saya?" => "Setiap affiliator mendapat link unik personal. Siapa pun yang mendaftar lewat link tersebut otomatis tercatat atas namamu — meskipun mereka mendaftar beberapa hari setelah klik link pertama kali.",
-                "Apa bedanya komisi pendaftaran dan daftar ulang?" => "Komisi pendaftaran (Rp50.000) didapat saat calon mahasiswa mengisi formulir lewat linkmu. Komisi daftar ulang (Rp1.000.000) didapat saat mereka resmi diterima dan melakukan daftar ulang."
+                "Apa bedanya komisi pendaftaran dan daftar ulang?" => "Komisi pendaftaran (Rp{{ number_format($maxReferralReward, 0, ',', '.') }}) didapat saat calon mahasiswa mengisi formulir lewat linkmu. Komisi daftar ulang (Rp{{ number_format($maxReRegistrationReward, 0, ',', '.') }}) didapat saat mereka resmi diterima dan melakukan daftar ulang."
             ];
             @endphp
 
