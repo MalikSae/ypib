@@ -57,8 +57,11 @@
         $status     = $registration->status;
         $step2Active= in_array($status, ['menunggu_pembayaran','menunggu_konfirmasi']);
         $step2Done  = !in_array($status, ['menunggu_pembayaran','menunggu_konfirmasi']);
-        $step3Done  = in_array($status, ['terdaftar','diterima','ditolak','perlu_revisi', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']);
-        $step4Done  = in_array($status, ['diterima','ditolak','perlu_revisi', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']);
+        $step3Done  = in_array($status, ['terdaftar','menunggu_review_berkas','diterima','ditolak','perlu_revisi_berkas', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']);
+        
+        $step4Active= in_array($status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas']);
+        $step4Done  = in_array($status, ['diterima','ditolak', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']);
+        
         $step5Active= in_array($status, ['diterima', 'menunggu_konfirmasi_daftar_ulang']);
         $step5Done  = in_array($status, ['daftar_ulang_selesai']);
     @endphp
@@ -183,19 +186,73 @@
 
             {{-- Step 4 --}}
             <div class="relative mb-6">
-                <div class="absolute -left-14 top-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-[3px] border-white z-10 {{ $step4Done ? 'bg-green-600 text-white' : 'bg-[#DEE3E9] text-[#8595A4]' }}">
+                <div class="absolute -left-14 top-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-[3px] border-white z-10 {{ $step4Done ? 'bg-[#082e8f] text-white' : ($step4Active ? 'bg-orange-600 text-white' : 'bg-[#DEE3E9] text-[#8595A4]') }}">
                     @if($step4Done)
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                     @else 4 @endif
                 </div>
-                <div class="text-sm font-semibold text-neutral-900 pt-1">Hasil Seleksi</div>
-                @if($step4Done && $status !== 'ditolak' && $status !== 'perlu_revisi')
+                <div class="text-sm font-semibold flex items-center pt-1 {{ $step4Active ? 'text-orange-600' : ($step4Done ? 'text-neutral-900' : 'text-[#8595A4]') }}">
+                    Pemberkasan (Ijazah / SKL)
+                    @if($status === 'menunggu_review_berkas')
+                        <span class="bg-[#e6edfc] text-primary-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full ml-2 leading-tight">Menunggu Review</span>
+                    @elseif($status === 'perlu_revisi_berkas')
+                        <span class="bg-orange-50 text-orange-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full ml-2 leading-tight">Perlu Revisi</span>
+                    @elseif($status === 'terdaftar')
+                        <span class="bg-orange-50 text-orange-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full ml-2 leading-tight">Belum Upload</span>
+                    @endif
+                </div>
+
+                @if($step4Active)
+                    @if($status === 'perlu_revisi_berkas')
+                        <div class="bg-orange-50 border border-orange-300 rounded-xl p-3.5 mt-2.5 mb-3">
+                            <div class="font-bold text-orange-600 text-[15px] flex items-center gap-1.5">
+                                <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+                                Berkas Perlu Direvisi
+                            </div>
+                            <div class="text-[13px] text-orange-700 mt-1">Silakan upload ulang dokumen Ijazah atau SKL yang lebih jelas/sesuai.</div>
+                        </div>
+                    @endif
+
+                    @if($registration->document_proof)
+                        <div class="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-lg py-3 px-3.5 text-[13px] mb-2.5 mt-2.5">
+                            <svg class="w-4 h-4 shrink-0 text-green-700" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                            <div>
+                                <div class="font-semibold text-green-700">Dokumen sudah diunggah</div>
+                                <div class="text-[11px] text-green-600">{{ basename($registration->document_proof) }}</div>
+                            </div>
+                            <a href="{{ Storage::url($registration->document_proof) }}" target="_blank"
+                               class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
+                        </div>
+                    @endif
+
+                    @if($status !== 'menunggu_review_berkas')
+                        <div class="mt-3">
+                            <form method="POST" action="{{ route('registration.upload-document') }}" enctype="multipart/form-data">
+                                @csrf
+                                <div class="flex flex-wrap items-start gap-2.5">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="flex items-center gap-2.5 border border-neutral-300 bg-white rounded-lg py-2 px-3 cursor-pointer transition-colors hover:bg-neutral-50">
+                                            <svg class="w-[18px] h-[18px] shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                                            <span id="file-name-doc" class="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis text-neutral-500">Pilih file Ijazah/SKL...</span>
+                                            <input type="file" name="document_proof" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="document.getElementById('file-name-doc').textContent = this.files[0] ? this.files[0].name : 'Pilih file Ijazah/SKL...'; document.getElementById('file-name-doc').classList.remove('text-neutral-500'); document.getElementById('file-name-doc').classList.add('text-neutral-900');">
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn-primary h-10 px-5 text-sm shrink-0">Upload</button>
+                                </div>
+                                <div class="text-[11px] mt-2 leading-relaxed text-neutral-400">
+                                    <div>Format file: JPG, PNG, PDF. Maks: 15MB.</div>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
+
+                @elseif($step4Done && $status !== 'ditolak')
                     <div class="bg-green-50 border border-green-200 rounded-xl p-3.5 mt-2.5">
                         <div class="font-bold text-[15px] flex items-center gap-1.5 text-green-700">
                             <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                            Selamat! Anda DITERIMA
+                            Berkas Disetujui (DITERIMA)
                         </div>
-                        <div class="text-[13px] text-green-600 mt-1">Pantau informasi registrasi ulang dari PMB YPIB.</div>
+                        <div class="text-[13px] text-green-600 mt-1">Anda dapat melanjutkan ke tahap Daftar Ulang.</div>
                     </div>
                 @elseif($status === 'ditolak')
                     <div class="bg-red-50 border border-red-200 rounded-xl p-3.5 mt-2.5">
@@ -205,16 +262,8 @@
                         </div>
                         <div class="text-[13px] text-red-600 mt-1">Hubungi admin PMB untuk informasi lebih lanjut.</div>
                     </div>
-                @elseif($status === 'perlu_revisi')
-                    <div class="bg-orange-50 border border-orange-300 rounded-xl p-3.5 mt-2.5">
-                        <div class="font-bold text-orange-600 text-[15px] flex items-center gap-1.5">
-                            <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-                            Perlu Revisi Data
-                        </div>
-                        <div class="text-[13px] text-orange-700 mt-1">Hubungi admin PMB untuk instruksi revisi.</div>
-                    </div>
                 @else
-                    <div class="text-xs mt-0.5 text-neutral-400">Akan diumumkan setelah verifikasi selesai.</div>
+                    <div class="text-xs mt-0.5 text-neutral-400">Tahap pemberkasan dilakukan setelah mendapat nomor registrasi.</div>
                 @endif
             </div>
 

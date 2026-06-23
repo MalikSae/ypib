@@ -44,13 +44,51 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full">
-            <thead class="bg-neutral-50 border-b border-neutral-100">
+            <thead class="bg-neutral-50/50">
+                @php
+                    $sort = request('sort');
+                    $dir = request('dir', 'desc');
+                    
+                    $sortUrl = function($column) use ($sort, $dir) {
+                        $newDir = ($sort === $column && $dir === 'desc') ? 'asc' : 'desc';
+                        return request()->fullUrlWithQuery(['sort' => $column, 'dir' => $newDir]);
+                    };
+                    
+                    $sortIcon = function($column) use ($sort, $dir) {
+                        $isAsc = $sort === $column && $dir === 'asc';
+                        $isDesc = $sort === $column && $dir === 'desc';
+                        $colorTop = $isAsc ? 'text-primary-600' : 'text-neutral-300';
+                        $colorBottom = $isDesc ? 'text-primary-600' : 'text-neutral-300';
+                        
+                        return '<div class="flex flex-col ml-1">
+                            <svg class="w-2.5 h-2.5 ' . $colorTop . ' -mb-[1px]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-2.5 h-2.5 ' . $colorBottom . ' -mt-[1px]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </div>';
+                    };
+                @endphp
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Nama & Email</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Referral</th>
-                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">Klik</th>
-                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">Konversi</th>
-                    <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Total Reward</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                        <a href="{{ $sortUrl('klik') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 {{ $sort === 'klik' ? 'text-primary-600' : '' }}">
+                            Klik {!! $sortIcon('klik') !!}
+                        </a>
+                    </th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                        <a href="{{ $sortUrl('konversi') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 {{ $sort === 'konversi' ? 'text-primary-600' : '' }}">
+                            Konversi {!! $sortIcon('konversi') !!}
+                        </a>
+                    </th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                        <a href="{{ $sortUrl('rate') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 {{ $sort === 'rate' ? 'text-primary-600' : '' }}">
+                            % Konversi {!! $sortIcon('rate') !!}
+                        </a>
+                    </th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                        <a href="{{ $sortUrl('reward') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 justify-end w-full {{ $sort === 'reward' ? 'text-primary-600' : '' }}">
+                            Total Reward {!! $sortIcon('reward') !!}
+                        </a>
+                    </th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-24">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
@@ -59,7 +97,9 @@
                 @forelse($referrers as $referrer)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-bold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $referrer->user?->name ?? '—' }}</div>
+                        <a href="{{ route('admin.referrers.show', $referrer->id) }}" class="block text-sm font-bold text-primary-600 hover:text-primary-800 transition-colors">
+                            {{ $referrer->user?->name ?? '—' }}
+                        </a>
                         <div class="text-xs mt-0.5 text-neutral-500">{{ $referrer->user?->email }}</div>
                     </td>
                     <td class="px-6 py-4">
@@ -73,9 +113,14 @@
                     <td class="px-6 py-4 text-center">
                         <span class="text-sm font-bold text-neutral-900">{{ $referrer->total_conversions }}</span>
                     </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="text-sm font-bold text-neutral-600">
+                            {{ $referrer->total_clicks > 0 ? number_format(($referrer->total_conversions / $referrer->total_clicks) * 100, 0) : 0 }}%
+                        </span>
+                    </td>
                     <td class="px-6 py-4 text-right">
                         <span class="text-sm font-bold text-neutral-900">
-                            Rp {{ number_format($referrer->rewards->whereIn('status',['approved','disbursed'])->sum('amount'), 0, ',', '.') }}
+                            Rp {{ number_format($referrer->total_reward ?? $referrer->rewards->whereIn('status',['approved','disbursed'])->sum('amount'), 0, ',', '.') }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-center">
@@ -86,14 +131,12 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <form method="POST" action="{{ route('admin.referrers.toggle', $referrer->id) }}" class="m-0 inline-block">
-                            @csrf
-                            <button type="submit"
-                                    onclick="return confirm('Toggle status afiliasi ini?')"
-                                    class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 border {{ $referrer->status === 'active' ? 'border-neutral-200 bg-white text-error-600 hover:bg-error-50 hover:border-error-200' : 'border-neutral-200 bg-white text-success-600 hover:bg-success-50 hover:border-success-200' }}">
-                                {{ $referrer->status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}
-                            </button>
-                        </form>
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('admin.referrers.show', $referrer->id) }}" 
+                               class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 border border-neutral-200 bg-white text-primary-600 hover:bg-primary-50 hover:border-primary-200">
+                                Detail
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -113,5 +156,6 @@
         </div>
     @endif
 </div>
+
 
 @endsection

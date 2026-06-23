@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pendaftaran', [RegistrationController::class, 'index'])->name('registration.index');
     Route::get('/pendaftaran/status', [RegistrationController::class, 'status'])->name('registration.status');
     Route::post('/pendaftaran/upload-bukti', [RegistrationController::class, 'uploadProof'])->name('registration.upload-proof');
+    Route::post('/pendaftaran/upload-berkas', [RegistrationController::class, 'uploadDocument'])->name('registration.upload-document');
     Route::post('/pendaftaran/upload-daftar-ulang-bukti', [RegistrationController::class, 'uploadReRegistrationProof'])->name('registration.upload-re-registration-proof');
 });
 
@@ -75,6 +76,10 @@ Route::prefix('admin')
         Route::get('/pengaturan', [\App\Http\Controllers\Admin\PmbPeriodController::class, 'index'])->name('periods.index');
         Route::put('/pengaturan/{id}', [\App\Http\Controllers\Admin\PmbPeriodController::class, 'update'])->name('periods.update');
 
+        // Pengaturan Email
+        Route::get('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'mail'])->name('settings.mail');
+        Route::put('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'updateMail'])->name('settings.mail.update');
+
         // Master Data
         Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
         Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
@@ -92,11 +97,13 @@ Route::prefix('admin')
             Route::post('/{id}/upload-bukti', [AdminRegistrationController::class, 'uploadBukti'])->name('upload-bukti');
             Route::post('/{id}/status', [AdminRegistrationController::class, 'updateStatus'])->name('update-status');
             Route::post('/{id}/catatan', [AdminRegistrationController::class, 'addNote'])->name('add-note');
+            Route::post('/{id}/referral', [AdminRegistrationController::class, 'updateReferral'])->name('update-referral');
         });
 
         // Referrer management
         Route::prefix('afiliasi')->name('referrers.')->group(function () {
             Route::get('/', [AdminReferrerController::class, 'index'])->name('index');
+            Route::get('/{id}', [AdminReferrerController::class, 'show'])->name('show');
             Route::post('/{id}/toggle', [AdminReferrerController::class, 'toggle'])->name('toggle');
         });
 
@@ -111,6 +118,9 @@ Route::prefix('admin')
             Route::post('/referrers/mass-disburse', [AdminRewardController::class, 'massDisburseReferrers'])->name('referrers.mass-disburse');
             Route::post('/referrers/export', [AdminRewardController::class, 'exportCsvReferrers'])->name('referrers.export');
         });
+
+        // User management
+        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
     });
 
 require __DIR__.'/auth.php';

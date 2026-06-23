@@ -18,8 +18,8 @@
 {{-- ── 2-Column Layout ── --}}
 <div class="detail-grid">
 
-    {{-- ══════ KOLOM KIRI ══════ --}}
-    <div style="display:flex;flex-direction:column;gap:20px;">
+    {{-- ══════ KOLOM KIRI (Konten Utama) ══════ --}}
+    <div class="min-w-0" style="display:flex;flex-direction:column;gap:20px;">
 
         {{-- Card 1: Header Pendaftar --}}
         <div style="border-radius:16px;padding:24px;" class="bg-primary-600">
@@ -38,12 +38,13 @@
                     $labelsMap = [
                         'menunggu_pembayaran' => 'Menunggu Pembayaran',
                         'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
-                        'terdaftar'           => 'Terdaftar',
+                        'terdaftar'           => 'Terdaftar (Belum Upload Berkas)',
+                        'menunggu_review_berkas' => 'Menunggu Review Berkas',
+                        'perlu_revisi_berkas' => 'Perlu Revisi Berkas',
                         'diterima'            => 'Diterima (Menunggu Daftar Ulang)',
                         'menunggu_konfirmasi_daftar_ulang' => 'Menunggu Konfirmasi Daftar Ulang',
                         'daftar_ulang_selesai'=> 'Daftar Ulang Selesai',
                         'ditolak'             => 'Ditolak',
-                        'perlu_revisi'        => 'Perlu Revisi',
                     ];
                     @endphp
                     {{ $labelsMap[$registration->status] ?? $registration->status }}
@@ -156,6 +157,29 @@
                 </form>
             @endif
         </div>
+
+        {{-- Card 4.2: Dokumen Ijazah / SKL --}}
+        @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Dokumen Ijazah / SKL</div>
+
+            @if($registration->document_proof)
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <a href="{{ Storage::url($registration->document_proof) }}" target="_blank"
+                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                       onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
+                        <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                        Lihat Dokumen
+                    </a>
+                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->document_proof) }}</span>
+                </div>
+            @else
+                <p style="font-size:14px;margin:0;" class="text-neutral-400">Belum ada dokumen Ijazah / SKL diupload pendaftar.</p>
+            @endif
+        </div>
+        @endif
 
         {{-- Card 4.4: Tagihan Daftar Ulang --}}
         @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
@@ -310,24 +334,24 @@
         </div>
         @endif
 
-        {{-- Card Aksi 2: Update Status Seleksi --}}
-        @if(in_array($registration->status, ['terdaftar', 'diterima', 'ditolak', 'perlu_revisi']))
+        {{-- Card Aksi 2: Review & Approval Berkas --}}
+        @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'ditolak']))
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Update Status Seleksi</h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Tetapkan atau ubah hasil seleksi pendaftar.</p>
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Review & Approval Berkas</h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Review Ijazah/SKL dan setujui untuk lanjut Daftar Ulang.</p>
             <form method="POST" action="{{ route('admin.registrations.update-status', $registration->id) }}">
                 @csrf
                 <select name="status"
                         style="width:100%;height:44px;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px;" class="border-neutral-300 text-neutral-900 bg-white">
-                    <option value="">— Pilih Hasil —</option>
+                    <option value="">— Pilih Hasil Review —</option>
                     <option value="diterima"     {{ $registration->status === 'diterima'     ? 'selected' : '' }}>Diterima</option>
                     <option value="ditolak"      {{ $registration->status === 'ditolak'      ? 'selected' : '' }}>Ditolak</option>
-                    <option value="perlu_revisi" {{ $registration->status === 'perlu_revisi' ? 'selected' : '' }}>Perlu Revisi</option>
+                    <option value="perlu_revisi_berkas" {{ $registration->status === 'perlu_revisi_berkas' ? 'selected' : '' }}>Perlu Revisi Berkas</option>
                 </select>
                 <button type="submit"
                         style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
                         onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
-                    Perbarui Status
+                    Perbarui Status Berkas
                 </button>
             </form>
         </div>
@@ -391,6 +415,89 @@
             </form>
         </div>
 
+        {{-- Card Aksi 4: Reset Password --}}
+        @if($registration->user_id)
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Reset Password</h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Atur ulang password pengguna jika lupa atau kesulitan login.</p>
+            
+            @if ($errors->has('password') || $errors->has('password_confirmation'))
+                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                    <ul style="margin:0;padding-left:20px;">
+                        @if($errors->has('password')) <li>{{ $errors->first('password') }}</li> @endif
+                        @if($errors->has('password_confirmation')) <li>{{ $errors->first('password_confirmation') }}</li> @endif
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('admin.users.reset-password', $registration->user_id) }}" onsubmit="return confirm('Anda yakin ingin mereset password akun ini?')">
+                @csrf
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <label style="display:block;font-size:12px;font-weight:600;" class="text-neutral-500">Password Baru</label>
+                        <button type="button" onclick="useStandardPassword('reg_new_pwd', 'reg_conf_pwd')" class="text-primary-600 bg-primary-50" style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; border:none; cursor:pointer; font-family:inherit;">
+                            Gunakan pass standar
+                        </button>
+                    </div>
+                    <div style="position:relative;">
+                        <input type="password" id="reg_new_pwd" name="password" required minlength="8" 
+                               style="width:100%;height:44px;border-radius:8px;padding:0 40px 0 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;border:1px solid #CED0D4;" 
+                               class="text-neutral-900 bg-white" placeholder="Masukkan password baru">
+                        <button type="button" onclick="toggleRegPassword('reg_new_pwd', 'reg_eye_1')" style="position:absolute;right:0;top:0;bottom:0;padding:0 12px;background:none;border:none;cursor:pointer;display:flex;align-items:center;" class="text-neutral-400">
+                            <svg id="reg_eye_1" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Konfirmasi Password</label>
+                    <div style="position:relative;">
+                        <input type="password" id="reg_conf_pwd" name="password_confirmation" required minlength="8" 
+                               style="width:100%;height:44px;border-radius:8px;padding:0 40px 0 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;border:1px solid #CED0D4;" 
+                               class="text-neutral-900 bg-white" placeholder="Ulangi password baru">
+                        <button type="button" onclick="toggleRegPassword('reg_conf_pwd', 'reg_eye_2')" style="position:absolute;right:0;top:0;bottom:0;padding:0 12px;background:none;border:none;cursor:pointer;display:flex;align-items:center;" class="text-neutral-400">
+                            <svg id="reg_eye_2" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit"
+                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;background-color:#EF4444;color:white;"
+                        onmouseover="this.style.backgroundColor='#DC2626'" onmouseout="this.style.backgroundColor='#EF4444'">
+                    Simpan Password Baru
+                </button>
+            </form>
+        </div>
+        @endif
+
+        {{-- Card Aksi 5: Ubah Afiliator --}}
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Ubah Afiliator</h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Ubah atau hapus afiliator untuk pendaftar ini.</p>
+            
+            <form method="POST" action="{{ route('admin.registrations.update-referral', $registration->id) }}" onsubmit="return confirm('Anda yakin ingin mengubah afiliator pendaftar ini?')">
+                @csrf
+                <select name="referrer_id"
+                        style="width:100%;height:44px;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px;" class="border-neutral-300 text-neutral-900 bg-white">
+                    <option value="">— Tidak Ada (Langsung) —</option>
+                    @foreach($referrers as $ref)
+                        <option value="{{ $ref->id }}" {{ $registration->referrer_id == $ref->id ? 'selected' : '' }}>
+                            {{ $ref->user->name ?? 'User Dihapus' }} ({{ $ref->code }})
+                        </option>
+                    @endforeach
+                </select>
+                <button type="submit"
+                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;"
+                        onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'" class="bg-neutral-100 text-primary-600 border-neutral-300">
+                    Simpan Afiliator
+                </button>
+            </form>
+        </div>
+
         {{-- Reward Info --}}
         @if($registration->rewards && $registration->rewards->count() > 0)
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
@@ -419,5 +526,24 @@
     </div>{{-- end kolom kanan --}}
 
 </div>{{-- end 2-column grid --}}
+
+<script>
+function useStandardPassword(newId, confId) {
+    document.getElementById(newId).value = 'ypib2026';
+    document.getElementById(confId).value = 'ypib2026';
+}
+
+function toggleRegPassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+    }
+}
+</script>
 
 @endsection

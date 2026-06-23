@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Cookie;
+use App\Models\Referrer;
 
 class RegisteredUserController extends Controller
 {
@@ -39,18 +41,33 @@ class RegisteredUserController extends Controller
             'email.regex' => 'Format alamat email tidak valid (harus mengandung domain seperti .com, .id, dll).',
         ]);
 
+        $referrerId = null;
+        $refCode = Cookie::get('ref');
+        if ($refCode) {
+            $referrer = Referrer::where('code', $refCode)->where('status', 'active')->first();
+            if ($referrer) {
+                $referrerId = $referrer->id;
+            }
+        }
+
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'phone'    => $request->phone,
-            'role'     => 'mahasiswa',
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
+            'phone'       => $request->phone,
+            'role'        => 'mahasiswa',
+            'referrer_id' => $referrerId,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $response = redirect()->intended(route('dashboard', absolute: false));
+        if ($refCode) {
+            $response->withoutCookie('ref');
+        }
+
+        return $response;
     }
 }

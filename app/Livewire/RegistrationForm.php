@@ -121,13 +121,21 @@ class RegistrationForm extends Component
             $this->phone = $user->phone ?? '';
         }
 
-        // Check referral cookie & resolve referrer_id
-        $refCode = Cookie::get('ref', '');
-        if ($refCode) {
-            $referrer = Referrer::where('code', $refCode)->where('status', 'active')->first();
+        // Determine referrer: First from User account (if locked), then fallback to cookie (for backward compatibility if needed)
+        if ($user && $user->referrer_id) {
+            $referrer = Referrer::find($user->referrer_id);
             if ($referrer) {
-                $this->referrer_code = $refCode;
+                $this->referrer_code = $referrer->code;
                 $this->referrer_id   = $referrer->id;
+            }
+        } else {
+            $refCode = Cookie::get('ref', '');
+            if ($refCode) {
+                $referrer = Referrer::where('code', $refCode)->where('status', 'active')->first();
+                if ($referrer) {
+                    $this->referrer_code = $refCode;
+                    $this->referrer_id   = $referrer->id;
+                }
             }
         }
 

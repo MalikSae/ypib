@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'is_referrer',
+        'referrer_id',
     ];
 
     protected $hidden = [
@@ -38,6 +39,11 @@ class User extends Authenticatable
     public function referrer()
     {
         return $this->hasOne(Referrer::class);
+    }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(Referrer::class, 'referrer_id');
     }
 
     public function registrations()

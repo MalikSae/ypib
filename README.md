@@ -1,66 +1,94 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# YPIB - Sistem Informasi Penerimaan Mahasiswa Baru (PMB) & Afiliasi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Project ini adalah Sistem Informasi Penerimaan Mahasiswa Baru (PMB) terpadu untuk YPIB (Yayasan Pendidikan Imam Bonjol) Majalengka. Selain melayani pendaftaran mahasiswa, sistem ini dilengkapi dengan program Afiliasi/Referral untuk memberikan reward kepada pihak yang berhasil merekomendasikan pendaftar baru.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Portal Publik & Pendaftaran (Calon Mahasiswa)
+- Halaman Landing informatif dengan daftar Fakultas, Program Studi, dan Fasilitas.
+- Formulir pendaftaran mahasiswa baru secara online.
+- Dashboard Calon Mahasiswa untuk melihat status kelulusan, upload bukti pembayaran registrasi awal, dan upload bukti daftar ulang.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. Program Afiliasi (Referral System)
+- Pendaftaran mandiri untuk menjadi Mitra Afiliasi (Referrer).
+- Link referral unik untuk setiap mitra (`/ref/{code}`).
+- Pencatatan otomatis (tracking) pengunjung dan pendaftar yang mendaftar melalui tautan afiliasi.
+- Dashboard Afiliasi untuk memantau trafik klik, jumlah konversi (pendaftar), serta mengatur rekening bank tujuan pencairan reward.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Dashboard Admin & Operator
+- **Manajemen Master Data:** Pengaturan detail Fakultas, Program Studi, Galeri Prodi, Fasilitas Kampus, dan Partner kerja sama.
+- **Manajemen Pendaftar:** Verifikasi validitas pembayaran, persetujuan status pendaftaran, penambahan catatan (notes), serta konfirmasi daftar ulang.
+- **Manajemen Periode PMB:** Konfigurasi gelombang PMB (aktif/non-aktif), batas tanggal, biaya registrasi, serta nominal komisi afiliasi.
+- **Manajemen Pencairan Reward:** 
+  - Verifikasi dan persetujuan payout untuk para affiliate.
+  - Fitur *Mass-Disburse* (Pencairan Massal) untuk kemudahan operasional.
+  - Export laporan pencairan dalam format CSV.
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Sistem ini dikembangkan dengan kerangka kerja modern **TALL Stack**:
+- **Backend:** [Laravel 12.x](https://laravel.com)
+- **Frontend Logic:** [Livewire 4.x](https://livewire.laravel.com) & [Alpine.js](https://alpinejs.dev)
+- **Styling:** [Tailwind CSS 3.4](https://tailwindcss.com) (dengan plugin Forms & Typography)
+- **Bundler:** [Vite](https://vitejs.dev/)
+- **Database ORM:** Eloquent ORM
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 📦 Kebutuhan Sistem Dasar
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- Database Server (MySQL/MariaDB) atau ekstensial SQLite
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Panduan Instalasi (Development)
 
-## Laravel Sponsors
+1. **Persiapkan Repositori**
+   Pastikan Anda sudah berada di root direktori project.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install Dependensi Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-### Premium Partners
+3. **Konfigurasi Environment**
+   Ganti nama `.env.example` menjadi `.env`, lalu generate App Key:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Jangan lupa atur konfigurasi `DB_*` di dalam file `.env` sesuai database Anda.*
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. **Jalankan Migrasi & Seeder**
+   Membangun struktur database sekaligus mengisi data fundamental (Fakultas, Prodi, Periode PMB, dll).
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
 
-## Contributing
+5. **Build Aset Frontend**
+   ```bash
+   # Mode kompilasi satu kali:
+   npm run build
+   
+   # Atau mode watch untuk development:
+   npm run dev
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+6. **Jalankan Server Lokal**
+   ```bash
+   php artisan serve
+   ```
+   Akses project melalui URL lokal, umumnya `http://localhost:8000`.
 
-## Code of Conduct
+## 🔐 Kredensial Pengguna Akses (Seeder)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Setelah proses seed database selesai, Anda dapat mencoba login pada rute `/login` menggunakan akun berikut:
 
-## Security Vulnerabilities
+**Super Administrator:**
+- **Email:** `admin@ypib.ac.id`
+- **Password:** `password`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Operator PMB:**
+- **Email:** `operator@ypib.ac.id`
+- **Password:** `password`
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+*(Gunakan role operator untuk melihat batasan fitur yang tidak memerlukan otorisasi manajerial penuh).*

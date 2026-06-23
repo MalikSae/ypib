@@ -79,6 +79,39 @@ class RegistrationController extends Controller
             ->with('success', 'Bukti transfer berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
     }
 
+    public function uploadDocument(Request $request)
+    {
+        $request->validate([
+            'document_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+        ], [
+            'document_proof.required' => 'File Ijazah/SKL wajib diupload.',
+            'document_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
+            'document_proof.max'      => 'Ukuran file maksimal 15MB.',
+        ]);
+
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        // Cek status, harus terdaftar atau perlu_revisi_berkas
+        if (!in_array($registration->status, ['terdaftar', 'perlu_revisi_berkas'])) {
+            return redirect()->route('registration.status')->with('error', 'Status pendaftaran belum memenuhi syarat untuk upload berkas.');
+        }
+
+        // Hapus file lama jika ada
+        if ($registration->document_proof && Storage::disk('public')->exists($registration->document_proof)) {
+            Storage::disk('public')->delete($registration->document_proof);
+        }
+
+        $path = $request->file('document_proof')->store('dokumen-ijazah', 'public');
+
+        $registration->update([
+            'document_proof' => $path,
+            'status'         => 'menunggu_review_berkas',
+        ]);
+
+        return redirect()->route('registration.status')
+            ->with('success', 'Berkas berhasil diupload! Admin akan segera mereview dokumen Anda.');
+    }
+
     public function uploadReRegistrationProof(Request $request)
     {
         $request->validate([

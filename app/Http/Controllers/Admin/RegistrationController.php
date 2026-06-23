@@ -53,7 +53,9 @@ class RegistrationController extends Controller
             'period', 'paymentLogs.actor', 'rewards'
         ])->findOrFail($id);
 
-        return view('admin.registrations.show', compact('registration'));
+        $referrers = Referrer::with('user')->where('status', 'active')->get();
+
+        return view('admin.registrations.show', compact('registration', 'referrers'));
     }
 
     public function confirmPayment(Request $request, int $id)
@@ -171,19 +173,19 @@ class RegistrationController extends Controller
     public function updateStatus(Request $request, int $id)
     {
         $request->validate([
-            'status' => 'required|in:diterima,ditolak,perlu_revisi',
+            'status' => 'required|in:diterima,ditolak,perlu_revisi_berkas',
         ]);
 
         $registration = Registration::findOrFail($id);
 
         // Hanya bisa update status jika sudah terdaftar
-        if ($registration->status !== 'terdaftar') {
-            return redirect()->back()->with('error', 'Status hanya bisa diubah setelah pendaftar berstatus Terdaftar.');
+        if (!in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'ditolak'])) {
+            return redirect()->back()->with('error', 'Status hanya bisa diubah setelah pendaftar menyelesaikan pendaftaran.');
         }
 
         $registration->update(['status' => $request->status]);
 
-        $labels = ['diterima' => 'Diterima', 'ditolak' => 'Ditolak', 'perlu_revisi' => 'Perlu Revisi'];
+        $labels = ['diterima' => 'Diterima', 'ditolak' => 'Ditolak', 'perlu_revisi_berkas' => 'Perlu Revisi Berkas'];
 
         PaymentLog::create([
             'registration_id' => $registration->id,
@@ -270,5 +272,51 @@ class RegistrationController extends Controller
         $registration->update(['internal_notes' => $request->note]);
 
         return redirect()->back()->with('success', 'Catatan internal berhasil disimpan.');
+    }
+
+    public function updateReferral(Request $request, int $id)
+    {
+        $request->validate([
+            'referrer_id' => 'nullable|exists:referrers,id',
+        ]);
+
+        $registration = Registration::findOrFail($id);
+        $oldReferrerId = $registration->referrer_id;
+        $newReferrerId = $request->referrer_id;
+
+        if ($oldReferrerId != $newReferrerId) {
+            $registration->update(['referrer_id' => $newReferrerId]);
+            
+            if ($registration->user_id) {
+                \App\Models\User::where('id', $registration->user_id)->update(['referrer_id' => $newReferrerId]);
+            }
+
+            // Pindahkan komisi (Reward) dan sesuaikan total konversi
+            $hasConverted = \App\Models\Reward::where('registration_id', $registration->id)->exists();
+            
+            if ($hasConverted) {
+                if ($oldReferrerId) {
+                    \App\Models\Referrer::where('id', $oldReferrerId)->decrement('total_conversions');
+                }
+                
+                if ($newReferrerId) {
+                    \App\Models\Referrer::where('id', $newReferrerId)->increment('total_conversions');
+                    \App\Models\Reward::where('registration_id', $registration->id)->update(['referrer_id' => $newReferrerId]);
+                } else {
+                    \App\Models\Reward::where('registration_id', $registration->id)->delete();
+                }
+            }
+
+            $referrerName = $newReferrerId ? Referrer::with('user')->find($newReferrerId)->user->name : 'Dihapus / Tidak Ada';
+            
+            PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by'        => Auth::id(),
+                'action'          => 'referral_changed',
+                'note'            => 'Afiliator diubah menjadi ' . $referrerName . ' oleh admin ' . Auth::user()->name . '. Komisi disesuaikan.',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Afiliator dan komisi berhasil diperbarui.');
     }
 }

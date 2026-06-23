@@ -28,6 +28,7 @@ class Registration extends Model
         'graduation_year',
         'school_grade',
         'payment_proof',
+        'document_proof',
         're_registration_payment_proof',
         'status',
         'internal_notes',
