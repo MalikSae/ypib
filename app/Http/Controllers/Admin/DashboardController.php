@@ -15,6 +15,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // ── Notifications / Action Required ───────────────────────
+        $notifications = [
+            'pending_payment' => Registration::where('status', 'menunggu_konfirmasi')->count(),
+            'pending_review'  => Registration::where('status', 'menunggu_review_berkas')->count(),
+            'pending_reregistration' => Registration::where('status', 'menunggu_konfirmasi_daftar_ulang')->count(),
+        ];
+
         // ── Main KPI stats ─────────────────────────────────────────
         $stats = [
             'total'            => Registration::count(),
@@ -54,7 +61,7 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard', compact(
-            'stats', 'statusBreakdown', 'topReferrers', 'recent', 'activityFeed'
+            'notifications', 'stats', 'statusBreakdown', 'topReferrers', 'recent', 'activityFeed'
         ));
     }
 }

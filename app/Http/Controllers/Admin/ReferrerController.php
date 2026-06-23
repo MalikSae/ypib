@@ -11,6 +11,10 @@ class ReferrerController extends Controller
 {
     public function index(Request $request)
     {
+        $totalAfiliator = Referrer::count();
+        $totalKlik = Referrer::sum('total_clicks');
+        $totalKonversi = Referrer::sum('total_conversions');
+        $persentaseKonversi = $totalKlik > 0 ? ($totalKonversi / $totalKlik) * 100 : 0;
         $query = Referrer::with(['user', 'rewards', 'clicks'])
             ->withSum(['rewards as total_reward' => function($q) {
                 $q->whereIn('status', ['approved', 'disbursed']);
@@ -47,7 +51,7 @@ class ReferrerController extends Controller
         $perPage = $request->input('per_page', 20);
         $referrers = $query->paginate($perPage)->appends($request->query());
 
-        return view('admin.referrers.index', compact('referrers'));
+        return view('admin.referrers.index', compact('referrers', 'totalAfiliator', 'totalKlik', 'totalKonversi', 'persentaseKonversi'));
     }
 
     public function toggle(int $id)

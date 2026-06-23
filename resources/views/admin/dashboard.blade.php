@@ -28,6 +28,62 @@ $badgeMap = [
     </a>
 </div>
 
+{{-- Notifications / Action Required --}}
+@if($notifications['pending_payment'] > 0 || $notifications['pending_review'] > 0 || $notifications['pending_reregistration'] > 0)
+    <div class="mb-8 p-5 bg-orange-50 border border-orange-200 rounded-2xl shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+            <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 class="text-lg font-bold text-orange-900 tracking-tight">Butuh Tindakan Admin</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @if($notifications['pending_payment'] > 0)
+                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:shadow-md transition-shadow decoration-none">
+                    <div>
+                        <div class="text-2xl font-extrabold text-neutral-900 mb-1">{{ $notifications['pending_payment'] }}</div>
+                        <div class="text-xs font-semibold text-neutral-600">Verifikasi Pembayaran</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                </a>
+            @endif
+
+            @if($notifications['pending_review'] > 0)
+                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_review_berkas']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:shadow-md transition-shadow decoration-none">
+                    <div>
+                        <div class="text-2xl font-extrabold text-neutral-900 mb-1">{{ $notifications['pending_review'] }}</div>
+                        <div class="text-xs font-semibold text-neutral-600">Review Ijazah/SKL</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                    </div>
+                </a>
+            @endif
+
+            @if($notifications['pending_reregistration'] > 0)
+                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi_daftar_ulang']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:shadow-md transition-shadow decoration-none">
+                    <div>
+                        <div class="text-2xl font-extrabold text-neutral-900 mb-1">{{ $notifications['pending_reregistration'] }}</div>
+                        <div class="text-xs font-semibold text-neutral-600">Verifikasi Daftar Ulang</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                </a>
+            @endif
+        </div>
+    </div>
+@endif
+
 {{-- 4 KPI Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
