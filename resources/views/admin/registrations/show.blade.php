@@ -532,12 +532,12 @@
 
         {{-- Reward Info --}}
         @if($registration->rewards && $registration->rewards->count() > 0)
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200 mb-6">
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Reward Referral</div>
             
             <div style="display:flex;flex-direction:column;gap:12px;">
                 @foreach($registration->rewards as $reward)
-                <div style="border-radius:8px;padding:12px;" class="border-neutral-200">
+                <div style="border-radius:8px;padding:12px;" class="border-neutral-200 bg-neutral-50">
                     <div style="font-size:12px;margin-bottom:4px;font-weight:600;" class="text-neutral-400">
                         {{ $reward->reward_type === 'registration' ? 'Komisi Pendaftaran' : 'Komisi Daftar Ulang' }}
                     </div>
@@ -547,13 +547,34 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:13px;" class="text-neutral-500">Status</span>
-                        <span style="font-size:12px;font-weight:600;text-transform:capitalize;padding:2px 8px;border-radius:4px;" class="text-neutral-600 bg-neutral-100">{{ $reward->status }}</span>
+                        <span style="font-size:12px;font-weight:600;text-transform:capitalize;padding:2px 8px;border-radius:4px;" class="{{ $reward->status === 'cancelled' ? 'bg-error-50 text-error-600' : 'text-neutral-600 bg-neutral-200' }}">{{ $reward->status }}</span>
                     </div>
+                    @if($reward->notes)
+                    <div style="font-size:11px;margin-top:8px;font-style:italic;" class="text-neutral-400">
+                        {{ $reward->notes }}
+                    </div>
+                    @endif
                 </div>
                 @endforeach
             </div>
         </div>
         @endif
+
+        {{-- Card Aksi 6: Hapus Pendaftar --}}
+        <div style="border-radius:16px;padding:24px;border:1px solid #FCA5A5;" class="bg-red-50">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-red-700">Hapus Pendaftar</h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-red-600">Arsipkan data pendaftar ini. Komisi terkait akan otomatis dibatalkan dan nilai konversi afiliasi disesuaikan.</p>
+            
+            <form method="POST" action="{{ route('admin.registrations.destroy', $registration->id) }}" onsubmit="return confirm('Yakin ingin menghapus pendaftar ini? Data akan diarsipkan dan komisi terkait akan disesuaikan otomatis.')">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;border:none;background-color:#DC2626;color:#ffffff;"
+                        onmouseover="this.style.backgroundColor='#B91C1C'" onmouseout="this.style.backgroundColor='#DC2626'" class="shadow-sm">
+                    Hapus Pendaftar
+                </button>
+            </form>
+        </div>
 
     </div>{{-- end kolom kanan --}}
 

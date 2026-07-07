@@ -10,6 +10,7 @@ use App\Models\Registration;
 use App\Models\Reward;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -325,6 +326,71 @@ class RegistrationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Afiliator dan komisi berhasil diperbarui.');
+    }
+
+    public function destroy(int $id)
+    {
+        DB::transaction(function () use ($id) {
+            $registration = Registration::findOrFail($id);
+
+            // Ambil semua reward bertipe 'registration' milik pendaftar ini
+            $rewards = Reward::where('registration_id', $registration->id)
+                ->where('reward_type', 'registration')
+                ->get();
+
+            foreach ($rewards as $reward) {
+                if (in_array($reward->status, ['pending', 'approved'])) {
+                    $reward->update([
+                        'status' => 'cancelled',
+                        'notes' => ($reward->notes ? $reward->notes . "\n" : "") . "Dibatalkan otomatis - pendaftar dihapus pada " . now()->format('d/m/Y H:i'),
+                    ]);
+                    
+                    if ($reward->referrer_id) {
+                        $referrer = Referrer::find($reward->referrer_id);
+                        if ($referrer && $referrer->total_conversions > 0) {
+                            $referrer->decrement('total_conversions');
+                        }
+                    }
+                } elseif ($reward->status === 'disbursed') {
+                    // Jangan ubah status reward, tapi tetap kurangi total_conversions
+                    if ($reward->referrer_id) {
+                        $referrer = Referrer::find($reward->referrer_id);
+                        if ($referrer && $referrer->total_conversions > 0) {
+                            $referrer->decrement('total_conversions');
+                        }
+                    }
+                }
+            }
+
+            $registration->delete();
+        });
+
+        return redirect()->route('admin.registrations.index')->with('success', 'Pendaftar berhasil dihapus/diarsipkan.');
+    }
+
+    public function trash(Request $request)
+    {
+        $query = Registration::onlyTrashed()->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('registration_number', 'like', "%{$search}%")
+                  ->orWhere('full_name', 'like', "%{$search}%");
+            });
+        }
+
+        $registrations = $query->latest('deleted_at')->paginate(20)->withQueryString();
+        $totalRegistrations = Registration::onlyTrashed()->count();
+
+        return view('admin.registrations.trash', compact('registrations', 'totalRegistrations'));
+    }
+
+    public function restore(int $id)
+    {
+        $registration = Registration::onlyTrashed()->findOrFail($id);
+        $registration->restore();
+
+        return redirect()->back()->with('success', 'Pendaftar berhasil dipulihkan. Reward/komisi terkait perlu dicek manual jika diperlukan.');
     }
 
     public function export(Request $request)

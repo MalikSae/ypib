@@ -93,7 +93,10 @@ Route::prefix('admin')
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
             Route::get('/export', [AdminRegistrationController::class, 'export'])->name('export');
+            Route::get('/sampah', [AdminRegistrationController::class, 'trash'])->name('trash');
             Route::get('/{id}', [AdminRegistrationController::class, 'show'])->name('show');
+            Route::delete('/{id}', [AdminRegistrationController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/restore', [AdminRegistrationController::class, 'restore'])->name('restore');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
             Route::post('/{id}/konfirmasi-daftar-ulang', [AdminRegistrationController::class, 'confirmReRegistration'])->name('confirm-re-registration');
             Route::post('/{id}/upload-bukti', [AdminRegistrationController::class, 'uploadBukti'])->name('upload-bukti');
