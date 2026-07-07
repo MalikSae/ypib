@@ -65,26 +65,46 @@
 
 {{-- FILTER SECTION --}}
 <div class="mb-6 bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
-    <form action="{{ route('admin.referrers.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-            <select name="per_page" id="per_page" onchange="this.form.submit()" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 cursor-pointer shadow-sm">
-                <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
-                <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-            </select>
-        </div>
-        
-        <div class="relative w-full sm:w-72">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+        <form action="{{ route('admin.referrers.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center w-full lg:w-auto">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
+                <select name="per_page" id="per_page" onchange="this.form.submit()" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 cursor-pointer shadow-sm">
+                    <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
+                    <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                    <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
+                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                </select>
             </div>
-            <input type="text" name="search" value="{{ request('search') }}" class="block w-full p-2 pl-10 text-sm font-medium border border-neutral-300 rounded-lg bg-white focus:ring-primary-500 focus:border-primary-500 placeholder-neutral-400 text-neutral-900 shadow-sm transition-shadow" placeholder="Cari nama, email, kode...">
-        </div>
-        <button type="submit" class="hidden">Submit</button>
-    </form>
+            
+            <div class="relative w-full sm:w-72">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" name="search" value="{{ request('search') }}" class="block w-full p-2 pl-10 text-sm font-medium border border-neutral-300 rounded-lg bg-white focus:ring-primary-500 focus:border-primary-500 placeholder-neutral-400 text-neutral-900 shadow-sm transition-shadow" placeholder="Cari nama, email, kode...">
+            </div>
+            <button type="submit" class="hidden">Submit</button>
+        </form>
+
+        <form method="GET" action="{{ route('admin.referrers.export') }}" class="flex gap-3 items-center w-full lg:w-auto overflow-x-auto">
+            <select name="period_id" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 shadow-sm min-w-[140px]">
+                <option value="">Semua Periode</option>
+                @foreach(\App\Models\PmbPeriod::all() as $period)
+                    <option value="{{ $period->id }}">{{ $period->name }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 shadow-sm min-w-[140px]">
+                <option value="">Semua Status</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Excel
+            </button>
+        </form>
+    </div>
 </div>
 
 {{-- TABLE WRAPPER --}}

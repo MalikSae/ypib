@@ -108,12 +108,12 @@ $activeStatus = request('status', '');
 <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-0">
 
     {{-- Search Bar Row --}}
-    <div class="px-5 pt-5 pb-4 border-b border-neutral-100">
-        <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex gap-3">
+    <div class="px-5 pt-5 pb-4 border-b border-neutral-100 flex flex-col md:flex-row justify-between gap-4">
+        <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex gap-3 flex-1">
             @if($activeStatus)
                 <input type="hidden" name="status" value="{{ $activeStatus }}">
             @endif
-            <div class="flex-1 relative">
+            <div class="flex-1 relative max-w-md">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                     <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -129,6 +129,27 @@ $activeStatus = request('status', '');
                     <x-button type="button" variant="outline" color="neutral" size="sm">Reset</x-button>
                 </a>
             @endif
+        </form>
+
+        <form method="GET" action="{{ route('admin.registrations.export') }}" class="flex gap-2 shrink-0 overflow-x-auto">
+            <select name="period_id" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]">
+                <option value="">Semua Periode</option>
+                @foreach(\App\Models\PmbPeriod::all() as $period)
+                    <option value="{{ $period->id }}">{{ $period->name }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]">
+                <option value="">Semua Status</option>
+                @foreach($statusConfig as $key => $cfg)
+                    @if($key !== '')
+                        <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>{{ $cfg['label'] }}</option>
+                    @endif
+                @endforeach
+            </select>
+            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-green-600 border border-transparent rounded-xl shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Excel
+            </button>
         </form>
     </div>
 

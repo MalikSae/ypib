@@ -91,6 +91,7 @@ Route::prefix('admin')
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
+            Route::get('/export', [AdminRegistrationController::class, 'export'])->name('export');
             Route::get('/{id}', [AdminRegistrationController::class, 'show'])->name('show');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
             Route::post('/{id}/konfirmasi-daftar-ulang', [AdminRegistrationController::class, 'confirmReRegistration'])->name('confirm-re-registration');
@@ -103,6 +104,7 @@ Route::prefix('admin')
         // Referrer management
         Route::prefix('afiliasi')->name('referrers.')->group(function () {
             Route::get('/', [AdminReferrerController::class, 'index'])->name('index');
+            Route::get('/export', [AdminReferrerController::class, 'export'])->name('export');
             Route::get('/{id}', [AdminReferrerController::class, 'show'])->name('show');
             Route::post('/{id}/toggle', [AdminReferrerController::class, 'toggle'])->name('toggle');
         });

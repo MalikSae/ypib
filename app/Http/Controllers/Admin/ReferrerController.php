@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Referrer;
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReferrerController extends Controller
 {
@@ -78,5 +79,13 @@ class ReferrerController extends Controller
         ])->findOrFail($id);
 
         return view('admin.referrers.show', compact('referrer'));
+    }
+
+    public function export(Request $request)
+    {
+        $periodId = $request->query('period_id');
+        $status   = $request->query('status');
+        $filename = 'Data_Referrer_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new \App\Exports\ReferrerExport($periodId, $status), $filename);
     }
 }

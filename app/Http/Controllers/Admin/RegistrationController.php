@@ -11,6 +11,7 @@ use App\Models\Reward;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RegistrationController extends Controller
 {
@@ -318,5 +319,13 @@ class RegistrationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Afiliator dan komisi berhasil diperbarui.');
+    }
+
+    public function export(Request $request)
+    {
+        $periodId = $request->query('period_id');
+        $status   = $request->query('status');
+        $filename = 'Data_Pendaftar_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new \App\Exports\RegistrationExport($periodId, $status), $filename);
     }
 }
