@@ -79,6 +79,35 @@ class RegistrationController extends Controller
             ->with('success', 'Bukti transfer berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
     }
 
+    public function uploadAlumniCard(Request $request)
+    {
+        $request->validate([
+            'alumni_card_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ], [
+            'alumni_card_proof.required' => 'File kartu alumni wajib diupload.',
+            'alumni_card_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
+            'alumni_card_proof.max'      => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        // Hapus file lama jika ada
+        if ($registration->alumni_card_proof && Storage::disk('public')->exists($registration->alumni_card_proof)) {
+            Storage::disk('public')->delete($registration->alumni_card_proof);
+        }
+
+        $path = $request->file('alumni_card_proof')->store('kartu-alumni', 'public');
+
+        $registration->update([
+            'alumni_card_proof' => $path,
+            'registration_type' => 'alumni',
+            'status'            => 'menunggu_konfirmasi',
+        ]);
+
+        return redirect()->route('registration.status')
+            ->with('success', 'Kartu alumni berhasil dikirim! Admin akan segera mengkonfirmasi pendaftaran Anda.');
+    }
+
     public function uploadDocument(Request $request)
     {
         $request->validate([

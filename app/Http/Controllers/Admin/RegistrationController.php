@@ -63,20 +63,26 @@ class RegistrationController extends Controller
     {
         $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
 
-        if (!$registration->payment_proof) {
-            $request->validate([
-                'bukti_bayar' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
-                'note'        => 'required_without:bukti_bayar|string|max:1000',
-            ], [
-                'bukti_bayar.required_without' => 'Bukti bayar wajib diupload jika catatan kosong.',
-                'note.required_without'        => 'Catatan wajib diisi jika bukti bayar tidak diupload.',
-                'bukti_bayar.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
-                'bukti_bayar.max'              => 'Ukuran file maksimal 2MB.',
-            ]);
+        if ($registration->registration_type === 'alumni') {
+            if (!$registration->alumni_card_proof && !$request->filled('note')) {
+                return redirect()->back()->with('error', 'Kartu alumni belum diunggah. Silakan isi catatan jika ingin melewati (override manual).');
+            }
+        } else {
+            if (!$registration->payment_proof) {
+                $request->validate([
+                    'bukti_bayar' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
+                    'note'        => 'required_without:bukti_bayar|string|max:1000',
+                ], [
+                    'bukti_bayar.required_without' => 'Bukti bayar wajib diupload jika catatan kosong.',
+                    'note.required_without'        => 'Catatan wajib diisi jika bukti bayar tidak diupload.',
+                    'bukti_bayar.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
+                    'bukti_bayar.max'              => 'Ukuran file maksimal 2MB.',
+                ]);
 
-            if ($request->hasFile('bukti_bayar')) {
-                $path = $request->file('bukti_bayar')->store('bukti-bayar', 'public');
-                $registration->payment_proof = $path;
+                if ($request->hasFile('bukti_bayar')) {
+                    $path = $request->file('bukti_bayar')->store('bukti-bayar', 'public');
+                    $registration->payment_proof = $path;
+                }
             }
         }
 

@@ -33,22 +33,27 @@
             @endif
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
                 <div style="font-size:24px;font-weight:700;" class="text-white">{{ $registration->full_name }}</div>
-                <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;" class="text-white">
-                    @php
-                    $labelsMap = [
-                        'menunggu_pembayaran' => 'Menunggu Pembayaran',
-                        'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
-                        'terdaftar'           => 'Terdaftar (Belum Upload Berkas)',
-                        'menunggu_review_berkas' => 'Menunggu Review Berkas',
-                        'perlu_revisi_berkas' => 'Perlu Revisi Berkas',
-                        'diterima'            => 'Diterima (Menunggu Daftar Ulang)',
-                        'menunggu_konfirmasi_daftar_ulang' => 'Menunggu Konfirmasi Daftar Ulang',
-                        'daftar_ulang_selesai'=> 'Daftar Ulang Selesai',
-                        'ditolak'             => 'Ditolak',
-                    ];
-                    @endphp
-                    {{ $labelsMap[$registration->status] ?? $registration->status }}
-                </span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;background:rgba(0,0,0,0.15);" class="text-white">
+                        Jalur: {{ $registration->registration_type === 'alumni' ? 'Alumni YPIB' : 'Reguler' }}
+                    </span>
+                    <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;" class="text-white">
+                        @php
+                        $labelsMap = [
+                            'menunggu_pembayaran' => 'Menunggu Pembayaran',
+                            'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
+                            'terdaftar'           => 'Terdaftar (Belum Upload Berkas)',
+                            'menunggu_review_berkas' => 'Menunggu Review Berkas',
+                            'perlu_revisi_berkas' => 'Perlu Revisi Berkas',
+                            'diterima'            => 'Diterima (Menunggu Daftar Ulang)',
+                            'menunggu_konfirmasi_daftar_ulang' => 'Menunggu Konfirmasi Daftar Ulang',
+                            'daftar_ulang_selesai'=> 'Daftar Ulang Selesai',
+                            'ditolak'             => 'Ditolak',
+                        ];
+                        @endphp
+                        {{ $labelsMap[$registration->status] ?? $registration->status }}
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -114,47 +119,67 @@
             </div>
         </div>
 
-        {{-- Card 4: Bukti Pembayaran --}}
+        {{-- Card 4: Bukti Pembayaran / Kartu Alumni --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Bukti Pembayaran</div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">
+                {{ $registration->registration_type === 'alumni' ? 'Kartu Alumni YPIB' : 'Bukti Pembayaran' }}
+            </div>
 
-            @if($registration->payment_proof)
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                    <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
-                       onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
-                        <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        Lihat Bukti Bayar
-                    </a>
-                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->payment_proof) }}</span>
-                </div>
-            @else
-                <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
-            @endif
-
-            {{-- Form upload admin --}}
-            @if(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
-                <form method="POST"
-                      action="{{ route('admin.registrations.upload-bukti', $registration->id) }}"
-                      enctype="multipart/form-data"
-                      style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
-                    @csrf
-                    <div style="font-size:12px;font-weight:700;margin-bottom:10px;" class="text-neutral-500">Upload Bukti Bayar (Admin)</div>
-                    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
-                        <div style="flex:1;min-width:200px;">
-                            <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
-                                   style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
-                            <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
-                        </div>
-                        <button type="submit"
-                                style="height:40px;border-radius:9999px;padding:0 20px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background 0.15s;"
-                                onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
-                            Upload
-                        </button>
+            @if($registration->registration_type === 'alumni')
+                @if($registration->alumni_card_proof)
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank"
+                           style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                           onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
+                            <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                            Lihat Kartu Alumni
+                        </a>
+                        <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->alumni_card_proof) }}</span>
                     </div>
-                </form>
+                @else
+                    <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada kartu alumni diupload.</p>
+                @endif
+            @else
+                @if($registration->payment_proof)
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
+                           style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                           onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
+                            <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                            Lihat Bukti Bayar
+                        </a>
+                        <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->payment_proof) }}</span>
+                    </div>
+                @else
+                    <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
+                @endif
+
+                {{-- Form upload admin --}}
+                @if(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
+                    <form method="POST"
+                          action="{{ route('admin.registrations.upload-bukti', $registration->id) }}"
+                          enctype="multipart/form-data"
+                          style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
+                        @csrf
+                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;" class="text-neutral-500">Upload Bukti Bayar (Admin)</div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:200px;">
+                                <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
+                                       style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                                <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
+                            </div>
+                            <button type="submit"
+                                    style="height:40px;border-radius:9999px;padding:0 20px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background 0.15s;"
+                                    onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+                @endif
             @endif
         </div>
 
@@ -296,8 +321,12 @@
         {{-- Card Aksi 1: Konfirmasi Pembayaran --}}
         @if(in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi']))
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Konfirmasi Pembayaran</h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Konfirmasi pembayaran dan generate nomor pendaftaran.</p>
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">
+                {{ $registration->registration_type === 'alumni' ? 'Konfirmasi Alumni' : 'Konfirmasi Pembayaran' }}
+            </h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">
+                {{ $registration->registration_type === 'alumni' ? 'Verifikasi kartu alumni pendaftar.' : 'Konfirmasi pembayaran dan generate nomor pendaftaran.' }}
+            </p>
 
             @if ($errors->any())
                 <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
@@ -313,22 +342,25 @@
                   action="{{ route('admin.registrations.confirm-payment', $registration->id) }}" enctype="multipart/form-data">
                 @csrf
                 
-                @if(!$registration->payment_proof)
+                @if($registration->registration_type !== 'alumni' && !$registration->payment_proof)
                     <div style="margin-bottom: 12px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Upload Bukti (Opsional jika ada catatan)</label>
                         <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
                     </div>
+                @endif
+                
+                @if(!$registration->payment_proof && $registration->registration_type !== 'alumni' || $registration->registration_type === 'alumni' && !$registration->alumni_card_proof)
                     <div style="margin-bottom: 16px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti)</label>
-                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Bayar tunai di kampus..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'" class="border-neutral-300">{{ old('note') }}</textarea>
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti/kartu)</label>
+                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Diverifikasi manual..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'" class="border-neutral-300">{{ old('note') }}</textarea>
                     </div>
                 @endif
 
                 <button type="submit"
-                        onclick="return confirm('Konfirmasi pembayaran dan generate nomor pendaftaran?')"
+                        onclick="return confirm('{{ $registration->registration_type === 'alumni' ? 'Verifikasi alumni dan generate nomor pendaftaran?' : 'Konfirmasi pembayaran dan generate nomor pendaftaran?' }}')"
                         style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
                         onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
-                    Konfirmasi Pembayaran
+                    {{ $registration->registration_type === 'alumni' ? 'Verifikasi & Konfirmasi Alumni' : 'Konfirmasi Pembayaran' }}
                 </button>
             </form>
         </div>

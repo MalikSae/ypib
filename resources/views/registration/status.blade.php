@@ -101,66 +101,126 @@
                 </div>
 
                 @if($step2Active)
-                {{-- Info rekening --}}
-                <div class="bg-amber-50 border border-amber-300 rounded-xl p-5 mt-3">
-                    <div class="text-[13px] font-bold text-amber-900 mb-3 flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                        Informasi Pembayaran
+                <div x-data="{ isAlumni: {{ $registration->registration_type === 'alumni' ? 'true' : 'false' }} }">
+                    <div class="flex justify-end mt-1 mb-2">
+                        <button type="button" @click="isAlumni = !isAlumni" class="text-xs text-primary-600 font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                            <span x-show="!isAlumni">Saya Alumni YPIB, klik di sini</span>
+                            <span x-show="isAlumni" style="display:none;">Kembali ke Pembayaran Reguler</span>
+                        </button>
                     </div>
-                    <div class="grid grid-cols-[100px_1fr] gap-2 text-[13px] text-amber-900/80">
-                        <span>Bank</span><strong class="text-amber-950">{{ $registration->period->university_bank_name ?? '-' }}</strong>
-                        <span>No. Rekening</span>
-                        <div class="flex items-center gap-1.5">
-                            <strong class="font-mono text-amber-950">{{ $registration->period->university_bank_account ?? '-' }}</strong>
-                            @if(!empty($registration->period->university_bank_account))
-                                <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->period->university_bank_account }}').then(() => alert('Nomor rekening berhasil disalin!'))" class="bg-transparent border-none p-0.5 cursor-pointer text-amber-800 flex items-center justify-center transition-colors hover:text-primary-700" title="Salin nomor rekening">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                                    </svg>
-                                </button>
-                            @endif
-                        </div>
-                        <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
-                        <span>Nominal</span><strong class="text-orange-700">Rp {{ number_format($registration->firstChoiceProgram?->registration_fee ?? 0, 0, ',', '.') }}</strong>
-                    </div>
-                </div>
 
-                {{-- Upload bukti --}}
-                <div class="mt-3">
-                    @if($registration->payment_proof)
-                        <div class="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-lg py-3 px-3.5 text-[13px] mb-2.5">
-                            <svg class="w-4 h-4 shrink-0 text-green-700" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
-                            <div>
-                                <div class="font-semibold text-green-700">Bukti sudah diunggah</div>
-                                <div class="text-[11px] text-green-600">{{ basename($registration->payment_proof) }}</div>
+                    <div x-show="!isAlumni">
+                        {{-- Info rekening --}}
+                        <div class="bg-amber-50 border border-amber-300 rounded-xl p-5">
+                            <div class="text-[13px] font-bold text-amber-900 mb-3 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                Informasi Pembayaran
                             </div>
-                            <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
-                               class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
-                        </div>
-                    @endif
-                    <form method="POST" action="{{ route('registration.upload-proof') }}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="flex flex-wrap items-start gap-2.5">
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="flex items-center gap-2.5 border border-neutral-300 bg-white rounded-lg py-2 px-3 cursor-pointer transition-colors hover:bg-neutral-50">
-                                    <svg class="w-[18px] h-[18px] shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                                    <span id="file-name" class="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis text-neutral-500">Pilih file bukti bayar...</span>
-                                    <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih file bukti bayar...'; document.getElementById('file-name').classList.remove('text-neutral-500'); document.getElementById('file-name').classList.add('text-neutral-900');">
-                                </label>
+                            <div class="grid grid-cols-[100px_1fr] gap-2 text-[13px] text-amber-900/80">
+                                <span>Bank</span><strong class="text-amber-950">{{ $registration->period->university_bank_name ?? '-' }}</strong>
+                                <span>No. Rekening</span>
+                                <div class="flex items-center gap-1.5">
+                                    <strong class="font-mono text-amber-950">{{ $registration->period->university_bank_account ?? '-' }}</strong>
+                                    @if(!empty($registration->period->university_bank_account))
+                                        <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->period->university_bank_account }}').then(() => alert('Nomor rekening berhasil disalin!'))" class="bg-transparent border-none p-0.5 cursor-pointer text-amber-800 flex items-center justify-center transition-colors hover:text-primary-700" title="Salin nomor rekening">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                                <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
+                                <span>Nominal</span><strong class="text-orange-700">Rp {{ number_format($registration->firstChoiceProgram?->registration_fee ?? 0, 0, ',', '.') }}</strong>
                             </div>
-                            <button type="submit" class="btn-primary h-10 px-5 text-sm shrink-0">Upload</button>
                         </div>
-                        <div class="text-[11px] mt-2 leading-relaxed text-neutral-400">
-                            <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
-                            <div class="mt-0.5">Atau konfirmasi ke admin: <strong>{{ $registration->period->admin_whatsapp ?? '(0233) 123456' }}</strong></div>
+
+                        {{-- Upload bukti --}}
+                        <div class="mt-3">
+                            @if($registration->payment_proof)
+                                <div class="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-lg py-3 px-3.5 text-[13px] mb-2.5">
+                                    <svg class="w-4 h-4 shrink-0 text-green-700" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                                    <div>
+                                        <div class="font-semibold text-green-700">Bukti sudah diunggah</div>
+                                        <div class="text-[11px] text-green-600">{{ basename($registration->payment_proof) }}</div>
+                                    </div>
+                                    <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
+                                       class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
+                                </div>
+                            @endif
+                            <form method="POST" action="{{ route('registration.upload-proof') }}" enctype="multipart/form-data">
+                                @csrf
+                                <div class="flex flex-wrap items-start gap-2.5">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="flex items-center gap-2.5 border border-neutral-300 bg-white rounded-lg py-2 px-3 cursor-pointer transition-colors hover:bg-neutral-50">
+                                            <svg class="w-[18px] h-[18px] shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                                            <span id="file-name" class="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis text-neutral-500">Pilih file bukti bayar...</span>
+                                            <input type="file" name="payment_proof" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'Pilih file bukti bayar...'; document.getElementById('file-name').classList.remove('text-neutral-500'); document.getElementById('file-name').classList.add('text-neutral-900');">
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn-primary h-10 px-5 text-sm shrink-0">Upload</button>
+                                </div>
+                                <div class="text-[11px] mt-2 leading-relaxed text-neutral-400">
+                                    <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
+                                    <div class="mt-0.5">Atau konfirmasi ke admin: <strong>{{ $registration->period->admin_whatsapp ?? '(0233) 123456' }}</strong></div>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
+
+                    <div x-show="isAlumni" style="display:none;">
+                        {{-- Info Alumni --}}
+                        <div class="bg-blue-50 border border-blue-300 rounded-xl p-5">
+                            <div class="text-[13px] font-bold text-blue-900 mb-2 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
+                                Verifikasi Alumni YPIB
+                            </div>
+                            <div class="text-[13px] text-blue-900/80 leading-relaxed">
+                                Sebagai alumni YPIB, Anda tidak perlu membayar biaya pendaftaran. Silakan upload kartu siswa/mahasiswa YPIB yang masih berlaku sebagai gantinya.
+                            </div>
+                        </div>
+
+                        {{-- Upload bukti alumni --}}
+                        <div class="mt-3">
+                            @if($registration->alumni_card_proof)
+                                <div class="flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-lg py-3 px-3.5 text-[13px] mb-2.5">
+                                    <svg class="w-4 h-4 shrink-0 text-green-700" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                                    <div>
+                                        <div class="font-semibold text-green-700">Kartu Alumni sudah diunggah</div>
+                                        <div class="text-[11px] text-green-600">{{ basename($registration->alumni_card_proof) }}</div>
+                                    </div>
+                                    <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank"
+                                       class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
+                                </div>
+                            @endif
+                            <form method="POST" action="{{ route('registration.upload-alumni-card') }}" enctype="multipart/form-data">
+                                @csrf
+                                <div class="flex flex-wrap items-start gap-2.5">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="flex items-center gap-2.5 border border-neutral-300 bg-white rounded-lg py-2 px-3 cursor-pointer transition-colors hover:bg-neutral-50">
+                                            <svg class="w-[18px] h-[18px] shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                                            <span id="file-name-alumni" class="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis text-neutral-500">Pilih file kartu alumni...</span>
+                                            <input type="file" name="alumni_card_proof" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="document.getElementById('file-name-alumni').textContent = this.files[0] ? this.files[0].name : 'Pilih file kartu alumni...'; document.getElementById('file-name-alumni').classList.remove('text-neutral-500'); document.getElementById('file-name-alumni').classList.add('text-neutral-900');">
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn-primary h-10 px-5 text-sm shrink-0">Upload Kartu</button>
+                                </div>
+                                <div class="text-[11px] mt-2 leading-relaxed text-neutral-400">
+                                    <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 @elseif($step2Done && $registration->payment_proof)
                     <div class="mt-1">
                         <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
                            class="text-xs text-primary-700 hover:underline">Lihat bukti bayar</a>
+                    </div>
+                @elseif($step2Done && $registration->alumni_card_proof)
+                    <div class="mt-1">
+                        <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank"
+                           class="text-xs text-primary-700 hover:underline">Lihat kartu alumni</a>
                     </div>
                 @endif
             </div>
