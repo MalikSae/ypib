@@ -37,6 +37,7 @@ class RegistrationExport implements FromCollection, WithHeadings, WithMapping
         return [
             'No. Registrasi',
             'Nama Lengkap',
+            'Email',
             'NIK',
             'No. HP',
             'Asal Sekolah',
@@ -56,6 +57,7 @@ class RegistrationExport implements FromCollection, WithHeadings, WithMapping
         return [
             $registration->registration_number,
             $registration->full_name,
+            $registration->user?->email,
             $registration->nik,
             $registration->phone,
             $registration->school_name,
