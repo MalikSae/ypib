@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PmbPeriod;
 use App\Models\Registration;
+use App\Models\RegistrationDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +49,99 @@ class RegistrationController extends Controller
             ->latest()
             ->first();
 
-        return view('registration.status', compact('registration'));
+        $timelineStages = $registration ? $registration->getTimelineStages() : [];
+
+        return view('registration.status', compact('registration', 'timelineStages'));
+    }
+
+    public function documents()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with('documents')
+            ->latest()
+            ->firstOrFail();
+
+        if (in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
+            return redirect()->route('registration.status')->with('error', 'Selesaikan pembayaran terlebih dahulu.');
+        }
+
+        $mandatoryLabels = [
+            'foto' => 'Foto Close Up (Latar Merah/Biru)',
+            'ktp' => 'KTP',
+            'kk' => 'Kartu Keluarga (KK)',
+            'akta_lahir' => 'Akta Lahir',
+            'transkrip_nilai' => 'Transkrip Nilai',
+            'surat_keterangan_sehat' => 'Surat Keterangan Sehat',
+        ];
+
+        return view('registration.documents', compact('registration', 'mandatoryLabels'));
+    }
+
+    public function uploadDocumentFile(Request $request)
+    {
+        $request->validate([
+            'document_type' => 'required|in:foto,ktp,kk,akta_lahir,transkrip_nilai,surat_keterangan_sehat,sertifikat,lainnya',
+            'label' => 'required_if:document_type,lainnya|nullable|string|max:255',
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+        ], [
+            'document_type.required' => 'Tipe dokumen tidak valid.',
+            'document_type.in' => 'Tipe dokumen tidak valid.',
+            'label.required_if' => 'Nama dokumen lainnya harus diisi.',
+            'file.required' => 'File dokumen wajib diupload.',
+            'file.mimes' => 'File harus berformat JPG, PNG, atau PDF.',
+            'file.max' => 'Ukuran file maksimal 15MB.',
+        ]);
+
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        $type = $request->document_type;
+        $label = $type === 'lainnya' ? $request->label : null;
+
+        if ($type !== 'lainnya') {
+            $existing = RegistrationDocument::where('registration_id', $registration->id)
+                ->where('document_type', $type)
+                ->first();
+
+            if ($existing) {
+                if ($existing->status === 'disetujui') {
+                    return back()->with('error', 'Dokumen ini sudah disetujui, tidak bisa diubah lagi. Hubungi admin jika perlu koreksi.');
+                }
+                
+                // Hapus file lama
+                if (Storage::disk('public')->exists($existing->file_path)) {
+                    Storage::disk('public')->delete($existing->file_path);
+                }
+                
+                $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
+                $existing->update([
+                    'file_path' => $path,
+                    'status' => 'menunggu_review',
+                    'review_note' => null,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                ]);
+            } else {
+                $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
+                RegistrationDocument::create([
+                    'registration_id' => $registration->id,
+                    'document_type' => $type,
+                    'file_path' => $path,
+                    'status' => 'menunggu_review',
+                ]);
+            }
+        } else {
+            $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
+            RegistrationDocument::create([
+                'registration_id' => $registration->id,
+                'document_type' => $type,
+                'label' => $label,
+                'file_path' => $path,
+                'status' => 'menunggu_review',
+            ]);
+        }
+
+        return redirect()->route('registration.documents')
+            ->with('success', 'Dokumen berhasil diupload!');
     }
 
     public function uploadProof(Request $request)
@@ -171,5 +264,89 @@ class RegistrationController extends Controller
 
         return redirect()->route('registration.status')
             ->with('success', 'Bukti transfer daftar ulang berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
+    }
+
+    public function detail()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with('firstChoiceProgram')
+            ->latest()
+            ->firstOrFail();
+
+        $canEdit = !in_array($registration->status, ['diterima', 'ditolak']);
+
+        return view('registration.detail', compact('registration', 'canEdit'));
+    }
+
+    public function updateDetail(Request $request)
+    {
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        if (in_array($registration->status, ['diterima', 'ditolak'])) {
+            return redirect()->back()->with('error', 'Data tidak bisa diedit lagi karena pendaftaran sudah diproses.');
+        }
+
+        $section = $request->input('section');
+        $rules = [];
+
+        if ($section === 'data_diri') {
+            $rules = [
+                'full_name'   => 'required|string|max:255',
+                'nisn'        => 'required|string|digits:10',
+                'nik'         => 'required|string|size:16',
+                'birth_place' => 'required|string|max:100',
+                'birth_date'  => 'required|date',
+                'gender'      => 'required|in:male,female',
+                'religion'    => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Lainnya',
+                'address'     => 'required|string',
+                'phone'       => 'required|string|max:20',
+            ];
+            $sectionName = 'Data Diri';
+        } elseif ($section === 'program_jalur') {
+            $rules = [
+                'first_choice_program_id' => 'required|exists:programs,id',
+                'admission_path'          => 'required|in:umum,prestasi,tahfidz',
+            ];
+            $sectionName = 'Program Studi & Jalur';
+        } elseif ($section === 'data_sekolah') {
+            $rules = [
+                'school_name'        => 'required|string|max:255',
+                'school_major'       => 'required|string|max:255',
+                'graduation_year'    => 'required|digits:4',
+                'certificate_number' => 'required|string|max:100',
+                'school_grade'       => 'nullable|numeric',
+            ];
+            $sectionName = 'Data Sekolah';
+        } elseif ($section === 'data_ortu') {
+            $rules = [
+                'father_name'       => 'required|string|max:255',
+                'mother_name'       => 'required|string|max:255',
+                'father_occupation' => 'required|string|max:255',
+                'mother_occupation' => 'required|string|max:255',
+            ];
+            $sectionName = 'Data Orang Tua/Wali';
+        } else {
+            return redirect()->back()->with('error', 'Section form tidak valid.');
+        }
+
+        $validatedData = $request->validate($rules);
+        $registration->update($validatedData);
+
+        $anchor = str_replace('_', '-', $section);
+
+        return redirect()->route('registration.detail', ['#' . $anchor])->with('success', "Data {$sectionName} berhasil diperbarui.");
+    }
+
+    public function downloadPdf()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with('firstChoiceProgram')
+            ->latest()
+            ->firstOrFail();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('registration.pdf-formulir', compact('registration'));
+        $fileName = 'Formulir-Pendaftaran-' . \Illuminate\Support\Str::slug($registration->full_name) . '.pdf';
+
+        return $pdf->download($fileName);
     }
 }

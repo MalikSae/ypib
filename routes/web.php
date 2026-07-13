@@ -52,6 +52,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/pendaftaran/upload-kartu-alumni', [RegistrationController::class, 'uploadAlumniCard'])->name('registration.upload-alumni-card');
     Route::post('/pendaftaran/upload-berkas', [RegistrationController::class, 'uploadDocument'])->name('registration.upload-document');
     Route::post('/pendaftaran/upload-daftar-ulang-bukti', [RegistrationController::class, 'uploadReRegistrationProof'])->name('registration.upload-re-registration-proof');
+    Route::get('/pendaftaran/dokumen', [RegistrationController::class, 'documents'])->name('registration.documents');
+    Route::post('/pendaftaran/dokumen/upload', [RegistrationController::class, 'uploadDocumentFile'])->name('registration.upload-document-file');
+    Route::get('/pendaftaran/detail', [RegistrationController::class, 'detail'])->name('registration.detail');
+    Route::post('/pendaftaran/detail/update', [RegistrationController::class, 'updateDetail'])->name('registration.detail.update');
+    Route::get('/pendaftaran/cetak', [RegistrationController::class, 'downloadPdf'])->name('registration.pdf');
 });
 
 // ── Referrer Area (Afiliasi) ────────────────────────────────────────────────
@@ -103,6 +108,7 @@ Route::prefix('admin')
             Route::post('/{id}/status', [AdminRegistrationController::class, 'updateStatus'])->name('update-status');
             Route::post('/{id}/catatan', [AdminRegistrationController::class, 'addNote'])->name('add-note');
             Route::post('/{id}/referral', [AdminRegistrationController::class, 'updateReferral'])->name('update-referral');
+            Route::post('/document/{documentId}/review', [AdminRegistrationController::class, 'reviewDocument'])->name('review-document');
         });
 
         // Referrer management

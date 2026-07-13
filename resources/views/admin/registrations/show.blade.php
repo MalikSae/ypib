@@ -206,6 +206,74 @@
         </div>
         @endif
 
+        {{-- Card 4.3: Dokumen Pendaftaran (Multi-Berkas) --}}
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Dokumen Pendaftaran (Multi-Berkas)</div>
+                @if($registration->documents && $registration->documents->count() > 0)
+                    @php
+                        $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
+                        $approvedCount = $registration->documents->whereIn('document_type', $mandatoryTypes)->where('status', 'disetujui')->count();
+                        $totalMandatory = count($mandatoryTypes);
+                    @endphp
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:9999px;background:#F1F4F7;" class="text-neutral-600">
+                        {{ $approvedCount }}/{{ $totalMandatory }} Wajib Disetujui
+                    </span>
+                @endif
+            </div>
+
+            @if($registration->documents && $registration->documents->count() > 0)
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach($registration->documents as $doc)
+                        <div style="border:1px solid #E5E7EB;border-radius:8px;padding:12px;background:#F9FAFB;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                                <div style="font-size:13px;font-weight:700;" class="text-neutral-900">
+                                    {{ $doc->document_type === 'lainnya' ? $doc->label : strtoupper(str_replace('_', ' ', $doc->document_type)) }}
+                                    @if(in_array($doc->document_type, \App\Models\RegistrationDocument::MANDATORY_TYPES))
+                                        <span style="color:#ef4444;">*</span>
+                                    @endif
+                                </div>
+                                <div>
+                                    @if($doc->status === 'disetujui')
+                                        <span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">DISETUJUI</span>
+                                    @elseif($doc->status === 'perlu_revisi')
+                                        <span style="background:#ffedd5;color:#c2410c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">REVISI</span>
+                                    @else
+                                        <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">MENUNGGU</span>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <a href="{{ Storage::url($doc->file_path) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#082e8f;font-weight:600;text-decoration:none;margin-bottom:12px;">
+                                <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                                Lihat Dokumen
+                            </a>
+
+                            @if($doc->status === 'perlu_revisi' && $doc->review_note)
+                                <div style="font-size:11px;color:#c2410c;margin-bottom:8px;font-style:italic;">
+                                    Catatan: {{ $doc->review_note }}
+                                </div>
+                            @endif
+
+                            @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas']))
+                                <form method="POST" action="{{ route('admin.registrations.review-document', $doc->id) }}" style="display:flex;gap:8px;align-items:flex-start;border-top:1px solid #E5E7EB;padding-top:12px;margin-top:4px;">
+                                    @csrf
+                                    <select name="status" style="width:130px;height:32px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 8px;">
+                                        <option value="disetujui" {{ $doc->status === 'disetujui' ? 'selected' : '' }}>Setujui</option>
+                                        <option value="perlu_revisi" {{ $doc->status === 'perlu_revisi' ? 'selected' : '' }}>Revisi</option>
+                                    </select>
+                                    <input type="text" name="review_note" placeholder="Catatan jika revisi..." value="{{ $doc->review_note }}" style="flex:1;height:32px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 8px;">
+                                    <button type="submit" style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;">Simpan</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p style="font-size:14px;margin:0;" class="text-neutral-400">Pendaftar belum mengunggah dokumen apapun.</p>
+            @endif
+        </div>
+
         {{-- Card 4.4: Tagihan Daftar Ulang --}}
         @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">

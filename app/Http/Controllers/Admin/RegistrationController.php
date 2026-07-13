@@ -7,6 +7,7 @@ use App\Models\PaymentLog;
 use App\Models\Referrer;
 use App\Models\ReferralClick;
 use App\Models\Registration;
+use App\Models\RegistrationDocument;
 use App\Models\Reward;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -268,6 +269,48 @@ class RegistrationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pembayaran daftar ulang berhasil dikonfirmasi.');
+    }
+
+    public function reviewDocument(Request $request, $documentId)
+    {
+        $request->validate([
+            'status' => 'required|in:disetujui,perlu_revisi',
+            'review_note' => 'required_if:status,perlu_revisi|nullable|string|max:1000',
+        ]);
+
+        $document = RegistrationDocument::with('registration')->findOrFail($documentId);
+        
+        $document->update([
+            'status' => $request->status,
+            'review_note' => $request->status === 'perlu_revisi' ? $request->review_note : null,
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        // Auto-progress check
+        $registration = $document->registration;
+        $mandatoryCount = count(RegistrationDocument::MANDATORY_TYPES);
+        
+        $approvedMandatoryCount = RegistrationDocument::where('registration_id', $registration->id)
+            ->whereIn('document_type', RegistrationDocument::MANDATORY_TYPES)
+            ->where('status', 'disetujui')
+            ->count();
+
+        if ($approvedMandatoryCount === $mandatoryCount) {
+            // Check if status is still in early stages
+            if (in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas'])) {
+                $registration->update(['status' => 'menunggu_tes_tulis']);
+                
+                PaymentLog::create([
+                    'registration_id' => $registration->id,
+                    'acted_by' => Auth::id(),
+                    'action' => 'documents_approved',
+                    'note' => 'Semua dokumen wajib disetujui, lanjut ke tahap Tes Tulis.',
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Review dokumen berhasil disimpan.');
     }
 
     public function addNote(Request $request, int $id)
