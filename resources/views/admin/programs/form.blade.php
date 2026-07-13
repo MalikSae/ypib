@@ -25,140 +25,184 @@
             @csrf
             @if(isset($program)) @method('PUT') @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <x-input-label for="name" value="Nama Program Studi" required="true" />
-                    <x-text-input type="text" id="name" name="name" :value="old('name', $program->name ?? '')" required
-                                  placeholder="Contoh: S1 Ilmu Keperawatan" :error="$errors->has('name')" />
-                    <x-input-error :messages="$errors->get('name')" />
-                </div>
+            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- SECTION 1: INFORMASI DASAR                      --}}
+            {{-- ═══════════════════════════════════════════════ --}}
+            <div class="mb-8">
+                <label class="block text-sm font-semibold text-neutral-900 mb-3">Informasi Dasar</label>
+                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
 
-                <div>
-                    <x-input-label for="faculty_id" value="Fakultas" required="true" />
-                    <x-select id="faculty_id" name="faculty_id" required :error="$errors->has('faculty_id')">
-                        <option value="">-- Pilih Fakultas --</option>
-                        @foreach($faculties as $faculty)
-                            <option value="{{ $faculty->id }}" {{ old('faculty_id', $program->faculty_id ?? '') == $faculty->id ? 'selected' : '' }}>
-                                {{ $faculty->name }}
-                            </option>
-                        @endforeach
-                    </x-select>
-                    <x-input-error :messages="$errors->get('faculty_id')" />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <x-input-label for="accreditation" value="Akreditasi" />
-                    <x-select id="accreditation" name="accreditation" :error="$errors->has('accreditation')">
-                        <option value="">-- Pilih Akreditasi --</option>
-                        <option value="Baik" {{ old('accreditation', $program->accreditation ?? '') == 'Baik' ? 'selected' : '' }}>Baik</option>
-                        <option value="Baik Sekali" {{ old('accreditation', $program->accreditation ?? '') == 'Baik Sekali' ? 'selected' : '' }}>Baik Sekali</option>
-                        <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Unggul</option>
-                    </x-select>
-                    <x-input-error :messages="$errors->get('accreditation')" />
-                </div>
-
-                <div>
-                    <x-input-label for="quota" value="Kuota" required="true" />
-                    <x-text-input type="number" id="quota" name="quota" :value="old('quota', $program->quota ?? 0)" required min="0" :error="$errors->has('quota')" />
-                    <x-input-error :messages="$errors->get('quota')" />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <x-input-label for="registration_fee_display" value="Biaya Pendaftaran" required="true" />
-                    <div class="relative">
-                        <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
-                        <x-text-input type="text" id="registration_fee_display" :value="number_format(old('registration_fee', $program->registration_fee ?? 0), 0, '', '.')" required
-                                      placeholder="250.000" style="padding-left: 3rem;" :error="$errors->has('registration_fee')" />
-                        <input type="hidden" name="registration_fee" id="registration_fee" value="{{ old('registration_fee', $program->registration_fee ?? 0) }}">
-                    </div>
-                    <div class="text-xs text-neutral-400 mt-1.5">Format ribuan akan muncul otomatis.</div>
-                    <x-input-error :messages="$errors->get('registration_fee')" />
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-neutral-900 mb-2">Pengaturan Komisi Afiliasi</label>
-                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200">
+                    {{-- Baris 1: Nama | Fakultas --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <x-input-label for="referral_reward_display" value="Komisi Pendaftaran Awal" required="true" />
-                            <div class="relative">
-                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
-                                <x-text-input type="text" id="referral_reward_display" :value="number_format(old('referral_reward_amount', $program->referral_reward_amount ?? 0), 0, '', '.')" required
-                                            placeholder="50.000" style="padding-left: 3rem;" :error="$errors->has('referral_reward_amount')" />
-                                <input type="hidden" name="referral_reward_amount" id="referral_reward_amount" value="{{ old('referral_reward_amount', $program->referral_reward_amount ?? 0) }}">
-                            </div>
-                            <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa membayar pendaftaran.</div>
-                            <x-input-error :messages="$errors->get('referral_reward_amount')" />
+                            <x-input-label for="name" value="Nama Program Studi" required="true" />
+                            <x-text-input type="text" id="name" name="name" :value="old('name', $program->name ?? '')" required
+                                          placeholder="Contoh: S1 Ilmu Keperawatan" :error="$errors->has('name')" />
+                            <x-input-error :messages="$errors->get('name')" />
                         </div>
                         <div>
-                            <x-input-label for="re_registration_reward_display" value="Komisi Daftar Ulang" required="true" />
-                            <div class="relative">
-                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
-                                <x-text-input type="text" id="re_registration_reward_display" :value="number_format(old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0), 0, '', '.')" required
-                                            placeholder="200.000" style="padding-left: 3rem;" :error="$errors->has('re_registration_reward_amount')" />
-                                <input type="hidden" name="re_registration_reward_amount" id="re_registration_reward_amount" value="{{ old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0) }}">
-                            </div>
-                            <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa melunasi daftar ulang.</div>
-                            <x-input-error :messages="$errors->get('re_registration_reward_amount')" />
+                            <x-input-label for="faculty_id" value="Fakultas" required="true" />
+                            <x-select id="faculty_id" name="faculty_id" required :error="$errors->has('faculty_id')">
+                                <option value="">-- Pilih Fakultas --</option>
+                                @foreach($faculties as $faculty)
+                                    <option value="{{ $faculty->id }}" {{ old('faculty_id', $program->faculty_id ?? '') == $faculty->id ? 'selected' : '' }}>
+                                        {{ $faculty->name }}
+                                    </option>
+                                @endforeach
+                            </x-select>
+                            <x-input-error :messages="$errors->get('faculty_id')" />
                         </div>
                     </div>
+
+                    {{-- Baris 2: Kode Prodi | Tipe Program --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <x-input-label for="kode_prodi" value="Kode Prodi" />
+                            <x-text-input type="text" id="kode_prodi" name="kode_prodi"
+                                          :value="old('kode_prodi', $program->kode_prodi ?? '')"
+                                          maxlength="5" inputmode="numeric" pattern="[0-9]{5}"
+                                          placeholder="Contoh: 15201"
+                                          :error="$errors->has('kode_prodi')" />
+                            <div class="text-xs text-neutral-400 mt-1.5">5 digit sesuai kode resmi program studi. Kosongkan jika belum tersedia.</div>
+                            <x-input-error :messages="$errors->get('kode_prodi')" />
+                        </div>
+                        <div>
+                            <x-input-label for="registration_track" value="Tipe Program" required="true" />
+                            <x-select id="registration_track" name="registration_track" required :error="$errors->has('registration_track')">
+                                <option value="reguler" {{ old('registration_track', $program->registration_track ?? 'reguler') == 'reguler' ? 'selected' : '' }}>Reguler</option>
+                                <option value="non_reguler" {{ old('registration_track', $program->registration_track ?? 'reguler') == 'non_reguler' ? 'selected' : '' }}>Non-Reguler</option>
+                            </x-select>
+                            <x-input-error :messages="$errors->get('registration_track')" />
+                        </div>
+                    </div>
+
+                    {{-- Baris 3: Akreditasi | Kuota --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <x-input-label for="accreditation" value="Akreditasi" />
+                            <x-select id="accreditation" name="accreditation" :error="$errors->has('accreditation')">
+                                <option value="">-- Pilih Akreditasi --</option>
+                                <option value="Baik" {{ old('accreditation', $program->accreditation ?? '') == 'Baik' ? 'selected' : '' }}>Baik</option>
+                                <option value="Baik Sekali" {{ old('accreditation', $program->accreditation ?? '') == 'Baik Sekali' ? 'selected' : '' }}>Baik Sekali</option>
+                                <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Unggul</option>
+                            </x-select>
+                            <x-input-error :messages="$errors->get('accreditation')" />
+                        </div>
+                        <div>
+                            <x-input-label for="quota" value="Kuota" required="true" />
+                            <x-text-input type="number" id="quota" name="quota" :value="old('quota', $program->quota ?? 0)" required min="0" :error="$errors->has('quota')" />
+                            <x-input-error :messages="$errors->get('quota')" />
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-neutral-900 mb-2">Rincian Biaya Daftar Ulang</label>
-                <div class="rounded-lg overflow-hidden border border-neutral-200">
-                    <table class="w-full text-left border-collapse" id="fee-table">
-                        <thead class="bg-neutral-50 border-b border-neutral-200">
-                            <tr>
-                                <th class="px-4 py-2 text-sm font-semibold text-neutral-500 w-[60%]">Jenis Biaya</th>
-                                <th class="px-4 py-2 text-sm font-semibold text-neutral-500">Nominal (Rp)</th>
-                                <th class="px-4 py-2 text-sm font-semibold text-center text-neutral-500 w-16">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fee-tbody">
-                            @php
-                                $feeDetails = old('fee_names') ? null : ($program->re_registration_fee_details ?? []);
-                                if(old('fee_names')) {
-                                    foreach(old('fee_names') as $i => $name) {
-                                        $feeDetails[] = ['name' => $name, 'amount' => str_replace('.', '', old('fee_amounts')[$i])];
-                                    }
-                                }
-                            @endphp
+            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- SECTION 2: BIAYA & KOMISI                        --}}
+            {{-- ═══════════════════════════════════════════════ --}}
+            <div class="mb-8">
+                <label class="block text-sm font-semibold text-neutral-900 mb-3">Biaya & Komisi</label>
+                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
 
-                            @if(empty($feeDetails))
-                                <tr class="fee-row border-b border-neutral-200">
-                                    <td class="px-4 py-3">
-                                        <input type="text" name="fee_names[]" class="fee-name w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" required
-                                               placeholder="Contoh: Dana Pengembangan Pendidikan">
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <input type="text" class="fee-amount-display w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" required
-                                               placeholder="0">
-                                        <input type="hidden" name="fee_amounts[]" class="fee-amount" value="0">
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <button type="button" class="remove-fee-btn text-error hover:text-error-700 bg-transparent border-none cursor-pointer p-1 transition-colors" title="Hapus" aria-label="Hapus Baris">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                                        </button>
-                                    </td>
+                    {{-- Baris 1: Biaya Pendaftaran | Minimal DP Daftar Ulang --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <x-input-label for="registration_fee_display" value="Biaya Pendaftaran" required="true" />
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                <x-text-input type="text" id="registration_fee_display" :value="number_format(old('registration_fee', $program->registration_fee ?? 0), 0, '', '.')" required
+                                              placeholder="250.000" style="padding-left: 3rem;" :error="$errors->has('registration_fee')" />
+                                <input type="hidden" name="registration_fee" id="registration_fee" value="{{ old('registration_fee', $program->registration_fee ?? 0) }}">
+                            </div>
+                            <div class="text-xs text-neutral-400 mt-1.5">Format ribuan akan muncul otomatis.</div>
+                            <x-input-error :messages="$errors->get('registration_fee')" />
+                        </div>
+                        <div>
+                            <x-input-label for="re_registration_minimum_payment_display" value="Minimal Pembayaran Awal (DP) Daftar Ulang" required="true" />
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                <x-text-input type="text" id="re_registration_minimum_payment_display"
+                                              :value="number_format(old('re_registration_minimum_payment', $program->re_registration_minimum_payment ?? 0), 0, '', '.')"
+                                              required placeholder="0" style="padding-left: 3rem;"
+                                              :error="$errors->has('re_registration_minimum_payment')" />
+                                <input type="hidden" name="re_registration_minimum_payment" id="re_registration_minimum_payment"
+                                       value="{{ old('re_registration_minimum_payment', $program->re_registration_minimum_payment ?? 0) }}">
+                            </div>
+                            <div class="text-xs text-neutral-400 mt-1.5">Nominal minimal yang harus dibayar mahasiswa saat daftar ulang. Pengecekan kesesuaian bukti bayar tetap dilakukan manual oleh admin.</div>
+                            <x-input-error :messages="$errors->get('re_registration_minimum_payment')" />
+                        </div>
+                    </div>
+
+                    {{-- Sub-card: Pengaturan Komisi Afiliasi --}}
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-600 mb-2">Pengaturan Komisi Afiliasi</label>
+                        <div class="p-5 bg-white rounded-lg border border-neutral-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <x-input-label for="referral_reward_display" value="Komisi Pendaftaran Awal" required="true" />
+                                    <div class="relative">
+                                        <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                        <x-text-input type="text" id="referral_reward_display" :value="number_format(old('referral_reward_amount', $program->referral_reward_amount ?? 0), 0, '', '.')" required
+                                                    placeholder="50.000" style="padding-left: 3rem;" :error="$errors->has('referral_reward_amount')" />
+                                        <input type="hidden" name="referral_reward_amount" id="referral_reward_amount" value="{{ old('referral_reward_amount', $program->referral_reward_amount ?? 0) }}">
+                                    </div>
+                                    <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa membayar pendaftaran.</div>
+                                    <x-input-error :messages="$errors->get('referral_reward_amount')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="re_registration_reward_display" value="Komisi Daftar Ulang" required="true" />
+                                    <div class="relative">
+                                        <div class="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-neutral-400">Rp</div>
+                                        <x-text-input type="text" id="re_registration_reward_display" :value="number_format(old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0), 0, '', '.')" required
+                                                    placeholder="200.000" style="padding-left: 3rem;" :error="$errors->has('re_registration_reward_amount')" />
+                                        <input type="hidden" name="re_registration_reward_amount" id="re_registration_reward_amount" value="{{ old('re_registration_reward_amount', $program->re_registration_reward_amount ?? 0) }}">
+                                    </div>
+                                    <div class="text-xs text-neutral-400 mt-1.5">Diberikan setelah calon mahasiswa melunasi daftar ulang.</div>
+                                    <x-input-error :messages="$errors->get('re_registration_reward_amount')" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- SECTION 3: RINCIAN BIAYA DAFTAR ULANG           --}}
+            {{-- ═══════════════════════════════════════════════ --}}
+            <div class="mb-8">
+                <label class="block text-sm font-semibold text-neutral-900 mb-3">Rincian Biaya Daftar Ulang</label>
+                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200">
+                    <div class="rounded-lg overflow-hidden border border-neutral-200">
+                        <table class="w-full text-left border-collapse" id="fee-table">
+                            <thead class="bg-neutral-50 border-b border-neutral-200">
+                                <tr>
+                                    <th class="px-4 py-2 text-sm font-semibold text-neutral-500 w-[60%]">Jenis Biaya</th>
+                                    <th class="px-4 py-2 text-sm font-semibold text-neutral-500">Nominal (Rp)</th>
+                                    <th class="px-4 py-2 text-sm font-semibold text-center text-neutral-500 w-16">Aksi</th>
                                 </tr>
-                            @else
-                                @foreach($feeDetails as $detail)
+                            </thead>
+                            <tbody id="fee-tbody">
+                                @php
+                                    $feeDetails = old('fee_names') ? null : ($program->re_registration_fee_details ?? []);
+                                    if(old('fee_names')) {
+                                        foreach(old('fee_names') as $i => $name) {
+                                            $feeDetails[] = ['name' => $name, 'amount' => str_replace('.', '', old('fee_amounts')[$i])];
+                                        }
+                                    }
+                                @endphp
+
+                                @if(empty($feeDetails))
                                     <tr class="fee-row border-b border-neutral-200">
                                         <td class="px-4 py-3">
-                                            <input type="text" name="fee_names[]" class="fee-name w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" value="{{ $detail['name'] }}" required
+                                            <input type="text" name="fee_names[]" class="fee-name w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" required
                                                    placeholder="Contoh: Dana Pengembangan Pendidikan">
                                         </td>
                                         <td class="px-4 py-3">
-                                            <input type="text" class="fee-amount-display w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" value="{{ number_format($detail['amount'], 0, '', '.') }}" required
+                                            <input type="text" class="fee-amount-display w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" required
                                                    placeholder="0">
-                                            <input type="hidden" name="fee_amounts[]" class="fee-amount" value="{{ $detail['amount'] }}">
+                                            <input type="hidden" name="fee_amounts[]" class="fee-amount" value="0">
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <button type="button" class="remove-fee-btn text-error hover:text-error-700 bg-transparent border-none cursor-pointer p-1 transition-colors" title="Hapus" aria-label="Hapus Baris">
@@ -166,31 +210,53 @@
                                             </button>
                                         </td>
                                     </tr>
-                                @endforeach
-                            @endif
-                        </tbody>
-                        <tfoot class="bg-neutral-50 border-t border-neutral-200">
-                            <tr>
-                                <td colspan="3" class="px-4 py-3">
-                                    <button type="button" id="add-fee-btn" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 bg-transparent border-none cursor-pointer transition-colors">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                                        Tambah Rincian
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="border-t border-neutral-200">
-                                <td class="px-4 py-4 text-right text-sm font-bold text-neutral-900">TOTAL BIAYA DAFTAR ULANG:</td>
-                                <td colspan="2" class="px-4 py-4 text-lg font-extrabold text-primary-600">
-                                    Rp <span id="total-fee-display">0</span>
-                                    <input type="hidden" name="re_registration_fee" id="total_re_registration_fee" value="0">
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                @else
+                                    @foreach($feeDetails as $detail)
+                                        <tr class="fee-row border-b border-neutral-200">
+                                            <td class="px-4 py-3">
+                                                <input type="text" name="fee_names[]" class="fee-name w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" value="{{ $detail['name'] }}" required
+                                                       placeholder="Contoh: Dana Pengembangan Pendidikan">
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <input type="text" class="fee-amount-display w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:border-primary-600 focus:ring-1 focus:ring-primary-600 outline-none transition-colors" value="{{ number_format($detail['amount'], 0, '', '.') }}" required
+                                                       placeholder="0">
+                                                <input type="hidden" name="fee_amounts[]" class="fee-amount" value="{{ $detail['amount'] }}">
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <button type="button" class="remove-fee-btn text-error hover:text-error-700 bg-transparent border-none cursor-pointer p-1 transition-colors" title="Hapus" aria-label="Hapus Baris">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                            <tfoot class="bg-neutral-50 border-t border-neutral-200">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-3">
+                                        <button type="button" id="add-fee-btn" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 bg-transparent border-none cursor-pointer transition-colors">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                            Tambah Rincian
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="border-t border-neutral-200">
+                                    <td class="px-4 py-4 text-right text-sm font-bold text-neutral-900">TOTAL BIAYA DAFTAR ULANG:</td>
+                                    <td colspan="2" class="px-4 py-4 text-lg font-extrabold text-primary-600">
+                                        Rp <span id="total-fee-display">0</span>
+                                        <input type="hidden" name="re_registration_fee" id="total_re_registration_fee" value="0">
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="text-xs text-neutral-400 mt-2">Total biaya akan dihitung otomatis dari rincian di atas.</div>
                 </div>
-                <div class="text-xs text-neutral-400 mt-1.5">Total biaya akan dihitung otomatis dari rincian di atas.</div>
             </div>
 
+            {{-- ═══════════════════════════════════════════════ --}}
+            {{-- SECTION 4+: STATUS, IKON, DESKRIPSI, GALERI     --}}
+            {{-- ═══════════════════════════════════════════════ --}}
             <div class="mb-6">
                 <x-input-label for="is_active" value="Status Aktif" />
                 <label class="inline-flex items-center cursor-pointer gap-2">
@@ -236,12 +302,12 @@
                     <input type="file" id="gallery-input" name="gallery[]" multiple accept="image/*" class="text-sm text-neutral-600 w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
                     <div class="text-xs text-neutral-500 mt-2">Anda bisa memilih banyak foto sekaligus, atau klik "Choose Files" lagi untuk menambah foto lainnya.</div>
                 </div>
-                
+
                 <div id="gallery-preview-container" style="display:none;" class="mt-4">
                     <div class="text-sm font-semibold text-neutral-900 mb-2">Preview Foto Baru (Akan Diupload):</div>
                     <div id="gallery-preview-list" class="flex flex-wrap gap-3"></div>
                 </div>
-                
+
                 @if(isset($program) && $program->galleries && $program->galleries->count() > 0)
                     <div class="mt-6">
                         <div class="text-sm font-semibold text-neutral-600 mb-2">Foto yang sudah ada:</div>
@@ -273,6 +339,7 @@
         </form>
     </x-card>
 </div>
+
 
 <!-- (The rest of the JS is left largely untouched, just the HTML elements were styled with x-components and grid adjustments) -->
 <script>
@@ -315,6 +382,13 @@
             let cleanVal = val.replace(/\D/g, "");
             $(this).val(formatNumber(val));
             $('#re_registration_reward_amount').val(cleanVal);
+        });
+
+        $('#re_registration_minimum_payment_display').on('input', function() {
+            let val = $(this).val();
+            let cleanVal = val.replace(/\D/g, "");
+            $(this).val(formatNumber(val));
+            $('#re_registration_minimum_payment').val(cleanVal);
         });
 
         // Dynamic Fee Table Logic
