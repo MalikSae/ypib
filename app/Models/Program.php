@@ -11,6 +11,8 @@ class Program extends Model
 
     protected $fillable = [
         'name',
+        'kode_prodi',
+        'registration_track',
         'icon',
         'slug',
         'faculty_id',
@@ -19,6 +21,7 @@ class Program extends Model
         'registration_fee',
         're_registration_fee',
         're_registration_fee_details',
+        're_registration_minimum_payment',
         'referral_reward_amount',
         're_registration_reward_amount',
         'description',

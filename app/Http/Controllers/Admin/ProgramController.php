@@ -47,17 +47,24 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'faculty_id' => 'required|exists:faculties,id',
-            'accreditation' => 'nullable|string|max:50',
-            'quota' => 'required|integer|min:0',
-            'registration_fee' => 'required|integer|min:0',
-            'referral_reward_amount' => 'required|integer|min:0',
-            're_registration_reward_amount' => 'required|integer|min:0',
-            'is_active' => 'boolean',
-            'icon' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'gallery.*' => 'image|mimes:jpeg,png,jpg|max:2048'
+            'name'                            => 'required|string|max:255',
+            'kode_prodi'                      => 'nullable|string|size:5|regex:/^[0-9]{5}$/|unique:programs,kode_prodi',
+            'registration_track'              => 'required|in:reguler,non_reguler',
+            'faculty_id'                      => 'required|exists:faculties,id',
+            'accreditation'                   => 'nullable|string|max:50',
+            'quota'                           => 'required|integer|min:0',
+            'registration_fee'                => 'required|integer|min:0',
+            'referral_reward_amount'          => 'required|integer|min:0',
+            're_registration_reward_amount'   => 'required|integer|min:0',
+            're_registration_minimum_payment' => 'required|integer|min:0',
+            'is_active'                       => 'boolean',
+            'icon'                            => 'nullable|string|max:255',
+            'description'                     => 'nullable|string',
+            'gallery.*'                       => 'image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
+            'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
+            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh prodi lain.',
         ]);
 
         try {
@@ -127,17 +134,24 @@ class ProgramController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'faculty_id' => 'required|exists:faculties,id',
-            'accreditation' => 'nullable|string|max:50',
-            'quota' => 'required|integer|min:0',
-            'registration_fee' => 'required|integer|min:0',
-            'referral_reward_amount' => 'required|integer|min:0',
-            're_registration_reward_amount' => 'required|integer|min:0',
-            'is_active' => 'boolean',
-            'icon' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'gallery.*' => 'image|mimes:jpeg,png,jpg|max:2048'
+            'name'                            => 'required|string|max:255',
+            'kode_prodi'                      => 'nullable|string|size:5|regex:/^[0-9]{5}$/|unique:programs,kode_prodi,' . $id,
+            'registration_track'              => 'required|in:reguler,non_reguler',
+            'faculty_id'                      => 'required|exists:faculties,id',
+            'accreditation'                   => 'nullable|string|max:50',
+            'quota'                           => 'required|integer|min:0',
+            'registration_fee'                => 'required|integer|min:0',
+            'referral_reward_amount'          => 'required|integer|min:0',
+            're_registration_reward_amount'   => 'required|integer|min:0',
+            're_registration_minimum_payment' => 'required|integer|min:0',
+            'is_active'                       => 'boolean',
+            'icon'                            => 'nullable|string|max:255',
+            'description'                     => 'nullable|string',
+            'gallery.*'                       => 'image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
+            'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
+            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh prodi lain.',
         ]);
 
         try {

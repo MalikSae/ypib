@@ -51,6 +51,8 @@
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Prodi</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Jalur</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Fakultas</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya</th>
@@ -64,6 +66,20 @@
                     <td class="px-6 py-4">
                         <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $program->name }}</div>
                         <div class="text-xs font-mono mt-0.5 text-neutral-400">Akreditasi: {{ $program->accreditation ?? '-' }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($program->kode_prodi)
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-mono font-bold border border-neutral-200">{{ $program->kode_prodi }}</span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-400 text-xs font-medium border border-neutral-200 border-dashed">Belum diisi</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($program->registration_track === 'non_reguler')
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-200">Non-Reguler</span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">Reguler</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
                         <span class="text-sm font-medium text-neutral-600">{{ $program->faculty->name }}</span>
