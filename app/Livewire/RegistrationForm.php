@@ -20,26 +20,36 @@ class RegistrationForm extends Component
     // Validasi aktual dihandle manual via rulesForStep()
     public $rules = [];
 
+    public array $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu', 'Lainnya'];
+
     // Step 1 — Data Diri
     public string $full_name   = '';
+    public string $nisn        = '';
     public string $nik         = '';
     public string $birth_place = '';
-    public string $birth_date         = '';
+    public string $birth_date  = '';
     public string $gender      = '';
+    public string $religion    = '';
     public string $address     = '';
     public string $phone       = '';
 
-    // Step 2 — Pilih Prodi
+    // Step 2 — Program Studi & Jalur
     public $programs;
     public string $first_choice_program_id  = '';
-
-    // Step 2 Baru — Pilih Jalur Masuk
     public string $admission_path = '';
 
-    // Step 3 — Asal Sekolah
-    public string $school_name      = '';
-    public string $graduation_year  = '';
-    public string $school_grade     = '';
+    // Step 3 — Data Sekolah
+    public string $school_name        = '';
+    public string $school_major       = '';
+    public string $graduation_year    = '';
+    public string $certificate_number = '';
+    public string $school_grade       = '';
+
+    // Step 4 — Data Orang Tua/Wali
+    public string $father_name       = '';
+    public string $mother_name       = '';
+    public string $father_occupation = '';
+    public string $mother_occupation = '';
 
     // Referral
     public ?int $referrer_id = null;
@@ -50,20 +60,30 @@ class RegistrationForm extends Component
         return match ($this->step) {
             1 => [
                 'full_name'   => 'required|string|max:255',
+                'nisn'        => 'required|string|digits:10',
                 'nik'         => 'required|string|size:16',
                 'birth_place' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::in($this->getValidCities())],
                 'birth_date'  => 'required|date',
                 'gender'      => 'required|in:male,female',
+                'religion'    => 'required|string|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu,Lainnya',
                 'address'     => 'required|string',
                 'phone'       => 'required|string|max:20',
-                'first_choice_program_id' => 'required|exists:programs,id',
             ],
             2 => [
-                'admission_path'  => 'required|in:umum,prestasi,tahfidz',
+                'first_choice_program_id' => 'required|exists:programs,id',
+                'admission_path'          => 'required|in:umum,prestasi,tahfidz',
             ],
             3 => [
-                'school_name'     => 'required|string|max:255',
-                'graduation_year' => 'required|digits:4',
+                'school_name'        => 'required|string|max:255',
+                'school_major'       => 'required|string|max:255',
+                'graduation_year'    => 'required|digits:4',
+                'certificate_number' => 'required|string|max:100',
+            ],
+            4 => [
+                'father_name'       => 'required|string|max:255',
+                'mother_name'       => 'required|string|max:255',
+                'father_occupation' => 'required|string|max:255',
+                'mother_occupation' => 'required|string|max:255',
             ],
             default => [],
         };
@@ -86,6 +106,16 @@ class RegistrationForm extends Component
             'school_name.required'            => 'Nama sekolah wajib diisi.',
             'graduation_year.required'        => 'Tahun lulus wajib diisi.',
             'graduation_year.digits'          => 'Tahun lulus harus 4 digit.',
+            'nisn.required'                   => 'NISN wajib diisi.',
+            'nisn.digits'                     => 'NISN harus 10 digit.',
+            'religion.required'               => 'Agama wajib dipilih.',
+            'religion.in'                     => 'Pilihan agama tidak valid.',
+            'school_major.required'           => 'Jurusan sekolah wajib diisi.',
+            'certificate_number.required'     => 'Nomor Ijazah/SKL wajib diisi.',
+            'father_name.required'            => 'Nama Ayah wajib diisi.',
+            'mother_name.required'            => 'Nama Ibu wajib diisi.',
+            'father_occupation.required'      => 'Pekerjaan Ayah wajib diisi.',
+            'mother_occupation.required'      => 'Pekerjaan Ibu wajib diisi.',
         ];
     }
 
@@ -194,15 +224,23 @@ class RegistrationForm extends Component
                 'first_choice_program_id'  => (int) $this->first_choice_program_id,
                 'second_choice_program_id' => null, // removed
                 'full_name'                => $this->full_name,
+                'nisn'                     => $this->nisn,
                 'nik'                      => $this->nik,
                 'birth_place'              => $this->birth_place,
                 'birth_date'               => $this->birth_date,
                 'gender'                   => $this->gender,
+                'religion'                 => $this->religion,
                 'address'                  => $this->address,
                 'phone'                    => $this->phone,
                 'school_name'              => $this->school_name,
+                'school_major'             => $this->school_major,
                 'graduation_year'          => (int) $this->graduation_year,
+                'certificate_number'       => $this->certificate_number,
                 'school_grade'             => $this->school_grade ?: null,
+                'father_name'              => $this->father_name,
+                'mother_name'              => $this->mother_name,
+                'father_occupation'        => $this->father_occupation,
+                'mother_occupation'        => $this->mother_occupation,
                 'status'                   => 'menunggu_pembayaran',
             ]);
 
