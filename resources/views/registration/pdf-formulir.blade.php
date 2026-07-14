@@ -63,16 +63,52 @@
 </head>
 <body>
 
-    <div class="header">
-        <h1>Universitas YPIB Majalengka</h1>
-        <h2>FORMULIR PENDAFTARAN MAHASISWA BARU</h2>
-    </div>
+    @php
+        $photoDoc = $registration->documents->firstWhere('document_type', 'foto');
+        $photoPath = $photoDoc ? storage_path('app/public/' . $photoDoc->file_path) : null;
+        $hasPhoto = $photoPath && file_exists($photoPath);
+        $logoPath = public_path('images/Favicon.png');
+    @endphp
 
-    @if($registration->registration_number)
-    <div style="text-align: right; margin-bottom: 10px;">
-        <strong>No. Registrasi: {{ $registration->registration_number }}</strong>
-    </div>
-    @endif
+    <table style="width:100%; border-collapse:collapse;">
+        <tr>
+            <td style="width:95px; vertical-align:middle;">
+                @if(file_exists($logoPath))
+                    <img src="{{ $logoPath }}" style="width:80px; height:80px; object-fit:contain;">
+                @endif
+            </td>
+            <td style="vertical-align:middle; text-align:center;">
+                <div style="font-size:16px; font-weight:bold; text-transform:uppercase; margin:0;">Universitas YPIB Majalengka</div>
+                <div style="font-size:12px; margin:4px 0 0;">Formulir Pendaftaran Mahasiswa Baru</div>
+            </td>
+            <td style="width:95px;"></td>
+        </tr>
+    </table>
+    <div style="border-bottom:2px solid #333; margin:10px 0 15px;"></div>
+
+    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+        <tr>
+            <td style="vertical-align:top;">
+                @if($registration->registration_number)
+                    <strong>No. Registrasi: {{ $registration->registration_number }}</strong>
+                @endif
+                @if(isset($qrCodeBase64))
+                    <div style="margin-top:8px;">
+                        <img src="data:image/png;base64,{{ $qrCodeBase64 }}" style="width:100px; height:100px;">
+                    </div>
+                @endif
+            </td>
+            <td style="width:120px; vertical-align:top; text-align:right;">
+                @if($hasPhoto)
+                    <img src="{{ $photoPath }}" style="width:112px; height:150px; object-fit:cover; border:1px solid #333;">
+                @else
+                    <div style="width:112px; height:150px; border:1px dashed #999; display:inline-block; text-align:center; font-size:11px; color:#999; line-height:150px;">
+                        Pas Foto
+                    </div>
+                @endif
+            </td>
+        </tr>
+    </table>
 
     <div class="section-title">A. PROGRAM STUDI & JALUR</div>
     <table>
@@ -124,6 +160,11 @@
             <td class="label">No. HP (WhatsApp)</td>
             <td class="colon">:</td>
             <td class="value">{{ $registration->phone }}</td>
+        </tr>
+        <tr>
+            <td class="label">Email</td>
+            <td class="colon">:</td>
+            <td class="value">{{ $registration->user ? $registration->user->email : '-' }}</td>
         </tr>
         <tr>
             <td class="label">Alamat Lengkap</td>

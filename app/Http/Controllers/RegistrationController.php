@@ -65,8 +65,13 @@ class RegistrationController extends Controller
             return redirect()->route('registration.status')->with('error', 'Selesaikan pembayaran terlebih dahulu.');
         }
 
+        if (!$registration->isFormComplete()) {
+            return redirect()->route('registration.detail')
+                ->with('error', 'Lengkapi seluruh data formulir terlebih dahulu sebelum melanjutkan ke Pemberkasan Dokumen.');
+        }
+
         $mandatoryLabels = [
-            'foto' => 'Foto Close Up (Latar Merah/Biru)',
+            'foto' => 'Foto Close Up',
             'ktp' => 'KTP',
             'kk' => 'Kartu Keluarga (KK)',
             'akta_lahir' => 'Akta Lahir',
@@ -75,73 +80,6 @@ class RegistrationController extends Controller
         ];
 
         return view('registration.documents', compact('registration', 'mandatoryLabels'));
-    }
-
-    public function uploadDocumentFile(Request $request)
-    {
-        $request->validate([
-            'document_type' => 'required|in:foto,ktp,kk,akta_lahir,transkrip_nilai,surat_keterangan_sehat,sertifikat,lainnya',
-            'label' => 'required_if:document_type,lainnya|nullable|string|max:255',
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
-        ], [
-            'document_type.required' => 'Tipe dokumen tidak valid.',
-            'document_type.in' => 'Tipe dokumen tidak valid.',
-            'label.required_if' => 'Nama dokumen lainnya harus diisi.',
-            'file.required' => 'File dokumen wajib diupload.',
-            'file.mimes' => 'File harus berformat JPG, PNG, atau PDF.',
-            'file.max' => 'Ukuran file maksimal 15MB.',
-        ]);
-
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
-
-        $type = $request->document_type;
-        $label = $type === 'lainnya' ? $request->label : null;
-
-        if ($type !== 'lainnya') {
-            $existing = RegistrationDocument::where('registration_id', $registration->id)
-                ->where('document_type', $type)
-                ->first();
-
-            if ($existing) {
-                if ($existing->status === 'disetujui') {
-                    return back()->with('error', 'Dokumen ini sudah disetujui, tidak bisa diubah lagi. Hubungi admin jika perlu koreksi.');
-                }
-                
-                // Hapus file lama
-                if (Storage::disk('public')->exists($existing->file_path)) {
-                    Storage::disk('public')->delete($existing->file_path);
-                }
-                
-                $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
-                $existing->update([
-                    'file_path' => $path,
-                    'status' => 'menunggu_review',
-                    'review_note' => null,
-                    'reviewed_by' => null,
-                    'reviewed_at' => null,
-                ]);
-            } else {
-                $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
-                RegistrationDocument::create([
-                    'registration_id' => $registration->id,
-                    'document_type' => $type,
-                    'file_path' => $path,
-                    'status' => 'menunggu_review',
-                ]);
-            }
-        } else {
-            $path = $request->file('file')->store('dokumen-pendaftaran', 'public');
-            RegistrationDocument::create([
-                'registration_id' => $registration->id,
-                'document_type' => $type,
-                'label' => $label,
-                'file_path' => $path,
-                'status' => 'menunggu_review',
-            ]);
-        }
-
-        return redirect()->route('registration.documents')
-            ->with('success', 'Dokumen berhasil diupload!');
     }
 
     public function uploadProof(Request $request)
@@ -201,37 +139,76 @@ class RegistrationController extends Controller
             ->with('success', 'Kartu alumni berhasil dikirim! Admin akan segera mengkonfirmasi pendaftaran Anda.');
     }
 
-    public function uploadDocument(Request $request)
+    public function uploadDocumentFile(Request $request)
     {
         $request->validate([
-            'document_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+            'document_type' => 'required|string',
+            'file'          => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+            'label'         => 'required_if:document_type,lainnya|string|max:255',
         ], [
-            'document_proof.required' => 'File Ijazah/SKL wajib diupload.',
-            'document_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
-            'document_proof.max'      => 'Ukuran file maksimal 15MB.',
+            'file.required' => 'File wajib diupload.',
+            'file.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
+            'file.max'      => 'Ukuran file maksimal 15MB.',
+            'label.required_if' => 'Nama dokumen wajib diisi untuk dokumen tambahan.',
         ]);
 
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
-        // Cek status, harus terdaftar atau perlu_revisi_berkas
-        if (!in_array($registration->status, ['terdaftar', 'perlu_revisi_berkas'])) {
-            return redirect()->route('registration.status')->with('error', 'Status pendaftaran belum memenuhi syarat untuk upload berkas.');
+        if ($registration->status !== 'terdaftar') {
+            return redirect()->route('registration.documents')->with('error', 'Status pendaftaran belum memenuhi syarat untuk upload berkas.');
         }
 
-        // Hapus file lama jika ada
-        if ($registration->document_proof && Storage::disk('public')->exists($registration->document_proof)) {
-            Storage::disk('public')->delete($registration->document_proof);
+        $type = $request->input('document_type');
+        $file = $request->file('file');
+        
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $safeName = \Illuminate\Support\Str::slug($originalName) . '-' . time() . '.' . $extension;
+        
+        if ($type !== 'lainnya') {
+            // Cek jika sudah ada file untuk tipe ini
+            $existingDoc = $registration->documents()->where('document_type', $type)->first();
+            
+            if ($existingDoc && $existingDoc->status === 'disetujui') {
+                return redirect()->route('registration.documents')->with('error', 'Dokumen ini sudah disetujui dan tidak dapat diubah.');
+            }
+            
+            $path = $file->storeAs('dokumen-pendaftaran', $safeName, 'public');
+            
+            if ($existingDoc) {
+                // Hapus file lama
+                if (Storage::disk('public')->exists($existingDoc->file_path)) {
+                    Storage::disk('public')->delete($existingDoc->file_path);
+                }
+                
+                $existingDoc->update([
+                    'file_path' => $path,
+                    'status' => 'menunggu_review',
+                    'review_note' => null,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                ]);
+            } else {
+                $registration->documents()->create([
+                    'document_type' => $type,
+                    'label' => null,
+                    'file_path' => $path,
+                    'status' => 'menunggu_review',
+                ]);
+            }
+        } else {
+            // Untuk dokumen lainnya, selalu buat baru
+            $path = $file->storeAs('dokumen-pendaftaran', $safeName, 'public');
+            
+            $registration->documents()->create([
+                'document_type' => 'lainnya',
+                'label' => $request->input('label'),
+                'file_path' => $path,
+                'status' => 'menunggu_review',
+            ]);
         }
 
-        $path = $request->file('document_proof')->store('dokumen-ijazah', 'public');
-
-        $registration->update([
-            'document_proof' => $path,
-            'status'         => 'menunggu_review_berkas',
-        ]);
-
-        return redirect()->route('registration.status')
-            ->with('success', 'Berkas berhasil diupload! Admin akan segera mereview dokumen Anda.');
+        return redirect()->route('registration.documents')->with('success', 'Dokumen berhasil diunggah!');
     }
 
     public function uploadReRegistrationProof(Request $request)
@@ -264,6 +241,20 @@ class RegistrationController extends Controller
 
         return redirect()->route('registration.status')
             ->with('success', 'Bukti transfer daftar ulang berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
+    }
+
+    public function reRegistration()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with(['firstChoiceProgram', 'period'])
+            ->latest()
+            ->firstOrFail();
+
+        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
+            return redirect()->route('registration.status')->with('error', 'Anda belum sampai pada tahap Daftar Ulang.');
+        }
+
+        return view('registration.re-registration', compact('registration'));
     }
 
     public function detail()
@@ -340,13 +331,137 @@ class RegistrationController extends Controller
     public function downloadPdf()
     {
         $registration = Registration::where('user_id', Auth::id())
-            ->with('firstChoiceProgram')
+            ->with(['firstChoiceProgram', 'documents'])
             ->latest()
             ->firstOrFail();
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('registration.pdf-formulir', compact('registration'));
+        $qrWriter = new \Endroid\QrCode\Writer\PngWriter();
+        $qrCode = \Endroid\QrCode\QrCode::create($registration->registration_number)->setSize(120)->setMargin(4);
+        $qrCodeBase64 = base64_encode($qrWriter->write($qrCode)->getString());
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('registration.pdf-formulir', compact('registration', 'qrCodeBase64'));
         $fileName = 'Formulir-Pendaftaran-' . \Illuminate\Support\Str::slug($registration->full_name) . '.pdf';
 
         return $pdf->download($fileName);
+    }
+
+    public function exam()
+    {
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+
+        if ($registration->status !== 'menunggu_tes_tulis') {
+            $session = \App\Models\ExamSession::where('registration_id', $registration->id)->where('status', 'completed')->first();
+            if ($session) {
+                return view('registration.exam', ['session' => $session, 'registration' => $registration, 'isCompleted' => true]);
+            }
+            return redirect()->route('registration.status')->with('error', 'Status Anda belum memenuhi syarat untuk tes tulis.');
+        }
+
+        $session = \App\Models\ExamSession::where('registration_id', $registration->id)->first();
+        
+        if (!$session) {
+            $questions = \App\Models\ExamQuestion::where('is_active', true)->get();
+            if ($questions->isEmpty()) {
+                return redirect()->route('registration.status')->with('error', 'Bank soal belum tersedia, silakan hubungi admin.');
+            }
+            
+            $session = \App\Models\ExamSession::create([
+                'registration_id' => $registration->id,
+                'status' => 'in_progress',
+                'started_at' => now(),
+            ]);
+
+            foreach ($questions as $q) {
+                \App\Models\ExamAnswer::create([
+                    'exam_session_id' => $session->id,
+                    'exam_question_id' => $q->id,
+                ]);
+            }
+        } elseif ($session->status === 'completed') {
+            return view('registration.exam', ['session' => $session, 'registration' => $registration, 'isCompleted' => true]);
+        }
+
+        $answers = \App\Models\ExamAnswer::with('question')
+            ->where('exam_session_id', $session->id)
+            ->orderBy('exam_question_id')
+            ->get();
+
+        return view('registration.exam', ['session' => $session, 'answers' => $answers, 'isCompleted' => false]);
+    }
+
+    public function saveExamAnswer(Request $request)
+    {
+        $validated = $request->validate([
+            'exam_answer_id' => 'required|exists:exam_answers,id',
+            'selected_option' => 'required|in:a,b,c,d',
+        ]);
+
+        $answer = \App\Models\ExamAnswer::findOrFail($validated['exam_answer_id']);
+        $session = $answer->session;
+
+        if ($session->registration->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if ($session->status !== 'in_progress') {
+            return response()->json(['success' => false, 'message' => 'Ujian sudah selesai'], 403);
+        }
+
+        $answer->update(['selected_option' => $validated['selected_option']]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function submitExam(Request $request)
+    {
+        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $session = \App\Models\ExamSession::where('registration_id', $registration->id)
+            ->where('status', 'in_progress')
+            ->firstOrFail();
+
+        $answers = \App\Models\ExamAnswer::with('question')->where('exam_session_id', $session->id)->get();
+        
+        if ($answers->whereNull('selected_option')->count() > 0) {
+            return redirect()->back()->with('error', 'Masih ada soal yang belum dijawab, silakan lengkapi semua jawaban.');
+        }
+
+        $correctCount = 0;
+        foreach ($answers as $ans) {
+            $isCorrect = $ans->selected_option === $ans->question->correct_option;
+            $ans->update(['is_correct' => $isCorrect]);
+            if ($isCorrect) $correctCount++;
+        }
+
+        $score = ($correctCount / $answers->count()) * 100;
+        $resultLabel = $score >= 80 ? 'sangat_baik' : 'baik';
+
+        $session->update([
+            'status' => 'completed',
+            'score' => $score,
+            'result_label' => $resultLabel,
+            'completed_at' => now(),
+        ]);
+
+        $registration->update(['status' => 'menunggu_interview']);
+
+        \App\Models\PaymentLog::create([
+            'registration_id' => $registration->id,
+            'acted_by' => Auth::id(),
+            'action' => 'exam_completed',
+            'note' => 'Tes tulis online selesai dengan hasil: ' . ($resultLabel === 'sangat_baik' ? 'Sangat Baik' : 'Baik')
+        ]);
+
+        return redirect()->route('registration.exam')->with('success', 'Tes tulis berhasil diselesaikan.');
+    }
+
+    public function interview()
+    {
+        $registration = Registration::where('user_id', Auth::id())->with('period')->latest()->firstOrFail();
+
+        if ($registration->status !== 'menunggu_interview') {
+            return redirect()->route('registration.status')->with('error', 'Status Anda bukan di tahap interview saat ini.');
+        }
+
+        return view('registration.interview', compact('registration'));
     }
 }

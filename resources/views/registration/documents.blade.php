@@ -6,10 +6,31 @@
 <div class="pub-container">
 <div class="max-w-3xl mx-auto">
 
-    {{-- Page header --}}
-    <div class="text-center mb-8">
-        <h1 class="text-2xl sm:text-[26px] font-bold mb-1.5 text-neutral-900">Pemberkasan Dokumen</h1>
-        <p class="text-sm text-neutral-500">Lengkapi berkas pendaftaran Anda</p>
+    {{-- Back Link --}}
+    <div class="mb-6">
+        <a href="{{ route('registration.status') }}" class="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-primary-600 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Kembali ke Status Pendaftaran
+        </a>
+    </div>
+
+    {{-- Page header & Progress --}}
+    @php
+        $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
+        $approvedMandatory = $registration->documents->whereIn('document_type', $mandatoryTypes)->where('status', 'disetujui')->count();
+        $totalMandatory = count($mandatoryTypes);
+    @endphp
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-xl font-semibold text-neutral-900 mb-1">Pemberkasan Dokumen</h1>
+            <p class="text-sm text-neutral-500">Lengkapi berkas pendaftaran Anda</p>
+        </div>
+        <div class="flex-shrink-0 w-full sm:w-auto">
+            <div class="bg-white px-4 py-2 rounded-full border border-neutral-200 text-sm font-semibold text-neutral-700 shadow-sm flex items-center gap-2 w-full sm:w-fit justify-center">
+                <div class="w-2 h-2 rounded-full {{ $approvedMandatory === $totalMandatory ? 'bg-green-500' : 'bg-orange-500' }}"></div>
+                Progress: {{ $approvedMandatory }} dari {{ $totalMandatory }} Dokumen Wajib Disetujui
+            </div>
+        </div>
     </div>
 
     {{-- Flash --}}
@@ -36,24 +57,6 @@
         </div>
     @endif
 
-    {{-- Back Link & Progress --}}
-    @php
-        $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
-        $approvedMandatory = $registration->documents->whereIn('document_type', $mandatoryTypes)->where('status', 'disetujui')->count();
-        $totalMandatory = count($mandatoryTypes);
-    @endphp
-    
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <a href="{{ route('registration.status') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-primary-600 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
-            Kembali ke Status
-        </a>
-        <div class="bg-white px-4 py-2 rounded-full border border-neutral-200 text-sm font-semibold text-neutral-700 shadow-sm flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full {{ $approvedMandatory === $totalMandatory ? 'bg-green-500' : 'bg-orange-500' }}"></div>
-            Progress: {{ $approvedMandatory }} dari {{ $totalMandatory }} Dokumen Wajib Disetujui
-        </div>
-    </div>
-
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3">
         <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
         <div class="text-sm text-blue-900">
@@ -75,7 +78,7 @@
                 $isRevision = $doc && $doc->status === 'perlu_revisi';
                 $isPending = $doc && $doc->status === 'menunggu_review';
             @endphp
-            <div class="bg-white border {{ $isRevision ? 'border-orange-300' : 'border-neutral-200' }} rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col h-full">
+            <div class="bg-white border {{ $isRevision ? 'border-orange-300' : 'border-neutral-200' }} rounded-xl p-6 shadow-sm relative overflow-hidden flex flex-col h-full">
                 @if($isApproved)
                     <div class="absolute top-0 right-0 w-2 h-full bg-green-500"></div>
                 @elseif($isRevision)
@@ -86,18 +89,24 @@
                     <div class="absolute top-0 right-0 w-2 h-full bg-neutral-200"></div>
                 @endif
 
-                <div class="flex items-start justify-between mb-2">
-                    <h3 class="font-bold text-neutral-900 text-sm leading-tight pr-4">{{ $label }}</h3>
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <h3 class="text-sm font-semibold text-neutral-900 flex-1 leading-tight">{{ $label }}</h3>
                     @if($isApproved)
-                        <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Disetujui</span>
+                        <span class="bg-green-100 text-green-700 text-[11px] font-bold py-0.5 px-2.5 rounded-full flex-shrink-0 whitespace-nowrap">Disetujui</span>
                     @elseif($isRevision)
-                        <span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Revisi</span>
+                        <span class="bg-orange-100 text-orange-700 text-[11px] font-bold py-0.5 px-2.5 rounded-full flex-shrink-0 whitespace-nowrap">Revisi</span>
                     @elseif($isPending)
-                        <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Menunggu</span>
+                        <span class="bg-blue-100 text-blue-700 text-[11px] font-bold py-0.5 px-2.5 rounded-full flex-shrink-0 whitespace-nowrap">Menunggu</span>
                     @else
-                        <span class="bg-neutral-100 text-neutral-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Belum Ada</span>
+                        <span class="bg-neutral-100 text-neutral-500 text-[11px] font-bold py-0.5 px-2.5 rounded-full flex-shrink-0 whitespace-nowrap">Belum Ada</span>
                     @endif
                 </div>
+
+                @if($type === 'foto')
+                    <div class="text-[11px] text-neutral-500 leading-tight mb-3">
+                        Foto Close Up Terbaru Baju Putih Latar Belakang Merah/Biru
+                    </div>
+                @endif
 
                 @if($isRevision && $doc->review_note)
                     <div class="bg-orange-50 text-orange-800 text-xs p-2.5 rounded-lg mb-3 border border-orange-100">
@@ -135,7 +144,7 @@
 
     {{-- DOKUMEN LAINNYA --}}
     <h2 class="text-lg font-bold text-neutral-900 mb-4">Dokumen Lainnya</h2>
-    <div class="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm mb-8">
+    <div class="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm mb-8">
         
         @php
             $otherDocs = $registration->documents->where('document_type', 'lainnya');

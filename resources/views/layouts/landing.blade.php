@@ -207,6 +207,11 @@
             border-radius: 12px; padding: 14px 16px; font-size: 14px;
             margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
         }
+        .pub-flash-warning {
+            background: #FFF8E1; border: 1px solid #FFE082; color: #F57F17;
+            border-radius: 12px; padding: 14px 16px; font-size: 14px;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
 
         /* Status badge (reused on public pages) */
         .status-badge {

@@ -38,20 +38,7 @@
                         Jalur: {{ $registration->registration_type === 'alumni' ? 'Alumni YPIB' : 'Reguler' }}
                     </span>
                     <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;" class="text-white">
-                        @php
-                        $labelsMap = [
-                            'menunggu_pembayaran' => 'Menunggu Pembayaran',
-                            'menunggu_konfirmasi' => 'Menunggu Konfirmasi',
-                            'terdaftar'           => 'Terdaftar (Belum Upload Berkas)',
-                            'menunggu_review_berkas' => 'Menunggu Review Berkas',
-                            'perlu_revisi_berkas' => 'Perlu Revisi Berkas',
-                            'diterima'            => 'Diterima (Menunggu Daftar Ulang)',
-                            'menunggu_konfirmasi_daftar_ulang' => 'Menunggu Konfirmasi Daftar Ulang',
-                            'daftar_ulang_selesai'=> 'Daftar Ulang Selesai',
-                            'ditolak'             => 'Ditolak',
-                        ];
-                        @endphp
-                        {{ $labelsMap[$registration->status] ?? $registration->status }}
+                        {{ $registration->getStatusLabel() }}
                     </span>
                 </div>
             </div>
@@ -183,51 +170,81 @@
             @endif
         </div>
 
-        {{-- Card 4.2: Dokumen Ijazah / SKL --}}
-        @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Dokumen Ijazah / SKL</div>
-
-            @if($registration->document_proof)
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <a href="{{ Storage::url($registration->document_proof) }}" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
-                       onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
-                        <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                        Lihat Dokumen
-                    </a>
-                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->document_proof) }}</span>
-                </div>
-            @else
-                <p style="font-size:14px;margin:0;" class="text-neutral-400">Belum ada dokumen Ijazah / SKL diupload pendaftar.</p>
-            @endif
-        </div>
-        @endif
-
-        {{-- Card 4.3: Dokumen Pendaftaran (Multi-Berkas) --}}
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+        {{-- Card 4.3: Dokumen Pendaftaran --}}
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200"
+             x-data="{
+                selected: [],
+                allIds: [{{ $registration->documents ? $registration->documents->pluck('id')->implode(',') : '' }}],
+                get allSelected() { return this.allIds.length > 0 && this.selected.length === this.allIds.length },
+                get someSelected() { return this.selected.length > 0 && this.selected.length < this.allIds.length },
+                toggleAll() {
+                    if (this.allSelected) { this.selected = [] }
+                    else { this.selected = [...this.allIds] }
+                },
+                toggle(id) {
+                    const idx = this.selected.indexOf(id);
+                    if (idx > -1) { this.selected.splice(idx, 1) }
+                    else { this.selected.push(id) }
+                }
+             }">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Dokumen Pendaftaran (Multi-Berkas)</div>
-                @if($registration->documents && $registration->documents->count() > 0)
-                    @php
-                        $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
-                        $approvedCount = $registration->documents->whereIn('document_type', $mandatoryTypes)->where('status', 'disetujui')->count();
-                        $totalMandatory = count($mandatoryTypes);
-                    @endphp
-                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:9999px;background:#F1F4F7;" class="text-neutral-600">
-                        {{ $approvedCount }}/{{ $totalMandatory }} Wajib Disetujui
-                    </span>
-                @endif
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Dokumen Pendaftaran</div>
+                @php
+                    $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
+                    $uploadedDocs = $registration->documents ? $registration->documents->keyBy('document_type') : collect();
+                    $approvedCount = $uploadedDocs->whereIn('document_type', $mandatoryTypes)->where('status', 'disetujui')->count();
+                    $totalMandatory = count($mandatoryTypes);
+                    
+                    $allDocsToDisplay = [];
+                    foreach ($mandatoryTypes as $type) {
+                        if ($uploadedDocs->has($type)) {
+                            $allDocsToDisplay[] = (object) ['is_uploaded' => true, 'doc' => $uploadedDocs->get($type)];
+                        } else {
+                            $allDocsToDisplay[] = (object) [
+                                'is_uploaded' => false,
+                                'type' => $type,
+                                'label' => strtoupper(str_replace('_', ' ', $type)),
+                            ];
+                        }
+                    }
+                    foreach ($uploadedDocs as $type => $doc) {
+                        if (!in_array($type, $mandatoryTypes)) {
+                            $allDocsToDisplay[] = (object) ['is_uploaded' => true, 'doc' => $doc];
+                        }
+                    }
+                @endphp
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:9999px;background:#F1F4F7;" class="text-neutral-600">
+                    {{ $approvedCount }}/{{ $totalMandatory }} Wajib Disetujui
+                </span>
             </div>
 
-            @if($registration->documents && $registration->documents->count() > 0)
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    @foreach($registration->documents as $doc)
-                        <div style="border:1px solid #E5E7EB;border-radius:8px;padding:12px;background:#F9FAFB;">
-                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                                <div style="font-size:13px;font-weight:700;" class="text-neutral-900">
+            {{-- Select All header (only when status allows review AND there are uploaded docs) --}}
+            @if($registration->status === 'terdaftar' && $uploadedDocs->count() > 0)
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F1F4F7;border-radius:8px;margin-bottom:12px;">
+                <input type="checkbox" :checked="allSelected" :indeterminate="someSelected" @click="toggleAll()"
+                       class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 cursor-pointer">
+                <span style="font-size:12px;font-weight:600;" class="text-neutral-600">
+                    Pilih Semua Dokumen Upload
+                </span>
+                <span x-show="selected.length > 0" x-cloak
+                      style="font-size:11px;font-weight:700;padding:1px 8px;border-radius:9999px;background:#082e8f;color:white;margin-left:auto;">
+                    <span x-text="selected.length"></span> dipilih
+                </span>
+            </div>
+            @endif
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                @foreach($allDocsToDisplay as $item)
+                    @if($item->is_uploaded)
+                        @php $doc = $item->doc; @endphp
+                        <div class="p-4 rounded-xl border transition-colors duration-200"
+                             :class="selected.includes({{ $doc->id }}) ? 'border-primary-600 bg-primary-50' : 'border-neutral-200 bg-white'">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                                @if($registration->status === 'terdaftar')
+                                <input type="checkbox" :checked="selected.includes({{ $doc->id }})" @click="toggle({{ $doc->id }})"
+                                       class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 cursor-pointer shrink-0 mt-0.5">
+                                @endif
+                                <div style="font-size:14px;font-weight:700;flex:1;" class="text-neutral-900">
                                     {{ $doc->document_type === 'lainnya' ? $doc->label : strtoupper(str_replace('_', ' ', $doc->document_type)) }}
                                     @if(in_array($doc->document_type, \App\Models\RegistrationDocument::MANDATORY_TYPES))
                                         <span style="color:#ef4444;">*</span>
@@ -235,42 +252,182 @@
                                 </div>
                                 <div>
                                     @if($doc->status === 'disetujui')
-                                        <span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">DISETUJUI</span>
+                                        <span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:4px 10px;border-radius:9999px;">DISETUJUI</span>
                                     @elseif($doc->status === 'perlu_revisi')
-                                        <span style="background:#ffedd5;color:#c2410c;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">REVISI</span>
+                                        <span style="background:#ffedd5;color:#c2410c;font-size:10px;font-weight:700;padding:4px 10px;border-radius:9999px;">REVISI</span>
                                     @else
-                                        <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;">MENUNGGU</span>
+                                        <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:4px 10px;border-radius:9999px;">MENUNGGU</span>
                                     @endif
                                 </div>
                             </div>
-                            
-                            <a href="{{ Storage::url($doc->file_path) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#082e8f;font-weight:600;text-decoration:none;margin-bottom:12px;">
-                                <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-                                Lihat Dokumen
-                            </a>
 
-                            @if($doc->status === 'perlu_revisi' && $doc->review_note)
-                                <div style="font-size:11px;color:#c2410c;margin-bottom:8px;font-style:italic;">
-                                    Catatan: {{ $doc->review_note }}
-                                </div>
-                            @endif
+                            <div style="padding-left: {{ $registration->status === 'terdaftar' ? '28px' : '0' }};">
+                                <a href="{{ Storage::url($doc->file_path) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#0B41CB;font-weight:600;text-decoration:none;">
+                                    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                                    Lihat Dokumen
+                                </a>
 
-                            @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas']))
-                                <form method="POST" action="{{ route('admin.registrations.review-document', $doc->id) }}" style="display:flex;gap:8px;align-items:flex-start;border-top:1px solid #E5E7EB;padding-top:12px;margin-top:4px;">
+                                @if($doc->status === 'perlu_revisi' && $doc->review_note)
+                                    <div style="font-size:12px;color:#c2410c;margin-top:8px;font-style:italic;background:#fff7ed;padding:8px 12px;border-radius:6px;border:1px solid #ffedd5;">
+                                        <strong>Catatan Revisi:</strong> {{ $doc->review_note }}
+                                    </div>
+                                @endif
+
+                                @if($doc->document_type !== 'lainnya')
+                                <form method="POST" action="{{ route('admin.registrations.upload-document', $registration->id) }}" enctype="multipart/form-data" class="mt-3 pt-3" style="border-top:1px dashed #E5E7EB;">
                                     @csrf
-                                    <select name="status" style="width:130px;height:32px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 8px;">
-                                        <option value="disetujui" {{ $doc->status === 'disetujui' ? 'selected' : '' }}>Setujui</option>
-                                        <option value="perlu_revisi" {{ $doc->status === 'perlu_revisi' ? 'selected' : '' }}>Revisi</option>
-                                    </select>
-                                    <input type="text" name="review_note" placeholder="Catatan jika revisi..." value="{{ $doc->review_note }}" style="flex:1;height:32px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 8px;">
-                                    <button type="submit" style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;">Simpan</button>
+                                    <input type="hidden" name="document_type" value="{{ $doc->document_type }}">
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
+                                               style="flex:1;font-size:11px;">
+                                        <button type="submit"
+                                                onclick="return confirm('Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui.')"
+                                                style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap;">
+                                            Ganti
+                                        </button>
+                                    </div>
                                 </form>
-                            @endif
+                                @endif
+                            </div>
                         </div>
-                    @endforeach
+                    @else
+                        <div class="p-4 rounded-xl border border-dashed border-neutral-300 bg-neutral-50/70">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                                @if($registration->status === 'terdaftar')
+                                <input type="checkbox" disabled class="w-4 h-4 rounded border-neutral-300 bg-neutral-200 cursor-not-allowed shrink-0 mt-0.5 opacity-50">
+                                @endif
+                                <div style="font-size:14px;font-weight:700;flex:1;" class="text-neutral-500">
+                                    {{ $item->label }} <span style="color:#ef4444;">*</span>
+                                </div>
+                                <div>
+                                    <span style="background:#F1F2F4;color:#646E87;font-size:10px;font-weight:700;padding:4px 10px;border-radius:9999px;">BELUM DIUPLOAD</span>
+                                </div>
+                            </div>
+                            <div style="padding-left: {{ $registration->status === 'terdaftar' ? '28px' : '0' }}; font-size:13px;color:#9A9FAC;display:flex;align-items:center;gap:6px;">
+                                <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                Pendaftar belum mengunggah dokumen ini.
+                            </div>
+
+                            <div style="padding-left: {{ $registration->status === 'terdaftar' ? '28px' : '0' }};">
+                                @if($item->type !== 'lainnya')
+                                <form method="POST" action="{{ route('admin.registrations.upload-document', $registration->id) }}" enctype="multipart/form-data" class="mt-3 pt-3" style="border-top:1px dashed #E5E7EB;">
+                                    @csrf
+                                    <input type="hidden" name="document_type" value="{{ $item->type }}">
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
+                                               style="flex:1;font-size:11px;">
+                                        <button type="submit"
+                                                onclick="return confirm('Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui.')"
+                                                style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap;">
+                                            Upload
+                                        </button>
+                                    </div>
+                                </form>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+
+            {{-- Bulk Action Bar (inline) --}}
+            @if($registration->status === 'terdaftar')
+            <div x-show="selected.length > 0" x-cloak x-transition.opacity
+                 style="margin-top:16px;padding:16px;background:#F8FAFF;border:1.5px solid #082e8f;border-radius:12px;">
+                <form method="POST" action="{{ route('admin.registrations.bulk-review-documents', $registration->id) }}">
+                    @csrf
+                    <template x-for="id in selected" :key="id">
+                        <input type="hidden" name="document_ids[]" :value="id">
+                    </template>
+
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <svg style="width:16px;height:16px;color:#082e8f;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                        <span style="font-size:13px;font-weight:700;color:#082e8f;">
+                            Aksi untuk <span x-text="selected.length"></span> dokumen terpilih
+                        </span>
+                    </div>
+
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+                        <div style="flex:1;min-width:200px;">
+                            <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika revisi)</label>
+                            <input type="text" name="bulk_note" placeholder="Catatan untuk dokumen terpilih..."
+                                   style="width:100%;height:36px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 10px;box-sizing:border-box;">
+                        </div>
+                        <button type="submit" name="bulk_status" value="disetujui"
+                                onclick="return confirm('Setujui ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')"
+                                style="height:36px;background:#15803d;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.15s;"
+                                onmouseover="this.style.background='#166534'" onmouseout="this.style.background='#15803d'">
+                            <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                            Setujui Terpilih
+                        </button>
+                        <button type="submit" name="bulk_status" value="perlu_revisi"
+                                onclick="return confirm('Minta revisi ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')"
+                                style="height:36px;background:#c2410c;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.15s;"
+                                onmouseover="this.style.background='#9a3412'" onmouseout="this.style.background='#c2410c'">
+                            <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                            Minta Revisi
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+        </div>
+
+        {{-- Card 4.35: Hasil Tes Tulis Online --}}
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Hasil Tes Tulis Online</div>
+            
+            @php $examSession = $registration->examSession; @endphp
+            
+            @if($examSession)
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                    <div>
+                        <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Status Ujian</div>
+                        <div style="font-size:14px;font-weight:700;" class="{{ $examSession->status === 'completed' ? 'text-success-600' : 'text-warning-600' }}">
+                            {{ $examSession->status === 'completed' ? 'Selesai' : 'Sedang Dikerjakan' }}
+                        </div>
+                    </div>
+                    
+                    @if($examSession->status === 'completed')
+                        <div>
+                            <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Skor Ujian</div>
+                            <div style="font-size:14px;font-weight:700;" class="text-neutral-900">
+                                {{ $examSession->score }}% 
+                                <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:9999px;margin-left:6px;background:{{ $examSession->result_label === 'sangat_baik' ? '#dcfce7' : '#dbeafe' }};color:{{ $examSession->result_label === 'sangat_baik' ? '#166534' : '#1e40af' }};">
+                                    {{ $examSession->result_label === 'sangat_baik' ? 'Sangat Baik' : 'Baik' }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Tanggal Selesai</div>
+                            <div style="font-size:14px;font-weight:500;" class="text-neutral-900">
+                                {{ \Carbon\Carbon::parse($examSession->completed_at)->isoFormat('D MMM Y, HH:mm') }}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <form action="{{ route('admin.registrations.reset-exam', $registration->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mereset sesi tes tulis peserta ini? Seluruh jawaban akan dihapus dan peserta harus mengerjakan ulang.')" style="margin:0;">
+                                @csrf
+                                <button type="submit" style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+                                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    </svg>
+                                    Reset Tes
+                                </button>
+                            </form>
+                        </div>
+                    @else
+                        <div>
+                            <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Tanggal Mulai</div>
+                            <div style="font-size:14px;font-weight:500;" class="text-neutral-900">
+                                {{ \Carbon\Carbon::parse($examSession->started_at)->isoFormat('D MMM Y, HH:mm') }}
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @else
-                <p style="font-size:14px;margin:0;" class="text-neutral-400">Pendaftar belum mengunggah dokumen apapun.</p>
+                <p style="font-size:14px;margin:0;" class="text-neutral-400">Pendaftar belum memulai tes tulis.</p>
             @endif
         </div>
 
@@ -429,29 +586,6 @@
                         style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
                         onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
                     {{ $registration->registration_type === 'alumni' ? 'Verifikasi & Konfirmasi Alumni' : 'Konfirmasi Pembayaran' }}
-                </button>
-            </form>
-        </div>
-        @endif
-
-        {{-- Card Aksi 2: Review & Approval Berkas --}}
-        @if(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'ditolak']))
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Review & Approval Berkas</h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Review Ijazah/SKL dan setujui untuk lanjut Daftar Ulang.</p>
-            <form method="POST" action="{{ route('admin.registrations.update-status', $registration->id) }}">
-                @csrf
-                <select name="status"
-                        style="width:100%;height:44px;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px;" class="border-neutral-300 text-neutral-900 bg-white">
-                    <option value="">— Pilih Hasil Review —</option>
-                    <option value="diterima"     {{ $registration->status === 'diterima'     ? 'selected' : '' }}>Diterima</option>
-                    <option value="ditolak"      {{ $registration->status === 'ditolak'      ? 'selected' : '' }}>Ditolak</option>
-                    <option value="perlu_revisi_berkas" {{ $registration->status === 'perlu_revisi_berkas' ? 'selected' : '' }}>Perlu Revisi Berkas</option>
-                </select>
-                <button type="submit"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                        onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
-                    Perbarui Status Berkas
                 </button>
             </form>
         </div>

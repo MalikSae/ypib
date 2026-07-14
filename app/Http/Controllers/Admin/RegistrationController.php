@@ -179,31 +179,28 @@ class RegistrationController extends Controller
         return redirect()->back()->with('success', 'Bukti bayar berhasil diupload.');
     }
 
-    public function updateStatus(Request $request, int $id)
+    public function resetExam(int $id)
     {
-        $request->validate([
-            'status' => 'required|in:diterima,ditolak,perlu_revisi_berkas',
-        ]);
-
         $registration = Registration::findOrFail($id);
-
-        // Hanya bisa update status jika sudah terdaftar
-        if (!in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas', 'diterima', 'ditolak'])) {
-            return redirect()->back()->with('error', 'Status hanya bisa diubah setelah pendaftar menyelesaikan pendaftaran.');
+        
+        $session = \App\Models\ExamSession::where('registration_id', $registration->id)->where('status', 'completed')->first();
+        if (!$session) {
+            return redirect()->back()->with('error', 'Tidak ada sesi tes yang bisa direset.');
         }
 
-        $registration->update(['status' => $request->status]);
+        $session->answers()->delete();
+        $session->delete();
 
-        $labels = ['diterima' => 'Diterima', 'ditolak' => 'Ditolak', 'perlu_revisi_berkas' => 'Perlu Revisi Berkas'];
+        $registration->update(['status' => 'menunggu_tes_tulis']);
 
-        PaymentLog::create([
+        \App\Models\PaymentLog::create([
             'registration_id' => $registration->id,
-            'acted_by'        => Auth::id(),
-            'action'          => 'status_changed',
-            'note'            => 'Status diubah menjadi ' . ($labels[$request->status] ?? $request->status) . ' oleh ' . Auth::user()->name,
+            'acted_by' => \Illuminate\Support\Facades\Auth::id(),
+            'action' => 'exam_reset',
+            'note' => 'Admin mereset sesi tes tulis, pendaftar dapat mengerjakan ulang.'
         ]);
 
-        return redirect()->back()->with('success', 'Status berhasil diperbarui menjadi ' . ($labels[$request->status] ?? $request->status) . '.');
+        return redirect()->back()->with('success', 'Sesi tes tulis berhasil direset.');
     }
 
     public function confirmReRegistration(Request $request, int $id)
@@ -288,7 +285,13 @@ class RegistrationController extends Controller
         ]);
 
         // Auto-progress check
-        $registration = $document->registration;
+        $this->checkAndProgressDocuments($document->registration);
+
+        return redirect()->back()->with('success', 'Review dokumen berhasil disimpan.');
+    }
+
+    private function checkAndProgressDocuments($registration)
+    {
         $mandatoryCount = count(RegistrationDocument::MANDATORY_TYPES);
         
         $approvedMandatoryCount = RegistrationDocument::where('registration_id', $registration->id)
@@ -309,8 +312,104 @@ class RegistrationController extends Controller
                 ]);
             }
         }
+    }
 
-        return redirect()->back()->with('success', 'Review dokumen berhasil disimpan.');
+    public function uploadDocument(Request $request, $registrationId)
+    {
+        $request->validate([
+            'document_type' => 'required|in:foto,ktp,kk,akta_lahir,transkrip_nilai,surat_keterangan_sehat,sertifikat',
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
+        ]);
+
+        $registration = Registration::findOrFail($registrationId);
+        $documentType = $request->document_type;
+        $file = $request->file('file');
+
+        $document = RegistrationDocument::where('registration_id', $registration->id)
+            ->where('document_type', $documentType)
+            ->first();
+
+        $path = $file->store('dokumen-pendaftaran', 'public');
+
+        if ($document) {
+            if ($document->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($document->file_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($document->file_path);
+            }
+            $document->update([
+                'file_path' => $path,
+                'status' => 'disetujui',
+                'review_note' => null,
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+        } else {
+            RegistrationDocument::create([
+                'registration_id' => $registration->id,
+                'document_type' => $documentType,
+                'file_path' => $path,
+                'status' => 'disetujui',
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+        }
+
+        $this->checkAndProgressDocuments($registration);
+
+        PaymentLog::create([
+            'registration_id' => $registration->id,
+            'acted_by' => Auth::id(),
+            'action' => 'document_uploaded_by_admin',
+            'note' => "Dokumen {$documentType} diupload/diganti langsung oleh admin (" . Auth::user()->name . ").",
+        ]);
+
+        return redirect()->back()->with('success', 'Dokumen berhasil diupload.');
+    }
+
+    public function bulkReviewDocuments(Request $request, int $id)
+    {
+        $request->validate([
+            'document_ids'   => 'required|array|min:1',
+            'document_ids.*' => 'integer|exists:registration_documents,id',
+            'bulk_status'    => 'required|in:disetujui,perlu_revisi',
+            'bulk_note'      => 'required_if:bulk_status,perlu_revisi|nullable|string|max:1000',
+        ]);
+
+        $registration = Registration::findOrFail($id);
+
+        $reviewNote = $request->bulk_status === 'perlu_revisi' ? $request->bulk_note : null;
+
+        RegistrationDocument::where('registration_id', $registration->id)
+            ->whereIn('id', $request->document_ids)
+            ->update([
+                'status'      => $request->bulk_status,
+                'review_note' => $reviewNote,
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+
+        // Auto-progress check (same logic as single review)
+        $mandatoryCount = count(RegistrationDocument::MANDATORY_TYPES);
+
+        $approvedMandatoryCount = RegistrationDocument::where('registration_id', $registration->id)
+            ->whereIn('document_type', RegistrationDocument::MANDATORY_TYPES)
+            ->where('status', 'disetujui')
+            ->count();
+
+        if ($approvedMandatoryCount === $mandatoryCount) {
+            if ($registration->status === 'terdaftar') {
+                $registration->update(['status' => 'menunggu_tes_tulis']);
+
+                PaymentLog::create([
+                    'registration_id' => $registration->id,
+                    'acted_by'        => Auth::id(),
+                    'action'          => 'documents_approved',
+                    'note'            => 'Semua dokumen wajib disetujui (bulk), lanjut ke tahap Tes Tulis.',
+                ]);
+            }
+        }
+
+        $count = count($request->document_ids);
+        return redirect()->back()->with('success', "{$count} dokumen berhasil di-review.");
     }
 
     public function addNote(Request $request, int $id)

@@ -3,30 +3,7 @@
 @section('page-title', 'Data Pendaftar')
 
 @php
-$statusConfig = [
-    ''                                 => ['label' => 'Semua',            'color' => 'neutral'],
-    'menunggu_pembayaran'              => ['label' => 'Belum Bayar',      'color' => 'warning'],
-    'menunggu_konfirmasi'              => ['label' => 'Konfirmasi',       'color' => 'info'],
-    'terdaftar'                        => ['label' => 'Terdaftar',        'color' => 'success'],
-    'menunggu_review_berkas'           => ['label' => 'Review Berkas',    'color' => 'warning'],
-    'perlu_revisi_berkas'              => ['label' => 'Revisi Berkas',    'color' => 'orange'],
-    'diterima'                         => ['label' => 'Diterima',         'color' => 'green'],
-    'ditolak'                          => ['label' => 'Ditolak',          'color' => 'error'],
-    'menunggu_konfirmasi_daftar_ulang' => ['label' => 'Konfirmasi DU',   'color' => 'info'],
-    'daftar_ulang_selesai'             => ['label' => 'Selesai DU',      'color' => 'primary'],
-];
-
-$badgeMap = [
-    'menunggu_pembayaran'              => ['label' => 'Belum Bayar',         'class' => 'bg-neutral-100 text-neutral-600'],
-    'menunggu_konfirmasi'              => ['label' => 'Menunggu Konfirmasi', 'class' => 'bg-neutral-100 text-neutral-600'],
-    'terdaftar'                        => ['label' => 'Terdaftar (Belum Upload)', 'class' => 'bg-primary-50 text-primary-700'],
-    'menunggu_review_berkas'           => ['label' => 'Menunggu Review Berkas', 'class' => 'bg-orange-50 text-orange-600'],
-    'perlu_revisi_berkas'              => ['label' => 'Perlu Revisi Berkas', 'class' => 'bg-orange-50 text-orange-600'],
-    'diterima'                         => ['label' => 'Diterima',            'class' => 'bg-primary-100 text-primary-800'],
-    'ditolak'                          => ['label' => 'Ditolak',             'class' => 'bg-neutral-200 text-neutral-600'],
-    'menunggu_konfirmasi_daftar_ulang' => ['label' => 'Konfirmasi Daftar Ulang', 'class' => 'bg-neutral-100 text-neutral-600'],
-    'daftar_ulang_selesai'             => ['label' => 'Selesai Daftar Ulang',    'class' => 'bg-primary-50 text-primary-700'],
-];
+$statusConfig = ['' => ['label' => 'Semua', 'color' => 'neutral']] + \App\Models\Registration::STATUS_LABELS;
 
 $activeStatus = request('status', '');
 @endphp
@@ -207,7 +184,15 @@ $activeStatus = request('status', '');
             <tbody class="divide-y divide-neutral-100">
                 @forelse($registrations as $reg)
                     @php
-                        $badge = $badgeMap[$reg->status] ?? ['label' => str_replace('_', ' ', $reg->status), 'class' => 'bg-neutral-100 text-neutral-600'];
+                        $color = $reg->getStatusColor();
+                        $bgClass = match($color) {
+                            'warning' => 'bg-warning-50 text-warning-700',
+                            'info' => 'bg-info-50 text-info-700',
+                            'success' => 'bg-success-50 text-success-700',
+                            'error' => 'bg-error-50 text-error-700',
+                            'primary' => 'bg-primary-50 text-primary-700',
+                            default => 'bg-neutral-100 text-neutral-600',
+                        };
                     @endphp
                     <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                         {{-- Pendaftar (Nama + Email) --}}
@@ -260,8 +245,8 @@ $activeStatus = request('status', '');
 
                         {{-- Status Badge --}}
                         <td class="px-5 py-4">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $badge['class'] }}">
-                                {{ $badge['label'] }}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $bgClass }}">
+                                {{ $reg->getStatusLabel() }}
                             </span>
                         </td>
 

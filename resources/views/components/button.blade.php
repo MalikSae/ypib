@@ -6,13 +6,13 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-full transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     $sizeClasses = [
-        'sm' => 'px-3 py-2 text-sm',
-        'md' => 'px-4 py-3 text-base',
-        'lg' => 'px-6 py-4 text-lg',
-    ][$size] ?? 'px-4 py-3 text-base';
+        'sm' => 'px-3 py-2 text-sm h-9',
+        'md' => 'px-4 py-2.5 text-sm h-11',
+        'lg' => 'px-6 py-3 text-base h-12',
+    ][$size] ?? 'px-4 py-2.5 text-sm h-11';
 
     $colorVariants = [
         'primary' => [

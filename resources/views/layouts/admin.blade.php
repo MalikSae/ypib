@@ -10,9 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; padding: 0; background: #F1F4F7; font-family: 'Plus Jakarta Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
 
         /* ─────────────────────────────────────────
            SIDEBAR
@@ -472,6 +474,25 @@
             </svg>
             <span class="sidebar-label">Data Pendaftar</span>
         </a>
+        {{-- Kelola Panitia --}}
+        <a href="{{ route('admin.panitia.index') }}"
+           data-label="Kelola Panitia"
+           class="nav-item {{ request()->routeIs('admin.panitia.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+            </svg>
+            <span class="sidebar-label">Kelola Panitia</span>
+        </a>
+
+        {{-- Bank Soal --}}
+        <a href="{{ route('admin.bank-soal.index') }}"
+           data-label="Bank Soal"
+           class="nav-item {{ request()->routeIs('admin.bank-soal.*') ? 'active' : '' }}">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+            </svg>
+            <span class="sidebar-label">Bank Soal</span>
+        </a>
 
         {{-- Data Afiliasi --}}
         <a href="{{ route('admin.referrers.index') }}"
@@ -512,6 +533,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
             </svg>
             <span class="sidebar-label">Integrasi Email</span>
+        </a>
+
+        {{-- Komponen UI Showcase (Dev only) --}}
+        <a href="{{ route('admin.komponen') }}"
+           data-label="Komponen UI"
+           class="nav-item {{ request()->routeIs('admin.komponen') ? 'active' : '' }} mt-8" style="opacity: 0.6; filter: grayscale(100%);">
+            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+            </svg>
+            <span class="sidebar-label">Komponen UI</span>
         </a>
     </nav>
 
