@@ -301,7 +301,7 @@ class RegistrationController extends Controller
 
         if ($approvedMandatoryCount === $mandatoryCount) {
             // Check if status is still in early stages
-            if (in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas'])) {
+            if ($registration->status === 'terdaftar') {
                 $registration->update(['status' => 'menunggu_tes_tulis']);
                 
                 PaymentLog::create([

@@ -54,7 +54,7 @@ $activeStatus = request('status', '');
     <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             @php
-                $uploadBerkas = ($statusCounts['menunggu_review_berkas'] ?? 0) + ($statusCounts['perlu_revisi_berkas'] ?? 0) + ($statusCounts['diterima'] ?? 0) + ($statusCounts['menunggu_konfirmasi_daftar_ulang'] ?? 0) + ($statusCounts['daftar_ulang_selesai'] ?? 0) + ($statusCounts['ditolak'] ?? 0);
+                $uploadBerkas = ($statusCounts['diterima'] ?? 0) + ($statusCounts['menunggu_konfirmasi_daftar_ulang'] ?? 0) + ($statusCounts['daftar_ulang_selesai'] ?? 0) + ($statusCounts['ditolak'] ?? 0);
             @endphp
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $uploadBerkas }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Upload Berkas</div>

@@ -35,7 +35,7 @@
             <strong>Data Anda belum lengkap.</strong> Mohon lengkapi seluruh field yang ditandai wajib sebelum melanjutkan ke tahap Pemberkasan Dokumen.
         </div>
     </div>
-    @elseif(in_array($registration->status, ['terdaftar', 'menunggu_review_berkas', 'perlu_revisi_berkas']))
+    @elseif($registration->status === 'terdaftar')
     <div class="mb-6 bg-green-50/80 rounded-xl border border-green-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-sm">
         <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
             <div class="flex-shrink-0 bg-green-100 p-3 rounded-full hidden sm:block">

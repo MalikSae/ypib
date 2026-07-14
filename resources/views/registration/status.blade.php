@@ -99,10 +99,7 @@
                         <span class="bg-[#e6edfc] text-primary-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full leading-tight shrink-0">Menunggu Konfirmasi</span>
                     @elseif($stage['number'] == 2 && $status === 'menunggu_pembayaran')
                         <span class="bg-orange-50 text-orange-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full leading-tight shrink-0">Belum Dibayar</span>
-                    @elseif($stage['number'] == 3 && $status === 'menunggu_review_berkas')
-                        <span class="bg-[#e6edfc] text-primary-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full leading-tight shrink-0">Menunggu Review</span>
-                    @elseif($stage['number'] == 3 && $status === 'perlu_revisi_berkas')
-                        <span class="bg-orange-50 text-orange-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full leading-tight shrink-0">Perlu Revisi</span>
+
                     @elseif($stage['number'] == 7 && $status === 'menunggu_konfirmasi_daftar_ulang' && $registration->re_registration_payment_proof)
                         <span class="bg-[#e6edfc] text-primary-600 text-[11px] font-bold py-0.5 px-2.5 rounded-full leading-tight shrink-0">Menunggu Konfirmasi</span>
                     @elseif($stage['number'] == 7 && $status === 'diterima')
