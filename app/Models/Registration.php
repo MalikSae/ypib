@@ -254,20 +254,24 @@ class Registration extends Model
         // TAHAP 6 - Hasil Seleksi
         $t6State = 'locked';
         $t6Description = 'Pengumuman kelulusan calon mahasiswa.';
+        $t6ActionUrl = null;
+        $t6ActionLabel = null;
         if ($status === 'ditolak') {
             $t6State = 'rejected';
             $t6Description = 'Mohon maaf, Anda dinyatakan tidak lolos seleksi PMB Universitas YPIB Majalengka tahun ini.';
         } elseif (in_array($status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
             $t6State = 'completed';
             $t6Description = 'Selamat! Anda dinyatakan <strong class="text-success-600">LULUS</strong> seleksi PMB Universitas YPIB Majalengka. Silakan lanjutkan ke tahap Daftar Ulang.';
+            $t6ActionUrl = route('registration.skl');
+            $t6ActionLabel = 'Download Surat Kelulusan';
         }
         $stages[] = [
             'number' => 6,
             'label' => 'Hasil Seleksi',
             'state' => $t6State,
             'description' => $t6Description,
-            'action_url' => null,
-            'action_label' => null
+            'action_url' => $t6ActionUrl,
+            'action_label' => $t6ActionLabel
         ];
 
         // TAHAP 7 - Pembayaran Daftar Ulang
@@ -325,5 +329,39 @@ class Registration extends Model
             && !empty($this->mother_name)
             && !empty($this->father_occupation)
             && !empty($this->mother_occupation);
+    }
+
+    public function generateNim(): ?string
+    {
+        $program = $this->firstChoiceProgram;
+        if (!$program || empty($program->kode_prodi)) {
+            return null; // Fallback aman: skip generate, JANGAN error/exception
+        }
+        $year = $this->period->year ?? date('Y');
+        $yearCode = substr((string) $year, -2);
+        $trackCode = $program->registration_track === 'non_reguler' ? '2' : '1';
+        $prefix = $yearCode . $program->kode_prodi . $trackCode;
+
+        $lastSequence = self::whereNotNull('nim')
+            ->where('nim', 'like', $yearCode . '%')
+            ->count();
+        $sequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
+
+        return $prefix . $sequence;
+    }
+
+    public function generateLetterNumber(): string
+    {
+        $now = now();
+        $romanMonths = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+        $roman = $romanMonths[(int) $now->format('n')];
+        $year = $now->format('Y');
+
+        $lastSequence = self::whereNotNull('letter_number')
+            ->where('letter_number', 'like', '%/' . $year)
+            ->count();
+        $sequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
+
+        return "{$sequence}/UNIV-YPIB/SKL/{$roman}/{$year}";
     }
 }

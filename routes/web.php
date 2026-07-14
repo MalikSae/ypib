@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pendaftaran/detail', [RegistrationController::class, 'detail'])->name('registration.detail');
     Route::post('/pendaftaran/detail/update', [RegistrationController::class, 'updateDetail'])->name('registration.detail.update');
     Route::get('/pendaftaran/cetak', [RegistrationController::class, 'downloadPdf'])->name('registration.pdf');
+    Route::get('/pendaftaran/surat-kelulusan', [RegistrationController::class, 'downloadSkl'])->name('registration.skl');
     Route::get('/pendaftaran/tes-tulis', [RegistrationController::class, 'exam'])->name('registration.exam');
     Route::get('/pendaftaran/interview', [RegistrationController::class, 'interview'])->name('registration.interview');
     Route::post('/pendaftaran/tes-tulis/jawab', [RegistrationController::class, 'saveExamAnswer'])->name('registration.exam.save-answer');

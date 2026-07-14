@@ -64,21 +64,29 @@ class DashboardController extends Controller
             return redirect()->route('panitia.dashboard')->with('error', 'Pendaftar ini sudah diproses atau tidak valid.');
         }
 
-        $registration->status = $request->hasil;
-        
         $catatanNote = $request->catatan ? $request->catatan : '-';
-        $internalNotes = $registration->internal_notes ? $registration->internal_notes . "\n\n" : "";
-        $internalNotes .= "[Interview] Diproses oleh " . Auth::user()->name . " pada " . now()->format('d M Y H:i:s') . "\nCatatan: " . $catatanNote;
-        
-        $registration->internal_notes = $internalNotes;
-        $registration->save();
 
-        PaymentLog::create([
-            'registration_id' => $registration->id,
-            'acted_by' => Auth::id(),
-            'action' => 'interview_completed',
-            'note' => 'Interview diputuskan: ' . strtoupper($request->hasil) . '. Catatan: ' . $catatanNote
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request, $catatanNote) {
+            $registration->status = $request->hasil;
+
+            if ($request->hasil === 'diterima') {
+                $registration->nim = $registration->generateNim();
+                $registration->letter_number = $registration->generateLetterNumber();
+            }
+            
+            $internalNotes = $registration->internal_notes ? $registration->internal_notes . "\n\n" : "";
+            $internalNotes .= "[Interview] Diproses oleh " . Auth::user()->name . " pada " . now()->format('d M Y H:i:s') . "\nCatatan: " . $catatanNote;
+            
+            $registration->internal_notes = $internalNotes;
+            $registration->save();
+
+            PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by' => Auth::id(),
+                'action' => 'interview_completed',
+                'note' => 'Interview diputuskan: ' . strtoupper($request->hasil) . '. Catatan: ' . $catatanNote
+            ]);
+        });
 
         return redirect()->route('panitia.dashboard')->with('success', 'Interview untuk ' . $registration->full_name . ' selesai diproses: ' . strtoupper($request->hasil) . '.');
     }

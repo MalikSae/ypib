@@ -347,6 +347,23 @@ class RegistrationController extends Controller
         return $pdf->download($fileName);
     }
 
+    public function downloadSkl()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with(['firstChoiceProgram', 'period'])
+            ->latest()
+            ->firstOrFail();
+
+        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
+            return redirect()->route('registration.status')->with('error', 'Anda belum dinyatakan lulus.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('registration.pdf-skl', compact('registration'));
+        $fileName = 'Surat-Keterangan-Lulus-' . \Illuminate\Support\Str::slug($registration->full_name) . '.pdf';
+
+        return $pdf->download($fileName);
+    }
+
     public function exam()
     {
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
