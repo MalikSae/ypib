@@ -67,7 +67,7 @@
         $photoDoc = $registration->documents->firstWhere('document_type', 'foto');
         $photoPath = $photoDoc ? storage_path('app/public/' . $photoDoc->file_path) : null;
         $hasPhoto = $photoPath && file_exists($photoPath);
-        $logoPath = public_path('images/Favicon.png');
+        $logoPath = public_path('images/favicon.png');
     @endphp
 
     <table style="width:100%; border-collapse:collapse;">
