@@ -257,6 +257,14 @@
                         </div>
                     @elseif($stage['state'] === 'completed')
                         <div class="text-xs mt-0.5 text-green-600 font-semibold">Berkas Disetujui</div>
+                        @if(!empty($stage['action_url']))
+                            <div class="mt-2.5">
+                                <a href="{{ $stage['action_url'] }}" class="inline-flex items-center gap-2 h-9 px-4 text-xs font-semibold bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors">
+                                    <i class="ti ti-folder text-base"></i>
+                                    {{ $stage['action_label'] }}
+                                </a>
+                            </div>
+                        @endif
                     @else
                         <div class="text-xs mt-0.5 text-neutral-400">{!! $stage['description'] !!}</div>
                     @endif

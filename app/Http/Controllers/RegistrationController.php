@@ -72,14 +72,18 @@ class RegistrationController extends Controller
 
         $mandatoryLabels = [
             'foto' => 'Foto Close Up',
-            'ktp' => 'KTP',
             'kk' => 'Kartu Keluarga (KK)',
             'akta_lahir' => 'Akta Lahir',
-            'transkrip_nilai' => 'Transkrip Nilai',
-            'surat_keterangan_sehat' => 'Surat Keterangan Sehat',
         ];
 
-        return view('registration.documents', compact('registration', 'mandatoryLabels'));
+        $optionalLabels = [
+            'ktp' => 'KTP (Opsional)',
+            'transkrip_nilai' => 'Transkrip Nilai (Opsional)',
+            'surat_keterangan_sehat' => 'Surat Keterangan Sehat (Opsional)',
+            'sertifikat' => 'Sertifikat (Opsional)',
+        ];
+
+        return view('registration.documents', compact('registration', 'mandatoryLabels', 'optionalLabels'));
     }
 
     public function uploadProof(Request $request)
@@ -154,9 +158,7 @@ class RegistrationController extends Controller
 
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
-        if ($registration->status !== 'terdaftar') {
-            return redirect()->route('registration.documents')->with('error', 'Status pendaftaran belum memenuhi syarat untuk upload berkas.');
-        }
+
 
         $type = $request->input('document_type');
         $file = $request->file('file');

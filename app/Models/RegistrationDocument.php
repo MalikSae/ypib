@@ -23,11 +23,8 @@ class RegistrationDocument extends Model
 
     public const MANDATORY_TYPES = [
         'foto',
-        'ktp',
         'kk',
         'akta_lahir',
-        'transkrip_nilai',
-        'surat_keterangan_sehat',
     ];
 
     public function registration()

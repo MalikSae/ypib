@@ -157,6 +157,8 @@ class Registration extends Model
 
         if (in_array($status, ['menunggu_tes_tulis', 'menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
             $t3State = 'completed';
+            $t3ActionUrl = route('registration.documents');
+            $t3ActionLabel = 'Lihat/Kelola Dokumen';
         } elseif ($status === 'terdaftar') {
             $t3State = 'active';
             if (!$this->isFormComplete()) {

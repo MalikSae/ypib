@@ -49,11 +49,14 @@
         @endphp
 
         @if($waNumberFormatted)
-        <div class="mt-6 pt-6 border-t border-neutral-200 text-center">
-            <p class="text-xs text-neutral-500 mb-3">Ada pertanyaan seputar jadwal interview?</p>
-            <a href="https://wa.me/{{ $waNumberFormatted }}?text={{ urlencode('Halo, saya ingin bertanya tentang jadwal interview PMB. Nomor pendaftaran saya: ' . $registration->registration_number) }}"
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+                <h4 class="text-sm font-bold text-blue-900 mb-1">Informasi Jadwal & Dokumen</h4>
+                <p class="text-xs text-blue-800/80 leading-relaxed">Hubungi panitia PMB untuk mendapatkan informasi jadwal dan dokumen yang harus dibawa saat interview.</p>
+            </div>
+            <a href="https://wa.me/{{ $waNumberFormatted }}?text={{ urlencode('Halo, saya ingin bertanya tentang jadwal dan dokumen yang harus dibawa saat interview PMB. Nomor pendaftaran saya: ' . $registration->registration_number) }}"
                target="_blank"
-               class="btn-secondary inline-flex items-center gap-2">
+               class="shrink-0 inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1DA851] text-white h-10 px-5 text-sm font-semibold rounded-full transition-colors shadow-sm w-full sm:w-auto justify-center">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.489 1.2.532 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.663.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
                     <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2 22l5.216-1.317C8.641 21.502 10.276 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.5c-1.606 0-3.09-.474-4.339-1.286l-.311-.196-3.229.815.848-3.148-.203-.323C3.474 15.121 3 13.606 3 12c0-4.963 4.037-9 9-9s9 4.037 9 9-4.037 9-9 9z"/>
