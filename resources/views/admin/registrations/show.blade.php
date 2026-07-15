@@ -49,9 +49,11 @@
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
                 <div style="font-size:24px;font-weight:700;" class="text-white">{{ $registration->full_name }}</div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;background:rgba(0,0,0,0.15);" class="text-white">
-                        Jalur: {{ $registration->registration_type === 'alumni' ? 'Alumni YPIB' : 'Reguler' }}
-                    </span>
+                    @if($registration->registration_type === 'alumni')
+                        <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;background:rgba(0,0,0,0.15);" class="text-white">
+                            Alumni YPIB
+                        </span>
+                    @endif
                     <span style="border:1.5px solid rgba(255,255,255,0.6);font-size:12px;font-weight:700;border-radius:9999px;padding:4px 14px;display:inline-block;" class="text-white">
                         {{ $registration->getStatusLabel() }}
                     </span>

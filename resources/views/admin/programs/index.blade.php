@@ -52,7 +52,7 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Prodi</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Jalur</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tipe</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Fakultas</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya</th>
