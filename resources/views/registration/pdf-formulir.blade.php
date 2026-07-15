@@ -65,7 +65,7 @@
 
     @php
         $photoDoc = $registration->documents->firstWhere('document_type', 'foto');
-        $photoPath = $photoDoc ? storage_path('app/public/' . $photoDoc->file_path) : null;
+        $photoPath = $photoDoc ? \Illuminate\Support\Facades\Storage::disk('public')->path($photoDoc->file_path) : null;
         $hasPhoto = $photoPath && file_exists($photoPath);
         $logoPath = public_path('images/favicon.png');
     @endphp
