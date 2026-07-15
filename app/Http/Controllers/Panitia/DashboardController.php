@@ -70,7 +70,6 @@ class DashboardController extends Controller
             $registration->status = $request->hasil;
 
             if ($request->hasil === 'diterima') {
-                $registration->nim = $registration->generateNim();
                 $registration->letter_number = $registration->generateLetterNumber();
             }
             

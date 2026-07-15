@@ -129,7 +129,7 @@ class Registration extends Model
             'state' => 'completed',
             'description' => 'Formulir telah berhasil dikirim.',
             'action_url' => route('registration.detail'),
-            'action_label' => 'Lihat Formulir'
+            'action_label' => 'Lihat/Download Formulir'
         ];
 
 
@@ -167,7 +167,7 @@ class Registration extends Model
                 $t3RequiresForm = true;
             } else {
                 $t3ActionUrl = route('registration.documents');
-                $t3ActionLabel = 'Buka Dokumen';
+                $t3ActionLabel = 'Upload Dokumen';
             }
 
         } elseif (in_array($status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {

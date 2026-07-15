@@ -203,6 +203,46 @@ class RegistrationController extends Controller
         return redirect()->back()->with('success', 'Sesi tes tulis berhasil direset.');
     }
 
+    public function overrideStatus(Request $request, int $id)
+    {
+        $request->validate([
+            'hasil' => 'required|in:diterima,ditolak',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        $registration = Registration::findOrFail($id);
+
+        $allowedStatuses = ['menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang'];
+        if (!in_array($registration->status, $allowedStatuses)) {
+            return redirect()->back()->with('error', 'Status pendaftar ini tidak dapat diubah lewat fitur override (sudah melewati tahap daftar ulang).');
+        }
+
+        $catatanNote = $request->catatan ? $request->catatan : '-';
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request, $catatanNote) {
+            $registration->status = $request->hasil;
+
+            if ($request->hasil === 'diterima' && empty($registration->letter_number)) {
+                $registration->letter_number = $registration->generateLetterNumber();
+            }
+
+            $internalNotes = $registration->internal_notes ? $registration->internal_notes . "\n\n" : "";
+            $internalNotes .= "[Override Admin] Diproses oleh " . Auth::user()->name . " pada " . now()->format('d M Y H:i:s') . "\nCatatan: " . $catatanNote;
+
+            $registration->internal_notes = $internalNotes;
+            $registration->save();
+
+            PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by' => Auth::id(),
+                'action' => 'admin_status_override',
+                'note' => 'Status diubah manual oleh admin menjadi: ' . strtoupper($request->hasil) . '. Catatan: ' . $catatanNote,
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Status pendaftar berhasil diubah menjadi ' . strtoupper($request->hasil) . '.');
+    }
+
     public function confirmReRegistration(Request $request, int $id)
     {
         $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
@@ -229,6 +269,11 @@ class RegistrationController extends Controller
         }
 
         $registration->status = 'daftar_ulang_selesai';
+        
+        if (empty($registration->nim)) {
+            $registration->nim = $registration->generateNim();
+        }
+        
         $registration->save();
 
         $actionNote = 'Pembayaran daftar ulang dikonfirmasi oleh ' . Auth::user()->name;

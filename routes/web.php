@@ -115,6 +115,7 @@ Route::prefix('admin')
             Route::post('/{id}/restore', [AdminRegistrationController::class, 'restore'])->name('restore');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
             Route::post('/{id}/konfirmasi-daftar-ulang', [AdminRegistrationController::class, 'confirmReRegistration'])->name('confirm-re-registration');
+            Route::post('/{id}/override-status', [AdminRegistrationController::class, 'overrideStatus'])->name('override-status');
             Route::post('/{id}/upload-bukti', [AdminRegistrationController::class, 'uploadBukti'])->name('upload-bukti');
             Route::post('/{id}/catatan', [AdminRegistrationController::class, 'addNote'])->name('add-note');
             Route::post('/{id}/referral', [AdminRegistrationController::class, 'updateReferral'])->name('update-referral');

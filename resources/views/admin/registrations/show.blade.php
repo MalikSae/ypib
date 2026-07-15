@@ -23,14 +23,29 @@
 
         {{-- Card 1: Header Pendaftar --}}
         <div style="border-radius:16px;padding:24px;" class="bg-primary-600">
-            <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;">
-                {{ $registration->registration_number ? 'Nomor Pendaftaran' : 'Belum terdaftar' }}
-            </div>
-            @if($registration->registration_number)
-                <div style="font-size:20px;font-weight:700;font-family:monospace;letter-spacing:0.05em;margin-bottom:8px;" class="text-white">
-                    {{ $registration->registration_number }}
+            <div style="display:flex;align-items:flex-start;gap:32px;flex-wrap:wrap;margin-bottom:8px;">
+                <div>
+                    <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;">
+                        {{ $registration->registration_number ? 'Nomor Pendaftaran' : 'Belum terdaftar' }}
+                    </div>
+                    @if($registration->registration_number)
+                        <div style="font-size:20px;font-weight:700;font-family:monospace;letter-spacing:0.05em;" class="text-white">
+                            {{ $registration->registration_number }}
+                        </div>
+                    @endif
                 </div>
-            @endif
+
+                @if($registration->nim)
+                    <div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;">
+                            NIM
+                        </div>
+                        <div style="font-size:20px;font-weight:700;font-family:monospace;letter-spacing:0.05em;" class="text-white">
+                            {{ $registration->nim }}
+                        </div>
+                    </div>
+                @endif
+            </div>
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
                 <div style="font-size:24px;font-weight:700;" class="text-white">{{ $registration->full_name }}</div>
                 <div style="display:flex;align-items:center;gap:8px;">
@@ -589,6 +604,51 @@
                 </button>
             </form>
         </div>
+        @endif
+
+        {{-- Card Aksi: Override Status Kelulusan --}}
+        @if(in_array($registration->status, ['menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang']))
+        <x-card class="p-6 mb-6">
+            <h3 class="text-base font-bold text-neutral-900 mb-1">Override Status Kelulusan</h3>
+            <p class="text-sm text-neutral-500 mb-4">
+                Ubah status kelulusan pendaftar secara manual (status saat ini: <span class="font-bold">{{ $registration->getStatusLabel() }}</span>). Gunakan untuk fleksibilitas operasional di lapangan.
+            </p>
+
+            <form action="{{ route('admin.registrations.override-status', $registration->id) }}" method="POST" onsubmit="return confirm('Yakin ubah status pendaftar ini?')">
+                @csrf
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="hasil" value="diterima" class="peer sr-only" required>
+                        <div class="rounded-xl border-2 border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50 peer-checked:border-success-500 peer-checked:bg-success-50 transition text-center">
+                            <div class="font-bold text-neutral-900 text-sm">Lulus</div>
+                        </div>
+                        <div class="absolute top-1.5 right-1.5 opacity-0 peer-checked:opacity-100 text-success-500">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </label>
+                    
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="hasil" value="ditolak" class="peer sr-only" required>
+                        <div class="rounded-xl border-2 border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50 peer-checked:border-error-500 peer-checked:bg-error-50 transition text-center">
+                            <div class="font-bold text-neutral-900 text-sm">Tidak Lulus</div>
+                        </div>
+                        <div class="absolute top-1.5 right-1.5 opacity-0 peer-checked:opacity-100 text-error-500">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="mb-4">
+                    <x-input-label for="override_catatan" value="Catatan Tambahan (Opsional)" />
+                    <x-textarea name="catatan" id="override_catatan" rows="2" placeholder="Alasan override..."></x-textarea>
+                </div>
+                
+                <x-button type="submit" color="primary" class="w-full justify-center">
+                    Simpan Perubahan Status
+                </x-button>
+            </form>
+        </x-card>
         @endif
 
         {{-- Card Aksi: Konfirmasi Daftar Ulang --}}
