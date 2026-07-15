@@ -144,16 +144,24 @@
             startBtn.disabled = true;
             startBtn.textContent = 'Memulai...';
             errorContainer.classList.add('hidden');
-            
+
+            // Tampilkan div reader SEBELUM start() dipanggil, supaya library
+            // bisa menghitung dimensi container dengan benar (elemen harus
+            // sudah punya width/height nyata di DOM, bukan display:none)
+            placeholder.classList.add('hidden');
+            readerDiv.classList.remove('hidden');
+
             html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
                 .then(() => {
-                    placeholder.classList.add('hidden');
-                    readerDiv.classList.remove('hidden');
                     stopContainer.classList.remove('hidden');
                     startBtn.disabled = false;
                     startBtn.textContent = 'Mulai Scan';
                 })
                 .catch(err => {
+                    // Rollback tampilan kalau gagal start, supaya tidak nyangkut
+                    // menampilkan reader kosong tanpa kamera aktif
+                    readerDiv.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
                     errorText.textContent = err;
                     errorContainer.classList.remove('hidden');
                     startBtn.disabled = false;
