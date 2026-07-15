@@ -7,8 +7,9 @@
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.35;
             color: #333;
+            padding-bottom: 60px;
         }
         .header {
             text-align: center;
@@ -29,8 +30,8 @@
             background-color: #f0f0f0;
             padding: 5px 10px;
             font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 10px;
+            margin-top: 10px;
+            margin-bottom: 6px;
             border: 1px solid #ddd;
         }
         table {
@@ -38,7 +39,7 @@
             border-collapse: collapse;
         }
         td {
-            padding: 5px;
+            padding: 3px 5px;
             vertical-align: top;
         }
         .label {
@@ -52,12 +53,16 @@
             width: 68%;
         }
         .footer {
-            margin-top: 40px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
             font-size: 10px;
             color: #777;
             border-top: 1px solid #ddd;
-            padding-top: 10px;
+            padding-top: 8px;
+            padding-bottom: 10px;
         }
     </style>
 </head>
@@ -79,14 +84,15 @@
             </td>
             <td style="vertical-align:middle; text-align:center;">
                 <div style="font-size:16px; font-weight:bold; text-transform:uppercase; margin:0;">Universitas YPIB Majalengka</div>
-                <div style="font-size:12px; margin:4px 0 0;">Formulir Pendaftaran Mahasiswa Baru</div>
+                <div style="font-size:11px; margin:3px 0 0; color:#444;">Jalan Gerakan Koperasi Nomor 003, Majalengka</div>
+                <div style="font-size:12px; margin:8px 0 0;">Formulir Pendaftaran Mahasiswa Baru</div>
             </td>
             <td style="width:95px;"></td>
         </tr>
     </table>
     <div style="border-bottom:2px solid #333; margin:10px 0 15px;"></div>
 
-    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+    <table style="width:100%; border-collapse:collapse; margin-bottom:8px;">
         <tr>
             <td style="vertical-align:top;">
                 @if($registration->registration_number)

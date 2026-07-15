@@ -445,7 +445,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         // Page Loader
-        window.addEventListener('load', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const loader = document.getElementById('page-loader');
             if (loader) {
                 loader.style.opacity = '0';
