@@ -48,7 +48,12 @@ class ProgramController extends Controller
     {
         $request->validate([
             'name'                            => 'required|string|max:255',
-            'kode_prodi'                      => 'nullable|string|size:5|regex:/^[0-9]{5}$/|unique:programs,kode_prodi',
+            'kode_prodi'                      => [
+                'nullable', 'string', 'size:5', 'regex:/^[0-9]{5}$/',
+                \Illuminate\Validation\Rule::unique('programs')->where(function ($query) use ($request) {
+                    return $query->where('registration_track', $request->registration_track);
+                }),
+            ],
             'registration_track'              => 'required|in:reguler,non_reguler',
             'faculty_id'                      => 'required|exists:faculties,id',
             'accreditation'                   => 'nullable|string|max:50',
@@ -64,7 +69,7 @@ class ProgramController extends Controller
         ], [
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
-            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh prodi lain.',
+            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
         ]);
 
         try {
@@ -135,7 +140,12 @@ class ProgramController extends Controller
     {
         $request->validate([
             'name'                            => 'required|string|max:255',
-            'kode_prodi'                      => 'nullable|string|size:5|regex:/^[0-9]{5}$/|unique:programs,kode_prodi,' . $id,
+            'kode_prodi'                      => [
+                'nullable', 'string', 'size:5', 'regex:/^[0-9]{5}$/',
+                \Illuminate\Validation\Rule::unique('programs')->ignore($id)->where(function ($query) use ($request) {
+                    return $query->where('registration_track', $request->registration_track);
+                }),
+            ],
             'registration_track'              => 'required|in:reguler,non_reguler',
             'faculty_id'                      => 'required|exists:faculties,id',
             'accreditation'                   => 'nullable|string|max:50',
@@ -151,7 +161,7 @@ class ProgramController extends Controller
         ], [
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
-            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh prodi lain.',
+            'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
         ]);
 
         try {
