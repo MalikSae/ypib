@@ -21,3 +21,9 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Backups
+/backups/
+*.bak
+*.backup
+*~
