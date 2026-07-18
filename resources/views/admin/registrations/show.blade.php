@@ -63,7 +63,13 @@
 
         {{-- Card 2: Data Diri --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Data Diri</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Data Diri</div>
+                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-data-modal')" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;background:#F1F4F7;color:#082e8f;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
+                    Edit Data
+                </button>
+            </div>
             <div class="field-grid">
                 @php
                 $fields = [
@@ -811,7 +817,7 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:13px;" class="text-neutral-500">Status</span>
-                        <span style="font-size:12px;font-weight:600;text-transform:capitalize;padding:2px 8px;border-radius:4px;" class="{{ $reward->status === 'cancelled' ? 'bg-error-50 text-error-600' : 'text-neutral-600 bg-neutral-200' }}">{{ $reward->status }}</span>
+                        <x-reward-status-badge :status="$reward->status" />
                     </div>
                     @if($reward->notes)
                     <div style="font-size:11px;margin-top:8px;font-style:italic;" class="text-neutral-400">
@@ -862,5 +868,143 @@ function toggleRegPassword(inputId, iconId) {
     }
 }
 </script>
+
+    <x-modal name="edit-data-modal" :show="$errors->hasAny(['full_name','nik','birth_place','birth_date','gender','phone','email','address','school_name','graduation_year','school_grade','admission_path','first_choice_program_id'])" maxWidth="2xl">
+        <form action="{{ route('admin.registrations.update-data', $registration->id) }}" method="POST" class="p-6">
+            @csrf
+            <h2 class="text-lg font-bold text-neutral-900 mb-4">Edit Data Pendaftar</h2>
+
+            @if ($errors->any())
+                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                    <ul style="margin:0;padding-left:20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <x-input-label for="edit_full_name" value="Nama Lengkap" required="true" />
+                    <x-text-input id="edit_full_name" name="full_name" type="text" class="mt-1 block w-full" :value="old('full_name', $registration->full_name)" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_nik" value="NIK" required="true" />
+                    <x-text-input id="edit_nik" name="nik" type="text" class="mt-1 block w-full" :value="old('nik', $registration->nik)" required maxlength="16" />
+                </div>
+                <div>
+                    <x-input-label for="edit_birth_place" value="Tempat Lahir" required="true" />
+                    <select id="edit_birth_place" name="birth_place" class="mt-1 block w-full" required>
+                        <option value="">Pilih Kota/Kabupaten</option>
+                        @foreach($cities as $city)
+                            <option value="{{ $city }}" {{ old('birth_place', $registration->birth_place) === $city ? 'selected' : '' }}>
+                                {{ $city }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <x-input-label for="edit_birth_date" value="Tanggal Lahir" required="true" />
+                    <x-text-input id="edit_birth_date" name="birth_date" type="date" class="mt-1 block w-full" :value="old('birth_date', $registration->birth_date ? $registration->birth_date->format('Y-m-d') : '')" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_gender" value="Jenis Kelamin" required="true" />
+                    <x-select id="edit_gender" name="gender" class="mt-1 block w-full" required>
+                        <option value="male" {{ old('gender', $registration->gender) === 'male' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="female" {{ old('gender', $registration->gender) === 'female' ? 'selected' : '' }}>Perempuan</option>
+                    </x-select>
+                </div>
+                <div>
+                    <x-input-label for="edit_phone" value="No. HP" required="true" />
+                    <x-text-input id="edit_phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $registration->phone)" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_email" value="Email (Akun Login)" required="true" />
+                    <x-text-input id="edit_email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $registration->user?->email)" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_admission_path" value="Jalur Pendaftaran" required="true" />
+                    <x-select id="edit_admission_path" name="admission_path" class="mt-1 block w-full" required>
+                        <option value="umum" {{ old('admission_path', $registration->admission_path) === 'umum' ? 'selected' : '' }}>Jalur Reguler</option>
+                        <option value="prestasi" {{ old('admission_path', $registration->admission_path) === 'prestasi' ? 'selected' : '' }}>Jalur Prestasi</option>
+                        <option value="tahfidz" {{ old('admission_path', $registration->admission_path) === 'tahfidz' ? 'selected' : '' }}>Jalur Tahfidz</option>
+                    </x-select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <x-input-label for="edit_address" value="Alamat Lengkap" required="true" />
+                <x-textarea id="edit_address" name="address" class="mt-1 block w-full" rows="3" required>{{ old('address', $registration->address) }}</x-textarea>
+            </div>
+
+            <h3 class="text-sm font-bold text-neutral-900 mb-3 mt-6 border-t pt-4">Data Akademik</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <x-input-label for="edit_school_name" value="Asal Sekolah" required="true" />
+                    <x-text-input id="edit_school_name" name="school_name" type="text" class="mt-1 block w-full" :value="old('school_name', $registration->school_name)" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_graduation_year" value="Tahun Lulus" required="true" />
+                    <x-text-input id="edit_graduation_year" name="graduation_year" type="number" class="mt-1 block w-full" :value="old('graduation_year', $registration->graduation_year)" required />
+                </div>
+                <div>
+                    <x-input-label for="edit_school_grade" value="Nilai Rata-rata" />
+                    <x-text-input id="edit_school_grade" name="school_grade" type="text" class="mt-1 block w-full" :value="old('school_grade', $registration->school_grade)" />
+                </div>
+                <div>
+                    <x-input-label for="edit_program_id" value="Program Studi" required="true" />
+                    <x-select id="edit_program_id" name="first_choice_program_id" class="mt-1 block w-full" :disabled="$registration->nim ? true : false" :required="$registration->nim ? false : true">
+                        @foreach(\App\Models\Program::all() as $prog)
+                            <option value="{{ $prog->id }}" {{ old('first_choice_program_id', $registration->first_choice_program_id) == $prog->id ? 'selected' : '' }}>
+                                {{ $prog->name }}
+                            </option>
+                        @endforeach
+                    </x-select>
+                    @if($registration->nim)
+                        <p class="text-xs text-error-600 mt-1">Tidak bisa diubah — NIM sudah diterbitkan.</p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3 pt-6 border-t border-neutral-200">
+                <x-button type="button" variant="ghost" color="neutral" x-on:click="$dispatch('close')">
+                    Batal
+                </x-button>
+                <x-button type="submit" color="primary">
+                    Simpan Perubahan
+                </x-button>
+            </div>
+        </form>
+    </x-modal>
+
+@push('scripts')
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        .ts-control {
+            padding: 0.625rem 1rem !important;
+            border-radius: 0.5rem !important;
+            border-color: #DEE3E9 !important;
+            font-size: 0.875rem !important;
+            min-height: auto !important;
+            box-shadow: none !important;
+            line-height: 1.25rem !important;
+        }
+        .ts-control.focus {
+            border-color: #0B41CB !important;
+            outline: none !important;
+            box-shadow: 0 0 0 2px rgba(11, 65, 203, 0.2) !important;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new TomSelect('#edit_birth_place', {
+                create: false,
+                maxOptions: 100,
+            });
+        });
+    </script>
+@endpush
 
 @endsection

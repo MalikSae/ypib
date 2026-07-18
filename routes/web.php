@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pendaftaran/detail/update', [RegistrationController::class, 'updateDetail'])->name('registration.detail.update');
     Route::get('/pendaftaran/cetak', [RegistrationController::class, 'downloadPdf'])->name('registration.pdf');
     Route::get('/pendaftaran/surat-kelulusan', [RegistrationController::class, 'downloadSkl'])->name('registration.skl');
+    Route::get('/pendaftaran/e-ktm/download', [RegistrationController::class, 'downloadEktm'])->name('registration.ektm');
     Route::get('/pendaftaran/tes-tulis', [RegistrationController::class, 'exam'])->name('registration.exam');
     Route::get('/pendaftaran/interview', [RegistrationController::class, 'interview'])->name('registration.interview');
     Route::post('/pendaftaran/tes-tulis/jawab', [RegistrationController::class, 'saveExamAnswer'])->name('registration.exam.save-answer');
@@ -109,6 +110,7 @@ Route::prefix('admin')
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
             Route::get('/export', [AdminRegistrationController::class, 'export'])->name('export');
             Route::get('/{registration}', [AdminRegistrationController::class, 'show'])->name('show');
+            Route::post('/{id}/update-data', [AdminRegistrationController::class, 'updateData'])->name('update-data');
             Route::post('/{id}/reset-tes-tulis', [AdminRegistrationController::class, 'resetExam'])->name('reset-exam');
             Route::get('/sampah', [AdminRegistrationController::class, 'trash'])->name('trash');
             Route::delete('/{id}', [AdminRegistrationController::class, 'destroy'])->name('destroy');
@@ -130,6 +132,7 @@ Route::prefix('admin')
             Route::get('/export', [AdminReferrerController::class, 'export'])->name('export');
             Route::get('/{id}', [AdminReferrerController::class, 'show'])->name('show');
             Route::post('/{id}/toggle', [AdminReferrerController::class, 'toggle'])->name('toggle');
+            Route::post('/{id}/rekening', [AdminReferrerController::class, 'updateBankAccount'])->name('update-bank');
         });
 
         // Reward management
@@ -142,6 +145,8 @@ Route::prefix('admin')
             Route::post('/referrer/{referrer_id}/disburse', [AdminRewardController::class, 'disburseByReferrer'])->name('disburse.referrer');
             Route::post('/referrers/mass-disburse', [AdminRewardController::class, 'massDisburseReferrers'])->name('referrers.mass-disburse');
             Route::post('/referrers/export', [AdminRewardController::class, 'exportCsvReferrers'])->name('referrers.export');
+            Route::get('/referrer/{referrer_id}/approved-rewards', [AdminRewardController::class, 'approvedRewardsByReferrer'])->name('approved-rewards');
+            Route::post('/disburse-selected', [AdminRewardController::class, 'disburseSelected'])->name('disburse-selected');
         });
 
         // User management

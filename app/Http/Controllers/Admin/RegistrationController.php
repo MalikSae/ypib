@@ -58,7 +58,19 @@ class RegistrationController extends Controller
 
         $referrers = Referrer::with('user')->where('status', 'active')->get();
 
-        return view('admin.registrations.show', compact('registration', 'referrers'));
+        $cities = [];
+        $path = public_path('data/cities.json');
+        if (file_exists($path)) {
+            $data = json_decode(file_get_contents($path), true);
+            if (is_array($data) && !empty($data)) {
+                $cities = $data;
+            }
+        }
+        if (empty($cities)) {
+            $cities = ["Cirebon","Majalengka","Indramayu","Kuningan","Bandung","Jakarta","Surabaya","Semarang","Yogyakarta","Bekasi","Tangerang","Bogor","Depok"];
+        }
+
+        return view('admin.registrations.show', compact('registration', 'referrers', 'cities'));
     }
 
     public function confirmPayment(Request $request, int $id)
@@ -115,7 +127,7 @@ class RegistrationController extends Controller
         ]);
 
         // Referral reward
-        if ($registration->referrer_id) {
+        if ($registration->referrer_id && $registration->registration_type !== 'alumni') {
             ReferralClick::where('referrer_id', $registration->referrer_id)
                 ->where('converted', false)
                 ->latest()
@@ -177,6 +189,100 @@ class RegistrationController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Bukti bayar berhasil diupload.');
+    }
+
+    public function updateData(Request $request, int $id)
+    {
+        $registration = Registration::with('user')->findOrFail($id);
+
+        $rules = [
+            'full_name' => 'required|string|max:255',
+            'nik' => 'required|digits:16',
+            'birth_place' => 'required|string',
+            'birth_date' => 'required|date',
+            'gender' => 'required|in:male,female',
+            'phone' => 'required|string',
+            'address' => 'required|string',
+            'school_name' => 'required|string',
+            'graduation_year' => 'required|digits:4',
+            'school_grade' => 'nullable|numeric',
+            'admission_path' => 'required|in:umum,prestasi,tahfidz',
+            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($registration->user_id)],
+        ];
+
+        if (empty($registration->nim)) {
+            $rules['first_choice_program_id'] = 'required|exists:programs,id';
+        } else {
+            if ($request->has('first_choice_program_id') && $request->first_choice_program_id != $registration->first_choice_program_id) {
+                return redirect()->back()->with('error', 'Program Studi tidak bisa diubah karena NIM sudah diterbitkan.');
+            }
+        }
+
+        $validated = $request->validate($rules);
+
+        $changes = [];
+        $fields = [
+            'full_name' => 'Nama',
+            'nik' => 'NIK',
+            'birth_place' => 'Tempat Lahir',
+            'birth_date' => 'Tanggal Lahir',
+            'gender' => 'Jenis Kelamin',
+            'phone' => 'No HP',
+            'address' => 'Alamat',
+            'school_name' => 'Asal Sekolah',
+            'graduation_year' => 'Tahun Lulus',
+            'school_grade' => 'Nilai Rata-rata',
+            'admission_path' => 'Jalur Pendaftaran',
+        ];
+
+        foreach ($fields as $key => $label) {
+            // Need to handle date formatting for birth_date if needed, but since it's cast to date,
+            // $registration->birth_date is a Carbon instance, whereas $validated is a Y-m-d string.
+            $oldVal = $registration->$key;
+            if ($key === 'birth_date' && $oldVal) {
+                $oldVal = $oldVal->format('Y-m-d');
+            }
+            if ($oldVal != $validated[$key]) {
+                $changes[] = "$label: '" . ($oldVal ?: '-') . "' -> '" . ($validated[$key] ?: '-') . "'";
+                $registration->$key = $validated[$key];
+            }
+        }
+
+        if (empty($registration->nim) && isset($validated['first_choice_program_id'])) {
+            if ($registration->first_choice_program_id != $validated['first_choice_program_id']) {
+                $oldProgram = \App\Models\Program::find($registration->first_choice_program_id)?->name ?? '-';
+                $newProgram = \App\Models\Program::find($validated['first_choice_program_id'])?->name ?? '-';
+                $changes[] = "Program Studi: '$oldProgram' -> '$newProgram'";
+                $registration->first_choice_program_id = $validated['first_choice_program_id'];
+            }
+        }
+
+        if ($registration->user && $registration->user->email !== $validated['email']) {
+            $oldEmail = $registration->user->email;
+            $newEmail = $validated['email'];
+            $changes[] = "Email: '$oldEmail' -> '$newEmail'";
+        }
+
+        if (empty($changes)) {
+            return redirect()->back()->with('info', 'Tidak ada data yang diubah.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $validated, $changes) {
+            $registration->save();
+            
+            if ($registration->user && $registration->user->email !== $validated['email']) {
+                $registration->user->update(['email' => $validated['email']]);
+            }
+
+            PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by' => Auth::id(),
+                'action' => 'data_edited',
+                'note' => 'Admin mengedit data: ' . implode(', ', $changes),
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Data pendaftar berhasil diperbarui.');
     }
 
     public function resetExam(int $id)
@@ -268,47 +374,49 @@ class RegistrationController extends Controller
             }
         }
 
-        $registration->status = 'daftar_ulang_selesai';
-        
-        if (empty($registration->nim)) {
-            $registration->nim = $registration->generateNim();
-        }
-        
-        $registration->save();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request) {
+            $registration->status = 'daftar_ulang_selesai';
+            
+            if (empty($registration->nim)) {
+                $registration->nim = $registration->generateNim();
+            }
+            
+            $registration->save();
 
-        $actionNote = 'Pembayaran daftar ulang dikonfirmasi oleh ' . Auth::user()->name;
-        if ($request->filled('note')) {
-            $actionNote .= ' | Catatan: ' . $request->note;
-        }
+            $actionNote = 'Pembayaran daftar ulang dikonfirmasi oleh ' . \Illuminate\Support\Facades\Auth::user()->name;
+            if ($request->filled('note')) {
+                $actionNote .= ' | Catatan: ' . $request->note;
+            }
 
-        PaymentLog::create([
-            'registration_id' => $registration->id,
-            'acted_by'        => Auth::id(),
-            'action'          => 're_registration_confirmed',
-            'note'            => $actionNote,
-        ]);
+            \App\Models\PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by'        => \Illuminate\Support\Facades\Auth::id(),
+                'action'          => 're_registration_confirmed',
+                'note'            => $actionNote,
+            ]);
 
-        // Referral reward untuk Daftar Ulang
-        if ($registration->referrer_id) {
-            $existingReward = Reward::where('registration_id', $registration->id)
-                ->where('reward_type', 're_registration')
-                ->first();
+            // Referral reward untuk Daftar Ulang
+            if ($registration->referrer_id && $registration->registration_type !== 'alumni') {
+                $existingReward = Reward::where('registration_id', $registration->id)
+                    ->where('reward_type', 're_registration')
+                    ->first();
 
-            if (!$existingReward) {
-                $amount = $registration->firstChoiceProgram?->re_registration_reward_amount ?? 0;
-                if ($amount > 0) {
-                    Reward::create([
-                        'referrer_id'     => $registration->referrer_id,
-                        'registration_id' => $registration->id,
-                        'amount'          => $amount,
-                        'reward_type'     => 're_registration',
-                        'status'          => 'approved',
-                        'approved_by'     => Auth::id(),
-                        'approved_at'     => now(),
-                    ]);
+                if (!$existingReward) {
+                    $amount = $registration->firstChoiceProgram?->re_registration_reward_amount ?? 0;
+                    if ($amount > 0) {
+                        Reward::create([
+                            'referrer_id'     => $registration->referrer_id,
+                            'registration_id' => $registration->id,
+                            'amount'          => $amount,
+                            'reward_type'     => 're_registration',
+                            'status'          => 'approved',
+                            'approved_by'     => \Illuminate\Support\Facades\Auth::id(),
+                            'approved_at'     => now(),
+                        ]);
+                    }
                 }
             }
-        }
+        });
 
         return redirect()->back()->with('success', 'Pembayaran daftar ulang berhasil dikonfirmasi.');
     }
@@ -539,13 +647,9 @@ class RegistrationController extends Controller
                         }
                     }
                 } elseif ($reward->status === 'disbursed') {
-                    // Jangan ubah status reward, tapi tetap kurangi total_conversions
-                    if ($reward->referrer_id) {
-                        $referrer = Referrer::find($reward->referrer_id);
-                        if ($referrer && $referrer->total_conversions > 0) {
-                            $referrer->decrement('total_conversions');
-                        }
-                    }
+                    // Reward sudah disbursed (uang sudah cair) — total_conversions TIDAK
+                    // dikurangi meski pendaftar dihapus, karena konversi ini tetap sah
+                    // secara historis.
                 }
             }
 

@@ -38,4 +38,26 @@ class Reward extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'pending'   => 'Pending',
+            'approved'  => 'Siap Cair',
+            'disbursed' => 'Sudah Cair',
+            'cancelled' => 'Dibatalkan',
+            default     => ucfirst($this->status),
+        };
+    }
+
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'pending'   => 'gray',
+            'approved'  => 'blue',
+            'disbursed' => 'green',
+            'cancelled' => 'red',
+            default     => 'gray',
+        };
+    }
 }

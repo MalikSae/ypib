@@ -58,13 +58,40 @@ class RewardController extends Controller
             return redirect()->back()->with('error', 'Hanya reward berstatus pending yang bisa disetujui.');
         }
 
-        $reward->update([
-            'status'      => 'approved',
-            'approved_by' => Auth::id(),
-            'approved_at' => now(),
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($reward) {
+            $reward->update([
+                'status'      => 'approved',
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
+            ]);
+
+            \App\Models\ReferrerLog::create([
+                'referrer_id' => $reward->referrer_id,
+                'acted_by' => Auth::id(),
+                'action' => 'approved',
+                'note' => 'Komisi disetujui senilai Rp ' . number_format($reward->amount, 0, ',', '.'),
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Reward berhasil disetujui.');
+    }
+
+    private function guardBankComplete(\Illuminate\Support\Collection $referrerIds): void
+    {
+        $referrers = \App\Models\Referrer::with('user')->whereIn('id', $referrerIds->unique())->get();
+        
+        $incompleteReferrers = $referrers->filter(function ($referrer) {
+            return trim((string)$referrer->bank_name) === '' || 
+                   trim((string)$referrer->bank_account_number) === '' || 
+                   trim((string)$referrer->bank_account_name) === '';
+        });
+
+        if ($incompleteReferrers->isNotEmpty()) {
+            $names = $incompleteReferrers->map(fn($r) => $r->user?->name ?? 'Unknown')->implode(', ');
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect()->back()->with('error', 'Pencairan dibatalkan. Data rekening belum lengkap untuk: ' . $names)
+            );
+        }
     }
 
     public function disburse(int $id)
@@ -75,7 +102,18 @@ class RewardController extends Controller
             return redirect()->back()->with('error', 'Hanya reward berstatus approved yang bisa dicairkan.');
         }
 
-        $reward->update(['status' => 'disbursed']);
+        $this->guardBankComplete(collect([$reward->referrer_id]));
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($reward) {
+            $reward->update(['status' => 'disbursed']);
+            
+            \App\Models\ReferrerLog::create([
+                'referrer_id' => $reward->referrer_id,
+                'acted_by' => Auth::id(),
+                'action' => 'disbursed',
+                'note' => 'Pencairan komisi senilai Rp ' . number_format($reward->amount, 0, ',', '.'),
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Reward berhasil dicairkan.');
     }
@@ -95,9 +133,23 @@ class RewardController extends Controller
             return redirect()->back()->with('error', 'Tidak ada reward berstatus "Siap Cair" yang dipilih.');
         }
 
-        foreach ($rewards as $reward) {
-            $reward->update(['status' => 'disbursed']);
-        }
+        $this->guardBankComplete($rewards->pluck('referrer_id'));
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rewards) {
+            foreach ($rewards as $reward) {
+                $reward->update(['status' => 'disbursed']);
+            }
+            
+            $byReferrer = $rewards->groupBy('referrer_id');
+            foreach ($byReferrer as $referrerId => $group) {
+                \App\Models\ReferrerLog::create([
+                    'referrer_id' => $referrerId,
+                    'acted_by' => Auth::id(),
+                    'action' => 'disbursed',
+                    'note' => 'Pencairan massal ' . $group->count() . ' komisi dengan total Rp ' . number_format($group->sum('amount'), 0, ',', '.'),
+                ]);
+            }
+        });
 
         return redirect()->back()->with('success', $rewards->count() . ' reward berhasil dicairkan serentak.');
     }
@@ -162,9 +214,20 @@ class RewardController extends Controller
             return redirect()->back()->with('error', 'Tidak ada komisi yang Siap Cair untuk afiliasi ini.');
         }
 
-        foreach ($rewards as $reward) {
-            $reward->update(['status' => 'disbursed']);
-        }
+        $this->guardBankComplete(collect([$referrerId]));
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rewards, $referrerId) {
+            foreach ($rewards as $reward) {
+                $reward->update(['status' => 'disbursed']);
+            }
+            
+            \App\Models\ReferrerLog::create([
+                'referrer_id' => $referrerId,
+                'acted_by' => Auth::id(),
+                'action' => 'disbursed',
+                'note' => 'Pencairan komisi senilai Rp ' . number_format($rewards->sum('amount'), 0, ',', '.') . ' (' . $rewards->count() . ' transaksi)',
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Berhasil mencairkan ' . $rewards->count() . ' komisi untuk afiliasi ini.');
     }
@@ -184,9 +247,23 @@ class RewardController extends Controller
             return redirect()->back()->with('error', 'Tidak ada komisi yang Siap Cair untuk afiliasi yang dipilih.');
         }
 
-        foreach ($rewards as $reward) {
-            $reward->update(['status' => 'disbursed']);
-        }
+        $this->guardBankComplete(collect($request->referrer_ids));
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rewards) {
+            foreach ($rewards as $reward) {
+                $reward->update(['status' => 'disbursed']);
+            }
+            
+            $byReferrer = $rewards->groupBy('referrer_id');
+            foreach ($byReferrer as $referrerId => $group) {
+                \App\Models\ReferrerLog::create([
+                    'referrer_id' => $referrerId,
+                    'acted_by' => Auth::id(),
+                    'action' => 'disbursed',
+                    'note' => 'Pencairan komisi senilai Rp ' . number_format($group->sum('amount'), 0, ',', '.') . ' (' . $group->count() . ' transaksi)',
+                ]);
+            }
+        });
 
         return redirect()->back()->with('success', $rewards->count() . ' komisi dari afiliasi yang dipilih berhasil dicairkan serentak.');
     }
@@ -247,5 +324,64 @@ class RewardController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function approvedRewardsByReferrer(Request $request, $referrer_id)
+    {
+        $referrer = \App\Models\Referrer::findOrFail($referrer_id);
+
+        $rewards = Reward::where('referrer_id', $referrer_id)
+            ->where('status', 'approved')
+            ->with('registration')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $data = $rewards->map(function ($reward) {
+            return [
+                'id' => $reward->id,
+                'nama_pendaftar' => $reward->registration?->full_name ?? '—',
+                'reward_type' => $reward->reward_type === 'registration' ? 'Pendaftaran' : 'Daftar Ulang',
+                'amount' => $reward->amount,
+                'created_at' => $reward->created_at->translatedFormat('d M Y, H:i'),
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function disburseSelected(Request $request)
+    {
+        $request->validate([
+            'reward_ids' => 'required|array|min:1',
+            'reward_ids.*' => 'integer|exists:rewards,id',
+        ]);
+
+        $rewards = Reward::whereIn('id', $request->reward_ids)->get();
+
+        abort_if($rewards->contains(fn($r) => $r->status !== 'approved'), 422, 'Ada komisi yang statusnya sudah berubah, silakan refresh halaman.');
+
+        $this->guardBankComplete($rewards->pluck('referrer_id'));
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rewards) {
+            foreach ($rewards as $reward) {
+                $reward->update(['status' => 'disbursed']);
+            }
+            
+            $byReferrer = $rewards->groupBy('referrer_id');
+            foreach ($byReferrer as $referrerId => $group) {
+                \App\Models\ReferrerLog::create([
+                    'referrer_id' => $referrerId,
+                    'acted_by' => auth()->id(),
+                    'action' => 'disbursed',
+                    'note' => 'Pencairan komisi senilai Rp ' . number_format($group->sum('amount'), 0, ',', '.') . ' (' . $group->count() . ' transaksi terpilih)',
+                ]);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'total_disbursed' => $rewards->count(),
+            'total_amount' => $rewards->sum('amount'),
+        ]);
     }
 }

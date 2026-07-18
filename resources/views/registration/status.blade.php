@@ -307,6 +307,18 @@
                     @endif
                 @else
                     <div class="text-xs mt-0.5 text-neutral-400">{!! $stage['description'] !!}</div>
+                    @if($stage['number'] == 8 && !empty($registration->nim))
+                        <div class="mt-3 bg-primary-50 border border-primary-200 rounded-xl px-[18px] py-[14px] inline-block">
+                            <div class="text-[11px] font-bold mb-1 text-primary-600 uppercase">NIM ANDA</div>
+                            <div class="text-2xl font-bold font-mono tracking-wider text-neutral-900">{{ $registration->nim }}</div>
+                        </div>
+                        <div class="mt-2.5">
+                            <a href="{{ route('registration.ektm') }}" class="inline-flex items-center gap-2 h-9 px-4 text-xs font-semibold bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors">
+                                <i class="ti ti-download text-base"></i>
+                                Download e-KTM
+                            </a>
+                        </div>
+                    @endif
                     @if(!empty($stage['action_url']))
                         <div class="mt-3">
                             <a href="{{ $stage['action_url'] }}" class="btn-primary inline-flex items-center gap-2 h-10 px-5 text-sm whitespace-nowrap">

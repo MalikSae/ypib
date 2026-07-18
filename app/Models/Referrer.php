@@ -39,4 +39,9 @@ class Referrer extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    public function logs()
+    {
+        return $this->hasMany(ReferrerLog::class)->latest();
+    }
 }

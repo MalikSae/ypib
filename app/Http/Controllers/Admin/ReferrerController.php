@@ -62,8 +62,51 @@ class ReferrerController extends Controller
             'status' => $referrer->status === 'active' ? 'inactive' : 'active',
         ]);
 
+        $referrer->logs()->create([
+            'acted_by' => auth()->id(),
+            'action' => $referrer->status === 'active' ? 'toggled_active' : 'toggled_inactive',
+            'note' => $referrer->status === 'active' ? 'Akun diaktifkan' : 'Akun dinonaktifkan',
+        ]);
+
         $label = $referrer->status === 'active' ? 'diaktifkan' : 'dinonaktifkan';
         return redirect()->back()->with('success', "Referrer berhasil {$label}.");
+    }
+
+    public function updateBankAccount(Request $request, int $id)
+    {
+        $request->validate([
+            'bank_name' => 'required|string|max:255',
+            'bank_account_number' => 'required|string|max:255',
+            'bank_account_name' => 'required|string|max:255',
+        ]);
+
+        $referrer = Referrer::findOrFail($id);
+
+        $old = [
+            'bank_name' => $referrer->bank_name,
+            'bank_account_number' => $referrer->bank_account_number,
+            'bank_account_name' => $referrer->bank_account_name,
+        ];
+
+        $referrer->update([
+            'bank_name' => $request->bank_name,
+            'bank_account_number' => $request->bank_account_number,
+            'bank_account_name' => $request->bank_account_name,
+        ]);
+
+        $oldBankText = $old['bank_name'] || $old['bank_account_number'] || $old['bank_account_name'] 
+            ? "{$old['bank_name']} {$old['bank_account_number']} a.n {$old['bank_account_name']}"
+            : "belum ada data";
+
+        $newBankText = "{$request->bank_name} {$request->bank_account_number} a.n {$request->bank_account_name}";
+
+        $referrer->logs()->create([
+            'acted_by' => auth()->id(),
+            'action' => 'bank_updated',
+            'note' => "Rekening diubah dari {$oldBankText} menjadi {$newBankText}",
+        ]);
+
+        return redirect()->back()->with('success', 'Rekening pencairan berhasil diperbarui.');
     }
 
     public function show(int $id)
@@ -78,7 +121,9 @@ class ReferrerController extends Controller
             }
         ])->findOrFail($id);
 
-        return view('admin.referrers.show', compact('referrer'));
+        $logs = $referrer->logs()->with('actedBy')->paginate(15);
+
+        return view('admin.referrers.show', compact('referrer', 'logs'));
     }
 
     public function export(Request $request)

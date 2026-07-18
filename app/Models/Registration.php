@@ -10,6 +10,10 @@ class Registration extends Model
 {
     use HasFactory, SoftDeletes;
 
+    private const YEAR_SEQUENCE_START = [
+        '26' => 400, // Tahun 2026: sequence NIM dimulai dari 400
+    ];
+
     protected $fillable = [
         'period_id',
         'user_id',
@@ -342,10 +346,16 @@ class Registration extends Model
         $trackCode = $program->registration_track === 'non_reguler' ? '2' : '1';
         $prefix = $yearCode . $program->kode_prodi . $trackCode;
 
-        $lastSequence = self::whereNotNull('nim')
+        $maxSequence = self::withTrashed()
+            ->whereNotNull('nim')
             ->where('nim', 'like', $yearCode . '%')
-            ->count();
-        $sequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
+            ->lockForUpdate()
+            ->selectRaw('MAX(CAST(SUBSTRING(nim, -3) AS UNSIGNED)) as max_seq')
+            ->value('max_seq');
+
+        $startFloor = (self::YEAR_SEQUENCE_START[$yearCode] ?? 1) - 1;
+        $nextSequence = max($maxSequence ?? 0, $startFloor) + 1;
+        $sequence = str_pad($nextSequence, 3, '0', STR_PAD_LEFT);
 
         return $prefix . $sequence;
     }

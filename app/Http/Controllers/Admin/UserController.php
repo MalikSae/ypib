@@ -23,6 +23,15 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ])->save();
 
+        $referrer = \App\Models\Referrer::where('user_id', $user->id)->first();
+        if ($referrer) {
+            $referrer->logs()->create([
+                'acted_by' => auth()->id(),
+                'action' => 'password_reset',
+                'note' => 'Password akun direset oleh admin',
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Password pengguna ' . $user->name . ' berhasil direset.');
     }
 }

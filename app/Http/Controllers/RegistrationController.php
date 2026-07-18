@@ -364,6 +364,76 @@ class RegistrationController extends Controller
         return $pdf->download($fileName);
     }
 
+    public function downloadEktm()
+    {
+        $registration = Registration::where('user_id', Auth::id())
+            ->with(['firstChoiceProgram.faculty', 'documents'])
+            ->latest()
+            ->firstOrFail();
+
+        if (empty($registration->nim)) {
+            return redirect()->back()->with('error', 'NIM belum tersedia, e-KTM belum bisa didownload.');
+        }
+
+        $foto = $registration->documents->where('document_type', 'foto')->first();
+        if (!$foto) {
+            return redirect()->back()->with('error', 'Foto pendaftar tidak ditemukan.');
+        }
+
+        $fotoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($foto->file_path);
+        if (!file_exists($fotoPath)) {
+            return redirect()->back()->with('error', 'File foto pendaftar tidak ditemukan di server.');
+        }
+
+        // 1. Load template pakai GD dan konversi ke truecolor untuk mencegah pallete issue
+        $templatePath = public_path('images/e-ktm-blank.png');
+        $sourceImg = imagecreatefrompng($templatePath);
+        $img = imagecreatetruecolor(imagesx($sourceImg), imagesy($sourceImg));
+        imagecopy($img, $sourceImg, 0, 0, 0, 0, imagesx($sourceImg), imagesy($sourceImg));
+        imagedestroy($sourceImg);
+
+        // 2. FOTO - pakai Intervention Image untuk fit/crop 220x290
+        $manager = new \Intervention\Image\ImageManager(\Intervention\Image\Drivers\Gd\Driver::class);
+        $fotoImg = $manager->decodePath($fotoPath);
+        $fotoImg->cover(220, 290);
+        
+        $fotoData = $fotoImg->encode()->toString();
+        $fotoGd = imagecreatefromstring($fotoData);
+        imagecopy($img, $fotoGd, 705, 240, 0, 0, 220, 290);
+        imagedestroy($fotoGd);
+
+        // 3. QR CODE - generate QR berisi NIM
+        $qrWriter = new \Endroid\QrCode\Writer\PngWriter();
+        $qrCode = \Endroid\QrCode\QrCode::create($registration->nim)->setSize(115)->setMargin(0);
+        $qrData = $qrWriter->write($qrCode)->getString();
+        $qrGd = imagecreatefromstring($qrData);
+        imagecopy($img, $qrGd, 40, 505, 0, 0, 115, 115);
+        imagedestroy($qrGd);
+
+        // 4. TEKS VALUE - pakai imagettftext
+        $fontPath = public_path('fonts/inter/Inter-Regular.ttf');
+        $color = imagecolorallocate($img, 5, 30, 84); // #051e54
+        
+        $angkatan = '20' . substr($registration->nim, 0, 2);
+        
+        imagettftext($img, 16, 0, 275, 299, $color, $fontPath, $registration->full_name);
+        imagettftext($img, 16, 0, 275, 337, $color, $fontPath, $registration->nim);
+        imagettftext($img, 16, 0, 275, 375, $color, $fontPath, $registration->firstChoiceProgram->faculty->name ?? '-');
+        imagettftext($img, 16, 0, 275, 413, $color, $fontPath, $registration->firstChoiceProgram->name ?? '-');
+        imagettftext($img, 16, 0, 275, 451, $color, $fontPath, $angkatan);
+
+        // 5. Output sebagai PNG
+        ob_start();
+        imagepng($img);
+        $imageData = ob_get_clean();
+        imagedestroy($img);
+
+        return response($imageData, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="e-ktm-' . $registration->nim . '.png"',
+        ]);
+    }
+
     public function exam()
     {
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();

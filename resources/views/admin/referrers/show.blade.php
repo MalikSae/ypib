@@ -18,10 +18,10 @@
 <div class="detail-grid">
 
     {{-- ══════ KOLOM KIRI (Konten Utama: Riwayat) ══════ --}}
-    <div class="min-w-0" style="display:flex;flex-direction:column;gap:20px;">
+    <div class="min-w-0 flex flex-col">
 
         {{-- Section: Pendaftar Bawaan --}}
-        <div class="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div style="margin-bottom: 2.5rem;">
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Riwayat Pendaftar Bawaan</h3>
             
             @if($referrer->registrations->isEmpty())
@@ -69,7 +69,7 @@
         </div>
 
         {{-- Section: Riwayat Komisi --}}
-        <div class="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div style="margin-bottom: 2.5rem;">
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Riwayat Komisi (Rewards)</h3>
             
             @if($referrer->rewards->isEmpty())
@@ -101,24 +101,74 @@
                                     <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($reward->amount, 0, ',', '.') }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-center whitespace-nowrap">
-                                    @php
-                                        $statusColors = [
-                                            'pending' => 'bg-warning/10 text-warning-700 border-warning-200',
-                                            'approved' => 'bg-info/10 text-info-700 border-info-200',
-                                            'disbursed' => 'bg-success/10 text-success-700 border-success-200',
-                                            'rejected' => 'bg-error/10 text-error-700 border-error-200',
-                                        ];
-                                        $colorClass = $statusColors[$reward->status] ?? 'bg-neutral-100 text-neutral-700 border-neutral-200';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-bold capitalize {{ $colorClass }}">
-                                        {{ $reward->status }}
-                                    </span>
+                                    <x-reward-status-badge :status="$reward->status" />
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+            @endif
+        </div>
+
+        {{-- Section: Log Aktivitas --}}
+        <div>
+            <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Log Aktivitas</h3>
+            
+            @if($logs->isEmpty())
+                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-xl border border-neutral-100">
+                    Belum ada aktivitas tercatat.
+                </p>
+            @else
+                <div class="overflow-x-auto border border-neutral-100 rounded-xl">
+                    <table class="min-w-full divide-y divide-neutral-100">
+                        <thead class="bg-neutral-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-40">Tanggal</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Aksi</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Oleh</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-neutral-100">
+                            @foreach($logs as $log)
+                            <tr class="hover:bg-neutral-50 transition-colors">
+                                <td class="px-4 py-3 text-sm text-neutral-600 whitespace-nowrap">
+                                    {{ $log->created_at->format('d M Y, H:i') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    @php
+                                        $actionColors = [
+                                            'bank_updated' => 'bg-info/10 text-info-700 border-info-200',
+                                            'toggled_active' => 'bg-success/10 text-success-700 border-success-200',
+                                            'toggled_inactive' => 'bg-error/10 text-error-700 border-error-200',
+                                            'disbursed' => 'bg-primary-50 text-primary-700 border-primary-200',
+                                            'approved' => 'bg-warning/10 text-warning-700 border-warning-200',
+                                            'password_reset' => 'bg-neutral-100 text-neutral-700 border-neutral-200',
+                                        ];
+                                        $color = $actionColors[$log->action] ?? 'bg-neutral-100 text-neutral-700 border-neutral-200';
+                                    @endphp
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-bold {{ $color }}">
+                                        {{ str_replace('_', ' ', $log->action) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-sm font-medium text-neutral-900 whitespace-nowrap">
+                                    {{ $log->actedBy?->name ?? 'Sistem' }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-neutral-600">
+                                    {{ $log->note }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                
+                @if($logs->hasPages())
+                <div class="mt-4">
+                    {{ $logs->links() }}
+                </div>
+                @endif
             @endif
         </div>
 
@@ -224,8 +274,13 @@
                 </div>
             </div>
 
-            <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100">
-                <div class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-2">Rekening Pencairan</div>
+            <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100 relative">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Rekening Pencairan</div>
+                    <button type="button" onclick="openEditBankModal()" class="text-xs font-bold text-primary-600 hover:text-primary-800 bg-primary-50 px-2 py-1 rounded-md transition-colors">
+                        Edit Rekening
+                    </button>
+                </div>
                 @if($referrer->bank_name)
                     <div class="text-sm font-bold text-neutral-900">{{ $referrer->bank_name }}</div>
                     <div class="text-sm font-mono text-neutral-700 my-0.5">{{ $referrer->bank_account_number }}</div>
@@ -317,6 +372,45 @@
     </div>
 </div>
 
+<!-- Modal Edit Bank -->
+<div id="editBankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full p-6" style="max-width: 450px;">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-neutral-900">Edit Rekening Pencairan</h3>
+            <button onclick="closeEditBankModal()" class="text-neutral-400 hover:text-neutral-600 text-2xl leading-none">&times;</button>
+        </div>
+        
+        <form method="POST" action="{{ route('admin.referrers.update-bank', $referrer->id) }}">
+            @csrf
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-semibold text-neutral-700 mb-1">Nama Bank <span class="text-error-500">*</span></label>
+                    <input type="text" name="bank_name" required value="{{ old('bank_name', $referrer->bank_name) }}" 
+                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                           placeholder="Contoh: BCA / Mandiri">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-neutral-700 mb-1">Nomor Rekening <span class="text-error-500">*</span></label>
+                    <input type="text" name="bank_account_number" required value="{{ old('bank_account_number', $referrer->bank_account_number) }}" 
+                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                           placeholder="Contoh: 1234567890">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-neutral-700 mb-1">Nama Pemilik Rekening <span class="text-error-500">*</span></label>
+                    <input type="text" name="bank_account_name" required value="{{ old('bank_account_name', $referrer->bank_account_name) }}" 
+                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                           placeholder="Contoh: Asep Kopi">
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeEditBankModal()" class="px-5 py-2.5 text-sm font-bold text-neutral-600 bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors">Simpan Rekening</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function useStandardPassword(newId, confId) {
         document.getElementById(newId).value = 'ypib2026';
@@ -345,6 +439,16 @@
     function closeResetModal() {
         document.getElementById('resetPasswordModal').classList.add('hidden');
         document.getElementById('resetPasswordModal').classList.remove('flex');
+    }
+
+    function openEditBankModal() {
+        document.getElementById('editBankModal').classList.remove('hidden');
+        document.getElementById('editBankModal').classList.add('flex');
+    }
+    
+    function closeEditBankModal() {
+        document.getElementById('editBankModal').classList.add('hidden');
+        document.getElementById('editBankModal').classList.remove('flex');
     }
 </script>
 @endif
