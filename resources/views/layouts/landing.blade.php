@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
+    @include('partials.pwa-head', ['manifestPath' => 'manifest-public.json'])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'PMB YPIB Majalengka 2025/2026')</title>
     <meta name="description" content="@yield('meta-description', 'Penerimaan Mahasiswa Baru YPIB Majalengka 2025/2026. Daftarkan dirimu sekarang dan raih masa depan bersama kami.')">
@@ -12,12 +13,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.11.0/tabler-icons.min.css">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     
     @livewireStyles
     <style>
@@ -442,7 +443,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
     <script>
         // Page Loader
         document.addEventListener('DOMContentLoaded', function() {
@@ -456,5 +457,6 @@
         });
     </script>
     @livewireScripts
+    @include('partials.pwa-register')
 </body>
 </html>

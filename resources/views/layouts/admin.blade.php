@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
+    @include('partials.pwa-head', ['manifestPath' => 'manifest-admin.json'])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin PMB YPIB')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.11.0/tabler-icons.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; padding: 0; background: #F1F4F7; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -38,6 +38,20 @@
         /* Label teks sidebar (sembunyikan saat tablet collapsed) */
         .sidebar-label { transition: opacity 0.2s, width 0.2s; white-space: nowrap; overflow: hidden; }
         .sidebar-meta  { transition: opacity 0.2s; }
+
+        /* Custom Scrollbar for Sidebar Nav */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+            margin-right: -8px;
+            padding-right: 8px;
+        }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #DEE3E9; border-radius: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover { background: #CED0D4; }
 
         /* ─────────────────────────────────────────
            OVERLAY (mobile)
@@ -238,6 +252,7 @@
             #admin-sidebar.collapsed .sidebar-label { opacity: 0; width: 0; pointer-events: none; }
             #admin-sidebar.collapsed .sidebar-meta  { opacity: 0; pointer-events: none; }
             #admin-sidebar.collapsed .nav-section-label { display: none; }
+            #admin-sidebar.collapsed .sidebar-nav { overflow: visible; }
             
             #admin-sidebar.collapsed .sidebar-brand-full { display: none !important; }
             #admin-sidebar.collapsed .sidebar-brand-icon { display: block !important; }
@@ -412,7 +427,7 @@
     <div style="height:1px;margin:0 0 16px 0;" class="bg-neutral-200"></div>
 
     {{-- Navigation --}}
-    <nav style="flex:1;">
+    <nav class="sidebar-nav">
         <div class="nav-section-label text-neutral-400" style="font-size:11px;font-weight:700;letter-spacing:0.08em;margin-bottom:8px;padding:0 12px;">MENU UTAMA</div>
 
         {{-- Dashboard --}}
@@ -666,5 +681,6 @@
         if (e.changedTouches[0].clientX - touchStartX < -60) closeSidebar();
     }, { passive: true });
 </script>
+@include('partials.pwa-register')
 </body>
 </html>
