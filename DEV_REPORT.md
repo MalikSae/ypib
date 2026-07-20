@@ -1,214 +1,132 @@
-# Laporan Kondisi Project YPIB
+# Project Condition Report - PMB YPIB
 
-Laporan ini murni investigasi tanpa melakukan perubahan file apa pun pada project (kecuali pembuatan file laporan ini dan skrip pembantu sementara).
+Laporan investigasi codebase ini dibuat secara otomatis berdasarkan pemindaian pada file konfigurasi, struktur direktori, skema database (migration), route, dan controller.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 1 — INFO DASAR
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 1. Framework & Versi
+- **Framework:** Laravel Framework `^12.0`
+- **PHP Version:** `^8.2` (dari `composer.json`)
+- **Database Connection:** MySQL (berdasarkan file `.env` aktual: `DB_CONNECTION=mysql`, `DB_DATABASE=ypib`)
 
-**1. Framework & Versi**
-- **Laravel**: 12.59.0
-- **PHP**: 8.3.30
-- **Livewire**: ^4.3
-- **Alpine.js**: ^3.4.2
-- **Tailwind CSS**: ^3.4.19
-- **Vite**: ^6.0.11
-
-**2. Isi composer.json (Package Utama)**
-```json
-"require": {
-    "php": "^8.2",
-    "intervention/image": "^4.1",
-    "laravel/breeze": "^2.4",
-    "laravel/framework": "^12.0",
-    "laravel/tinker": "^2.10.1",
-    "livewire/livewire": "^4.3",
-    "symfony/resend-mailer": "^7.4"
-}
-```
-
-**3. Isi package.json (Dependency Frontend)**
-```json
-"devDependencies": {
-    "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.0.0",
-    "alpinejs": "^3.4.2",
-    "autoprefixer": "^10.4.2",
-    "axios": "^1.7.4",
-    "concurrently": "^9.0.1",
-    "laravel-vite-plugin": "^1.2.0",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.4.19",
-    "vite": "^6.0.11"
-}
-```
-
-**4. Struktur Folder Utama (2-3 Level)**
+## 2. Struktur Folder Utama
+Berikut adalah struktur folder root utama (2 level):
 - `app/`
-  - `Http/`
-    - `Controllers/` (Admin/, Auth/, dll)
-  - `Models/`
-  - `Providers/`
-- `resources/views/`
-  - `admin/`
-  - `components/`
-  - `landing/`
-  - `layouts/`
-  - `livewire/`
-  - `profile/`
-  - `referrer/`
-  - `registration/`
-- `routes/`
-  - `auth.php`
-  - `console.php`
-  - `web.php`
+  - `Exports/`, `Http/`, `Livewire/`, `Models/`, `Providers/`, `View/`
+- `bootstrap/`
+- `config/`
 - `database/`
-  - `factories/`
-  - `migrations/`
-  - `seeders/`
-  - `database.sqlite`
+  - `factories/`, `migrations/`, `seeders/`
+- `public/`
+- `resources/`
+  - `css/`, `js/`, `views/`
+- `routes/`
+  - `auth.php`, `console.php`, `web.php`
+- `storage/`
+- `tests/`
+- `vendor/`
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 2 — STATUS GIT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 3. Database (Tabel & Kolom Utama)
+Berdasarkan file migrations, berikut adalah tabel-tabel utama di sistem dan field pentingnya:
 
-- **git status**: `On branch master. Your branch is up to date. nothing to commit, working tree clean.`
-- **git diff --stat**: Kosong (Tidak ada perubahan yang belum di-commit).
+- **users**: `id`, `name`, `email`, `password`, `role` (enum: admin, operator, referrer, mahasiswa, panitia), `phone`, `is_referrer`, `referrer_id`.
+- **pmb_periods**: `id`, `name`, `start_date`, `end_date`, `is_active`, `bank_name`, `bank_account`, `bank_account_name`, `admin_whatsapp`.
+- **faculties**: `id`, `name`, `description`, `is_active`.
+- **programs**: `id`, `name`, `faculty_id`, `accreditation`, `quota`, `registration_fee`, `is_active`, `kode_prodi`, `registration_track`, `re_registration_minimum_payment`, `re_registration_fee`, `icon`, `slug`.
+- **referrers**: `id`, `user_id`, `referral_code`, `status`, `bank_name`, `bank_account`, `bank_account_name`.
+- **referral_clicks**: `id`, `referrer_id`, `ip_address`, `user_agent`.
+- **registrations**: `id`, `registration_number`, `nim`, `letter_number`, `user_id`, `period_id`, `first_choice_program_id`, `second_choice_program_id`, `referrer_id`, `status` (enum panjang pendaftaran), `registration_type` (umum/alumni), `payment_proof`, `re_registration_payment_proof`, (dan field data diri lengkap).
+- **registration_documents**: `id`, `registration_id`, `document_type`, `file_path`, `status`, `review_note`, `reviewed_by`.
+- **payment_logs**: `id`, `registration_id`, `acted_by`, `action`, `note`.
+- **rewards**: `id`, `referrer_id`, `registration_id`, `amount`, `status`, `disbursed_at`, `approved_at`.
+- **partners**: `id`, `name`, `logo_path`, `url`, `is_active`.
+- **facilities**: `id`, `name`, `description`, `image_path`, `icon`, `is_active`.
+- **exam_questions**: `id`, `question_text`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `is_active`.
+- **exam_sessions**: `id`, `registration_id`, `status`, `score`, `result_label`, `started_at`, `completed_at`.
+- **exam_answers**: `id`, `exam_session_id`, `exam_question_id`, `selected_option`, `is_correct`.
+- **settings**: `id`, `key`, `value`, `type`, `description`.
+- **referrer_logs**: `id`, `referrer_id`, `acted_by`, `action`, `note`.
 
-**File Modified / Untracked:**
-- **TIDAK ADA** file yang modified maupun untracked. Working tree dalam kondisi bersih.
-- **config/filesystems.php**: Telah di-commit di masa lalu. Isinya saat ini untuk disk `public` sudah dikonfigurasi dengan benar menggunakan `public_path('storage')`:
-  ```php
-  'public' => [
-      'driver' => 'local',
-      'root' => public_path('storage'),
-      'url' => env('APP_URL').'/storage',
-      'visibility' => 'public',
-      'throw' => false,
-      'report' => false,
-  ],
-  ```
+## 4. Fitur-Fitur yang Sudah Ada
+Berdasarkan `routes/web.php` dan `routes/auth.php`:
 
-**git log --oneline -15 (Sebagian besar commit terakhir):**
-- `f619eb4` feat: add admin dashboard, referrer management, and registration listing views with status metrics
-- `1a8789e` feat: implement registration system with admin settings management and mail configuration
-- `c90e78f` feat: create ReferrerController and affiliate program landing page view
-- `e9afabb` feat: implement admin registration management system with database schema updates and controller logic
-- `0cfe2ea` feat: add landing page preview layout and styling assets
-- `61135e9` feat: add program study detail page with fee structure and gallery display
-- `93a4eb7` feat: create landing page preview and associated build assets
-- `2df8a9c` feat: install intervention/image and implement landing page views and admin controllers
-- `8349b92` feat: create administrative program management form and landing page views
-- `d45f506` feat: initialize filesystems configuration with local, public, and s3 disk support
-- `66db4ea` feat: implement facility, program, and referrer management modules
-- `4916fa3` feat: scaffold complete admin panel and landing page infrastructure
-- `c864399` feat: initialize blade layout templates
-- `f03b402` feat: implement admin dashboard with partner management
-- `5dff2be` chore: build assets and update manifest file
+- **Public / Landing Page:**
+  - Tampilan beranda, detail prodi (`/prodi/{slug}`).
+  - Referral tracking (`/ref/{code}`).
+- **Pendaftaran (Mahasiswa):**
+  - Pembuatan pendaftaran (memilih prodi).
+  - Status pendaftaran dan pengunggahan bukti bayar / kartu alumni / daftar ulang.
+  - Pengisian detail data diri, sekolah, ortu.
+  - Upload dokumen berkas-berkas pendaftaran.
+  - Download formulir pendaftaran, SKL, dan e-KTM.
+  - Pelaksanaan tes tulis online secara langsung (CBT sederhana).
+  - Halaman informasi jadwal/hasil interview.
+- **Admin & Operator:**
+  - Pengaturan periode PMB dan email.
+  - Master data CRUD (Fakultas, Prodi, Mitra, Fasilitas, Bank Soal, Panitia).
+  - Manajemen Pendaftar (Approval, update data, export, restore, review dokumen per berkas, upload bukti manual, reset tes tulis).
+  - Manajemen Afiliasi (Approval referrer, update rekening, export).
+  - Pencairan komisi/reward (Approve, disburse per orang atau massal, export).
+  - Reset password user.
+- **Afiliasi (Referrer):**
+  - Mendaftar sebagai afiliator, aktivasi, dan melengkapi data bank.
+  - Dashboard performa (klik & pendaftaran berhasil).
+- **Panitia (Interview):**
+  - Dashboard khusus (mobile-friendly).
+  - Scan QR pendaftaran dan konfirmasi selesai/lulus interview.
+- **Autentikasi (Breeze):**
+  - Login, register, forgot/reset password, email verification.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 3 — DATABASE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 5. Alur Bisnis Utama
+**Alur Pendaftaran Mahasiswa Baru (PMB):**
+1. **Pendaftaran:** Pendaftar mengisi formulir awal dari landing page dan masuk ke sistem dengan status awal (biasanya `menunggu_pembayaran` atau `draft`).
+2. **Pembayaran:** Pendaftar mengunggah bukti bayar pendaftaran. Status berubah menjadi `menunggu_konfirmasi`.
+3. **Konfirmasi Admin:** Admin memvalidasi pembayaran. Jika sah, status menjadi `terdaftar`.
+4. **Lengkapi Form & Upload Dokumen:** Mahasiswa harus melengkapi form detail (jika belum lengkap). Setelah lengkap, mereka mengunggah 6 tipe dokumen pendaftaran (beberapa opsional). Dokumen berstatus `menunggu_review`. Admin mereview *per dokumen* (terima/tolak revisi).
+5. **Tes Tulis:** Setelah dokumen lengkap & disetujui otomatis lanjut ke status `menunggu_tes_tulis`. Peserta menjawab bank soal di sistem, disubmit, dihitung skor otomatis (`sangat_baik` atau `baik`).
+6. **Interview:** Setelah tes tulis, peserta diarahkan ke status `menunggu_interview`.
+7. **Persetujuan Akhir (Panitia):** Role Panitia menyeken QR pendaftar dan menandai hasil kelulusan. Status berubah ke `menunggu_konfirmasi_daftar_ulang`.
+8. **Daftar Ulang:** Pendaftar mengunggah bukti bayar daftar ulang. Admin menyetujui, dan alur pendaftaran selesai dengan status `daftar_ulang_selesai`.
 
-**1. Tabel PMB & Affiliate Utama**
-- **pmb_periods**: id, name, year, open_date, close_date, university_bank_name, dll.
-- **registrations**: id, period_id, user_id, referrer_id, registration_number, admission_path, first_choice_program_id, status, payment_proof, dll.
-- **payment_logs**: id, registration_id, action, note.
+**Alur Afiliasi (Referrer):**
+1. User (umumnya mahasiswa lama/pihak luar) mendaftar di `/afiliasi`.
+2. Admin mengaktifkan status Referrer.
+3. Referrer mendapat link unik (`/ref/{code}`). Setiap klik dicatat di `referral_clicks`.
+4. Jika klik berujung pada Registrasi (session), `referrer_id` disimpan di tabel `registrations`.
+5. Jika pendaftar mencapai status tertentu (sudah lulus daftar ulang), sistem (via command/logic tertentu) men-generate reward di tabel `rewards`.
+6. Admin melakukan *approve* lalu *disburse* komisi/reward yang bisa dilakukan massal.
 
-- **referrers**: id, user_id, code, status, bank_name, bank_account_number, bank_account_name.
-- **referral_clicks**: id, referrer_id, ip_address, converted, converted_at.
-- **rewards**: id, referrer_id, registration_id, amount, status, notes.
+## 6. Package/Library yang Digunakan
+**Backend (Composer):**
+- `barryvdh/laravel-dompdf` (^3.1): Cetak PDF (Formulir pendaftaran, SKL).
+- `endroid/qr-code` & `simplesoftwareio/simple-qrcode`: Generator QR Code untuk verifikasi e-KTM / Formulir.
+- `intervention/image` (^4.1): Manipulasi gambar (khususnya untuk e-KTM komposit foto & QR).
+- `laravel/breeze` (^2.4): Autentikasi starter kit.
+- `livewire/livewire` (^4.3): Komponen interaktif (dipakai kemungkinan untuk list data table).
+- `maatwebsite/excel` (^3.1): Export data ke Excel/CSV.
+- `symfony/resend-mailer`: Mailer.
 
-- **users**: id, name, email, role, is_referrer, referrer_id, phone.
-- **facilities**: id, name, image_path, icon, description, is_active, order.
-- **partners**: id, name, logo_path, url, is_active.
-- **programs**: id, name, faculty_id, registration_fee, referral_reward_amount, re_registration_reward_amount, dll.
+**Frontend (NPM):**
+- `tailwindcss` (^3.4) & plugin turunannya (`@tailwindcss/forms`, dll): Framework CSS utama.
+- `alpinejs` (^3.4): Javascript ringan untuk interaktivitas UI.
+- `axios`: HTTP client.
+- `vite`: Build tool.
 
-**2. Record Count:**
-- `facilities`: **16**
-- `partners`: **6**
-*(Seeder telah berjalan dengan sukses)*
+## 7. Kondisi .env.example
+File `.env.example` terstruktur secara default Laravel dengan beberapa kunci khusus yang menonjol:
+- Konfigurasi basic `APP_*` (URL, Name, Key, Env).
+- Konfigurasi `DB_*` menggunakan SQLite secara bawaan (konfigurasi MySQL di-comment).
+- Konfigurasi Email (`MAIL_*`) yang perlu disesuaikan server.
+- Terdapat blok konfigurasi `AWS_*` (S3). Ini menandakan project memiliki kapabilitas/disiapkan untuk upload file ke S3 Storage.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 4 — ROUTES & FITUR YANG SUDAH ADA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 8. Role & Auth System
+Sistem otorisasi menggunakan Guard standar (`web`), dilengkapi dengan role-based akses sederhana berbasis Enum di tabel `users`.
+- Role terdiri dari: `admin`, `operator`, `referrer`, `mahasiswa`, dan `panitia`.
+- Middleware khusus: `role:admin,operator` melindungi route `/admin/*`. `role:panitia` melindungi route `/panitia/*`.
+- Breeze mengatur akses `/login` dan validasi sesi. Logic redirect dashboard custom terdapat di `Route::get('/dashboard')`, me-redirect user ke panel yang sesuai rolenya saat berhasil login.
 
-**1. Landing Page:**
-- `GET /` -> `LandingController@preview`
-- `GET /brand` -> (Closure return view 'brand')
-- `GET /prodi/{slug}` -> `LandingController@prodi`
-
-**2. PMB (Pendaftaran):**
-- `GET /daftar` -> `RegistrationController@create`
-- `GET /pendaftaran` -> `RegistrationController@index`
-- `GET /pendaftaran/status` -> `RegistrationController@status`
-- `POST /pendaftaran/upload-bukti` -> `RegistrationController@uploadProof`
-- `POST /pendaftaran/upload-berkas` -> `RegistrationController@uploadDocument`
-- `POST /pendaftaran/upload-daftar-ulang-bukti` -> `RegistrationController@uploadReRegistrationProof`
-
-**3. Admin / CRUD:**
-- `GET admin/dashboard` -> `Admin\DashboardController@index`
-- `GET admin/pengaturan` -> `Admin\PmbPeriodController@index`
-- Resource routes: `admin/faculties`, `admin/programs`, `admin/partners`, `admin/facilities`.
-- Manajemen Pendaftar: `admin/pendaftar`, `admin/pendaftar/{id}`, `admin/pendaftar/{id}/konfirmasi-bayar`, dll (Controller: `Admin\RegistrationController`).
-
-**4. Sistem Referral / Affiliate:**
-- Tracking: `GET /ref/{code}` -> `ReferralController@track`
-- Referrer Dashboard: `GET /afiliasi/dashboard` -> `ReferrerController@dashboard`
-- Landing Afiliasi: `GET /afiliasi` -> `ReferrerController@index`
-- Admin Manajemen Afiliasi: `admin/afiliasi` & `admin/reward` (Termasuk fitur export & mass disburse ditangani oleh `Admin\RewardController`).
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 5 — LANDING PAGE STATUS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**1. Route /landing-preview:**
-Route `/landing-preview` **TIDAK ADA**. Berdasarkan kode saat ini, landing page preview diakses langsung melalui route `/` (`LandingController@preview`).
-
-**2. File View yang Terlibat:**
-- `resources/views/layouts/landing.blade.php`
-- `resources/views/landing/preview.blade.php`
-- `resources/views/landing/prodi.blade.php`
-
-**3. Komparasi Section di `preview.blade.php`:**
-**SUDAH ADA:**
-- Section 1: Hero
-- Section 3: Program Studi (Pilih Program Studimu)
-- Section 4: Cara Mendaftar
-- Section 5: Jalur Penerimaan
-- Section 6: Mitra Kerja Sama (Dipercaya Institusi Terkemuka)
-- Section 7: Gallery Image (Momen & Aktivitas)
-- Section 8: Final CTA
-
-**GAP (YANG BELUM ADA):**
-- **Section 2 (Trust Builder / Statistik)**: Section ini belum ada / terlewat di file `preview.blade.php`. Setelah Section 1 (Hero) langsung lompat ke Section 3 (Program Studi).
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 6 — KONFIGURASI ENVIRONMENT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**1. Status .env:**
-- `APP_ENV`: `local`
-- `APP_URL`: `http://ypib.test`
-- `DB_DATABASE`: `ypib`
-*(Value penting telah terisi, file ada dan tersambung).*
-
-**2. Status config/filesystems.php:**
-Sudah dikonfigurasi dengan benar sesuai instruksi "Hostinger fix". Disk `public` mengarah ke `public_path('storage')`.
-
-**3. Identifikasi Environment:**
-Ini adalah environment **development lokal (Laragon)**. Dilihat dari `APP_ENV=local` dan `APP_URL=http://ypib.test`. Belum disetting untuk environment `dev.univypib.ac.id` maupun production `daftar.univypib.ac.id`.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## BAGIAN 7 — CATATAN UNTUK PENGEMBANGAN LANJUTAN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1. **Potensi Konflik:**
-   - Karena landing page saat ini di set pada route root `/` (bukan `/landing-preview`), pastikan pengembangan fitur selanjutnya tidak menimpa root path ini.
-   - Database connection di env adalah `mysql` (`DB_DATABASE=ypib`), namun ada file `database.sqlite` di folder database. Hal ini tidak menjadi masalah karena database yang berjalan adalah MySQL, namun pastikan tidak tertukar di server production.
-2. **Status File / Folder:**
-   - Git Tree is Clean. Semua file dan direktori aman untuk dikerjakan dan tidak ada perubahan menggantung (*uncommitted changes*).
-3. **Ketidaksesuaian Terdeteksi:**
-   - Ada "Gap" desain di Landing Page (`preview.blade.php`) di mana "Section 2" (Trust Builder / Statistik) dilewati begitu saja.
-   - Menambahkan sebuah script `get_schema.php` untuk melihat struktur database. File ini bebas Anda hapus karena hanya digunakan sementara untuk generate laporan ini.
+## 9. Catatan Penting & Hal yang Perlu Diperhatikan (Watch Out)
+1. **Sistem Desain Ganda:** Layout admin (`layouts.admin`) dan layout publik (`layouts.landing`) menggunakan sistem UI yang benar-benar terpisah. **Jangan pernah memakai Breeze `x-app-layout` pada admin.**
+2. **Standardisasi Tailwind Warna Admin:** Halaman admin dilarang menggunakan `gray-*` atau `blue-*` default Tailwind. Harus menggunakan color token custom `neutral-*` dan `primary-*`.
+3. **Komponen Blade Custom Admin:** Form admin sangat bergantung pada komponen kustom (misal: `<x-card>`, `<x-button>`, `<x-text-input>`, `<x-select>`). Jangan buat elemen form mentah tanpa komponen ini.
+4. **Sistem Berkas Pendaftaran:** Alur dokumen menggunakan arsitektur tabel relasional tunggal yang baru (`registration_documents`). Kolom lama `document_proof` di tabel `registrations` adalah *deprecated/legacy* dan di-ignore dari logic saat ini. Jangan pernah membangun fitur di atas `document_proof` lama.
+5. **Image Processing:** Terdapat kerumitan di fitur E-KTM (`downloadEktm`), dimana sistem merakit pas foto, template PNG kosong, text overlay, dan QR code (Intervention + GD Native). Hati-hati jika menyentuh dependensi image pada sistem karena font/pallete issue rentan terjadi di GD.
+6. **Unique Constraints Prodi:** Constraint di database untuk `kode_prodi` adalah composite (terikat dengan `registration_track`).
