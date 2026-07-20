@@ -109,10 +109,10 @@ $activeStatus = request('status', '');
         </form>
 
         <form method="GET" action="{{ route('admin.registrations.export') }}" class="flex gap-2 shrink-0 overflow-x-auto">
-            <select name="period_id" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]">
-                <option value="">Semua Periode</option>
-                @foreach(\App\Models\PmbPeriod::all() as $period)
-                    <option value="{{ $period->id }}">{{ $period->name }}</option>
+            <select name="prodi" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
+                <option value="">Semua Program Studi</option>
+                @foreach($programs as $program)
+                    <option value="{{ $program->id }}" {{ request('prodi') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
                 @endforeach
             </select>
             <select name="status" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]">
@@ -145,6 +145,7 @@ $activeStatus = request('status', '');
                 $href = route('admin.registrations.index', array_filter([
                     'status' => $statusKey,
                     'search' => request('search'),
+                    'prodi'  => request('prodi'),
                 ]));
             @endphp
             <a href="{{ $href }}" class="decoration-none shrink-0">

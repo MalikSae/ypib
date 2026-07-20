@@ -44,8 +44,10 @@ class RegistrationController extends Controller
             ->pluck('total', 'status')
             ->toArray();
         $totalRegistrations = array_sum($statusCounts);
+        
+        $programs = \App\Models\Program::where('is_active', true)->get();
 
-        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations'));
+        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations', 'programs'));
     }
 
     public function show(int $id)
@@ -686,9 +688,9 @@ class RegistrationController extends Controller
 
     public function export(Request $request)
     {
-        $periodId = $request->query('period_id');
+        $prodiId = $request->query('prodi');
         $status   = $request->query('status');
         $filename = 'Data_Pendaftar_' . date('Ymd_His') . '.xlsx';
-        return Excel::download(new \App\Exports\RegistrationExport($periodId, $status), $filename);
+        return Excel::download(new \App\Exports\RegistrationExport($prodiId, $status), $filename);
     }
 }

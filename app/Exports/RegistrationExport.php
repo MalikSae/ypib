@@ -9,12 +9,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class RegistrationExport implements FromCollection, WithHeadings, WithMapping
 {
-    protected $periodId;
+    protected $prodiId;
     protected $status;
 
-    public function __construct($periodId = null, $status = null)
+    public function __construct($prodiId = null, $status = null)
     {
-        $this->periodId = $periodId;
+        $this->prodiId = $prodiId;
         $this->status = $status;
     }
 
@@ -22,8 +22,8 @@ class RegistrationExport implements FromCollection, WithHeadings, WithMapping
     {
         $query = Registration::with(['user', 'referrer.user', 'firstChoiceProgram', 'secondChoiceProgram']);
         
-        if ($this->periodId) {
-            $query->where('period_id', $this->periodId);
+        if ($this->prodiId) {
+            $query->where('first_choice_program_id', $this->prodiId);
         }
         if ($this->status) {
             $query->where('status', $this->status);
