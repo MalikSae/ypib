@@ -70,5 +70,6 @@
 
     @stack('scripts')
     @include('partials.pwa-register')
+    @include('partials.pwa-install-banner', ['section' => 'panitia'])
 </body>
 </html>

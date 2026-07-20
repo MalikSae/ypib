@@ -458,5 +458,6 @@
     </script>
     @livewireScripts
     @include('partials.pwa-register')
+    @include('partials.pwa-install-banner', ['section' => 'public'])
 </body>
 </html>

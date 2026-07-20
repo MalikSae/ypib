@@ -682,5 +682,6 @@
     }, { passive: true });
 </script>
 @include('partials.pwa-register')
+@include('partials.pwa-install-banner', ['section' => 'admin'])
 </body>
 </html>
