@@ -693,4 +693,76 @@ class RegistrationController extends Controller
         $filename = 'Data_Pendaftar_' . date('Ymd_His') . '.xlsx';
         return Excel::download(new \App\Exports\RegistrationExport($prodiId, $status), $filename);
     }
+
+    public function recap()
+    {
+        // Status yang BELUM bayar — dikecualikan dari kolom Pendaftar
+        $statusBelumBayar = ['menunggu_pembayaran', 'menunggu_konfirmasi'];
+        // Status yang dianggap "lulus" (diterima / pasca-diterima)
+        $statusLulus = ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'];
+        // Status yang dianggap "daftar ulang terkonfirmasi"
+        $statusDaftarUlang = ['daftar_ulang_selesai'];
+
+        $programs = \App\Models\Program::orderBy('name')->get();
+
+        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang) {
+            $base = Registration::where('first_choice_program_id', $program->id);
+
+            // Pendaftar = hanya yang sudah lunas (exclude belum bayar)
+            $pendaftar   = (clone $base)->whereNotIn('status', $statusBelumBayar)->count();
+            $lulus       = (clone $base)->whereIn('status', $statusLulus)->count();
+            $daftarUlang = (clone $base)->whereIn('status', $statusDaftarUlang)->count();
+
+            return [
+                'nama_prodi'   => $program->name,
+                'pendaftar'    => $pendaftar,
+                'lulus'        => $lulus,
+                'daftar_ulang' => $daftarUlang,
+            ];
+        })->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
+
+        $totals = [
+            'nama_prodi'   => 'Total',
+            'pendaftar'    => $rows->sum('pendaftar'),
+            'lulus'        => $rows->sum('lulus'),
+            'daftar_ulang' => $rows->sum('daftar_ulang'),
+            'is_total'     => true,
+        ];
+
+        return view('admin.registrations.recap', compact('rows', 'totals'));
+    }
+
+    public function exportRecap()
+    {
+        $statusBelumBayar  = ['menunggu_pembayaran', 'menunggu_konfirmasi'];
+        $statusLulus       = ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'];
+        $statusDaftarUlang = ['daftar_ulang_selesai'];
+
+        $programs = \App\Models\Program::orderBy('name')->get();
+
+        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang) {
+            $base = Registration::where('first_choice_program_id', $program->id);
+
+            return [
+                'nama_prodi'   => $program->name,
+                'pendaftar'    => (clone $base)->whereNotIn('status', $statusBelumBayar)->count(),
+                'lulus'        => (clone $base)->whereIn('status', $statusLulus)->count(),
+                'daftar_ulang' => (clone $base)->whereIn('status', $statusDaftarUlang)->count(),
+                'is_total'     => false,
+            ];
+        })->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
+
+        $totals = collect([[
+            'nama_prodi'   => 'Total',
+            'pendaftar'    => $rows->sum('pendaftar'),
+            'lulus'        => $rows->sum('lulus'),
+            'daftar_ulang' => $rows->sum('daftar_ulang'),
+            'is_total'     => true,
+        ]]);
+
+        $allRows = $rows->concat($totals);
+
+        $filename = 'Rekap_Pendaftaran_' . date('Ymd_His') . '.xlsx';
+        return Excel::download(new \App\Exports\RegistrationRecapExport($allRows), $filename);
+    }
 }

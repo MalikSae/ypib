@@ -109,6 +109,8 @@ Route::prefix('admin')
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
             Route::get('/export', [AdminRegistrationController::class, 'export'])->name('export');
+            Route::get('/rekap', [AdminRegistrationController::class, 'recap'])->name('recap');
+            Route::get('/rekap/export', [AdminRegistrationController::class, 'exportRecap'])->name('recap.export');
             Route::get('/{registration}', [AdminRegistrationController::class, 'show'])->name('show');
             Route::post('/{id}/update-data', [AdminRegistrationController::class, 'updateData'])->name('update-data');
             Route::post('/{id}/reset-tes-tulis', [AdminRegistrationController::class, 'resetExam'])->name('reset-exam');
