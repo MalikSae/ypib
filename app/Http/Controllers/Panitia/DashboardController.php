@@ -16,7 +16,7 @@ class DashboardController extends Controller
 
         $query = PaymentLog::where('acted_by', Auth::id())
             ->where('action', 'interview_completed')
-            ->with('registration.firstChoiceProgram')
+            ->with(['registration' => fn($q) => $q->withTrashed()->with('firstChoiceProgram')])
             ->latest();
 
         if ($search) {
