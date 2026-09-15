@@ -41,9 +41,9 @@ class FacilityController extends Controller
             $filename = Str::uuid() . '.webp';
             $path = 'facilities/' . $filename;
             
-            $image = $manager->read($request->file('image'));
+            $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 1200);
-            $encoded = $image->toWebp(80);
+            $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
             
             Storage::disk('public')->put($path, (string) $encoded);
             $validated['image_path'] = $path;
@@ -80,9 +80,9 @@ class FacilityController extends Controller
             $filename = Str::uuid() . '.webp';
             $path = 'facilities/' . $filename;
             
-            $image = $manager->read($request->file('image'));
+            $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 1200);
-            $encoded = $image->toWebp(80);
+            $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
             
             Storage::disk('public')->put($path, (string) $encoded);
             $validated['image_path'] = $path;

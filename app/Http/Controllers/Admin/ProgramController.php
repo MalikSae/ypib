@@ -105,9 +105,9 @@ class ProgramController extends Controller
                     $filename = Str::uuid() . '.webp';
                     $path = 'programs/' . $filename;
                     
-                    $image = $manager->read($file);
+                    $image = $manager->decode($file);
                     $image->scaleDown(width: 1200);
-                    $encoded = $image->toWebp(80);
+                    $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
                     
                     Storage::disk('public')->put($path, (string) $encoded);
                     
@@ -198,9 +198,9 @@ class ProgramController extends Controller
                     $filename = Str::uuid() . '.webp';
                     $path = 'programs/' . $filename;
                     
-                    $image = $manager->read($file);
+                    $image = $manager->decode($file);
                     $image->scaleDown(width: 1200);
-                    $encoded = $image->toWebp(80);
+                    $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
                     
                     Storage::disk('public')->put($path, (string) $encoded);
                     

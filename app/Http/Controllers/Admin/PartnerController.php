@@ -40,9 +40,9 @@ class PartnerController extends Controller
             $filename = Str::uuid() . '.webp';
             $path = 'partners/' . $filename;
             
-            $image = $manager->read($request->file('logo'));
+            $image = $manager->decode($request->file('logo'));
             $image->scaleDown(width: 400); // Logo tak perlu terlalu besar
-            $encoded = $image->toWebp(80);
+            $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
             
             Storage::disk('public')->put($path, (string) $encoded);
             $partner->logo_path = $path;
@@ -78,9 +78,9 @@ class PartnerController extends Controller
             $filename = Str::uuid() . '.webp';
             $path = 'partners/' . $filename;
             
-            $image = $manager->read($request->file('logo'));
+            $image = $manager->decode($request->file('logo'));
             $image->scaleDown(width: 400);
-            $encoded = $image->toWebp(80);
+            $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
             
             Storage::disk('public')->put($path, (string) $encoded);
             $partner->logo_path = $path;
