@@ -302,6 +302,10 @@
                     <input type="file" id="gallery-input" name="gallery[]" multiple accept="image/*" class="text-sm text-neutral-600 w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
                     <div class="text-xs text-neutral-500 mt-2">Anda bisa memilih banyak foto sekaligus, atau klik "Choose Files" lagi untuk menambah foto lainnya.</div>
                 </div>
+                <x-input-error :messages="$errors->get('gallery')" />
+                @foreach($errors->get('gallery.*') as $message)
+                    <p class="text-sm text-error mt-1">{{ $message[0] }}</p>
+                @endforeach
 
                 <div id="gallery-preview-container" style="display:none;" class="mt-4">
                     <div class="text-sm font-semibold text-neutral-900 mb-2">Preview Foto Baru (Akan Diupload):</div>

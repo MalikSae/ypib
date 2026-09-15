@@ -42,7 +42,7 @@
                                 @change="previewUrl = URL.createObjectURL($event.target.files[0])"
                             />
                         </label>
-                        <p class="text-xs text-neutral-500 mt-2">Format: JPG, PNG, WEBP. Maks 2MB.</p>
+                        <p class="text-xs text-neutral-500 mt-2">Format: JPG, PNG, WEBP. Maks 5MB.</p>
                         <x-input-error :messages="$errors->get('image')" />
                     </div>
                 </div>

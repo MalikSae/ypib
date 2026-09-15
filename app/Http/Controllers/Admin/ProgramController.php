@@ -65,7 +65,7 @@ class ProgramController extends Controller
             'is_active'                       => 'boolean',
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
-            'gallery.*'                       => 'image|mimes:jpeg,png,jpg|max:2048',
+            'gallery.*'                       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ], [
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
@@ -157,7 +157,7 @@ class ProgramController extends Controller
             'is_active'                       => 'boolean',
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
-            'gallery.*'                       => 'image|mimes:jpeg,png,jpg|max:2048',
+            'gallery.*'                       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ], [
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',

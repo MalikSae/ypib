@@ -27,7 +27,7 @@ class FacilityController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'description' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'order' => 'nullable|integer',
@@ -63,7 +63,7 @@ class FacilityController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'description' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'order' => 'nullable|integer',
