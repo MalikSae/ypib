@@ -72,6 +72,9 @@ class ProgramController extends Controller
             'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
         ]);
 
+        $createdPaths = [];
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
         try {
             $feeDetails = [];
             $totalReRegistrationFee = 0;
@@ -90,7 +93,8 @@ class ProgramController extends Controller
 
             $program = new Program();
             $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
-            $program->slug = Str::slug($request->name);
+            $program->slug = Program::uniqueSlug($request->name);
+            $program->description = \App\Support\HtmlSanitizer::clean($request->description);
             $program->is_active = $request->has('is_active');
             $program->re_registration_fee_details = $feeDetails;
             $program->re_registration_fee = $totalReRegistrationFee;
@@ -110,7 +114,8 @@ class ProgramController extends Controller
                     $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
                     
                     Storage::disk('public')->put($path, (string) $encoded);
-                    
+                    $createdPaths[] = $path;
+
                     ProgramGallery::create([
                         'program_id' => $program->id,
                         'image_path' => $path
@@ -118,9 +123,17 @@ class ProgramController extends Controller
                 }
             }
 
+            \Illuminate\Support\Facades\DB::commit();
+
             return redirect()->route('admin.programs.index')->with('success', 'Program Studi berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan data: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            foreach ($createdPaths as $createdPath) {
+                Storage::disk('public')->delete($createdPath);
+            }
+            report($e);
+
+            return redirect()->back()->withInput()->with('error', 'Gagal menambahkan data. Periksa isian Anda lalu coba lagi; bila berulang hubungi pengembang.');
         }
     }
 
@@ -164,6 +177,9 @@ class ProgramController extends Controller
             'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
         ]);
 
+        $createdPaths = [];
+        \Illuminate\Support\Facades\DB::beginTransaction();
+
         try {
             $program = Program::findOrFail($id);
 
@@ -183,7 +199,10 @@ class ProgramController extends Controller
             }
 
             $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
-            $program->slug = Str::slug($request->name);
+            if ($program->isDirty('name') || empty($program->slug)) {
+                $program->slug = Program::uniqueSlug($request->name, $program->id);
+            }
+            $program->description = \App\Support\HtmlSanitizer::clean($request->description);
             $program->is_active = $request->has('is_active');
             $program->re_registration_fee_details = $feeDetails;
             $program->re_registration_fee = $totalReRegistrationFee;
@@ -197,13 +216,14 @@ class ProgramController extends Controller
                 foreach ($request->file('gallery') as $file) {
                     $filename = Str::uuid() . '.webp';
                     $path = 'programs/' . $filename;
-                    
+
                     $image = $manager->decode($file);
                     $image->scaleDown(width: 1200);
                     $encoded = $image->encode(new \Intervention\Image\Encoders\WebpEncoder(quality: 80));
-                    
+
                     Storage::disk('public')->put($path, (string) $encoded);
-                    
+                    $createdPaths[] = $path;
+
                     ProgramGallery::create([
                         'program_id' => $program->id,
                         'image_path' => $path
@@ -211,15 +231,34 @@ class ProgramController extends Controller
                 }
             }
 
+            \Illuminate\Support\Facades\DB::commit();
+
             return redirect()->route('admin.programs.index')->with('success', 'Program Studi berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            foreach ($createdPaths as $createdPath) {
+                Storage::disk('public')->delete($createdPath);
+            }
+            report($e);
+
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data. Periksa isian Anda lalu coba lagi; bila berulang hubungi pengembang.');
         }
     }
 
     public function destroy(Program $program)
     {
-        if ($program->galleries) {
+        // Pendaftar (termasuk yang di-soft-delete) masih mereferensikan prodi ini lewat FK.
+        $inUse = \App\Models\Registration::withTrashed()
+            ->where(fn ($q) => $q->where('first_choice_program_id', $program->id)
+                ->orWhere('second_choice_program_id', $program->id))
+            ->exists();
+
+        if ($inUse) {
+            return redirect()->route('admin.programs.index')
+                ->with('error', 'Prodi tidak bisa dihapus karena sudah dipakai oleh data pendaftar. Nonaktifkan prodi ini sebagai gantinya.');
+        }
+
+if ($program->galleries) {
             foreach ($program->galleries as $gallery) {
                 Storage::disk('public')->delete($gallery->image_path);
             }

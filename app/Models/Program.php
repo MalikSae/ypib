@@ -38,6 +38,38 @@ class Program extends Model
         return $query->where('is_active', true);
     }
 
+    /**
+     * Jumlah kursi terpakai: pendaftar aktif (tidak ditolak, tidak dihapus)
+     * yang memilih prodi ini, opsional dibatasi satu periode.
+     */
+    public function occupiedSeats(?int $periodId = null): int
+    {
+        return Registration::where('first_choice_program_id', $this->id)
+            ->when($periodId, fn ($q) => $q->where('period_id', $periodId))
+            ->where('status', '!=', 'ditolak')
+            ->count();
+    }
+
+    /** quota 0/kosong berarti tanpa batas. */
+    public function isFull(?int $periodId = null): bool
+    {
+        return (int) $this->quota > 0 && $this->occupiedSeats($periodId) >= (int) $this->quota;
+    }
+
+    /** Slug unik: tambahkan sufiks angka bila nama sama sudah dipakai. */
+    public static function uniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = \Illuminate\Support\Str::slug($name) ?: 'prodi';
+        $slug = $base;
+        $i = 2;
+
+        while (static::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+
+        return $slug;
+    }
+
     public function faculty()
     {
         return $this->belongsTo(Faculty::class);

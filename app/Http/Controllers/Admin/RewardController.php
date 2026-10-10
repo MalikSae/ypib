@@ -195,7 +195,7 @@ class RewardController extends Controller
                     $reward->amount,
                     $reward->registration?->full_name,
                 ];
-                fputcsv($file, $row);
+                fputcsv($file, \App\Support\CsvSanitizer::row($row));
             }
 
             fclose($file);
@@ -317,7 +317,7 @@ class RewardController extends Controller
                     $recap['total_registrations'],
                     $recap['total_amount'],
                 ];
-                fputcsv($file, $row);
+                fputcsv($file, \App\Support\CsvSanitizer::row($row));
             }
 
             fclose($file);

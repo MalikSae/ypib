@@ -234,12 +234,12 @@
             <input type="hidden" name="tab" value="detail"> {{-- Helps keep the detail tab active on reload if backend supports it --}}
             
             <div class="w-full md:w-auto flex-1 md:flex-none">
-                <select name="status" class="w-full md:w-48 px-3 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                <x-select name="status" class="md:w-48">
                     <option value="">Semua Status</option>
                     @foreach(['pending'=>'Pending','approved'=>'Disetujui / Siap Cair','disbursed'=>'Dicairkan'] as $val => $lbl)
                         <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                     @endforeach
-                </select>
+                </x-select>
             </div>
 
             <x-button type="submit" color="primary" size="sm">Filter</x-button>

@@ -30,7 +30,7 @@ class PmbPeriodController extends Controller
     {
         $period = PmbPeriod::findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'name'                          => 'required|string|max:255',
             'year'                          => 'required|integer',
             'open_date'                     => 'required|date',
@@ -41,7 +41,7 @@ class PmbPeriodController extends Controller
             'admin_whatsapp'                => 'nullable|string|max:20',
         ]);
 
-        $period->update($request->all());
+        $period->update($validated);
 
         return redirect()->route('admin.periods.index')->with('success', 'Pengaturan PMB berhasil diperbarui.');
     }

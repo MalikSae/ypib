@@ -79,6 +79,11 @@ class RegistrationController extends Controller
     {
         $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
 
+        $payableStatuses = ['menunggu_pembayaran', 'menunggu_konfirmasi'];
+        if (!in_array($registration->status, $payableStatuses)) {
+            return redirect()->back()->with('error', 'Pembayaran tidak dapat dikonfirmasi: status pendaftar saat ini "' . $registration->getStatusLabel() . '".');
+        }
+
         if ($registration->registration_type === 'alumni') {
             if (!$registration->alumni_card_proof && !$request->filled('note')) {
                 return redirect()->back()->with('error', 'Kartu alumni belum diunggah. Silakan isi catatan jika ingin melewati (override manual).');
@@ -96,7 +101,7 @@ class RegistrationController extends Controller
                 ]);
 
                 if ($request->hasFile('bukti_bayar')) {
-                    $path = $request->file('bukti_bayar')->store('bukti-bayar', 'public');
+                    $path = \App\Support\PrivateFile::store($request->file('bukti_bayar'), 'bukti-bayar');
                     $registration->payment_proof = $path;
                 }
             }
@@ -110,6 +115,15 @@ class RegistrationController extends Controller
             } while (Registration::where('registration_number', $number)->exists());
 
             $registration->registration_number = $number;
+        }
+
+        // Klaim atomik: cegah konfirmasi ganda (double-click / request paralel)
+        $claimed = Registration::where('id', $registration->id)
+            ->whereIn('status', $payableStatuses)
+            ->update(['status' => 'terdaftar']);
+
+        if (!$claimed) {
+            return redirect()->back()->with('error', 'Pendaftar ini sudah dikonfirmasi sebelumnya.');
         }
 
         $registration->status = 'terdaftar';
@@ -170,11 +184,9 @@ class RegistrationController extends Controller
         $registration = Registration::findOrFail($id);
 
         // Hapus file lama jika ada
-        if ($registration->payment_proof && Storage::disk('public')->exists($registration->payment_proof)) {
-            Storage::disk('public')->delete($registration->payment_proof);
-        }
+        \App\Support\PrivateFile::delete($registration->payment_proof);
 
-        $path = $request->file('bukti_bayar')->store('bukti-bayar', 'public');
+        $path = \App\Support\PrivateFile::store($request->file('bukti_bayar'), 'bukti-bayar');
 
         $registration->update([
             'payment_proof' => $path,
@@ -207,7 +219,7 @@ class RegistrationController extends Controller
             'address' => 'required|string',
             'school_name' => 'required|string',
             'graduation_year' => 'required|digits:4',
-            'school_grade' => 'nullable|numeric',
+            'school_grade' => 'nullable|numeric|between:0,100',
             'admission_path' => 'required|in:umum,prestasi,tahfidz',
             'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($registration->user_id)],
         ];
@@ -244,9 +256,10 @@ class RegistrationController extends Controller
             if ($key === 'birth_date' && $oldVal) {
                 $oldVal = $oldVal->format('Y-m-d');
             }
-            if ($oldVal != $validated[$key]) {
-                $changes[] = "$label: '" . ($oldVal ?: '-') . "' -> '" . ($validated[$key] ?: '-') . "'";
-                $registration->$key = $validated[$key];
+            $newVal = $validated[$key] ?? null; // school_grade opsional bisa tidak dikirim
+            if ($oldVal != $newVal) {
+                $changes[] = "$label: '" . ($oldVal ?: '-') . "' -> '" . ($newVal ?: '-') . "'";
+                $registration->$key = $newVal;
             }
         }
 
@@ -290,7 +303,13 @@ class RegistrationController extends Controller
     public function resetExam(int $id)
     {
         $registration = Registration::findOrFail($id);
-        
+
+        // Reset hanya sebelum keputusan interview; setelah itu status (diterima/ditolak,
+        // daftar ulang, NIM) tidak boleh dimundurkan.
+        if (!in_array($registration->status, ['menunggu_interview', 'menunggu_tes_tulis'], true)) {
+            return redirect()->back()->with('error', 'Tes tulis hanya bisa direset sebelum keputusan interview (status saat ini: ' . $registration->getStatusLabel() . ').');
+        }
+
         $session = \App\Models\ExamSession::where('registration_id', $registration->id)->where('status', 'completed')->first();
         if (!$session) {
             return redirect()->back()->with('error', 'Tidak ada sesi tes yang bisa direset.');
@@ -371,7 +390,7 @@ class RegistrationController extends Controller
             ]);
 
             if ($request->hasFile('bukti_daftar_ulang')) {
-                $path = $request->file('bukti_daftar_ulang')->store('bukti-daftar-ulang', 'public');
+                $path = \App\Support\PrivateFile::store($request->file('bukti_daftar_ulang'), 'bukti-daftar-ulang');
                 $registration->re_registration_payment_proof = $path;
             }
         }
@@ -484,12 +503,10 @@ class RegistrationController extends Controller
             ->where('document_type', $documentType)
             ->first();
 
-        $path = $file->store('dokumen-pendaftaran', 'public');
+        $path = \App\Support\PrivateFile::store($file, 'dokumen-pendaftaran');
 
         if ($document) {
-            if ($document->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($document->file_path)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($document->file_path);
-            }
+            \App\Support\PrivateFile::delete($document->file_path);
             $document->update([
                 'file_path' => $path,
                 'status' => 'disetujui',
@@ -570,11 +587,37 @@ class RegistrationController extends Controller
     public function addNote(Request $request, int $id)
     {
         $request->validate([
-            'note' => 'required|string|max:1000',
+            // Kolom diisi ulang dengan seluruh catatan (termasuk entri otomatis
+            // panitia/override), jadi batasnya harus longgar.
+            'note'           => 'required|string|max:10000',
+            'notes_checksum' => 'nullable|string|size:32',
         ]);
 
         $registration = Registration::findOrFail($id);
-        $registration->update(['internal_notes' => $request->note]);
+        $current = (string) $registration->internal_notes;
+
+        // Optimistic lock: tolak jika catatan berubah (mis. panitia menambah catatan
+        // interview) sejak halaman dimuat, supaya entri itu tidak tertimpa.
+        if ($request->filled('notes_checksum') && !hash_equals(md5($current), $request->notes_checksum)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Catatan internal sudah diubah pengguna lain sejak halaman dimuat. Muat ulang halaman, lalu ulangi perubahan Anda.');
+        }
+
+        if ($current === $request->note) {
+            return redirect()->back()->with('info', 'Tidak ada perubahan pada catatan internal.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request, $current) {
+            $registration->update(['internal_notes' => $request->note]);
+
+            PaymentLog::create([
+                'registration_id' => $registration->id,
+                'acted_by'        => Auth::id(),
+                'action'          => 'internal_note_edited',
+                'note'            => 'Catatan internal diedit oleh ' . Auth::user()->name . '. Isi sebelumnya: ' . ($current !== '' ? $current : '(kosong)'),
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Catatan internal berhasil disimpan.');
     }
@@ -587,40 +630,68 @@ class RegistrationController extends Controller
 
         $registration = Registration::findOrFail($id);
         $oldReferrerId = $registration->referrer_id;
-        $newReferrerId = $request->referrer_id;
+        $newReferrerId = $request->filled('referrer_id') ? (int) $request->referrer_id : null;
 
-        if ($oldReferrerId != $newReferrerId) {
+        if ($oldReferrerId == $newReferrerId) {
+            return redirect()->back()->with('success', 'Afiliator dan komisi berhasil diperbarui.');
+        }
+
+        // Komisi yang sudah dicairkan berarti uang sudah keluar: tidak boleh dipindah
+        // ke afiliator lain maupun dihapus dari riwayat.
+        $hasDisbursed = \App\Models\Reward::where('registration_id', $registration->id)
+            ->where('status', 'disbursed')
+            ->exists();
+
+        if ($hasDisbursed) {
+            return redirect()->back()->with('error', 'Afiliator tidak dapat diubah karena komisi pendaftar ini sudah dicairkan.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $oldReferrerId, $newReferrerId) {
             $registration->update(['referrer_id' => $newReferrerId]);
-            
+
             if ($registration->user_id) {
                 \App\Models\User::where('id', $registration->user_id)->update(['referrer_id' => $newReferrerId]);
             }
 
-            // Pindahkan komisi (Reward) dan sesuaikan total konversi
-            $hasConverted = \App\Models\Reward::where('registration_id', $registration->id)->exists();
-            
-            if ($hasConverted) {
+            // Hanya komisi yang belum dicairkan (pending/approved) yang disesuaikan.
+            $open = \App\Models\Reward::where('registration_id', $registration->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->get();
+
+            if ($open->isNotEmpty()) {
                 if ($oldReferrerId) {
-                    \App\Models\Referrer::where('id', $oldReferrerId)->decrement('total_conversions');
+                    \App\Models\Referrer::where('id', $oldReferrerId)
+                        ->where('total_conversions', '>', 0)
+                        ->decrement('total_conversions');
                 }
-                
+
                 if ($newReferrerId) {
                     \App\Models\Referrer::where('id', $newReferrerId)->increment('total_conversions');
-                    \App\Models\Reward::where('registration_id', $registration->id)->update(['referrer_id' => $newReferrerId]);
+                    foreach ($open as $reward) {
+                        $reward->update(['referrer_id' => $newReferrerId]);
+                    }
                 } else {
-                    \App\Models\Reward::where('registration_id', $registration->id)->delete();
+                    // Dibatalkan (bukan dihapus) agar jejak audit tetap ada.
+                    foreach ($open as $reward) {
+                        $reward->update([
+                            'status' => 'cancelled',
+                            'notes'  => ($reward->notes ? $reward->notes . "\n" : '') . 'Dibatalkan otomatis - afiliator dilepas oleh admin pada ' . now()->format('d/m/Y H:i'),
+                        ]);
+                    }
                 }
             }
 
-            $referrerName = $newReferrerId ? Referrer::with('user')->find($newReferrerId)->user->name : 'Dihapus / Tidak Ada';
-            
+            $referrerName = $newReferrerId
+                ? (Referrer::with('user')->find($newReferrerId)?->user?->name ?? 'Afiliator #' . $newReferrerId)
+                : 'Dihapus / Tidak Ada';
+
             PaymentLog::create([
                 'registration_id' => $registration->id,
                 'acted_by'        => Auth::id(),
                 'action'          => 'referral_changed',
                 'note'            => 'Afiliator diubah menjadi ' . $referrerName . ' oleh admin ' . Auth::user()->name . '. Komisi disesuaikan.',
             ]);
-        }
+        });
 
         return redirect()->back()->with('success', 'Afiliator dan komisi berhasil diperbarui.');
     }

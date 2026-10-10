@@ -83,7 +83,7 @@
                         <td class="px-5 py-4 text-right">
                             <form method="POST" action="{{ route('admin.registrations.restore', $reg->id) }}" onsubmit="return confirm('Yakin ingin memulihkan pendaftar ini? Reward komisi tidak akan dipulihkan secara otomatis.')">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap">
+                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-lg shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 whitespace-nowrap">
                                     Pulihkan
                                 </button>
                             </form>

@@ -31,8 +31,8 @@
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ number_format($totalKlik, 0, ',', '.') }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Total Klik</div>
         </div>
-        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+        <div class="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.671ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
             </svg>
         </div>
@@ -52,11 +52,11 @@
 
     <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between shadow-sm">
         <div>
-            <div class="text-3xl font-extrabold text-green-600 leading-none mb-2">{{ number_format($persentaseKonversi, 1, ',', '.') }}%</div>
+            <div class="text-3xl font-extrabold text-success-600 leading-none mb-2">{{ number_format($persentaseKonversi, 1, ',', '.') }}%</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">% Konversi</div>
         </div>
-        <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+        <div class="w-10 h-10 rounded-xl bg-success-50 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-success-500" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
             </svg>
         </div>
@@ -69,13 +69,13 @@
         <form action="{{ route('admin.referrers.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center w-full lg:w-auto">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-                <select name="per_page" id="per_page" onchange="this.form.submit()" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 cursor-pointer shadow-sm">
+                <x-select name="per_page" id="per_page" onchange="this.form.submit()" style="width:auto;">
                     <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                     <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
                     <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
                     <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                </select>
+                </x-select>
             </div>
             
             <div class="relative w-full sm:w-72">
@@ -88,18 +88,18 @@
         </form>
 
         <form method="GET" action="{{ route('admin.referrers.export') }}" class="flex gap-3 items-center w-full lg:w-auto overflow-x-auto">
-            <select name="period_id" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 shadow-sm min-w-[140px]">
+            <x-select name="period_id" style="width:auto;min-width:140px;">
                 <option value="">Semua Periode</option>
                 @foreach(\App\Models\PmbPeriod::all() as $period)
                     <option value="{{ $period->id }}">{{ $period->name }}</option>
                 @endforeach
-            </select>
-            <select name="status" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 shadow-sm min-w-[140px]">
+            </x-select>
+            <x-select name="status" style="width:auto;min-width:140px;">
                 <option value="">Semua Status</option>
                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
                 <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-            </select>
-            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap">
+            </x-select>
+            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-success-600 border border-transparent rounded-lg shadow-sm hover:bg-success-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-500 whitespace-nowrap">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export Excel
             </button>

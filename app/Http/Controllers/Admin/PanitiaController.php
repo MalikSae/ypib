@@ -16,8 +16,11 @@ class PanitiaController extends Controller
         
         $panitias = User::where('role', 'panitia')
             ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                // Dikelompokkan agar OR tidak lolos dari filter role
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
             })
             ->orderBy('name')
             ->paginate(10)
@@ -54,8 +57,10 @@ class PanitiaController extends Controller
         return redirect()->route('admin.panitia.index')->with('success', 'Akun Panitia berhasil ditambahkan.');
     }
 
-    public function edit(User $panitium) // Route resource uses singular 'panitium' or 'panitia' based on Laravel's inflector. Let's force parameter name.
+    public function edit(User $panitium)
     {
+        $this->ensurePanitia($panitium);
+
         return view('admin.panitia.form', [
             'panitia' => $panitium,
             'action' => route('admin.panitia.update', $panitium->id),
@@ -65,7 +70,9 @@ class PanitiaController extends Controller
 
     public function update(Request $request, User $panitium)
     {
-        $validated = $request->validate([
+        $this->ensurePanitia($panitium);
+
+$validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$panitium->id],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
@@ -85,7 +92,18 @@ class PanitiaController extends Controller
 
     public function destroy(User $panitium)
     {
+        $this->ensurePanitia($panitium);
+
         $panitium->delete();
         return redirect()->route('admin.panitia.index')->with('success', 'Akun Panitia berhasil dihapus.');
+    }
+
+    /**
+     * Route binding menerima User mana pun; endpoint ini hanya boleh
+     * menyentuh akun berperan panitia (cegah eskalasi ke admin/operator/pendaftar).
+     */
+    private function ensurePanitia(User $user): void
+    {
+        abort_unless($user->role === 'panitia', 404);
     }
 }

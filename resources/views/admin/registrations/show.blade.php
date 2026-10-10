@@ -138,7 +138,7 @@
             @if($registration->registration_type === 'alumni')
                 @if($registration->alumni_card_proof)
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                        <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank"
+                        <a href="{{ route('files.registration', [$registration->id, 'alumni_card_proof']) }}" target="_blank"
                            style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
                            onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
                             <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -154,7 +154,7 @@
             @else
                 @if($registration->payment_proof)
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                        <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank"
+                        <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank"
                            style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
                            onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
                             <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -285,7 +285,7 @@
                             </div>
 
                             <div style="padding-left: {{ $registration->status === 'terdaftar' ? '28px' : '0' }};">
-                                <a href="{{ Storage::url($doc->file_path) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#0B41CB;font-weight:600;text-decoration:none;">
+                                <a href="{{ route('files.document', $doc->id) }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#0B41CB;font-weight:600;text-decoration:none;">
                                     <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                                     Lihat Dokumen
                                 </a>
@@ -495,7 +495,7 @@
 
             @if($registration->re_registration_payment_proof)
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <a href="{{ Storage::url($registration->re_registration_payment_proof) }}" target="_blank"
+                    <a href="{{ route('files.registration', [$registration->id, 're_registration_payment_proof']) }}" target="_blank"
                        style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
                        onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -716,6 +716,7 @@
             <p style="font-size:13px;margin:0 0 12px 0;" class="text-neutral-500">Catatan untuk tim internal — tidak terlihat pendaftar.</p>
             <form method="POST" action="{{ route('admin.registrations.add-note', $registration->id) }}">
                 @csrf
+                <input type="hidden" name="notes_checksum" value="{{ md5((string) $registration->internal_notes) }}">
                 <textarea name="note" rows="4"
                           style="width:100%;border-radius:8px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;min-height:100px;outline:none;box-sizing:border-box;margin-bottom:12px;transition:border 0.15s;"
                           onfocus="this.style.border='2px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'"
@@ -794,15 +795,14 @@
             
             <form method="POST" action="{{ route('admin.registrations.update-referral', $registration->id) }}" onsubmit="return confirm('Anda yakin ingin mengubah afiliator pendaftar ini?')">
                 @csrf
-                <select name="referrer_id"
-                        style="width:100%;height:44px;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:12px;" class="border-neutral-300 text-neutral-900 bg-white">
+                <x-select name="referrer_id" style="margin-bottom:12px;">
                     <option value="">— Tidak Ada (Langsung) —</option>
                     @foreach($referrers as $ref)
                         <option value="{{ $ref->id }}" {{ $registration->referrer_id == $ref->id ? 'selected' : '' }}>
                             {{ $ref->user->name ?? 'User Dihapus' }} ({{ $ref->code }})
                         </option>
                     @endforeach
-                </select>
+                </x-select>
                 <button type="submit"
                         style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;"
                         onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'" class="bg-neutral-100 text-primary-600 border-neutral-300">
@@ -842,9 +842,9 @@
         @endif
 
         {{-- Card Aksi 6: Hapus Pendaftar --}}
-        <div style="border-radius:16px;padding:24px;border:1px solid #FCA5A5;" class="bg-red-50">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-red-700">Hapus Pendaftar</h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-red-600">Arsipkan data pendaftar ini. Komisi terkait akan otomatis dibatalkan dan nilai konversi afiliasi disesuaikan.</p>
+        <div style="border-radius:16px;padding:24px;border:1px solid #FCA5A5;" class="bg-error-50">
+            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-error-700">Hapus Pendaftar</h3>
+            <p style="font-size:13px;margin:0 0 16px 0;" class="text-error-600">Arsipkan data pendaftar ini. Komisi terkait akan otomatis dibatalkan dan nilai konversi afiliasi disesuaikan.</p>
             
             <form method="POST" action="{{ route('admin.registrations.destroy', $registration->id) }}" onsubmit="return confirm('Yakin ingin menghapus pendaftar ini? Data akan diarsipkan dan komisi terkait akan disesuaikan otomatis.')">
                 @csrf
@@ -906,14 +906,14 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_birth_place" value="Tempat Lahir" required="true" />
-                    <select id="edit_birth_place" name="birth_place" class="mt-1 block w-full" required>
+                    <x-select id="edit_birth_place" name="birth_place" class="mt-1 block" required>
                         <option value="">Pilih Kota/Kabupaten</option>
                         @foreach($cities as $city)
                             <option value="{{ $city }}" {{ old('birth_place', $registration->birth_place) === $city ? 'selected' : '' }}>
                                 {{ $city }}
                             </option>
                         @endforeach
-                    </select>
+                    </x-select>
                 </div>
                 <div>
                     <x-input-label for="edit_birth_date" value="Tanggal Lahir" required="true" />

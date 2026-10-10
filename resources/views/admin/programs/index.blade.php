@@ -25,13 +25,13 @@
     <form action="{{ route('admin.programs.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-            <select name="per_page" id="per_page" onchange="this.form.submit()" class="text-sm border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 block py-2 pl-3 pr-8 bg-white text-neutral-700 cursor-pointer shadow-sm">
+            <x-select name="per_page" id="per_page" onchange="this.form.submit()" style="width:auto;">
                 <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
                 <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-            </select>
+            </x-select>
         </div>
         
         <div class="relative w-full sm:w-72">
@@ -78,7 +78,7 @@
                         @if($program->registration_track === 'non_reguler')
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-200">Non-Reguler</span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">Reguler</span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold border border-primary-200">Reguler</span>
                         @endif
                     </td>
                     <td class="px-6 py-4">

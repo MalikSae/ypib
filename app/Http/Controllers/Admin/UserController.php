@@ -15,7 +15,17 @@ class UserController extends Controller
      */
     public function resetPassword(Request $request, User $user)
     {
-        $request->validate([
+        // Akun staf (admin/operator) hanya boleh direset oleh admin atau pemilik akun sendiri.
+        $actor = $request->user();
+        abort_if(
+            in_array($user->role, ['admin', 'operator'], true)
+                && $actor->role !== 'admin'
+                && $actor->id !== $user->id,
+            403,
+            'Hanya admin yang dapat mereset password akun staf.'
+        );
+
+$request->validate([
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 

@@ -20,12 +20,18 @@
                 <label for="resend_api_key" class="block text-sm font-semibold text-neutral-700 mb-2">Resend API Key</label>
                 <input type="password" name="resend_api_key" id="resend_api_key" 
                     class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                    value="{{ old('resend_api_key', $resendKey) }}" 
-                    placeholder="re_123456789...">
+                    value="" autocomplete="new-password"
+                    placeholder="{{ $hasResendKey ? '•••••••• (tersimpan — isi untuk mengganti)' : 're_123456789...' }}">
                 @error('resend_api_key')
                     <p class="text-error text-xs mt-1">{{ $message }}</p>
                 @enderror
-                <p class="text-neutral-500 text-xs mt-2">Dapatkan API Key ini dari dashboard Resend. Kosongkan jika tidak ingin mengubah/menggunakan layanan bawaan.</p>
+                <p class="text-neutral-500 text-xs mt-2">Dapatkan API Key ini dari dashboard Resend. Kosongkan untuk mempertahankan key yang tersimpan.</p>
+                @if($hasResendKey)
+                    <label class="inline-flex items-center gap-2 mt-3 text-xs text-neutral-700">
+                        <input type="checkbox" name="clear_resend_api_key" value="1" class="rounded border-neutral-300 text-primary-600">
+                        Hapus API key tersimpan (kembali ke konfigurasi <code>.env</code>)
+                    </label>
+                @endif
             </div>
 
             <div class="mb-5">

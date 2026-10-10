@@ -23,7 +23,7 @@ class FacultyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', $this->uniqueSlugRule()],
             'description' => 'nullable|string',
         ]);
 
@@ -42,7 +42,7 @@ class FacultyController extends Controller
     public function update(Request $request, Faculty $faculty)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', $this->uniqueSlugRule($faculty->id)],
             'description' => 'nullable|string',
         ]);
 
@@ -51,6 +51,20 @@ class FacultyController extends Controller
         $faculty->save();
 
         return redirect()->route('admin.faculties.index')->with('success', 'Fakultas berhasil diperbarui.');
+    }
+
+    /** Slug dibentuk dari nama dan bersifat unik; nama yang menghasilkan slug sama ditolak. */
+    private function uniqueSlugRule(?int $ignoreId = null): \Closure
+    {
+        return function (string $attribute, $value, \Closure $fail) use ($ignoreId) {
+            $exists = Faculty::where('slug', Str::slug((string) $value))
+                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+                ->exists();
+
+            if ($exists) {
+                $fail('Nama fakultas sudah digunakan (atau terlalu mirip dengan fakultas lain).');
+            }
+        };
     }
 
     public function destroy(Faculty $faculty)

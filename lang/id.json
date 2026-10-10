@@ -1,0 +1,9 @@
+{
+    "Too Many Requests": "Terlalu banyak permintaan. Silakan coba lagi beberapa saat lagi.",
+    "Forbidden": "Akses ditolak",
+    "Not Found": "Halaman tidak ditemukan",
+    "Page Expired": "Halaman kedaluwarsa. Muat ulang lalu coba lagi.",
+    "Server Error": "Terjadi kesalahan pada server",
+    "Service Unavailable": "Layanan sedang tidak tersedia",
+    "Unauthorized": "Belum masuk"
+}

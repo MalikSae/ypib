@@ -32,6 +32,22 @@ class PmbPeriod extends Model
         return $query->where('is_active', true);
     }
 
+    /**
+     * Periode dianggap terbuka bila aktif dan hari ini berada di antara
+     * tanggal buka dan tanggal tutup (inklusif).
+     */
+    public function isOpen(): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+
+        $today = now()->startOfDay();
+
+        return $today->gte($this->open_date->copy()->startOfDay())
+            && $today->lte($this->close_date->copy()->endOfDay());
+    }
+
     public function registrations()
     {
         return $this->hasMany(Registration::class, 'period_id');

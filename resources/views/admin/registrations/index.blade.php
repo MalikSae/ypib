@@ -109,25 +109,25 @@ $activeStatus = request('status', '');
         </form>
 
         <form method="GET" action="{{ route('admin.registrations.export') }}" class="flex gap-2 shrink-0 overflow-x-auto">
-            <select name="prodi" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
+            <x-select name="prodi" style="width:auto;min-width:140px;" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
                 <option value="">Semua Program Studi</option>
                 @foreach($programs as $program)
                     <option value="{{ $program->id }}" {{ request('prodi') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
                 @endforeach
-            </select>
-            <select name="status" class="text-sm border border-neutral-200 rounded-xl bg-neutral-50 text-neutral-700 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 py-2.5 pl-3 pr-8 min-w-[140px]">
+            </x-select>
+            <x-select name="status" style="width:auto;min-width:140px;">
                 <option value="">Semua Status</option>
                 @foreach($statusConfig as $key => $cfg)
                     @if($key !== '')
                         <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>{{ $cfg['label'] }}</option>
                     @endif
                 @endforeach
-            </select>
-            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-green-600 border border-transparent rounded-xl shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap">
+            </x-select>
+            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-success-600 border border-transparent rounded-xl shadow-sm hover:bg-success-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-500 whitespace-nowrap">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export Excel
             </button>
-            <a href="{{ route('admin.registrations.trash') }}" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-100 rounded-xl hover:bg-red-100 transition whitespace-nowrap">
+            <a href="{{ route('admin.registrations.trash') }}" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-error-600 bg-error-50 border border-error-100 rounded-xl hover:bg-error-100 transition whitespace-nowrap">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
