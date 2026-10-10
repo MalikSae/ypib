@@ -87,6 +87,12 @@ return [
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
+    | Password akun admin/operator yang dibuat DatabaseSeeder. Di production seeder
+    | menolak jalan bila ini kosong atau "password".
+    */
+    'seed_admin_password' => env('SEED_ADMIN_PASSWORD'),
+
+    /*
     |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
