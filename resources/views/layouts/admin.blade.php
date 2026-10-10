@@ -562,6 +562,7 @@
         </a>
 
         {{-- Komponen UI Showcase (Dev only) --}}
+        @if(app()->environment('local'))
         <a href="{{ route('admin.komponen') }}"
            data-label="Komponen UI"
            class="nav-item {{ request()->routeIs('admin.komponen') ? 'active' : '' }} mt-8" style="opacity: 0.6; filter: grayscale(100%);">
@@ -570,6 +571,7 @@
             </svg>
             <span class="sidebar-label">Komponen UI</span>
         </a>
+        @endif
     </nav>
 
     {{-- Bottom: Logout --}}

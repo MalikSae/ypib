@@ -72,7 +72,7 @@
                 
                 @if($program->description)
                     <div class="rich-text-content text-neutral-600" style="font-size:16px;  line-height:1.8; margin-bottom:48px;">
-                        {!! $program->description !!}
+                        {!! \App\Support\HtmlSanitizer::clean($program->description) !!}
                     </div>
                 @else
                     <p style="font-size:16px;  font-style:italic; margin-bottom:48px;" class="text-neutral-400">

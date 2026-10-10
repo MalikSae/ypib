@@ -1,94 +1,105 @@
 # YPIB - Sistem Informasi Penerimaan Mahasiswa Baru (PMB) & Afiliasi
 
-Project ini adalah Sistem Informasi Penerimaan Mahasiswa Baru (PMB) terpadu untuk YPIB (Yayasan Pendidikan Imam Bonjol) Majalengka. Selain melayani pendaftaran mahasiswa, sistem ini dilengkapi dengan program Afiliasi/Referral untuk memberikan reward kepada pihak yang berhasil merekomendasikan pendaftar baru.
+Sistem Informasi PMB terpadu untuk YPIB Majalengka. Selain melayani pendaftaran mahasiswa baru sampai daftar ulang, sistem ini memiliki program Afiliasi/Referral yang memberi reward kepada pihak yang merekomendasikan pendaftar.
 
-## 🚀 Fitur Utama
+## Fitur Utama
 
 ### 1. Portal Publik & Pendaftaran (Calon Mahasiswa)
-- Halaman Landing informatif dengan daftar Fakultas, Program Studi, dan Fasilitas.
-- Formulir pendaftaran mahasiswa baru secara online.
-- Dashboard Calon Mahasiswa untuk melihat status kelulusan, upload bukti pembayaran registrasi awal, dan upload bukti daftar ulang.
+- Landing page: Fakultas, Program Studi (halaman detail `/prodi/{slug}` + galeri), Fasilitas, dan Partner.
+- Formulir pendaftaran online bertahap (wizard 5 langkah, Livewire) dengan jalur umum dan **Jalur Alumni YPIB** (tanpa biaya pendaftaran).
+- Dashboard pendaftar (`/pendaftaran/status`) dengan timeline tahapan, upload bukti bayar, dan data diri lengkap (`/pendaftaran/detail`).
+- Upload dokumen per berkas (`/pendaftaran/dokumen`): Foto, KK, dan Akta Lahir wajib; KTP, transkrip nilai, surat keterangan sehat, dan sertifikat opsional.
+- Tes tulis online (CBT) dengan skor otomatis, lalu informasi jadwal interview.
+- Daftar ulang: upload bukti bayar daftar ulang.
+- Unduhan dokumen: formulir pendaftaran (PDF), Surat Keterangan Lulus (SKL, nomor surat otomatis), dan e-KTM digital.
+- PWA: dapat di-install dan punya halaman offline untuk area publik, admin, dan panitia (`public/sw.js`, `manifest-*.json`).
 
-### 2. Program Afiliasi (Referral System)
-- Pendaftaran mandiri untuk menjadi Mitra Afiliasi (Referrer).
-- Link referral unik untuk setiap mitra (`/ref/{code}`).
-- Pencatatan otomatis (tracking) pengunjung dan pendaftar yang mendaftar melalui tautan afiliasi.
-- Dashboard Afiliasi untuk memantau trafik klik, jumlah konversi (pendaftar), serta mengatur rekening bank tujuan pencairan reward.
+### 2. Program Afiliasi (Referral)
+- Pendaftaran mandiri menjadi mitra afiliasi di `/afiliasi`; admin mengaktifkan/menonaktifkan.
+- Link referral unik `/ref/{code}`; klik dan konversi dicatat otomatis.
+- Dashboard afiliasi: statistik klik, konversi, reward, dan pengaturan rekening bank pencairan.
+- Reward dibuat otomatis saat pembayaran pendaftaran dikonfirmasi (`registration`) dan saat daftar ulang dikonfirmasi (`re_registration`). Nominal diatur per prodi.
+- Pendaftar yang dihapus (soft delete) menyesuaikan komisi secara otomatis.
 
 ### 3. Dashboard Admin & Operator
-- **Manajemen Master Data:** Pengaturan detail Fakultas, Program Studi, Galeri Prodi, Fasilitas Kampus, dan Partner kerja sama.
-- **Manajemen Pendaftar:** Verifikasi validitas pembayaran, persetujuan status pendaftaran, penambahan catatan (notes), serta konfirmasi daftar ulang.
-- **Manajemen Periode PMB:** Konfigurasi gelombang PMB (aktif/non-aktif), batas tanggal, biaya registrasi, serta nominal komisi afiliasi.
-- **Manajemen Pencairan Reward:** 
-  - Verifikasi dan persetujuan payout untuk para affiliate.
-  - Fitur *Mass-Disburse* (Pencairan Massal) untuk kemudahan operasional.
-  - Export laporan pencairan dalam format CSV.
+- **Master data:** Fakultas, Program Studi (kode prodi, jalur reguler/non-reguler, biaya daftar ulang, reward, galeri), Fasilitas, Partner, Bank Soal, akun Panitia.
+- **Pengaturan:** periode PMB (rekening bank, WhatsApp admin) dan konfigurasi email.
+- **Manajemen pendaftar:**
+  - Daftar dengan filter (termasuk program studi), export Excel, dan **rekap per prodi** (+ export).
+  - Konfirmasi bayar, konfirmasi daftar ulang (NIM di-generate di tahap ini), override status, catatan internal, ubah referral.
+  - Review dokumen per berkas atau massal, upload dokumen/bukti manual, reset tes tulis, ubah data pendaftar.
+  - Hapus (soft delete), halaman sampah, dan restore.
+- **Afiliasi:** daftar mitra, detail, toggle aktif, ubah rekening, export.
+- **Reward:** approve, disburse per reward / per mitra / massal, export CSV.
+- Reset password user.
 
-## 🛠️ Tech Stack
+### 4. Panitia PMB
+- Dashboard mobile-first di `/panitia` dengan pemindai QR pendaftar.
+- Menandai hasil interview (diterima/ditolak); status lanjut ke tahap daftar ulang.
 
-Sistem ini dikembangkan dengan kerangka kerja modern **TALL Stack**:
-- **Backend:** [Laravel 12.x](https://laravel.com)
-- **Frontend Logic:** [Livewire 4.x](https://livewire.laravel.com) & [Alpine.js](https://alpinejs.dev)
-- **Styling:** [Tailwind CSS 3.4](https://tailwindcss.com) (dengan plugin Forms & Typography)
-- **Bundler:** [Vite](https://vitejs.dev/)
-- **Database ORM:** Eloquent ORM
+## Alur Status Pendaftaran
 
-## 📦 Kebutuhan Sistem Dasar
-- PHP >= 8.2
-- Composer
-- Node.js & NPM
-- Database Server (MySQL/MariaDB) atau ekstensial SQLite
+```
+menunggu_pembayaran -> menunggu_konfirmasi -> terdaftar
+  -> (lengkapi data diri) -> upload dokumen wajib, review admin per berkas
+  -> menunggu_tes_tulis -> menunggu_interview
+  -> diterima / ditolak (Panitia scan QR)
+  -> menunggu_konfirmasi_daftar_ulang -> daftar_ulang_selesai
+```
 
-## ⚙️ Panduan Instalasi (Development)
+Label dan warna status dipusatkan di `Registration::STATUS_LABELS`.
 
-1. **Persiapkan Repositori**
-   Pastikan Anda sudah berada di root direktori project.
+## Role
 
-2. **Install Dependensi Dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
+| Role | Akses |
+|---|---|
+| `admin`, `operator` | `/admin/*` |
+| `panitia` | `/panitia/*` |
+| `referrer` / `is_referrer` | `/afiliasi/dashboard` |
+| `mahasiswa` (default) | `/pendaftaran/*` |
 
-3. **Konfigurasi Environment**
-   Ganti nama `.env.example` menjadi `.env`, lalu generate App Key:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-   *Jangan lupa atur konfigurasi `DB_*` di dalam file `.env` sesuai database Anda.*
+## Tech Stack
 
-4. **Jalankan Migrasi & Seeder**
-   Membangun struktur database sekaligus mengisi data fundamental (Fakultas, Prodi, Periode PMB, dll).
-   ```bash
-   php artisan migrate:fresh --seed
-   ```
+- **Backend:** Laravel 12, PHP >= 8.2 (target produksi 8.3)
+- **Frontend:** Livewire 4, Alpine.js 3, Tailwind CSS 3.4, Vite
+- **Database:** MySQL/MariaDB (SQLite bawaan `.env.example`)
+- **Library:** maatwebsite/excel (export), barryvdh/laravel-dompdf (PDF), simplesoftwareio/simple-qrcode & endroid/qr-code (QR), intervention/image v4 (e-KTM), symfony/resend-mailer
+- **Belum aktif:** Xendit (pembayaran online), Fonnte/Wablas (WhatsApp)
+- **Hosting:** Hostinger shared hosting + Cloudflare DNS
 
-5. **Build Aset Frontend**
-   ```bash
-   # Mode kompilasi satu kali:
-   npm run build
-   
-   # Atau mode watch untuk development:
-   npm run dev
-   ```
+## Instalasi (Development)
 
-6. **Jalankan Server Lokal**
-   ```bash
-   php artisan serve
-   ```
-   Akses project melalui URL lokal, umumnya `http://localhost:8000`.
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+# atur DB_* di .env
+php artisan migrate:fresh --seed
+php artisan storage:link
+npm run dev        # atau: npm run build
+php artisan serve
+```
 
-## 🔐 Kredensial Pengguna Akses (Seeder)
+Akses di `http://localhost:8000`.
 
-Setelah proses seed database selesai, Anda dapat mencoba login pada rute `/login` menggunakan akun berikut:
+## Akun Seeder
 
-**Super Administrator:**
-- **Email:** `admin@ypib.ac.id`
-- **Password:** `password`
+Seeder membuat akun admin dan operator (`admin@ypib.ac.id`, `operator@ypib.ac.id`). Password awal ada di `database/seeders/DatabaseSeeder.php` — **ganti sebelum dipakai di produksi**.
 
-**Operator PMB:**
-- **Email:** `operator@ypib.ac.id`
-- **Password:** `password`
+## Dokumentasi Lain
 
-*(Gunakan role operator untuk melihat batasan fitur yang tidak memerlukan otorisasi manajerial penuh).*
+- `AGENTS.md` — standar kerja dan sistem desain untuk AI coding agent.
+- `UI_GUIDELINES.md` — komponen Blade dan aturan UI.
+- `DEV_REPORT.md` — laporan kondisi codebase (skema, fitur, alur, catatan penting).
+
+## Catatan Deploy: Berkas Privat
+
+Berkas pendaftar (bukti bayar, kartu alumni, bukti daftar ulang, dokumen) kini disimpan privat di `storage/app/private` dan ditayangkan lewat `/berkas/*` (wajib login). Setelah deploy, pindahkan berkas lama dari `public/storage` sekali saja:
+
+```bash
+php artisan files:privatize --dry-run   # lihat daftar yang akan dipindah
+php artisan files:privatize
+```
+
+Frontend di-build ulang (`npm run build`); sertakan `public/build` saat deploy.
