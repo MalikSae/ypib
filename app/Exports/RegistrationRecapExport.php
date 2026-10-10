@@ -6,6 +6,7 @@ use App\Models\Program;
 use App\Models\Registration;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -14,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class RegistrationRecapExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class RegistrationRecapExport extends SafeValueBinder implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithCustomValueBinder
 {
     protected Collection $rows;
 

@@ -4,10 +4,11 @@ namespace App\Exports;
 
 use App\Models\Registration;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class RegistrationExport implements FromCollection, WithHeadings, WithMapping
+class RegistrationExport extends SafeValueBinder implements FromCollection, WithHeadings, WithMapping, WithCustomValueBinder
 {
     protected $prodiId;
     protected $status;

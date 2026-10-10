@@ -4,10 +4,11 @@ namespace App\Exports;
 
 use App\Models\Referrer;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ReferrerExport implements FromCollection, WithHeadings, WithMapping
+class ReferrerExport extends SafeValueBinder implements FromCollection, WithHeadings, WithMapping, WithCustomValueBinder
 {
     protected $periodId;
     protected $status;
