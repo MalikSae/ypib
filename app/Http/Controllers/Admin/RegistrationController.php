@@ -378,6 +378,14 @@ class RegistrationController extends Controller
             return redirect()->back()->with('error', 'Status pendaftar belum memenuhi syarat untuk daftar ulang.');
         }
 
+        // NIM dibentuk dari Kode Prodi. Tanpa itu generateNim() mengembalikan null dan
+        // pendaftar akan "selesai" tanpa NIM (e-KTM tidak bisa diunduh), jadi tahan dulu.
+        if (empty($registration->nim) && empty($registration->firstChoiceProgram?->kode_prodi)) {
+            return redirect()->back()->with('error',
+                'NIM belum bisa dibuat: Kode Prodi untuk "' . ($registration->firstChoiceProgram?->name ?? 'prodi pilihan') . '" belum diisi. '
+                . 'Isi Kode Prodi di menu Kelola Program Studi, lalu konfirmasi daftar ulang lagi.');
+        }
+
         if (!$registration->re_registration_payment_proof) {
             $request->validate([
                 'bukti_daftar_ulang' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',

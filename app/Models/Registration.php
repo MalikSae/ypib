@@ -375,9 +375,12 @@ class Registration extends Model
         return $prefix . $sequence;
     }
 
-    public function generateLetterNumber(): string
+    /**
+     * @param  \Illuminate\Support\Carbon|null  $at  Tanggal acuan bulan/tahun nomor (default: sekarang).
+     */
+    public function generateLetterNumber(?\Illuminate\Support\Carbon $at = null): string
     {
-        $now = now();
+        $now = $at ?? now();
         $romanMonths = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         $roman = $romanMonths[(int) $now->format('n')];
         $year = $now->format('Y');

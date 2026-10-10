@@ -361,9 +361,14 @@ class RegistrationController extends Controller
             ->latest()
             ->firstOrFail();
 
-        $qrWriter = new \Endroid\QrCode\Writer\PngWriter();
-        $qrCode = \Endroid\QrCode\QrCode::create($registration->registration_number)->setSize(120)->setMargin(4);
-        $qrCodeBase64 = base64_encode($qrWriter->write($qrCode)->getString());
+        // Nomor pendaftaran baru diberikan saat pembayaran dikonfirmasi. Sebelum itu formulir
+        // tetap bisa diunduh tanpa QR (view sudah menangani $qrCodeBase64 yang null).
+        $qrCodeBase64 = null;
+        if (!empty($registration->registration_number)) {
+            $qrWriter = new \Endroid\QrCode\Writer\PngWriter();
+            $qrCode = \Endroid\QrCode\QrCode::create($registration->registration_number)->setSize(120)->setMargin(4);
+            $qrCodeBase64 = base64_encode($qrWriter->write($qrCode)->getString());
+        }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('registration.pdf-formulir', compact('registration', 'qrCodeBase64'));
         $fileName = 'Formulir-Pendaftaran-' . \Illuminate\Support\Str::slug($registration->full_name) . '.pdf';
