@@ -39,9 +39,15 @@ return new class extends Migration
     public function down(): void
     {
         // 1. Add columns back to pmb_periods
+        // Tanpa ->after('registration_fee'): saat rollback berurutan, kolom itu baru
+        // dikembalikan oleh migrasi sebelumnya (drop_registration_fee) setelah ini.
         Schema::table('pmb_periods', function (Blueprint $table) {
-            $table->bigInteger('referral_reward_amount')->default(0)->after('registration_fee');
-            $table->bigInteger('re_registration_reward_amount')->default(0)->after('referral_reward_amount');
+            if (!Schema::hasColumn('pmb_periods', 'referral_reward_amount')) {
+                $table->bigInteger('referral_reward_amount')->default(0);
+            }
+            if (!Schema::hasColumn('pmb_periods', 're_registration_reward_amount')) {
+                $table->bigInteger('re_registration_reward_amount')->default(0);
+            }
         });
 
         // 2. Try to copy back data from first program (lossy operation)

@@ -14,11 +14,21 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Kredensial default hanya untuk lingkungan non-produksi. Di production seeder
+        // menolak jalan kecuali SEED_ADMIN_PASSWORD diisi dengan nilai kuat.
+        $configured = (string) config('app.seed_admin_password');
+        if (app()->isProduction() && ($configured === '' || $configured === 'password')) {
+            $this->command?->error('Seeder dihentikan: di production isi SEED_ADMIN_PASSWORD (bukan "password") di .env lalu jalankan config:clear.');
+
+            return;
+        }
+        $password = $configured !== '' ? $configured : 'password';
+
         // ── Admin ──────────────────────────────────────────────────────────
         User::create([
             'name'     => 'Administrator',
             'email'    => 'admin@ypib.ac.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'role'     => 'admin',
             'phone'    => '08123456789',
         ]);
@@ -27,7 +37,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name'     => 'Operator PMB',
             'email'    => 'operator@ypib.ac.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'role'     => 'operator',
             'phone'    => '08129999999',
         ]);
@@ -151,11 +161,14 @@ class DatabaseSeeder extends Seeder
         }
 
         // ── Periode PMB Aktif ──────────────────────────────────────────────
+        // Tanggal relatif terhadap hari ini: periode hasil seed tidak boleh langsung
+        // berstatus tutup (PmbPeriod::isOpen() menegakkan open_date/close_date).
+        $year = now()->year;
         PmbPeriod::create([
-            'name'                  => 'PMB 2025/2026',
-            'year'                  => 2025,
-            'open_date'             => '2025-06-01',
-            'close_date'            => '2025-09-30',
+            'name'                  => 'PMB ' . $year . '/' . ($year + 1),
+            'year'                  => $year,
+            'open_date'             => now()->startOfMonth()->toDateString(),
+            'close_date'            => now()->addMonths(6)->endOfMonth()->toDateString(),
             'is_active'             => true,
         ]);
 
