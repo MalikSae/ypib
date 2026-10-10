@@ -69,7 +69,7 @@ class DashboardController extends Controller
         \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request, $catatanNote) {
             $registration->status = $request->hasil;
 
-            if ($request->hasil === 'diterima') {
+            if ($request->hasil === 'diterima' && empty($registration->letter_number)) {
                 $registration->letter_number = $registration->generateLetterNumber();
             }
             
