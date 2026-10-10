@@ -14,14 +14,12 @@ use Illuminate\Support\Facades\Route;
 // ── Public Landing ─────────────────────────────────────────────────────────
 Route::get('/', [LandingController::class, 'preview'])->name('landing');
 
-// ── Temporary Brand Visualization ──────────────────────────────────────────
-Route::get('/brand', function () {
-    return view('brand');
-});
 Route::get('/prodi/{slug}', [LandingController::class, 'prodi'])->name('prodi.show');
 
 // ── Referral Tracking (public, tanpa auth) ──────────────────────────────────
-Route::get('/ref/{code}', [ReferralController::class, 'track'])->name('referral.track');
+Route::get('/ref/{code}', [ReferralController::class, 'track'])
+    ->middleware('throttle:60,1')
+    ->name('referral.track');
 
 // ── Breeze Dashboard (keep for compatibility) ───────────────────────────────
 Route::get('/dashboard', function () {
@@ -68,10 +66,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/pendaftaran/tes-tulis/selesai', [RegistrationController::class, 'submitExam'])->name('registration.exam.submit');
 });
 
+// ── Berkas Pendaftar (terotorisasi) ────────────────────────────────────────
+Route::middleware('auth')->prefix('berkas')->name('files.')->group(function () {
+    Route::get('/registrasi/{id}/{field}', [\App\Http\Controllers\FileController::class, 'registration'])
+        ->whereNumber('id')->name('registration');
+    Route::get('/dokumen/{id}', [\App\Http\Controllers\FileController::class, 'document'])
+        ->whereNumber('id')->name('document');
+});
+
 // ── Referrer Area (Afiliasi) ────────────────────────────────────────────────
 Route::prefix('afiliasi')->name('referrer.')->group(function () {
     Route::get('/', [ReferrerController::class, 'index'])->name('index');
-    Route::post('/', [ReferrerController::class, 'register'])->name('register');
+    Route::post('/', [ReferrerController::class, 'register'])
+        ->middleware('throttle:public-signup')
+        ->name('register');
 
     Route::middleware('auth')->group(function () {
         Route::post('/aktifkan', [ReferrerController::class, 'store'])->name('store');
@@ -111,10 +119,10 @@ Route::prefix('admin')
             Route::get('/export', [AdminRegistrationController::class, 'export'])->name('export');
             Route::get('/rekap', [AdminRegistrationController::class, 'recap'])->name('recap');
             Route::get('/rekap/export', [AdminRegistrationController::class, 'exportRecap'])->name('recap.export');
-            Route::get('/{registration}', [AdminRegistrationController::class, 'show'])->name('show');
+            Route::get('/sampah', [AdminRegistrationController::class, 'trash'])->name('trash');
+            Route::get('/{registration}', [AdminRegistrationController::class, 'show'])->whereNumber('registration')->name('show');
             Route::post('/{id}/update-data', [AdminRegistrationController::class, 'updateData'])->name('update-data');
             Route::post('/{id}/reset-tes-tulis', [AdminRegistrationController::class, 'resetExam'])->name('reset-exam');
-            Route::get('/sampah', [AdminRegistrationController::class, 'trash'])->name('trash');
             Route::delete('/{id}', [AdminRegistrationController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/restore', [AdminRegistrationController::class, 'restore'])->name('restore');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
