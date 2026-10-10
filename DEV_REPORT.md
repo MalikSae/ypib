@@ -1,6 +1,6 @@
 # Project Condition Report - PMB YPIB
 
-Laporan kondisi codebase berdasarkan pemindaian file konfigurasi, struktur direktori, skema database (migration), route, dan controller. Terakhir diperbarui: 2026-10-10 (commit `a981cd8`).
+Laporan kondisi codebase berdasarkan pemindaian file konfigurasi, struktur direktori, skema database (migration), route, dan controller. Terakhir diperbarui: 2026-10-10 (commit `09998bc`; lihat bagian 10 untuk daftar periksa deploy).
 
 ## 1. Framework & Versi
 - **Framework:** Laravel Framework `^12.0`
@@ -156,3 +156,62 @@ Sistem otorisasi menggunakan Guard standar (`web`), dilengkapi dengan role-based
 23. **Seeder, NIM, Rollback:** `DatabaseSeeder` menolak jalan di production kecuali `SEED_ADMIN_PASSWORD` diisi (bukan kosong/"password"); periode seed memakai tanggal relatif hari ini. Konfirmasi daftar ulang ditolak bila prodi belum punya `kode_prodi` (NIM tidak boleh null). `migrate:rollback` penuh sudah diuji sampai kosong dan `migrate` ulang bersih; jaga `down()` agar tidak bergantung pada kolom yang baru dikembalikan migrasi sebelumnya.
 24. **Backfill & Recount (command, dry-run default):** `php artisan registrations:backfill-numbers [--apply --acted-by=ID] [--letter-date=YYYY-MM-DD]` mengisi NIM (status `daftar_ulang_selesai`, butuh `kode_prodi`) dan nomor SKL pendaftar lama; `php artisan referrers:recount [--clicks] [--apply --acted-by=ID]` menghitung ulang `total_conversions` (dan klik) dari `rewards`/`referral_clicks`. Tanpa `--apply` hanya simulasi (transaksi di-rollback). Perubahan tercatat di `payment_logs` (`numbers_backfilled`) dan `referrer_logs` (`counter_recounted`). Cadangkan DB sebelum `--apply`.
 25. **Formulir PDF:** `RegistrationController::downloadPdf` membuat QR hanya bila `registration_number` ada (nomor baru diberikan saat pembayaran dikonfirmasi); sebelum itu formulir tetap bisa diunduh tanpa QR.
+
+## 10. Daftar Periksa Deploy
+
+Hasil QA berlapis (kode, data nyata, UI, dependensi, konfigurasi). Centang berurutan; langkah bertanda **[DATA]** mengubah data produksi dan wajib didahului cadangan.
+
+### A. Sebelum deploy
+- [ ] **Cadangkan** database dan folder berkas: `public/storage/` (berkas lama) dan `storage/app/private/`.
+- [ ] **Perbarui tanggal periode aktif** di `/admin/pengaturan`. Sejak `PmbPeriod::isOpen()` ditegakkan, periode dengan `close_date` lewat (di DB dev: `2026-09-30`) menolak pendaftaran baru. Nama periode dan tanggal harus konsisten.
+- [ ] **Isi `kode_prodi`** semua prodi aktif di `/admin/programs`. Saat QA 5 dari 9 prodi masih kosong; tanpa kode, konfirmasi daftar ulang ditolak (NIM tidak bisa dibuat).
+- [ ] **Tinjau `quota` prodi.** Kuota > 0 kini ditegakkan per periode (`0` = tanpa batas). Pendaftar `menunggu_pembayaran` ikut menghitung kursi.
+- [ ] Siapkan `.env` produksi:
+
+| Kunci | Nilai | Catatan |
+|---|---|---|
+| `APP_ENV` / `APP_DEBUG` | `production` / `false` | HSTS dan guard seeder hanya aktif di `production` |
+| `APP_URL` | URL HTTPS situs | |
+| `SESSION_SECURE_COOKIE` | `true` | cookie sesi hanya lewat HTTPS |
+| `TRUSTED_PROXIES` | kosong (rentang Cloudflare + jaringan privat) atau daftar IP/CIDR proxy hosting | lihat verifikasi IP di bagian C |
+| `SEED_ADMIN_PASSWORD` | hanya bila menjalankan `db:seed` | seeder menolak jalan di production tanpa nilai kuat |
+| `MAIL_MAILER` / Resend API key | isi key di `/admin/pengaturan-email` | bawaan `.env.example` adalah `log`: email reset password tidak terkirim |
+
+  `APP_TIMEZONE` tidak perlu diisi (default `Asia/Jakarta`); `app.locale` dikunci `id`.
+- [ ] Pastikan folder ini **dapat ditulis**: `storage/framework/cache/htmlpurifier`, `storage/app/private`, `bootstrap/cache`.
+
+### B. Deploy
+- [ ] `composer install --no-dev --optimize-autoloader` (`composer.lock` berubah: 34 advisory ditutup; `composer audit` bersih).
+- [ ] Aset frontend: sertakan `public/build` hasil `npm run build` (tidak ada build di server).
+- [ ] `php artisan migrate --force` (QA tidak menambah migrasi baru; hanya `down()` migrasi `2026_05_24_080000` yang diperbaiki).
+- [ ] `php artisan config:cache && php artisan route:cache && php artisan view:cache` (sudah diuji berhasil).
+- [ ] **[DATA]** `php artisan files:privatize --dry-run`, tinjau daftar, lalu `php artisan files:privatize`. Berkas lama tetap terbaca lewat fallback sampai dipindah.
+
+### C. Verifikasi setelah deploy
+- [ ] **IP asli pengunjung**: `request()->ip()` di server harus IP pengunjung, bukan IP proxy. Bila bukan, isi `TRUSTED_PROXIES`. Gejala bila salah: semua pengunjung berbagi satu batas laju (429 massal pada `/register`, `/forgot-password`, login).
+- [ ] Header respons: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, dan `Strict-Transport-Security` (hanya HTTPS).
+- [ ] Alur utama: daftar akun → wizard → upload bukti → admin konfirmasi → dokumen → tes → interview (panitia, kamera pemindai QR berfungsi) → daftar ulang.
+- [ ] Unduhan: formulir PDF (juga sebelum nomor pendaftaran ada), SKL, e-KTM, dan tautan `/berkas/*` (pemilik/admin/operator/panitia sesuai aturan).
+- [ ] Tidak bisa mengakses `/storage/bukti-bayar/...`, `/storage/dokumen-pendaftaran/...` secara langsung setelah `files:privatize`.
+- [ ] `/brand` 404 dan `/admin/komponen` 404 (hanya di `local`).
+- [ ] Email reset password terkirim (setelah Resend API key diisi).
+
+### D. Perapian data (setelah verifikasi, semuanya **[DATA]**)
+Semua command berjalan sebagai simulasi tanpa `--apply`; hasil simulasi sama persis dengan yang akan ditulis.
+- [ ] `php artisan registrations:backfill-numbers --letter-date=YYYY-MM-DD` → tinjau → ulangi dengan `--apply --acted-by=<ID admin>`. Di DB dev: 3 pendaftar lama tanpa NIM/SKL. Tentukan `--letter-date` agar bulan/tahun SKL mencerminkan tanggal keputusan, bukan hari ini.
+- [ ] `php artisan referrers:recount --clicks` → tinjau → `--apply --acted-by=<ID admin>`. Di DB dev: 3 dari 5 afiliator menyimpang (termasuk `TESTX` yang kemungkinan data uji).
+- [ ] Hapus atau nonaktifkan akun/afiliator uji, dan ganti password default akun seed bila ada.
+
+### E. Keputusan terbuka (belum dikerjakan)
+- Geser timestamp lama +7 jam: data sebelum perubahan zona waktu berupa jam UTC (baris baru sudah WIB).
+- Kedaluwarsa pendaftar `menunggu_pembayaran` agar tidak menahan kuota.
+- NIK unik antar pendaftar (saat ini hanya satu registrasi per akun per periode).
+- `public/.htaccess` meng-cache gambar `public/images` selama 1 tahun tanpa versi nama berkas.
+- Content-Security-Policy penuh (Alpine/Livewire dan inline style perlu dirancang terpisah).
+- Batas laju `public-signup` (10/menit dan 60/jam per IP) dapat disesuaikan di `AppServiceProvider`.
+
+### F. Rollback
+- Kode: kembalikan commit sebelumnya, lalu `php artisan config:clear route:clear view:clear`.
+- Berkas: `files:privatize` memindahkan (bukan menyalin) berkas; pemulihan memerlukan cadangan folder `public/storage/`.
+- Data: `backfill-numbers`/`recount` tercatat di `payment_logs` (`numbers_backfilled`) dan `referrer_logs` (`counter_recounted`); pemulihan nilai lama memerlukan cadangan DB.
+- `migrate:rollback` penuh sudah diuji sampai kosong dan `migrate` ulang bersih.
