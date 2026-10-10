@@ -767,10 +767,38 @@ class RegistrationController extends Controller
 
     public function export(Request $request)
     {
-        $prodiId = $request->query('prodi');
-        $status   = $request->query('status');
-        $filename = 'Data_Pendaftar_' . date('Ymd_His') . '.xlsx';
-        return Excel::download(new \App\Exports\RegistrationExport($prodiId, $status), $filename);
+        $request->validate(['format' => 'nullable|in:xlsx,csv']);
+
+        $export = new \App\Exports\RegistrationExport($request->query('prodi'), $request->query('status'));
+        $stamp = date('Ymd_His');
+
+        if ($request->query('format') === 'csv') {
+            return response()->streamDownload(function () use ($export) {
+                $out = fopen('php://output', 'w');
+                fwrite($out, "\xEF\xBB\xBF"); // BOM UTF-8 agar Excel membaca karakter dengan benar
+                fputcsv($out, $export->headings());
+
+                // chunk + cursor: memori konstan berapa pun jumlah baris
+                $export->query()->chunkByIdDesc(500, function ($chunk) use ($out, $export) {
+                    foreach ($chunk as $registration) {
+                        fputcsv($out, $export->csvRow($registration));
+                    }
+                });
+
+                fclose($out);
+            }, "Data_Pendaftar_{$stamp}.csv", [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
+
+        $total = $export->query()->count();
+        if ($total > \App\Exports\RegistrationExport::XLSX_MAX_ROWS) {
+            return redirect()->back()->with('error',
+                "Data terlalu banyak untuk Excel ({$total} baris; batas " . \App\Exports\RegistrationExport::XLSX_MAX_ROWS . '). '
+                . 'Gunakan tombol Export CSV, atau persempit filter program studi/status.');
+        }
+
+        return Excel::download($export, "Data_Pendaftar_{$stamp}.xlsx");
     }
 
     public function recap()

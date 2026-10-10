@@ -10,6 +10,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class RegistrationExport extends SafeValueBinder implements FromCollection, WithHeadings, WithMapping, WithCustomValueBinder
 {
+    /**
+     * XLSX menyimpan seluruh sel di memori (PhpSpreadsheet): ±25 MB per 1.000 baris.
+     * Di atas batas ini ekspor harus memakai CSV streaming.
+     */
+    public const XLSX_MAX_ROWS = 5000;
+
     protected $prodiId;
     protected $status;
 
@@ -19,10 +25,11 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
         $this->status = $status;
     }
 
-    public function collection()
+    /** Query terfilter tanpa urutan; dipakai collection() dan ekspor CSV streaming. */
+    public function query()
     {
         $query = Registration::with(['user', 'referrer.user', 'firstChoiceProgram', 'secondChoiceProgram']);
-        
+
         if ($this->prodiId) {
             $query->where('first_choice_program_id', $this->prodiId);
         }
@@ -30,7 +37,31 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
             $query->where('status', $this->status);
         }
 
-        return $query->latest()->get();
+        return $query;
+    }
+
+    public function collection()
+    {
+        return $this->query()->latest()->get();
+    }
+
+    /**
+     * Baris CSV: nilai teks dinetralkan dari injeksi formula, dan deretan digit yang
+     * akan rusak di Excel (angka nol di depan hilang, >= 15 digit dibulatkan) dibungkus
+     * ="..." agar tampil sebagai teks. Digit murni, jadi aman dari injeksi.
+     */
+    public function csvRow($registration): array
+    {
+        return array_map(function ($value) {
+            $value = \App\Support\CsvSanitizer::cell($value);
+
+            if (is_string($value) && $value !== '' && ctype_digit($value)
+                && (($value[0] === '0' && strlen($value) > 1) || strlen($value) >= 15)) {
+                return '="' . $value . '"';
+            }
+
+            return $value;
+        }, $this->map($registration));
     }
 
     public function headings(): array
