@@ -103,3 +103,7 @@ php artisan files:privatize
 ```
 
 Frontend di-build ulang (`npm run build`); sertakan `public/build` saat deploy.
+
+## Menjalankan Test
+
+Buat database test sekali (`CREATE DATABASE ypib_test CHARACTER SET utf8mb4;`), lalu `php artisan test`. Test menolak berjalan di database yang namanya tidak berakhiran `_test`. Lihat `DEV_REPORT.md` bagian 11.

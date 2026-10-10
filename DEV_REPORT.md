@@ -209,9 +209,30 @@ Semua command berjalan sebagai simulasi tanpa `--apply`; hasil simulasi sama per
 - `public/.htaccess` meng-cache gambar `public/images` selama 1 tahun tanpa versi nama berkas.
 - Content-Security-Policy penuh (Alpine/Livewire dan inline style perlu dirancang terpisah).
 - Batas laju `public-signup` (10/menit dan 60/jam per IP) dapat disesuaikan di `AppServiceProvider`.
+- Batas ekspor XLSX pendaftar `RegistrationExport::XLSX_MAX_ROWS` = 5.000 baris (XLSX ±25 MB memori per 1.000 baris). Di atas itu admin diarahkan ke tombol **Export CSV** (streaming, memori konstan). Sesuaikan angka ini dengan `memory_limit` dan `max_execution_time` hosting; di hosting bersama 256 MB, XLSX mulai berisiko di kisaran 8.000–9.000 baris.
 
 ### F. Rollback
 - Kode: kembalikan commit sebelumnya, lalu `php artisan config:clear route:clear view:clear`.
 - Berkas: `files:privatize` memindahkan (bukan menyalin) berkas; pemulihan memerlukan cadangan folder `public/storage/`.
 - Data: `backfill-numbers`/`recount` tercatat di `payment_logs` (`numbers_backfilled`) dan `referrer_logs` (`counter_recounted`); pemulihan nilai lama memerlukan cadangan DB.
 - `migrate:rollback` penuh sudah diuji sampai kosong dan `migrate` ulang bersih.
+26. **Ekspor Pendaftar:** `GET /admin/pendaftar/export` mendukung `format=xlsx|csv` (+ filter `prodi`, `status`). XLSX menyimpan seluruh sel di memori (±25 MB per 1.000 baris), sehingga ditolak di atas `RegistrationExport::XLSX_MAX_ROWS` (5.000) dengan pesan mengarahkan ke CSV. CSV di-stream (`chunkByIdDesc(500)` + `fputcsv`, BOM UTF-8, memori konstan: 20.000 baris ±9 detik) dan memakai `RegistrationExport::csvRow()` yang menetralkan injeksi formula serta membungkus digit rawan Excel (nol di depan / >= 15 digit) sebagai `="..."`.
+
+## 11. Pengujian Otomatis
+
+Suite berada di `tests/Feature/Pmb/` (88 test, ±960 assertion bersama test bawaan Breeze; ±75 detik) dengan pembangun data di `tests/Concerns/BuildsPmbData.php`.
+
+| Berkas | Cakupan |
+|---|---|
+| `AccessControlTest` | matriks role, endpoint panitia, reset password staf, akses berkas privat, ekspor, halaman dev |
+| `StudentFlowTest` | upload bukti/dokumen + gerbang status, kunci data, ujian, keputusan panitia, PDF/SKL/e-KTM |
+| `AdminActionsTest` | konfirmasi bayar, daftar ulang + NIM, reset tes, afiliator, catatan internal, review dokumen, hapus/pulihkan |
+| `PublicRegistrationFormTest` | wizard Livewire: validasi, kuota, periode, referrer |
+| `AffiliateAndRewardTest` | pendaftaran afiliasi, pelacakan klik, pencairan, CSV reward |
+| `NumberingAndBackfillTest` | nomor SKL/NIM, command `registrations:backfill-numbers` dan `referrers:recount` |
+| `ExportsAndFilesTest` | ekspor XLSX/CSV, berkas privat, `files:privatize`, unggah gambar |
+| `PlatformSecurityAndConfigTest` | header, pembatas laju, IP proxy, zona waktu/bahasa, seeder, sanitasi HTML, master data, rahasia, hapus akun |
+
+**Wajib sebelum menjalankan:** buat database khusus test sekali: `CREATE DATABASE ypib_test CHARACTER SET utf8mb4;` (nama diatur di `phpunit.xml`). `tests/TestCase.php` menolak berjalan bila nama database tidak berakhiran `_test`, karena `RefreshDatabase` menghapus seluruh tabel. Jalankan dengan `php artisan test`.
+
+Catatan: test memakai MySQL (bukan SQLite) karena beberapa migrasi dan query memakai fitur MySQL.
