@@ -323,6 +323,21 @@ class Registration extends Model
         return $stages;
     }
 
+    /**
+     * Data diri/prodi dikunci setelah keputusan diambil (diterima/ditolak),
+     * sepanjang tahap daftar ulang, atau bila NIM sudah terbit.
+     */
+    public function isDetailLocked(): bool
+    {
+        return !empty($this->nim)
+            || in_array($this->status, [
+                'diterima',
+                'ditolak',
+                'menunggu_konfirmasi_daftar_ulang',
+                'daftar_ulang_selesai',
+            ], true);
+    }
+
     public function isFormComplete(): bool
     {
         return !empty($this->nisn)
@@ -367,10 +382,16 @@ class Registration extends Model
         $roman = $romanMonths[(int) $now->format('n')];
         $year = $now->format('Y');
 
-        $lastSequence = self::whereNotNull('letter_number')
+        // MAX(urutan) termasuk data soft-delete: count() bisa menerbitkan nomor ganda
+        // setelah pendaftar dihapus. Wajib dipanggil di dalam DB::transaction
+        // agar lockForUpdate efektif.
+        $maxSequence = self::withTrashed()
+            ->whereNotNull('letter_number')
             ->where('letter_number', 'like', '%/' . $year)
-            ->count();
-        $sequence = str_pad($lastSequence + 1, 3, '0', STR_PAD_LEFT);
+            ->lockForUpdate()
+            ->selectRaw("MAX(CAST(SUBSTRING_INDEX(letter_number, '/', 1) AS UNSIGNED)) as max_seq")
+            ->value('max_seq');
+        $sequence = str_pad(((int) $maxSequence) + 1, 3, '0', STR_PAD_LEFT);
 
         return "{$sequence}/UNIV-YPIB/SKL/{$roman}/{$year}";
     }

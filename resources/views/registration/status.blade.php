@@ -160,7 +160,7 @@
                                                 <div class="font-semibold text-green-700">Bukti sudah diunggah</div>
                                                 <div class="text-[11px] text-green-600">{{ basename($registration->payment_proof) }}</div>
                                             </div>
-                                            <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank" class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
+                                            <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank" class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
                                         </div>
                                     @endif
                                     <form method="POST" action="{{ route('registration.upload-proof') }}" enctype="multipart/form-data">
@@ -204,7 +204,7 @@
                                                 <div class="font-semibold text-green-700">Kartu Alumni sudah diunggah</div>
                                                 <div class="text-[11px] text-green-600">{{ basename($registration->alumni_card_proof) }}</div>
                                             </div>
-                                            <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank" class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
+                                            <a href="{{ route('files.registration', [$registration->id, 'alumni_card_proof']) }}" target="_blank" class="ml-auto text-xs text-green-700 underline hover:text-green-800">Lihat</a>
                                         </div>
                                     @endif
                                     <form method="POST" action="{{ route('registration.upload-alumni-card') }}" enctype="multipart/form-data">
@@ -229,11 +229,11 @@
                     @elseif($stage['state'] === 'completed')
                         @if($registration->payment_proof)
                             <div class="mt-1">
-                                <a href="{{ Storage::url($registration->payment_proof) }}" target="_blank" class="text-xs text-primary-700 hover:underline">Lihat bukti bayar</a>
+                                <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank" class="text-xs text-primary-700 hover:underline">Lihat bukti bayar</a>
                             </div>
                         @elseif($registration->alumni_card_proof)
                             <div class="mt-1">
-                                <a href="{{ Storage::url($registration->alumni_card_proof) }}" target="_blank" class="text-xs text-primary-700 hover:underline">Lihat kartu alumni</a>
+                                <a href="{{ route('files.registration', [$registration->id, 'alumni_card_proof']) }}" target="_blank" class="text-xs text-primary-700 hover:underline">Lihat kartu alumni</a>
                             </div>
                         @endif
 

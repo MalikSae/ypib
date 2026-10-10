@@ -9,6 +9,7 @@ use App\Models\Referrer;
 use App\Models\Registration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class RegistrationForm extends Component
@@ -52,16 +53,20 @@ class RegistrationForm extends Component
     public string $mother_occupation = '';
 
     // Referral
+    // Locked: tidak boleh diubah dari sisi klien. Nilai final di-resolve ulang
+    // di server pada submit() lewat resolveReferrer().
+    #[Locked]
     public ?int $referrer_id = null;
+    #[Locked]
     public string $referrer_code = '';
 
-    protected function rulesForStep(): array
+    protected function rulesForStep(?int $step = null): array
     {
-        return match ($this->step) {
+        return match ($step ?? $this->step) {
             1 => [
                 'full_name'   => 'required|string|max:255',
                 'nisn'        => 'required|string|digits:10',
-                'nik'         => 'required|string|size:16',
+                'nik'         => 'required|digits:16',
                 'birth_place' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::in($this->getValidCities())],
                 'birth_date'  => 'required|date',
                 'gender'      => 'required|in:male,female',
@@ -70,7 +75,7 @@ class RegistrationForm extends Component
                 'phone'       => 'required|string|max:20',
             ],
             2 => [
-                'first_choice_program_id' => 'required|exists:programs,id',
+                'first_choice_program_id' => ['required', \Illuminate\Validation\Rule::exists('programs', 'id')->where('is_active', true)],
                 'admission_path'          => 'required|in:umum,prestasi,tahfidz',
             ],
             3 => [
@@ -78,6 +83,7 @@ class RegistrationForm extends Component
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
                 'certificate_number' => 'required|string|max:100',
+                'school_grade'       => 'nullable|numeric|between:0,100',
             ],
             4 => [
                 'father_name'       => 'required|string|max:255',
@@ -95,6 +101,9 @@ class RegistrationForm extends Component
             'full_name.required'              => 'Nama lengkap wajib diisi.',
             'nik.required'                    => 'NIK wajib diisi.',
             'nik.size'                        => 'NIK harus 16 digit.',
+            'nik.digits'                      => 'NIK harus 16 digit angka.',
+            'school_grade.numeric'            => 'Nilai rata-rata harus berupa angka.',
+            'school_grade.between'            => 'Nilai rata-rata harus antara 0 dan 100.',
             'birth_place.required'            => 'Tempat lahir wajib diisi.',
             'birth_place.in'                  => 'Tempat lahir tidak valid. Pilih dari daftar kota yang tersedia.',
             'birth_date.required'             => 'Tanggal lahir wajib diisi.',
@@ -102,6 +111,7 @@ class RegistrationForm extends Component
             'address.required'                => 'Alamat wajib diisi.',
             'phone.required'                  => 'Nomor HP wajib diisi.',
             'first_choice_program_id.required'=> 'Pilih pilihan prodi pertama.',
+            'first_choice_program_id.exists'  => 'Program studi yang dipilih tidak tersedia.',
             'admission_path.required'         => 'Silakan pilih jalur pendaftaran.',
             'school_name.required'            => 'Nama sekolah wajib diisi.',
             'graduation_year.required'        => 'Tahun lulus wajib diisi.',
@@ -151,34 +161,61 @@ class RegistrationForm extends Component
             $this->phone = $user->phone ?? '';
         }
 
-        // Determine referrer: First from User account (if locked), then fallback to cookie (for backward compatibility if needed)
-        if ($user && $user->referrer_id) {
-            $referrer = Referrer::find($user->referrer_id);
-            if ($referrer) {
-                $this->referrer_code = $referrer->code;
-                $this->referrer_id   = $referrer->id;
-            }
-        } else {
-            $refCode = Cookie::get('ref', '');
-            if ($refCode) {
-                $referrer = Referrer::where('code', $refCode)->where('status', 'active')->first();
-                if ($referrer) {
-                    $this->referrer_code = $refCode;
-                    $this->referrer_id   = $referrer->id;
-                }
-            }
+        if ($referrer = $this->resolveReferrer()) {
+            $this->referrer_code = $referrer->code;
+            $this->referrer_id   = $referrer->id;
         }
 
         // Set pre-selected prodi from url
         $prodiId = request()->query('prodi');
-        if ($prodiId && Program::where('id', $prodiId)->exists()) {
+        if ($prodiId && Program::active()->where('id', $prodiId)->exists()) {
             $this->first_choice_program_id = $prodiId;
         }
+    }
+
+    /**
+     * Tentukan referrer dari sumber tepercaya di server: akun user (terkunci)
+     * lebih dulu, lalu cookie 'ref' (hanya referrer aktif).
+     */
+    protected function resolveReferrer(): ?Referrer
+    {
+        $user = Auth::user();
+
+        if ($user && $user->referrer_id) {
+            return Referrer::find($user->referrer_id);
+        }
+
+        $refCode = Cookie::get('ref', '');
+        if ($refCode) {
+            return Referrer::where('code', $refCode)->where('status', 'active')->first();
+        }
+
+        return null;
+    }
+
+    /** Prodi pilihan masih punya kursi pada periode aktif? (quota 0 = tanpa batas) */
+    protected function programHasSeat(): bool
+    {
+        $program = Program::active()->find((int) $this->first_choice_program_id);
+        $period = PmbPeriod::active()->first();
+
+        if ($program && $program->isFull($period?->id)) {
+            $this->addError('first_choice_program_id', 'Kuota program studi ini sudah penuh. Silakan pilih program studi lain.');
+
+            return false;
+        }
+
+        return true;
     }
 
     public function nextStep(): void
     {
         $this->validate($this->rulesForStep(), $this->messagesForStep());
+
+        if ($this->step === 2 && !$this->programHasSeat()) {
+            return;
+        }
+
         $this->step++;
     }
 
@@ -191,14 +228,18 @@ class RegistrationForm extends Component
 
     public function submit(): void
     {
-        // Step 3 (Konfirmasi) tidak punya validation rules khusus — langsung submit
         $user = Auth::user();
+
+        if (!$user) {
+            $this->redirect(route('login'));
+            return;
+        }
 
         // Reload periode dari DB (hindari masalah serialisasi Livewire model)
         $period = PmbPeriod::active()->first();
 
-        if (!$period) {
-            session()->flash('error', 'Tidak ada periode pendaftaran aktif saat ini.');
+        if (!$period || !$period->isOpen()) {
+            session()->flash('error', 'Pendaftaran belum dibuka atau sudah ditutup.');
             return;
         }
 
@@ -213,12 +254,33 @@ class RegistrationForm extends Component
             return;
         }
 
+        // Validasi ulang semua langkah di server: state Livewire berasal dari klien
+        // dan submit() bisa dipanggil tanpa melewati nextStep().
+        foreach ([1, 2, 3, 4] as $step) {
+            try {
+                $this->validate($this->rulesForStep($step), $this->messagesForStep());
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->step = $step;
+                throw $e;
+            }
+        }
 
         try {
+            // Kunci baris prodi agar dua pendaftar bersamaan tidak sama-sama merebut kursi terakhir.
+            \Illuminate\Support\Facades\DB::beginTransaction();
+            $lockedProgram = Program::whereKey((int) $this->first_choice_program_id)->lockForUpdate()->first();
+            if ($lockedProgram && $lockedProgram->isFull($period->id)) {
+                \Illuminate\Support\Facades\DB::rollBack();
+                $this->step = 2;
+                $this->addError('first_choice_program_id', 'Kuota program studi ini sudah penuh. Silakan pilih program studi lain.');
+
+                return;
+            }
+
             Registration::create([
                 'period_id'                => $period->id,
                 'user_id'                  => $user->id,
-                'referrer_id'              => $this->referrer_id,
+                'referrer_id'              => $this->resolveReferrer()?->id,
                 'registration_number'      => null, // digenerate admin saat konfirmasi bayar
                 'admission_path'           => $this->admission_path,
                 'first_choice_program_id'  => (int) $this->first_choice_program_id,
@@ -244,11 +306,15 @@ class RegistrationForm extends Component
                 'status'                   => 'menunggu_pembayaran',
             ]);
 
+            \Illuminate\Support\Facades\DB::commit();
+
             session()->flash('success', 'Formulir berhasil dikirim! Silakan lakukan pembayaran sesuai instruksi berikut.');
             $this->redirect(route('registration.status'));
 
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal menyimpan pendaftaran: ' . $e->getMessage());
+            \Illuminate\Support\Facades\DB::rollBack();
+            report($e);
+            session()->flash('error', 'Gagal menyimpan pendaftaran. Silakan coba lagi atau hubungi admin.');
         }
     }
 

@@ -18,6 +18,11 @@ class RegistrationController extends Controller
         if (!$period) {
             return redirect()->route('landing')->with('error', 'Pendaftaran belum dibuka.');
         }
+
+        // Pendaftar yang sudah punya registrasi tetap diarahkan ke status (lihat bawah).
+        if (!$period->isOpen() && !(Auth::check() && Registration::where('user_id', Auth::id())->exists())) {
+            return redirect()->route('landing')->with('error', 'Pendaftaran belum dibuka atau sudah ditutup.');
+        }
         
         $prodiId = $request->query('prodi');
         if (!$prodiId) {
@@ -98,12 +103,14 @@ class RegistrationController extends Controller
 
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
-        // Hapus file lama jika ada
-        if ($registration->payment_proof && Storage::disk('public')->exists($registration->payment_proof)) {
-            Storage::disk('public')->delete($registration->payment_proof);
+        if (!in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
+            return redirect()->route('registration.status')->with('error', 'Upload tidak dapat dilakukan pada tahap pendaftaran saat ini.');
         }
 
-        $path = $request->file('payment_proof')->store('bukti-bayar', 'public');
+        // Hapus file lama jika ada
+        \App\Support\PrivateFile::delete($registration->payment_proof);
+
+        $path = \App\Support\PrivateFile::store($request->file('payment_proof'), 'bukti-bayar');
 
         $registration->update([
             'payment_proof' => $path,
@@ -126,12 +133,14 @@ class RegistrationController extends Controller
 
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
-        // Hapus file lama jika ada
-        if ($registration->alumni_card_proof && Storage::disk('public')->exists($registration->alumni_card_proof)) {
-            Storage::disk('public')->delete($registration->alumni_card_proof);
+        if (!in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
+            return redirect()->route('registration.status')->with('error', 'Upload tidak dapat dilakukan pada tahap pendaftaran saat ini.');
         }
 
-        $path = $request->file('alumni_card_proof')->store('kartu-alumni', 'public');
+        // Hapus file lama jika ada
+        \App\Support\PrivateFile::delete($registration->alumni_card_proof);
+
+        $path = \App\Support\PrivateFile::store($request->file('alumni_card_proof'), 'kartu-alumni');
 
         $registration->update([
             'alumni_card_proof' => $path,
@@ -146,7 +155,7 @@ class RegistrationController extends Controller
     public function uploadDocumentFile(Request $request)
     {
         $request->validate([
-            'document_type' => 'required|string',
+            'document_type' => ['required', 'string', \Illuminate\Validation\Rule::in(RegistrationDocument::TYPES)],
             'file'          => 'required|file|mimes:jpg,jpeg,png,pdf|max:15360',
             'label'         => 'required_if:document_type,lainnya|string|max:255',
         ], [
@@ -158,15 +167,19 @@ class RegistrationController extends Controller
 
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
+        // Gerbang yang sama dengan halaman documents()
+        if (in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
+            return redirect()->route('registration.status')->with('error', 'Selesaikan pembayaran terlebih dahulu.');
+        }
 
+        if (!$registration->isFormComplete()) {
+            return redirect()->route('registration.detail')
+                ->with('error', 'Lengkapi seluruh data formulir terlebih dahulu sebelum mengunggah dokumen.');
+        }
 
         $type = $request->input('document_type');
         $file = $request->file('file');
-        
-        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $extension = $file->getClientOriginalExtension();
-        $safeName = \Illuminate\Support\Str::slug($originalName) . '-' . time() . '.' . $extension;
-        
+
         if ($type !== 'lainnya') {
             // Cek jika sudah ada file untuk tipe ini
             $existingDoc = $registration->documents()->where('document_type', $type)->first();
@@ -175,14 +188,12 @@ class RegistrationController extends Controller
                 return redirect()->route('registration.documents')->with('error', 'Dokumen ini sudah disetujui dan tidak dapat diubah.');
             }
             
-            $path = $file->storeAs('dokumen-pendaftaran', $safeName, 'public');
-            
+            $path = \App\Support\PrivateFile::store($file, 'dokumen-pendaftaran');
+
             if ($existingDoc) {
                 // Hapus file lama
-                if (Storage::disk('public')->exists($existingDoc->file_path)) {
-                    Storage::disk('public')->delete($existingDoc->file_path);
-                }
-                
+                \App\Support\PrivateFile::delete($existingDoc->file_path);
+
                 $existingDoc->update([
                     'file_path' => $path,
                     'status' => 'menunggu_review',
@@ -200,8 +211,8 @@ class RegistrationController extends Controller
             }
         } else {
             // Untuk dokumen lainnya, selalu buat baru
-            $path = $file->storeAs('dokumen-pendaftaran', $safeName, 'public');
-            
+            $path = \App\Support\PrivateFile::store($file, 'dokumen-pendaftaran');
+
             $registration->documents()->create([
                 'document_type' => 'lainnya',
                 'label' => $request->input('label'),
@@ -230,11 +241,9 @@ class RegistrationController extends Controller
         }
 
         // Hapus file lama jika ada
-        if ($registration->re_registration_payment_proof && Storage::disk('public')->exists($registration->re_registration_payment_proof)) {
-            Storage::disk('public')->delete($registration->re_registration_payment_proof);
-        }
+        \App\Support\PrivateFile::delete($registration->re_registration_payment_proof);
 
-        $path = $request->file('re_registration_payment_proof')->store('bukti-bayar-daftar-ulang', 'public');
+        $path = \App\Support\PrivateFile::store($request->file('re_registration_payment_proof'), 'bukti-bayar-daftar-ulang');
 
         $registration->update([
             're_registration_payment_proof' => $path,
@@ -266,7 +275,7 @@ class RegistrationController extends Controller
             ->latest()
             ->firstOrFail();
 
-        $canEdit = !in_array($registration->status, ['diterima', 'ditolak']);
+        $canEdit = !$registration->isDetailLocked();
 
         return view('registration.detail', compact('registration', 'canEdit'));
     }
@@ -275,7 +284,7 @@ class RegistrationController extends Controller
     {
         $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
 
-        if (in_array($registration->status, ['diterima', 'ditolak'])) {
+        if ($registration->isDetailLocked()) {
             return redirect()->back()->with('error', 'Data tidak bisa diedit lagi karena pendaftaran sudah diproses.');
         }
 
@@ -286,7 +295,7 @@ class RegistrationController extends Controller
             $rules = [
                 'full_name'   => 'required|string|max:255',
                 'nisn'        => 'required|string|digits:10',
-                'nik'         => 'required|string|size:16',
+                'nik'         => 'required|digits:16',
                 'birth_place' => 'required|string|max:100',
                 'birth_date'  => 'required|date',
                 'gender'      => 'required|in:male,female',
@@ -297,7 +306,10 @@ class RegistrationController extends Controller
             $sectionName = 'Data Diri';
         } elseif ($section === 'program_jalur') {
             $rules = [
-                'first_choice_program_id' => 'required|exists:programs,id',
+                // Hanya prodi aktif (atau prodi yang sedang dipilih pendaftar)
+                'first_choice_program_id' => ['required', \Illuminate\Validation\Rule::exists('programs', 'id')
+                    ->where(fn ($q) => $q->where('is_active', true)
+                        ->orWhere('id', $registration->first_choice_program_id))],
                 'admission_path'          => 'required|in:umum,prestasi,tahfidz',
             ];
             $sectionName = 'Program Studi & Jalur';
@@ -307,7 +319,7 @@ class RegistrationController extends Controller
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
                 'certificate_number' => 'required|string|max:100',
-                'school_grade'       => 'nullable|numeric',
+                'school_grade'       => 'nullable|numeric|between:0,100',
             ];
             $sectionName = 'Data Sekolah';
         } elseif ($section === 'data_ortu') {
@@ -323,6 +335,18 @@ class RegistrationController extends Controller
         }
 
         $validatedData = $request->validate($rules);
+
+        // Pindah prodi: tolak bila prodi tujuan sudah penuh pada periode ini.
+        if ($section === 'program_jalur'
+            && (int) $validatedData['first_choice_program_id'] !== (int) $registration->first_choice_program_id) {
+            $target = \App\Models\Program::find($validatedData['first_choice_program_id']);
+            if ($target && $target->isFull($registration->period_id)) {
+                return redirect()->back()->withInput()->withErrors([
+                    'first_choice_program_id' => 'Kuota program studi tujuan sudah penuh. Silakan pilih program studi lain.',
+                ]);
+            }
+        }
+
         $registration->update($validatedData);
 
         $anchor = str_replace('_', '-', $section);
@@ -380,8 +404,8 @@ class RegistrationController extends Controller
             return redirect()->back()->with('error', 'Foto pendaftar tidak ditemukan.');
         }
 
-        $fotoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($foto->file_path);
-        if (!file_exists($fotoPath)) {
+        $fotoPath = \App\Support\PrivateFile::absolutePath($foto->file_path);
+        if (!$fotoPath || !file_exists($fotoPath)) {
             return redirect()->back()->with('error', 'File foto pendaftar tidak ditemukan di server.');
         }
 

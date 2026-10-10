@@ -21,6 +21,17 @@ class RegistrationDocument extends Model
         'reviewed_at' => 'datetime',
     ];
 
+    public const TYPES = [
+        'foto',
+        'ktp',
+        'kk',
+        'akta_lahir',
+        'transkrip_nilai',
+        'surat_keterangan_sehat',
+        'sertifikat',
+        'lainnya',
+    ];
+
     public const MANDATORY_TYPES = [
         'foto',
         'kk',

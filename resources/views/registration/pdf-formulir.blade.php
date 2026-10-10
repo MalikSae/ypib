@@ -70,7 +70,7 @@
 
     @php
         $photoDoc = $registration->documents->firstWhere('document_type', 'foto');
-        $photoPath = $photoDoc ? \Illuminate\Support\Facades\Storage::disk('public')->path($photoDoc->file_path) : null;
+        $photoPath = $photoDoc ? \App\Support\PrivateFile::absolutePath($photoDoc->file_path) : null;
         $hasPhoto = $photoPath && file_exists($photoPath);
         $logoPath = public_path('images/favicon.png');
     @endphp
