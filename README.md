@@ -104,6 +104,26 @@ php artisan files:privatize
 
 Frontend di-build ulang (`npm run build`); sertakan `public/build` saat deploy.
 
+## Periode PMB (Multi-Periode)
+
+Satu tahun ajaran = satu periode yang dikelola di `/admin/periode` (draft, tayang, arsip). Biaya, kuota, dan komisi diatur per periode di `Biaya & Kuota`. Pendaftar dapat mendaftar lagi di periode berikutnya dan melihat riwayatnya. Rencana dan keputusan lengkap: `PLAN_MULTI_PERIODE.md`.
+
+Dua saklar di `.env` (keduanya `false` bawaan, nyalakan bertahap):
+
+| Saklar | Fungsi |
+|---|---|
+| `PMB_ENFORCE_WINDOW` | tolak unggah bukti bayar di luar masa bayar, bukti daftar ulang setelah tenggat, dan ubah data di periode arsip |
+| `PMB_ENFORCE_NIK_BLOCK` | blokir satu proses aktif per NIK (selama mati hanya tanda "NIK ganda" untuk admin) |
+
+Command (semuanya dry-run bila memakai `--apply`; cadangkan database dulu):
+
+```bash
+php artisan periods:precheck      # pelanggar unique sebelum migrasi
+php artisan periods:readiness     # kesiapan data sebelum menyalakan saklar
+php artisan periods:assign --to=<ID> --from=<ID>   # pindahkan pendaftaran antarperiode (simulasi; tambah --apply --acted-by=<ID>)
+```
+
+Urutan rilis dan rollback: `DEV_REPORT.md` bagian 10.G.
 ## Menjalankan Test
 
 Buat database test sekali (`CREATE DATABASE ypib_test CHARACTER SET utf8mb4;`), lalu `php artisan test`. Test menolak berjalan di database yang namanya tidak berakhiran `_test`. Lihat `DEV_REPORT.md` bagian 11.

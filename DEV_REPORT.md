@@ -30,16 +30,17 @@ Berikut adalah struktur folder root utama (2 level):
 Berdasarkan file migrations, berikut adalah tabel-tabel utama di sistem dan field pentingnya:
 
 - **users**: `id`, `name`, `email`, `password`, `role` (enum: admin, operator, referrer, mahasiswa, panitia), `phone`, `is_referrer`, `referrer_id`.
-- **pmb_periods**: `id`, `name`, `start_date`, `end_date`, `is_active`, `bank_name`, `bank_account`, `bank_account_name`, `admin_whatsapp`.
+- **pmb_periods**: `id`, `name`, `year`, `open_date`, `close_date`, `status` (`draft`/`published`/`archived`; sumber kebenaran), `is_active` (usang, disinkronkan dari `status`), `re_registration_deadline`, `payment_grace_days` (bawaan 3), `nim_sequence_start`, `published_at`, `archived_at`, `university_bank_name`, `university_bank_account`, `university_bank_account_name`, `admin_whatsapp`.
+- **period_programs**: biaya, kuota, dan komisi per prodi per periode: `period_id`, `program_id` (unik bersama), `is_offered`, `quota`, `registration_fee`, `re_registration_fee`, `re_registration_fee_details` (json), `re_registration_minimum_payment`, `referral_reward_amount`, `re_registration_reward_amount`. Kolom serupa di `programs` tinggal cadangan baca.
 - **faculties**: `id`, `name`, `description`, `is_active`.
 - **programs**: `id`, `name`, `faculty_id`, `accreditation`, `quota`, `registration_fee`, `is_active`, `kode_prodi`, `registration_track` (reguler/non_reguler; `kode_prodi` unik komposit dengan track), `re_registration_minimum_payment`, `re_registration_fee`, `re_registration_fee_details`, `referral_reward_amount`, `re_registration_reward_amount`, `icon`, `slug`.
 - **program_galleries**: galeri foto per prodi.
 - **referrers**: `id`, `user_id`, `referral_code`, `status`, `bank_name`, `bank_account`, `bank_account_name`.
 - **referral_clicks**: `id`, `referrer_id`, `ip_address`, `user_agent`.
-- **registrations**: `id`, `registration_number`, `nim`, `letter_number`, `user_id`, `period_id`, `first_choice_program_id`, `second_choice_program_id`, `referrer_id`, `status` (enum panjang pendaftaran), `registration_type` (reguler/alumni), `admission_path`, `payment_proof`, `alumni_card_proof`, `re_registration_payment_proof`, `document_proof` (legacy, tidak dibaca kode), `internal_notes`, `deleted_at` (soft delete), (dan field data diri lengkap).
+- **registrations**: `id`, `registration_number`, `nim`, `letter_number`, `user_id`, `period_id`, `first_choice_program_id`, `second_choice_program_id`, `referrer_id`, `status` (enum panjang pendaftaran), `registration_type` (reguler/alumni), `admission_path`, `payment_proof`, `alumni_card_proof`, `re_registration_payment_proof`, `document_proof` (legacy, tidak dibaca kode), `internal_notes`, `deleted_at` (soft delete), `active_key` (kolom turunan: satu pendaftaran aktif per akun per periode, unik), `reapply_allowed`/`reapply_note` (izin admin untuk NIK ber-NIM mendaftar lagi pada prodi yang sama), (dan field data diri lengkap). `nim` unik; indeks pada `nik`.
 - **registration_documents**: `id`, `registration_id`, `document_type`, `file_path`, `status`, `review_note`, `reviewed_by`.
 - **payment_logs**: `id`, `registration_id`, `acted_by`, `action`, `note`.
-- **rewards**: `id`, `referrer_id`, `registration_id`, `reward_type` (`registration`/`re_registration`), `amount`, `status`, `approved_by`, `approved_at`, `disbursed_at`.
+- **rewards**: `id`, `referrer_id`, `registration_id`, `nik` (NIK saat komisi dibuat; dasar satu komisi per orang), `reward_type` (`registration`/`re_registration`), `amount`, `status`, `approved_by`, `approved_at`, `disbursed_at`.
 - **partners**: `id`, `name`, `logo_path`, `url`, `is_active`.
 - **facilities**: `id`, `name`, `description`, `image_path`, `icon`, `is_active`.
 - **exam_questions**: `id`, `question_text`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `is_active`.
@@ -89,7 +90,7 @@ Berdasarkan `routes/web.php` dan `routes/auth.php`:
 5. **Tes Tulis:** Setelah dokumen lengkap & disetujui otomatis lanjut ke status `menunggu_tes_tulis`. Peserta menjawab bank soal di sistem, disubmit, dihitung skor otomatis (`sangat_baik` atau `baik`).
 6. **Interview:** Setelah tes tulis, peserta diarahkan ke status `menunggu_interview`.
 7. **Persetujuan Akhir (Panitia):** Role Panitia memindai QR pendaftar dan memutuskan `diterima` atau `ditolak` (nomor SKL dibuat saat `diterima`). Status menjadi `menunggu_konfirmasi_daftar_ulang` setelah pendaftar mengunggah bukti daftar ulang.
-8. **Daftar Ulang:** Pendaftar mengunggah bukti bayar daftar ulang. Admin menyetujui (`confirmReRegistration`); NIM di-generate di tahap ini (`Registration::generateNim()`, format `YY` + `kode_prodi` + track + urut 3 digit; 2026 mulai dari 400), dan alur selesai dengan status `daftar_ulang_selesai`.
+8. **Daftar Ulang:** Pendaftar mengunggah bukti bayar daftar ulang. Admin menyetujui (`confirmReRegistration`); NIM di-generate di tahap ini (`Registration::generateNim()`, format `YY` + `kode_prodi` + track + urut 3 digit; urutan dihitung **per awalan** `YY+kode_prodi+track`, lantai dari `pmb_periods.nim_sequence_start`, 2026 mulai dari 400; di atas 999 ditolak dengan pesan jelas), dan alur selesai dengan status `daftar_ulang_selesai`.
 9. **Dokumen keluaran:** Nomor surat SKL (`generateLetterNumber()`) dibuat saat status diterima (override admin atau konfirmasi panitia). Pendaftar dapat mengunduh formulir PDF, SKL, dan e-KTM.
 
 **Alur Afiliasi (Referrer):**
@@ -97,7 +98,7 @@ Berdasarkan `routes/web.php` dan `routes/auth.php`:
 2. Admin mengaktifkan status Referrer.
 3. Referrer mendapat link unik (`/ref/{code}`). Setiap klik dicatat di `referral_clicks`.
 4. Jika klik berujung pada Registrasi (session), `referrer_id` disimpan di tabel `registrations`.
-5. Reward di tabel `rewards` dibuat langsung oleh `AdminRegistrationController`: tipe `registration` saat admin mengonfirmasi pembayaran (nominal `programs.referral_reward_amount`, default 50.000) dan tipe `re_registration` saat daftar ulang dikonfirmasi (`programs.re_registration_reward_amount`, dilewati bila 0 atau jalur alumni). Status awal `approved`. Pendaftar yang di-soft-delete menyesuaikan komisi otomatis.
+5. Reward di tabel `rewards` dibuat langsung oleh `AdminRegistrationController`: tipe `registration` saat admin mengonfirmasi pembayaran (nominal dari `period_programs.referral_reward_amount` periode pendaftarannya, default 50.000) dan tipe `re_registration` saat daftar ulang dikonfirmasi (`period_programs.re_registration_reward_amount`, dilewati bila 0 atau jalur alumni). **Satu komisi per orang (NIK) seumur hidup** untuk tiap tipe, lintas periode, prodi, dan afiliator; reward `cancelled` tidak dihitung. Status awal `approved`. Pendaftar yang di-soft-delete menyesuaikan komisi otomatis.
 6. Admin melakukan *approve* lalu *disburse* komisi/reward yang bisa dilakukan massal.
 
 ## 6. Package/Library yang Digunakan
@@ -122,6 +123,7 @@ File `.env.example` terstruktur secara default Laravel dengan beberapa kunci khu
 - Konfigurasi `DB_*` menggunakan SQLite secara bawaan (konfigurasi MySQL di-comment).
 - Konfigurasi Email (`MAIL_*`); default `MAIL_MAILER=log` (email tidak terkirim sampai diubah; paket `symfony/resend-mailer` tersedia). Pengaturan email juga bisa diubah dari admin (`/admin/pengaturan-email`, tabel `settings`).
 - `SESSION_DRIVER=database`, `QUEUE_CONNECTION=database`, `FILESYSTEM_DISK=local`.
+- Saklar multi-periode (keduanya `false` bawaan): `PMB_ENFORCE_WINDOW` (gerbang jendela pendaftaran) dan `PMB_ENFORCE_NIK_BLOCK` (blokir satu proses aktif per NIK). Lihat bagian 10.G.
 - Terdapat blok konfigurasi `AWS_*` (S3). Ini menandakan project memiliki kapabilitas/disiapkan untuk upload file ke S3 Storage.
 
 ## 8. Role & Auth System
@@ -143,7 +145,7 @@ Sistem otorisasi menggunakan Guard standar (`web`), dilengkapi dengan role-based
 10. **Intervention Image v4:** API berbeda dari v2/v3 (lihat fix `a981cd8`); cek nama method di dokumentasi v4 sebelum mengubah kode e-KTM.
 11. **Integrasi Belum Aktif:** Xendit (pembayaran) dan Fonnte/Wablas (WhatsApp) belum terhubung; konfirmasi pembayaran masih manual oleh admin.
 12. **PWA:** service worker `public/sw.js` meng-cache area publik; ubah aset/rute penting bisa butuh bump versi cache.
-13. **Test:** hanya test bawaan Breeze (`tests/Feature/Auth`, `ProfileTest`); belum ada test untuk alur PMB.
+13. **Test:** suite PMB lengkap di `tests/Feature/Pmb/` (lihat bagian 11); jalankan `php artisan test` sebelum dan sesudah mengubah alur PMB.
 14. **Berkas Sensitif Privat:** bukti bayar, kartu alumni, bukti daftar ulang, dan dokumen pendaftaran disimpan di disk `local` (`storage/app/private`) lewat `App\Support\PrivateFile` dan hanya ditayangkan oleh `FileController` (rute `/berkas/*`, wajib login; pemilik, admin, operator; panitia hanya dokumen). Jangan memakai `Storage::url()` atau disk `public` untuk berkas ini. Berkas lama di disk `public` tetap terbaca (fallback) sampai dipindah dengan `php artisan files:privatize` (dukung `--dry-run`); jalankan sekali di server setelah deploy.
 15. **Hak Akses Akun:** `/admin/panitia/*` hanya boleh menyentuh akun berperan `panitia` (selain itu 404); reset password akun `admin`/`operator` hanya oleh admin atau pemilik akun. Jangan memakai route model binding `User` tanpa cek role di area admin.
 16. **Rahasia & Ekspor:** API key Resend disimpan terenkripsi (`enc:` + `Crypt`) lewat `Setting::setSecret()/getSecret()` dan tidak pernah dikirim ke browser (kosong = pertahankan, ada opsi hapus). Semua class export Excel memakai `SafeValueBinder` (teks berawalan `=` dan deretan digit >= 15 ditulis sebagai teks); CSV memakai `CsvSanitizer::row()`.
@@ -163,7 +165,7 @@ Hasil QA berlapis (kode, data nyata, UI, dependensi, konfigurasi). Centang berur
 
 ### A. Sebelum deploy
 - [ ] **Cadangkan** database dan folder berkas: `public/storage/` (berkas lama) dan `storage/app/private/`.
-- [ ] **Perbarui tanggal periode aktif** di `/admin/pengaturan`. Sejak `PmbPeriod::isOpen()` ditegakkan, periode dengan `close_date` lewat (di DB dev: `2026-09-30`) menolak pendaftaran baru. Nama periode dan tanggal harus konsisten.
+- [ ] **Perbarui tanggal periode aktif** di `/admin/periode`. Sejak `PmbPeriod::isOpen()` ditegakkan, periode dengan `close_date` lewat (di DB dev: `2026-09-30`) menolak pendaftaran baru. Nama periode dan tanggal harus konsisten.
 - [ ] **Isi `kode_prodi`** semua prodi aktif di `/admin/programs`. Saat QA 5 dari 9 prodi masih kosong; tanpa kode, konfirmasi daftar ulang ditolak (NIM tidak bisa dibuat).
 - [ ] **Tinjau `quota` prodi.** Kuota > 0 kini ditegakkan per periode (`0` = tanpa batas). Pendaftar `menunggu_pembayaran` ikut menghitung kursi.
 - [ ] Siapkan `.env` produksi:
@@ -216,11 +218,38 @@ Semua command berjalan sebagai simulasi tanpa `--apply`; hasil simulasi sama per
 - Berkas: `files:privatize` memindahkan (bukan menyalin) berkas; pemulihan memerlukan cadangan folder `public/storage/`.
 - Data: `backfill-numbers`/`recount` tercatat di `payment_logs` (`numbers_backfilled`) dan `referrer_logs` (`counter_recounted`); pemulihan nilai lama memerlukan cadangan DB.
 - `migrate:rollback` penuh sudah diuji sampai kosong dan `migrate` ulang bersih.
+### G. Multi-periode (urutan rilis; lihat `PLAN_MULTI_PERIODE.md`)
+
+Semua langkah migrasi bersifat penambahan dan dapat di-rollback sampai T9 (pembersihan, belum dikerjakan). Dua saklar baru **mati** secara bawaan sehingga rilis tidak mengubah perilaku pendaftar sampai dinyalakan.
+
+- [ ] **Cadangkan** database. Migrasi baru: `add_multi_period_columns`, `create_period_programs_table`, `add_reapply_columns_to_registrations`, `add_nik_to_rewards_table`.
+- [ ] `php artisan periods:precheck` harus bersih (tanpa pendaftaran aktif ganda per akun+periode, tanpa NIM ganda). Migrasi menolak jalan bila tidak.
+- [ ] `php artisan migrate --force`. Backfill otomatis: periode aktif menjadi `published`, selebihnya `archived`; `nim_sequence_start = 400` untuk tahun 2026; `period_programs` diisi dari nilai `programs`; `rewards.nik` dari pendaftarannya.
+- [ ] **[DATA]** Buka `/admin/periode`: isi **tenggat daftar ulang**, rekening, dan WhatsApp periode berjalan; tinjau **masa bayar** (`payment_grace_days`, bawaan 3) dan `nim_sequence_start`. Periode tayang tanpa tenggat tidak membatasi daftar ulang.
+- [ ] **[DATA]** Buka `Biaya & Kuota` pada periode berjalan dan tinjau tiap prodi (ditawarkan, kuota, biaya, komisi, rincian daftar ulang).
+- [ ] Putuskan bila perlu memecah pendaftaran lama per tahun ajaran: `php artisan periods:assign --to=<ID> --from=<ID> [--created-until=YYYY-MM-DD]` (simulasi), lalu `--apply --acted-by=<ID admin>`. Jika seluruh pendaftar lama satu tahun ajaran, lewati.
+- [ ] `php artisan periods:readiness` harus tanpa temuan **GAGAL**. Tinjau semua **PERIKSA** (prodi tanpa `kode_prodi`, biaya Rp 0, pendaftaran di periode non-tayang, NIK ganda).
+- [ ] Rilis dengan `PMB_ENFORCE_WINDOW=false` dan `PMB_ENFORCE_NIK_BLOCK=false`; verifikasi alur utama dan pemilih periode di header admin.
+- [ ] Satu siklus pendaftaran: tinjau tanda **NIK ganda** di `/admin/pendaftar` dan detail pendaftar; selesaikan yang basi.
+- [ ] Nyalakan `PMB_ENFORCE_WINDOW=true` (lalu `php artisan config:cache`) setelah tenggat dan masa bayar terisi. Nyalakan `PMB_ENFORCE_NIK_BLOCK=true` terpisah, setelah tanda NIK ganda ditinjau.
+- [ ] Jangan mengarsipkan periode lama sebelum melihat jumlah pendaftar yang masih berjalan di halaman konfirmasi arsip; arsip memutus unggahan baru pendaftarnya (unduhan tetap bisa).
+
+**Rollback multi-periode:** matikan kedua saklar (tanpa rilis ulang) bila gerbang atau blokir menolak pendaftar sah; kembalikan kode bila perlu (`migrate:rollback` tiap migrasi baru reversibel). Kolom biaya/kuota di `programs` dan `is_active` sengaja dipertahankan sebagai cadangan sampai pembersihan.
+
+**Keputusan yang masih terbuka** (default di `PLAN_MULTI_PERIODE.md` bagian 3): T-1 kalender reguler dan non-reguler (default: satu kalender), T-2 tenggat kelengkapan untuk pendaftar yang berhenti (default: tidak ada), T-3 lantai urutan NIM 400 global atau per prodi (default: per awalan, dari `nim_sequence_start` periode).
+
 26. **Ekspor Pendaftar:** `GET /admin/pendaftar/export` mendukung `format=xlsx|csv` (+ filter `prodi`, `status`). XLSX menyimpan seluruh sel di memori (±25 MB per 1.000 baris), sehingga ditolak di atas `RegistrationExport::XLSX_MAX_ROWS` (5.000) dengan pesan mengarahkan ke CSV. CSV di-stream (`chunkByIdDesc(500)` + `fputcsv`, BOM UTF-8, memori konstan: 20.000 baris ±9 detik) dan memakai `RegistrationExport::csvRow()` yang menetralkan injeksi formula serta membungkus digit rawan Excel (nol di depan / >= 15 digit) sebagai `="..."`.
+
+27. **Periode (multi-periode):** satu tahun ajaran = satu baris `pmb_periods`; `status` sumber kebenaran (hook `saving` menyelaraskan `is_active` dari atribut yang berubah, jangan menulis keduanya lewat query massal). Fase diturunkan dari tanggal (`registration_open`, masa bayar `close_date + payment_grace_days`, `in_progress`, daftar ulang sampai `re_registration_deadline`), tanpa scheduler. Satu periode hanya boleh tayang bila jendela tanggalnya tidak beririsan dan tenggat daftar ulang, rekening, serta WhatsApp terisi. Semua pembaca periode memakai `PmbPeriod::current()` (pendaftaran baru) atau `PmbPeriod::displayPeriod()` (tampilan); jangan memakai `PmbPeriod::active()->first()`.
+28. **Biaya per periode:** SKL, halaman bayar, dan komisi membaca `period_programs` milik periode pendaftarannya (`Registration::programTerms()`, `Program::termsFor($period)`); prodi tanpa baris memakai nilai `programs` sebagai cadangan. Prodi baru dibuat `is_offered = false` sampai biayanya diatur di `/admin/periode/{id}/biaya`. Periode arsip hanya baca. Form prodi tidak lagi mengedit biaya/kuota/komisi.
+29. **Satu proses aktif per NIK:** `App\Support\NikGuard`, diperiksa hanya di `RegistrationForm::submit()` dan saat pendaftar mengubah NIK (langkah wizard terbuka untuk tamu dan sengaja tidak memeriksa NIK: tidak boleh menjadi alat enumerasi). Pesan penolakan generik. Selama `PMB_ENFORCE_NIK_BLOCK=false` hanya tanda "NIK ganda" di daftar/detail admin. Pendaftaran ber-NIM pada prodi sama diblokir kecuali admin menyalakan `reapply_allowed` (alasan wajib, tercatat di `payment_logs`).
+30. **Gerbang jendela:** `App\Support\RegistrationWindow` menolak (hanya bila `PMB_ENFORCE_WINDOW=true`) unggah bukti bayar pertama di luar masa bayar, bukti daftar ulang setelah tenggat, dan aksi ubah data di periode arsip. Staf, halaman status, riwayat, dan unduhan tidak digerbangi. Pemberitahuan batas waktu di halaman status tampil terlepas dari saklar.
+31. **Riwayat dan filter:** pendaftar memilih pendaftaran lewat `?periode=ID` (disimpan di sesi, terikat ke akun; `?periode=reset` menghapus) sehingga halaman dan unduhan mengikuti. Staf memilih periode di header admin (`App\Support\AdminPeriod`, sesi per staf, bawaan periode tampilan, "Semua periode" tersedia): memengaruhi dashboard, daftar, sampah, rekap, dan ekspor, tidak pernah aksi.
+32. **Command periode:** `php artisan periods:precheck` (pelanggar unique sebelum migrasi), `periods:readiness` (kesiapan data sebelum menyalakan saklar; kode keluar 1 bila ada temuan GAGAL), `periods:assign --to=ID [--from=ID|--ids=|--created-from=|--created-until=] [--apply --acted-by=ID]` (memindahkan pendaftaran antarperiode; dry-run bawaan; tidak mengubah NIM/nomor yang terbit).
 
 ## 11. Pengujian Otomatis
 
-Suite berada di `tests/Feature/Pmb/` (88 test, ±960 assertion bersama test bawaan Breeze; ±75 detik) dengan pembangun data di `tests/Concerns/BuildsPmbData.php`.
+Suite berada di `tests/Feature/Pmb/` (259 test, ±1.530 assertion bersama test bawaan Breeze; ±2 menit) dengan pembangun data di `tests/Concerns/BuildsPmbData.php`.
 
 | Berkas | Cakupan |
 |---|---|
@@ -232,6 +261,16 @@ Suite berada di `tests/Feature/Pmb/` (88 test, ±960 assertion bersama test bawa
 | `NumberingAndBackfillTest` | nomor SKL/NIM, command `registrations:backfill-numbers` dan `referrers:recount` |
 | `ExportsAndFilesTest` | ekspor XLSX/CSV, berkas privat, `files:privatize`, unggah gambar |
 | `PlatformSecurityAndConfigTest` | header, pembatas laju, IP proxy, zona waktu/bahasa, seeder, sanitasi HTML, master data, rahasia, hapus akun |
+| `PeriodLifecycleTest` | status periode, hook `is_active`, jendela WIB, resolver `current()`/`displayPeriod()`, unique `active_key` dan `nim` |
+| `PeriodManagementTest` | CRUD periode, tayang/batal/arsip/buka kembali/salin, validasi dan pengaman |
+| `PeriodProgramPricingTest` | biaya, kuota, dan komisi per periode, prodi tidak ditawarkan, matriks admin |
+| `MultiPeriodRegistrationTest` | daftar lagi, resolver pendaftaran, tombol "daftar di periode berjalan", banner landing |
+| `ActiveProcessPerNikTest` | aturan K7, saklar, pesan generik, ubah NIK, penanda `reapply_allowed` |
+| `CommissionPerPersonTest` | satu komisi per NIK, `restore()` dengan konflik |
+| `RegistrationWindowGateTest` | gerbang bukti bayar/daftar ulang/arsip, saklar, K3 dan K5 |
+| `PeriodScopedAdminTest` | pemilih periode global, dashboard/daftar/rekap/ekspor |
+| `RegistrationHistoryTest` | riwayat pendaftaran, `?periode=`, banner langkah tertunda |
+| `PeriodCommandsTest` | `periods:assign` dan `periods:readiness` |
 
 **Wajib sebelum menjalankan:** buat database khusus test sekali: `CREATE DATABASE ypib_test CHARACTER SET utf8mb4;` (nama diatur di `phpunit.xml`). `tests/TestCase.php` menolak berjalan bila nama database tidak berakhiran `_test`, karena `RefreshDatabase` menghapus seluruh tabel. Jalankan dengan `php artisan test`.
 

@@ -291,7 +291,8 @@ termasuk test dan perbaikan test yang ada.
 ### T1. Skema, model, resolver, dan penulis lama (1,25 hari)
 - Migrasi: kolom baru `pmb_periods` (termasuk `payment_grace_days`); backfill `status` (`published` bila
   `is_active`, selain itu `archived`), `re_registration_deadline` dibiarkan null untuk data lama (audit C1),
-  `nim_sequence_start = 400` untuk periode tahun 2026; kolom `active_key` + unique; index `period_id` dan `nik`.
+  `nim_sequence_start = 400` untuk periode tahun 2026; kolom `active_key` + unique; index `nik`
+  (`period_id` sudah ber-index lewat foreign key). **Status: T1 diimplementasi** (lihat riwayat git/sesi).
 - **Pra-pemeriksaan wajib** (jalankan sebelum unique): duplikat `user_id+period_id` aktif, NIM ganda, dan
   periode non-aktif yang punya pendaftaran non-final (backfill akan mengarsipkannya; tinjau dulu).
 - `PmbPeriod`: fase (5.2), `current()`, `displayPeriod()`; `scopeActive` dan `isOpen()` pindah ke `status`;
@@ -302,7 +303,7 @@ termasuk test dan perbaikan test yang ada.
   diubah, hanya `status` diubah, keduanya, periode `archived`; `create(['is_active'=>true])` menghasilkan
   `published`; `displayPeriod()` dengan dua periode `published`), migrasi naik/turun, `migrate:rollback` bersih.
 
-### T2. Kelola periode di admin (1,5 hari)
+### T2. Kelola periode di admin (1,5 hari) — **diimplementasi**
 - Rute `admin/periode`: `index`, `create`, `store`, `edit`, `update`, plus `publish`, `archive`, `duplicate`.
 - `PmbPeriodController` ditulis ulang: tidak lagi membuat "PMB Baru" otomatis; validasi tanggal
   (`close_date >= open_date`, `re_registration_deadline >= close_date` dan wajib saat tayang,
@@ -315,7 +316,7 @@ termasuk test dan perbaikan test yang ada.
 - Test: akses staf, validasi, irisan tanggal, tenggat wajib, pengaman arsip, salin periode (termasuk
   rekening dan WA), tayang ditolak bila rekening kosong.
 
-### T3b. Biaya, kuota, dan komisi per periode (3 hari)
+### T3b. Biaya, kuota, dan komisi per periode (3 hari) — **diimplementasi**
 - Migrasi `period_programs` + isi untuk periode yang ada dari nilai `programs`.
 - Halaman "Biaya & kuota per periode" (matriks prodi x kolom) + salin dari periode sebelumnya.
   Editor rincian biaya daftar ulang (`fee_names`/`fee_amounts`) dibangun ulang pada halaman ini;
@@ -327,7 +328,7 @@ termasuk test dan perbaikan test yang ada.
   kuota per periode; prodi tidak ditawarkan tersembunyi dan ditolak saat pindah prodi; fallback ke `programs`
   selama transisi; jumlah query landing tidak bertambah per prodi.
 
-### T3. Pendaftaran per periode dan resolver (2,5 hari)
+### T3. Pendaftaran per periode dan resolver (2,5 hari) — **diimplementasi**
 - `create()` dan `RegistrationForm`: pakai `PmbPeriod::current()`; unique per periode; K7 **hanya di `submit()`**
   dan di `updateDetail` (section `data_diri`, saat `nik` berubah), dengan pesan generik (5.5).
 - Satu resolver `CurrentRegistration` menggantikan 17 query pendaftar: prioritas pendaftaran di periode
@@ -347,7 +348,7 @@ termasuk test dan perbaikan test yang ada.
   saklar mati hanya menandai, saklar hidup memblokir; tombol "Daftar di periode berjalan" memilih tujuan yang
   benar; dua pendaftaran tidak saling mengganggu; unique `active_key` menolak duplikat.
 
-### T5. Penomoran dan komisi (1,25 hari)
+### T5. Penomoran dan komisi (1,25 hari) — **diimplementasi**
 - `generateNim()` per awalan (5.7), unique `nim`, penyesuaian `registrations:backfill-numbers`.
 - Migrasi `rewards.nik` + isi ulang; aturan komisi per orang (5.6) di `confirmPayment` dan
   `confirmReRegistration`; perbaiki penghitungan `total_conversions`; sesuaikan `referrers:recount`.
@@ -356,7 +357,7 @@ termasuk test dan perbaikan test yang ada.
   tanpa komisi; nilai cadangan 50.000 (pendaftaran) dan 0 (daftar ulang, tidak dibuat); NIM soft-delete tidak
   dipakai ulang; `total_conversions` benar.
 
-### T4. Gerbang pintu masuk (0,5 hari)
+### T4. Gerbang pintu masuk (0,5 hari) — **diimplementasi**
 - Guard `EnsureRegistrationWindow` (periode milik pendaftaran) untuk empat aksi di 5.3; aksi lain yang
   mengubah data hanya guard `archived`. **Unduhan dan halaman status tidak digerbangi.** Tidak menulis ulang
   gerbang status yang sudah ada.
@@ -366,16 +367,16 @@ termasuk test dan perbaikan test yang ada.
   setelah `close_date`, unggah bukti di hari ke-3 dan hari ke-4 masa bayar, kartu alumni, saklar mati/hidup,
   dan **unduh e-KTM, SKL, formulir di periode arsip tetap berhasil**.
 
-### T6. Filter periode di admin (1 hari)
+### T6. Filter periode di admin (1 hari) — **diimplementasi**
 - Pemilih periode global di header admin (default `displayPeriod()`, disimpan di sesi).
 - Terapkan ke dashboard, daftar pendaftar, rekap per prodi + ekspornya, ekspor pendaftar/afiliasi.
 - Filter periode di halaman afiliator: urut `open_date` menurun dengan label status.
 
-### T7. Riwayat pendaftaran untuk pendaftar (0,5 hari)
+### T7. Riwayat pendaftaran untuk pendaftar (0,5 hari) — **diimplementasi**
 - Pemilih periode dan daftar "pendaftaran saya" di halaman status; unduhan mengikuti pendaftaran terpilih.
 - Banner bila ada langkah tertunda di pendaftaran periode lain (audit D7).
 
-### T8. Migrasi data lama dan deploy (0,5 hari)
+### T8. Migrasi data lama dan deploy (0,5 hari) — **diimplementasi (perangkat dan dokumen; pengisian data produksi ada di tangan Anda)**
 - Konfirmasi T-6; command `periods:assign` (default `--dry-run`, `--apply --acted-by=ID`) bila perlu memecah.
 - **Isi `re_registration_deadline` periode berjalan** (prasyarat K4/N4), tinjau `nim_sequence_start` dan
   `payment_grace_days`, isi matriks `period_programs`, lalu aktifkan `PMB_ENFORCE_WINDOW`.
