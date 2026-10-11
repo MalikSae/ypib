@@ -60,8 +60,9 @@
                 $key = "programs.{$program->id}";
             @endphp
 
-            <x-card class="p-5"
-                    x-data="{ open: false, items: @js($details), get total() { return this.items.reduce((a, i) => a + (parseInt(i.amount) || 0), 0); } }">
+            {{-- div biasa (bukan x-card): @js tidak diproses di dalam atribut komponen Blade --}}
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-neutral-200 p-5"
+                 x-data="{ open: false, items: @js($details), get total() { return this.items.reduce((a, i) => a + (parseInt(i.amount) || 0), 0); } }">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div>
                         <div class="text-sm font-bold text-neutral-900">{{ $program->name }}</div>
@@ -144,7 +145,7 @@
                         <p class="text-xs text-neutral-400">Total biaya daftar ulang dihitung otomatis dari rincian di atas.</p>
                     </div>
                 </div>
-            </x-card>
+            </div>
         @endforeach
     </fieldset>
 

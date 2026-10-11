@@ -37,31 +37,6 @@
     </div>
 @endif
 
-{{-- Penanda izin daftar lagi (hanya pendaftaran ber-NIM) --}}
-@if($registration->nim || $registration->status === 'daftar_ulang_selesai')
-    <div class="mb-5 p-4 rounded-xl border border-neutral-200 bg-white">
-        <div class="text-sm font-bold text-neutral-900">Izin daftar lagi pada prodi yang sama</div>
-        @if($registration->reapply_allowed)
-            <p class="mt-1 text-sm text-neutral-600">Diizinkan. Alasan: {{ $registration->reapply_note }}</p>
-        @else
-            <p class="mt-1 text-sm text-neutral-600">Belum diizinkan. NIK ini tidak bisa mendaftar lagi pada prodi yang sama (prodi lain boleh).</p>
-        @endif
-        <form action="{{ route('admin.registrations.reapply', $registration->id) }}" method="POST" class="mt-3 flex flex-col sm:flex-row gap-3 sm:items-end">
-            @csrf
-            <input type="hidden" name="allowed" value="{{ $registration->reapply_allowed ? 0 : 1 }}">
-            <div class="flex-1">
-                <x-input-label for="reapply_note" value="Alasan" required="true" />
-                <x-text-input type="text" id="reapply_note" name="note" required maxlength="1000"
-                              placeholder="Cth: cuti selesai, kembali kuliah" :error="$errors->has('note')" />
-                <x-input-error :messages="$errors->get('note')" />
-            </div>
-            <x-button type="submit" color="{{ $registration->reapply_allowed ? 'danger' : 'primary' }}" variant="outline">
-                {{ $registration->reapply_allowed ? 'Cabut Izin' : 'Izinkan Daftar Lagi' }}
-            </x-button>
-        </form>
-    </div>
-@endif
-
 {{-- ── 2-Column Layout ── --}}
 <div class="detail-grid">
 
@@ -107,6 +82,31 @@
                 </div>
             </div>
         </div>
+
+        {{-- Penanda izin daftar lagi (hanya pendaftaran ber-NIM) --}}
+        @if($registration->nim || $registration->status === 'daftar_ulang_selesai')
+            <div class="p-4 rounded-xl border border-neutral-200 bg-white">
+                <div class="text-sm font-bold text-neutral-900">Izin daftar lagi pada prodi yang sama</div>
+                @if($registration->reapply_allowed)
+                    <p class="mt-1 text-sm text-neutral-600">Diizinkan. Alasan: {{ $registration->reapply_note }}</p>
+                @else
+                    <p class="mt-1 text-sm text-neutral-600">Belum diizinkan. NIK ini tidak bisa mendaftar lagi pada prodi yang sama (prodi lain boleh).</p>
+                @endif
+                <form action="{{ route('admin.registrations.reapply', $registration->id) }}" method="POST" class="mt-3 flex flex-col sm:flex-row gap-3 sm:items-end">
+                    @csrf
+                    <input type="hidden" name="allowed" value="{{ $registration->reapply_allowed ? 0 : 1 }}">
+                    <div class="flex-1">
+                        <x-input-label for="reapply_note" value="Alasan" required="true" />
+                        <x-text-input type="text" id="reapply_note" name="note" required maxlength="1000"
+                                      placeholder="Cth: cuti selesai, kembali kuliah" :error="$errors->has('note')" />
+                        <x-input-error :messages="$errors->get('note')" />
+                    </div>
+                    <x-button type="submit" color="{{ $registration->reapply_allowed ? 'danger' : 'primary' }}" variant="outline">
+                        {{ $registration->reapply_allowed ? 'Cabut Izin' : 'Izinkan Daftar Lagi' }}
+                    </x-button>
+                </form>
+            </div>
+        @endif
 
         {{-- Card 2: Data Diri --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">

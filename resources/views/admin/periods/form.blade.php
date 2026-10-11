@@ -14,7 +14,7 @@
             <h1 class="text-xl font-bold text-neutral-900 tracking-tight">{{ $isEdit ? 'Edit Periode PMB' : 'Tambah Periode PMB' }}</h1>
             <p class="text-sm text-neutral-400">
                 @if($isEdit)
-                    Status: <strong>{{ $period->phaseLabel() }}</strong>. Periode baru berstatus draft sampai ditayangkan.
+                    Status: <strong>{{ $period->phaseLabel() }}</strong>.
                 @else
                     Periode baru berstatus draft. Tayangkan dari daftar periode setelah data lengkap.
                 @endif

@@ -20,108 +20,105 @@
     </a>
 </div>
 
-<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
-    <div class="overflow-x-auto">
-        <table class="min-w-full">
-            <thead class="bg-neutral-50 border-b border-neutral-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Periode</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Masa Pendaftaran</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Masa Bayar &amp; Daftar Ulang</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-100">
-                @forelse($periods as $period)
-                    @php
-                        $badge = match (true) {
-                            $period->isPublished() => 'bg-success-50 text-success-700 border-success-200',
-                            $period->isArchived()  => 'bg-warning-50 text-warning-700 border-warning-200',
-                            default                => 'bg-neutral-100 text-neutral-600 border-neutral-200',
-                        };
-                    @endphp
-                    <tr class="hover:bg-neutral-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $period->name }}</div>
-                            <div class="text-xs text-neutral-400">Tahun {{ $period->year }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-neutral-700 whitespace-nowrap">
-                            {{ $period->open_date->isoFormat('D MMM Y') }} &ndash; {{ $period->close_date->isoFormat('D MMM Y') }}
-                        </td>
-                        <td class="px-6 py-4 text-xs text-neutral-600">
-                            <div>Bayar s.d. {{ $period->close_date->copy()->addDays((int) $period->payment_grace_days)->isoFormat('D MMM Y') }}
-                                <span class="text-neutral-400">(+{{ $period->payment_grace_days }} hari)</span></div>
-                            <div class="mt-0.5">
+{{-- Kartu per periode: tetap terbaca di layar sempit tanpa gulir horizontal --}}
+<div class="space-y-4 mb-8">
+    @forelse($periods as $period)
+        @php
+            $badge = match (true) {
+                $period->isPublished() => 'bg-success-50 text-success-700 border-success-200',
+                $period->isArchived()  => 'bg-warning-50 text-warning-700 border-warning-200',
+                default                => 'bg-neutral-100 text-neutral-600 border-neutral-200',
+            };
+        @endphp
+        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-base font-bold text-neutral-900">{{ $period->name }}</h2>
+                        <span class="inline-flex items-center px-2.5 py-1 border rounded-full text-xs font-semibold whitespace-nowrap {{ $badge }}">
+                            {{ $period->phaseLabel() }}
+                        </span>
+                    </div>
+                    <div class="text-xs text-neutral-400 mt-0.5">Tahun {{ $period->year }}</div>
+
+                    <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                        <div>
+                            <dt class="text-xs font-semibold text-neutral-400 uppercase tracking-wide">Masa pendaftaran</dt>
+                            <dd class="text-neutral-800">{{ $period->open_date->isoFormat('D MMM Y') }} &ndash; {{ $period->close_date->isoFormat('D MMM Y') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold text-neutral-400 uppercase tracking-wide">Batas bukti bayar</dt>
+                            <dd class="text-neutral-800">
+                                {{ $period->close_date->copy()->addDays((int) $period->payment_grace_days)->isoFormat('D MMM Y') }}
+                                <span class="text-xs text-neutral-400">(+{{ $period->payment_grace_days }} hari)</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold text-neutral-400 uppercase tracking-wide">Tenggat daftar ulang</dt>
+                            <dd>
                                 @if($period->re_registration_deadline)
-                                    Daftar ulang s.d. {{ $period->re_registration_deadline->isoFormat('D MMM Y') }}
+                                    <span class="text-neutral-800">{{ $period->re_registration_deadline->isoFormat('D MMM Y') }}</span>
                                 @else
-                                    <span class="text-warning-700 font-semibold">Tenggat daftar ulang belum diisi</span>
+                                    <span class="text-warning-700 font-semibold">Belum diisi</span>
                                 @endif
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-neutral-700">
-                            <span class="font-semibold">{{ $period->registrations_count }}</span>
-                            <span class="text-xs text-neutral-400">({{ $period->running_registrations_count }} berjalan)</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center px-2.5 py-1 border rounded-full text-xs font-semibold whitespace-nowrap {{ $badge }}">
-                                {{ $period->phaseLabel() }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap justify-end items-center gap-2">
-                                @if(!$period->isArchived())
-                                    <x-table-action-edit :href="route('admin.periods.edit', $period->id)" />
-                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold text-neutral-400 uppercase tracking-wide">Pendaftar</dt>
+                            <dd class="text-neutral-800">
+                                <span class="font-semibold">{{ $period->registrations_count }}</span>
+                                <span class="text-xs text-neutral-400">({{ $period->running_registrations_count }} berjalan)</span>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
 
-                                <a href="{{ route('admin.periods.pricing', $period->id) }}" class="decoration-none">
-                                    <x-button color="primary" variant="outline" size="sm">Biaya &amp; Kuota</x-button>
-                                </a>
+                <div class="flex flex-wrap lg:justify-end items-center gap-2 lg:max-w-sm shrink-0">
+                    @if(!$period->isArchived())
+                        <x-table-action-edit :href="route('admin.periods.edit', $period->id)" />
+                    @endif
 
-                                @if($period->status === 'draft')
-                                    <form action="{{ route('admin.periods.publish', $period->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <x-button type="submit" color="success" size="sm">Tayangkan</x-button>
-                                    </form>
-                                @endif
+                    <a href="{{ route('admin.periods.pricing', $period->id) }}" class="decoration-none">
+                        <x-button color="primary" variant="outline" size="sm">Biaya &amp; Kuota</x-button>
+                    </a>
 
-                                @if($period->isPublished())
-                                    @if($period->registrations_count === 0)
-                                        <form action="{{ route('admin.periods.unpublish', $period->id) }}" method="POST" class="m-0">
-                                            @csrf
-                                            <x-button type="submit" color="neutral" variant="outline" size="sm">Batalkan Tayang</x-button>
-                                        </form>
-                                    @endif
-                                @endif
+                    @if($period->status === 'draft')
+                        <form action="{{ route('admin.periods.publish', $period->id) }}" method="POST" class="m-0">
+                            @csrf
+                            <x-button type="submit" color="success" size="sm">Tayangkan</x-button>
+                        </form>
+                    @endif
 
-                                @if(!$period->isArchived())
-                                    <a href="{{ route('admin.periods.archive.confirm', $period->id) }}" class="decoration-none">
-                                        <x-button color="danger" variant="outline" size="sm">Arsipkan</x-button>
-                                    </a>
-                                @else
-                                    <form action="{{ route('admin.periods.reopen', $period->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <x-button type="submit" color="primary" variant="outline" size="sm">Buka Kembali</x-button>
-                                    </form>
-                                @endif
+                    @if($period->isPublished() && $period->registrations_count === 0)
+                        <form action="{{ route('admin.periods.unpublish', $period->id) }}" method="POST" class="m-0">
+                            @csrf
+                            <x-button type="submit" color="neutral" variant="outline" size="sm">Batalkan Tayang</x-button>
+                        </form>
+                    @endif
 
-                                <form action="{{ route('admin.periods.duplicate', $period->id) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <x-button type="submit" color="neutral" variant="ghost" size="sm">Salin</x-button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-sm text-neutral-400">Belum ada periode. Tambahkan periode pertama.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                    @if(!$period->isArchived())
+                        <a href="{{ route('admin.periods.archive.confirm', $period->id) }}" class="decoration-none">
+                            <x-button color="danger" variant="outline" size="sm">Arsipkan</x-button>
+                        </a>
+                    @else
+                        <form action="{{ route('admin.periods.reopen', $period->id) }}" method="POST" class="m-0">
+                            @csrf
+                            <x-button type="submit" color="primary" variant="outline" size="sm">Buka Kembali</x-button>
+                        </form>
+                    @endif
+
+                    <form action="{{ route('admin.periods.duplicate', $period->id) }}" method="POST" class="m-0">
+                        @csrf
+                        <x-button type="submit" color="neutral" variant="ghost" size="sm">Salin</x-button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @empty
+        <div class="bg-white rounded-2xl border border-neutral-200 px-6 py-12 text-center text-sm text-neutral-400">
+            Belum ada periode. Tambahkan periode pertama.
+        </div>
+    @endforelse
 </div>
 
 @endsection
