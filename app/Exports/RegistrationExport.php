@@ -18,11 +18,13 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
 
     protected $prodiId;
     protected $status;
+    protected $periodId;
 
-    public function __construct($prodiId = null, $status = null)
+    public function __construct($prodiId = null, $status = null, $periodId = null)
     {
         $this->prodiId = $prodiId;
         $this->status = $status;
+        $this->periodId = $periodId;
     }
 
     /** Query terfilter tanpa urutan; dipakai collection() dan ekspor CSV streaming. */
@@ -30,6 +32,9 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
     {
         $query = Registration::with(['user', 'referrer.user', 'firstChoiceProgram', 'secondChoiceProgram']);
 
+        if ($this->periodId) {
+            $query->where('period_id', $this->periodId);
+        }
         if ($this->prodiId) {
             $query->where('first_choice_program_id', $this->prodiId);
         }

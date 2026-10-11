@@ -21,8 +21,15 @@ class ReferrerController extends Controller
             return redirect()->route('referrer.dashboard');
         }
 
-        $maxReferralReward = \App\Models\Program::max('referral_reward_amount') ?? 50000;
-        $maxReRegistrationReward = \App\Models\Program::max('re_registration_reward_amount') ?? 1000000;
+        // Nominal tertinggi yang ditampilkan: dari prodi yang ditawarkan pada periode berjalan,
+        // cadangan ke nilai master prodi bila periode belum punya matriks.
+        $period = \App\Models\PmbPeriod::displayPeriod();
+        $offered = $period
+            ? \App\Models\PeriodProgram::where('period_id', $period->id)->where('is_offered', true)
+            : null;
+
+        $maxReferralReward = ($offered?->max('referral_reward_amount')) ?? \App\Models\Program::max('referral_reward_amount') ?? 50000;
+        $maxReRegistrationReward = ($offered?->max('re_registration_reward_amount')) ?? \App\Models\Program::max('re_registration_reward_amount') ?? 1000000;
 
         return view('referrer.index', compact('maxReferralReward', 'maxReRegistrationReward'));
     }

@@ -543,12 +543,12 @@
 
         {{-- Program PMB --}}
         <a href="{{ route('admin.periods.index') }}"
-           data-label="Program PMB"
+           data-label="Periode PMB"
            class="nav-item {{ request()->routeIs('admin.periods.*') ? 'active' : '' }}">
             <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688 0-1.37-.043-2.05-.13m0 0A13.984 13.984 0 0 1 3 6.969V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25v1.719c0 2.61-1.04 5.096-2.89 6.924m-6.17 1.847L12 18l-.34-2.16m-2.81 2.81L7.5 21m6-2.35L15 21M9.75 9h4.5" />
             </svg>
-            <span class="sidebar-label">Program PMB</span>
+            <span class="sidebar-label">Periode PMB</span>
         </a>
 
         {{-- Integrasi Email --}}
@@ -610,6 +610,25 @@
             <h1 class="topbar-page-title text-neutral-900" style="font-size:20px;font-weight:700;margin:0;">@yield('page-title', 'Dashboard')</h1>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
+            @php
+                $adminPeriodOptions = \App\Support\AdminPeriod::options();
+                $adminPeriodId = \App\Support\AdminPeriod::id();
+            @endphp
+            @if($adminPeriodOptions->isNotEmpty())
+                <form method="POST" action="{{ route('admin.periods.select') }}" style="margin:0;display:flex;align-items:center;gap:6px;">
+                    @csrf
+                    <label for="admin-period-select" class="topbar-username text-neutral-500" style="font-size:12px;font-weight:600;">Periode</label>
+                    <select id="admin-period-select" name="period" onchange="this.form.submit()" aria-label="Pilih periode"
+                            style="height:34px;border:1px solid #DEE3E9;border-radius:8px;padding:0 8px;font-size:13px;font-weight:600;max-width:200px;background:#fff;" class="text-neutral-700">
+                        <option value="all" @selected($adminPeriodId === null)>Semua periode</option>
+                        @foreach($adminPeriodOptions as $adminPeriodOption)
+                            <option value="{{ $adminPeriodOption->id }}" @selected($adminPeriodId === $adminPeriodOption->id)>
+                                {{ $adminPeriodOption->name }}{{ $adminPeriodOption->isArchived() ? ' (arsip)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            @endif
             <span class="topbar-username text-neutral-600" style="font-size:14px;font-weight:500;">{{ auth()->user()->name }}</span>
             <span style="background:#F2F5FD;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;" class="text-primary-600">{{ ucfirst(auth()->user()->role) }}</span>
         </div>

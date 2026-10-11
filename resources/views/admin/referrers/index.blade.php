@@ -90,8 +90,10 @@
         <form method="GET" action="{{ route('admin.referrers.export') }}" class="flex gap-3 items-center w-full lg:w-auto overflow-x-auto">
             <x-select name="period_id" style="width:auto;min-width:140px;">
                 <option value="">Semua Periode</option>
-                @foreach(\App\Models\PmbPeriod::all() as $period)
-                    <option value="{{ $period->id }}">{{ $period->name }}</option>
+                @foreach(\App\Support\AdminPeriod::options() as $period)
+                    <option value="{{ $period->id }}" @selected(\App\Support\AdminPeriod::id() === $period->id)>
+                        {{ $period->name }} ({{ $period->phaseLabel() }})
+                    </option>
                 @endforeach
             </x-select>
             <x-select name="status" style="width:auto;min-width:140px;">
