@@ -21,10 +21,22 @@ class PmbPeriodController extends Controller
 
     public function index()
     {
-        $periods = PmbPeriod::withCount([
-            'registrations',
-            'registrations as running_registrations_count' => fn ($q) => $q->whereNotIn('status', self::FINAL_STATUSES),
-        ])->orderByDesc('open_date')->orderByDesc('id')->get();
+        $periods = PmbPeriod::orderByDesc('open_date')->orderByDesc('id')->get();
+
+        // Satu query terkelompok (ditutup indeks) menggantikan dua subquery berkorelasi per periode.
+        $counts = \App\Models\Registration::query()
+            ->select('period_id', 'status', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('period_id', 'status')
+            ->get()
+            ->groupBy('period_id');
+
+        foreach ($periods as $period) {
+            $byStatus = ($counts->get($period->id) ?? collect())->pluck('total', 'status');
+            $period->registrations_count = (int) $byStatus->sum();
+            $period->running_registrations_count = (int) $byStatus
+                ->reject(fn ($total, $status) => in_array($status, self::FINAL_STATUSES, true))
+                ->sum();
+        }
 
         return view('admin.periods.index', compact('periods'));
     }

@@ -222,7 +222,7 @@ Semua command berjalan sebagai simulasi tanpa `--apply`; hasil simulasi sama per
 
 Semua langkah migrasi bersifat penambahan dan dapat di-rollback sampai T9 (pembersihan, belum dikerjakan). Dua saklar baru **mati** secara bawaan sehingga rilis tidak mengubah perilaku pendaftar sampai dinyalakan.
 
-- [ ] **Cadangkan** database. Migrasi baru: `add_multi_period_columns`, `create_period_programs_table`, `add_reapply_columns_to_registrations`, `add_nik_to_rewards_table`.
+- [ ] **Cadangkan** database. Migrasi baru: `add_multi_period_columns`, `create_period_programs_table`, `add_reapply_columns_to_registrations`, `add_nik_to_rewards_table`, `add_performance_indexes`.
 - [ ] `php artisan periods:precheck` harus bersih (tanpa pendaftaran aktif ganda per akun+periode, tanpa NIM ganda). Migrasi menolak jalan bila tidak.
 - [ ] `php artisan migrate --force`. Backfill otomatis: periode aktif menjadi `published`, selebihnya `archived`; `nim_sequence_start = 400` untuk tahun 2026; `period_programs` diisi dari nilai `programs`; `rewards.nik` dari pendaftarannya.
 - [ ] **[DATA]** Buka `/admin/periode`: isi **tenggat daftar ulang**, rekening, dan WhatsApp periode berjalan; tinjau **masa bayar** (`payment_grace_days`, bawaan 3) dan `nim_sequence_start`. Periode tayang tanpa tenggat tidak membatasi daftar ulang.
@@ -246,6 +246,8 @@ Semua langkah migrasi bersifat penambahan dan dapat di-rollback sampai T9 (pembe
 30. **Gerbang jendela:** `App\Support\RegistrationWindow` menolak (hanya bila `PMB_ENFORCE_WINDOW=true`) unggah bukti bayar pertama di luar masa bayar, bukti daftar ulang setelah tenggat, dan aksi ubah data di periode arsip. Staf, halaman status, riwayat, dan unduhan tidak digerbangi. Pemberitahuan batas waktu di halaman status tampil terlepas dari saklar.
 31. **Riwayat dan filter:** pendaftar memilih pendaftaran lewat `?periode=ID` (disimpan di sesi, terikat ke akun; `?periode=reset` menghapus) sehingga halaman dan unduhan mengikuti. Staf memilih periode di header admin (`App\Support\AdminPeriod`, sesi per staf, bawaan periode tampilan, "Semua periode" tersedia): memengaruhi dashboard, daftar, sampah, rekap, dan ekspor, tidak pernah aksi.
 32. **Command periode:** `php artisan periods:precheck` (pelanggar unique sebelum migrasi), `periods:readiness` (kesiapan data sebelum menyalakan saklar; kode keluar 1 bila ada temuan GAGAL), `periods:assign --to=ID [--from=ID|--ids=|--created-from=|--created-until=] [--apply --acted-by=ID]` (memindahkan pendaftaran antarperiode; dry-run bawaan; tidak mengubah NIM/nomor yang terbit).
+
+33. **Performa & Indeks:** audit pada 30.000 pendaftar (MySQL, data terikat): daftar dan "terbaru" di dashboard 370 ms menjadi 3 ms, hitungan per status 120 ms menjadi 17 ms, rekap per prodi dari 92 query (1,3 detik) menjadi 3 query (±65 ms), daftar periode 470 ms menjadi ±70 ms. Penyebabnya filesort seluruh tabel `registrations`; migrasi `add_performance_indexes` menambah lima indeks komposit yang memuat `deleted_at` (soft delete) dan menutup kolom hitungan. Dashboard menurunkan seluruh KPI dari satu query status. Umpan aktivitas dengan filter periode memakai `FORCE INDEX (payment_logs_created_at_index)`; bila indeks itu dihapus, query ini gagal dan harus disesuaikan. Batas yang tetap: pencarian `LIKE '%...%'` pada nama/nomor (±250 ms di 30.000 baris, tidak bisa diindeks), halaman daftar dengan offset sangat dalam, ekspor CSV (±0,5 ms per baris: 30.000 baris ±15 detik; sesuaikan `max_execution_time`), dan halaman Biaya & Kuota dengan 30 prodi (±0,6 detik render Blade).
 
 ## 11. Pengujian Otomatis
 

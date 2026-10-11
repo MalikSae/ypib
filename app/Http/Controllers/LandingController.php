@@ -31,8 +31,14 @@ class LandingController extends Controller
         $facilities = Facility::active()->get();
         Program::preloadTerms($programs->concat($faculties->pluck('programs')->flatten()), $period);
 
+        // Biaya pendaftaran terendah di antara prodi yang ditawarkan pada periode ini (hero).
+        $startingFee = $programs
+            ->map(fn ($program) => (int) $program->termsFor($period)->registration_fee)
+            ->filter(fn ($fee) => $fee > 0)
+            ->min();
+
         return view('landing.preview', compact(
-            'programs', 'faculties', 'partners', 'facilities', 'period'
+            'programs', 'faculties', 'partners', 'facilities', 'period', 'startingFee'
         ));
     }
 

@@ -18,29 +18,32 @@ class DashboardController extends Controller
         // Periode yang dipilih di header admin (null = semua periode).
         $pid = \App\Support\AdminPeriod::id();
 
+        // Satu query: hitungan per status (ditutup indeks) menjadi sumber seluruh KPI di bawah.
+        $statusBreakdown = Registration::forPeriod($pid)->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total) => (int) $total)
+            ->toArray();
+
+        $sum = fn (array $statuses) => array_sum(array_map(fn ($status) => $statusBreakdown[$status] ?? 0, $statuses));
+
         // ── Notifications / Action Required ───────────────────────
         $notifications = [
-            'pending_payment' => Registration::forPeriod($pid)->where('status', 'menunggu_konfirmasi')->count(),
-            'pending_reregistration' => Registration::forPeriod($pid)->where('status', 'menunggu_konfirmasi_daftar_ulang')->count(),
+            'pending_payment'        => $sum(['menunggu_konfirmasi']),
+            'pending_reregistration' => $sum(['menunggu_konfirmasi_daftar_ulang']),
         ];
 
         // ── Main KPI stats ─────────────────────────────────────────
         $stats = [
-            'total'            => Registration::forPeriod($pid)->count(),
-            'pending'          => Registration::forPeriod($pid)->whereIn('status', ['menunggu_pembayaran', 'menunggu_konfirmasi'])->count(),
-            'terdaftar'        => Registration::forPeriod($pid)->where('status', 'terdaftar')->count(),
-            'diterima'         => Registration::forPeriod($pid)->whereIn('status', ['diterima', 'daftar_ulang_selesai'])->count(),
-            'perlu_tindakan'   => Registration::forPeriod($pid)->whereIn('status', ['menunggu_konfirmasi', 'menunggu_konfirmasi_daftar_ulang', 'perlu_revisi'])->count(),
+            'total'            => array_sum($statusBreakdown),
+            'pending'          => $sum(['menunggu_pembayaran', 'menunggu_konfirmasi']),
+            'terdaftar'        => $sum(['terdaftar']),
+            'diterima'         => $sum(['diterima', 'daftar_ulang_selesai']),
+            'perlu_tindakan'   => $sum(['menunggu_konfirmasi', 'menunggu_konfirmasi_daftar_ulang', 'perlu_revisi']),
             'referrers'        => Referrer::count(),
             'programs'         => Program::where('is_active', true)->count(),
             'faculties'        => Faculty::count(),
         ];
-
-        // ── Breakdown per status (for mini chart/bar) ──────────────
-        $statusBreakdown = Registration::forPeriod($pid)->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
 
         // ── Top performing referrers ───────────────────────────────
         $topReferrers = Referrer::withCount([
@@ -57,8 +60,12 @@ class DashboardController extends Controller
             ->get();
 
         // ── Activity feed – last 10 payment actions ────────────────
+        // Dengan filter periode, optimizer memilih memindai registrasi lalu filesort ribuan log
+        // (ratusan ms); memaksa urutan indeks created_at hanya membaca log terbaru sampai 8 cocok.
         $activityFeed = \App\Models\PaymentLog::with(['registration', 'actor'])
-            ->when($pid, fn ($q) => $q->whereHas('registration', fn ($r) => $r->where('period_id', $pid)))
+            ->when($pid, fn ($q) => $q
+                ->from(DB::raw('`payment_logs` force index (`payment_logs_created_at_index`)'))
+                ->whereHas('registration', fn ($r) => $r->where('period_id', $pid)))
             ->latest()
             ->take(8)
             ->get();

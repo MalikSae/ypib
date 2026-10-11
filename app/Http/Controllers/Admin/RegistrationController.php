@@ -900,6 +900,34 @@ class RegistrationController extends Controller
         return Excel::download($export, "Data_Pendaftar_{$stamp}.xlsx");
     }
 
+    /**
+     * Baris rekap per prodi dari SATU query terkelompok (prodi, status) pada periode terpilih.
+     * Sebelumnya 3 query per prodi (90+ query untuk 30 prodi).
+     */
+    private function recapRows(array $statusBelumBayar, array $statusLulus, array $statusDaftarUlang): \Illuminate\Support\Collection
+    {
+        $periodId = \App\Support\AdminPeriod::id();
+
+        $counts = Registration::forPeriod($periodId)
+            ->select('first_choice_program_id', 'status', DB::raw('count(*) as total'))
+            ->groupBy('first_choice_program_id', 'status')
+            ->get()
+            ->groupBy('first_choice_program_id');
+
+        return \App\Models\Program::orderBy('name')->get()->map(function ($program) use ($counts, $statusBelumBayar, $statusLulus, $statusDaftarUlang) {
+            $byStatus = ($counts->get($program->id) ?? collect())->pluck('total', 'status');
+            $count = fn (callable $matches) => (int) $byStatus->filter(fn ($total, $status) => $matches($status))->sum();
+
+            return [
+                'nama_prodi'   => $program->name,
+                // Pendaftar = hanya yang sudah lunas (exclude belum bayar)
+                'pendaftar'    => $count(fn ($status) => !in_array($status, $statusBelumBayar, true)),
+                'lulus'        => $count(fn ($status) => in_array($status, $statusLulus, true)),
+                'daftar_ulang' => $count(fn ($status) => in_array($status, $statusDaftarUlang, true)),
+            ];
+        });
+    }
+
     public function recap()
     {
         // Status yang BELUM bayar — dikecualikan dari kolom Pendaftar
@@ -909,24 +937,8 @@ class RegistrationController extends Controller
         // Status yang dianggap "daftar ulang terkonfirmasi"
         $statusDaftarUlang = ['daftar_ulang_selesai'];
 
-        $programs = \App\Models\Program::orderBy('name')->get();
-        $periodId = \App\Support\AdminPeriod::id();
-
-        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang, $periodId) {
-            $base = Registration::forPeriod($periodId)->where('first_choice_program_id', $program->id);
-
-            // Pendaftar = hanya yang sudah lunas (exclude belum bayar)
-            $pendaftar   = (clone $base)->whereNotIn('status', $statusBelumBayar)->count();
-            $lulus       = (clone $base)->whereIn('status', $statusLulus)->count();
-            $daftarUlang = (clone $base)->whereIn('status', $statusDaftarUlang)->count();
-
-            return [
-                'nama_prodi'   => $program->name,
-                'pendaftar'    => $pendaftar,
-                'lulus'        => $lulus,
-                'daftar_ulang' => $daftarUlang,
-            ];
-        })->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
+        $rows = $this->recapRows($statusBelumBayar, $statusLulus, $statusDaftarUlang)
+            ->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
 
         $totals = [
             'nama_prodi'   => 'Total',
@@ -945,20 +957,9 @@ class RegistrationController extends Controller
         $statusLulus       = ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'];
         $statusDaftarUlang = ['daftar_ulang_selesai'];
 
-        $programs = \App\Models\Program::orderBy('name')->get();
-        $periodId = \App\Support\AdminPeriod::id();
-
-        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang, $periodId) {
-            $base = Registration::forPeriod($periodId)->where('first_choice_program_id', $program->id);
-
-            return [
-                'nama_prodi'   => $program->name,
-                'pendaftar'    => (clone $base)->whereNotIn('status', $statusBelumBayar)->count(),
-                'lulus'        => (clone $base)->whereIn('status', $statusLulus)->count(),
-                'daftar_ulang' => (clone $base)->whereIn('status', $statusDaftarUlang)->count(),
-                'is_total'     => false,
-            ];
-        })->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
+        $rows = $this->recapRows($statusBelumBayar, $statusLulus, $statusDaftarUlang)
+            ->map(fn ($r) => $r + ['is_total' => false])
+            ->filter(fn ($r) => $r['pendaftar'] > 0)->sortByDesc('pendaftar')->values();
 
         $totals = collect([[
             'nama_prodi'   => 'Total',

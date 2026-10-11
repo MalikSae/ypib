@@ -408,4 +408,27 @@ class PeriodProgramPricingTest extends TestCase
 
         $this->assertSame(1, $termQueries);
     }
+
+    public function test_landing_hero_shows_the_lowest_registration_fee_of_the_period(): void
+    {
+        $period = $this->periodNamed('PMB Hero', (int) now()->year);
+        $this->terms($period, $this->program(), ['registration_fee' => 350000]);
+        $this->terms($period, $this->program(), ['registration_fee' => 275000]);
+        $this->terms($period, $this->program(), ['registration_fee' => 0]);
+        // Prodi yang tidak ditawarkan tidak ikut menentukan "mulai dari".
+        $this->terms($period, $this->program(), ['registration_fee' => 100000, 'is_offered' => false]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('Mulai Rp 275.000')
+            ->assertSee('Biaya Pendaftaran')
+            ->assertDontSee('400.000');
+    }
+
+    public function test_landing_hero_hides_the_fee_when_nothing_is_priced(): void
+    {
+        $period = $this->periodNamed('PMB Tanpa Harga', (int) now()->year);
+        $this->terms($period, $this->program(), ['registration_fee' => 0]);
+
+        $this->get('/')->assertOk()->assertDontSee('Mulai Rp');
+    }
 }
