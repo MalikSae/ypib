@@ -135,7 +135,7 @@ class PublicRegistrationFormTest extends TestCase
 
     public function test_period_window_follows_wib_calendar_days(): void
     {
-        $period = new PmbPeriod(['is_active' => true, 'open_date' => '2026-04-01', 'close_date' => '2026-04-30']);
+        $period = new PmbPeriod(['status' => 'published', 'open_date' => '2026-04-01', 'close_date' => '2026-04-30']);
 
         \Carbon\Carbon::setTestNow(\Carbon\Carbon::parse('2026-03-31 18:30:00', 'UTC'));   // 01:30 WIB 1 April
         $this->assertTrue($period->isOpen());

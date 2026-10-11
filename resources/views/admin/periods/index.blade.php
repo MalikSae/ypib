@@ -1,128 +1,127 @@
 @extends('layouts.admin')
-@section('title', 'Pengaturan PMB — Admin PMB YPIB')
-@section('page-title', 'Pengaturan PMB')
+@section('title', 'Periode PMB — Admin PMB YPIB')
+@section('page-title', 'Periode PMB')
 
 @section('content')
 
 {{-- PAGE HEADER --}}
-<div class="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
     <div>
-        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Pengaturan PMB</h1>
-        <p class="mt-0.5 text-sm text-neutral-400">Kelola periode pendaftaran, biaya, dan komisi afiliasi.</p>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Periode PMB</h1>
+        <p class="mt-0.5 text-sm text-neutral-400">Kelola tahun ajaran: tanggal pendaftaran, masa bayar, tenggat daftar ulang, dan rekening.</p>
+    </div>
+    <a href="{{ route('admin.periods.create') }}" class="decoration-none shrink-0">
+        <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200 shadow-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Tambah Periode
+        </button>
+    </a>
+</div>
+
+<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-neutral-50 border-b border-neutral-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Periode</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Masa Pendaftaran</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Masa Bayar &amp; Daftar Ulang</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100">
+                @forelse($periods as $period)
+                    @php
+                        $badge = match (true) {
+                            $period->isPublished() => 'bg-success-50 text-success-700 border-success-200',
+                            $period->isArchived()  => 'bg-warning-50 text-warning-700 border-warning-200',
+                            default                => 'bg-neutral-100 text-neutral-600 border-neutral-200',
+                        };
+                    @endphp
+                    <tr class="hover:bg-neutral-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-semibold text-neutral-900">{{ $period->name }}</div>
+                            <div class="text-xs text-neutral-400">Tahun {{ $period->year }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-neutral-700 whitespace-nowrap">
+                            {{ $period->open_date->isoFormat('D MMM Y') }} &ndash; {{ $period->close_date->isoFormat('D MMM Y') }}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-neutral-600">
+                            <div>Bayar s.d. {{ $period->close_date->copy()->addDays((int) $period->payment_grace_days)->isoFormat('D MMM Y') }}
+                                <span class="text-neutral-400">(+{{ $period->payment_grace_days }} hari)</span></div>
+                            <div class="mt-0.5">
+                                @if($period->re_registration_deadline)
+                                    Daftar ulang s.d. {{ $period->re_registration_deadline->isoFormat('D MMM Y') }}
+                                @else
+                                    <span class="text-warning-700 font-semibold">Tenggat daftar ulang belum diisi</span>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-neutral-700">
+                            <span class="font-semibold">{{ $period->registrations_count }}</span>
+                            <span class="text-xs text-neutral-400">({{ $period->running_registrations_count }} berjalan)</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 border rounded-full text-xs font-semibold whitespace-nowrap {{ $badge }}">
+                                {{ $period->phaseLabel() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap justify-end items-center gap-2">
+                                @if(!$period->isArchived())
+                                    <x-table-action-edit :href="route('admin.periods.edit', $period->id)" />
+                                @endif
+
+                                <a href="{{ route('admin.periods.pricing', $period->id) }}" class="decoration-none">
+                                    <x-button color="primary" variant="outline" size="sm">Biaya &amp; Kuota</x-button>
+                                </a>
+
+                                @if($period->status === 'draft')
+                                    <form action="{{ route('admin.periods.publish', $period->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <x-button type="submit" color="success" size="sm">Tayangkan</x-button>
+                                    </form>
+                                @endif
+
+                                @if($period->isPublished())
+                                    @if($period->registrations_count === 0)
+                                        <form action="{{ route('admin.periods.unpublish', $period->id) }}" method="POST" class="m-0">
+                                            @csrf
+                                            <x-button type="submit" color="neutral" variant="outline" size="sm">Batalkan Tayang</x-button>
+                                        </form>
+                                    @endif
+                                @endif
+
+                                @if(!$period->isArchived())
+                                    <a href="{{ route('admin.periods.archive.confirm', $period->id) }}" class="decoration-none">
+                                        <x-button color="danger" variant="outline" size="sm">Arsipkan</x-button>
+                                    </a>
+                                @else
+                                    <form action="{{ route('admin.periods.reopen', $period->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <x-button type="submit" color="primary" variant="outline" size="sm">Buka Kembali</x-button>
+                                    </form>
+                                @endif
+
+                                <form action="{{ route('admin.periods.duplicate', $period->id) }}" method="POST" class="m-0">
+                                    @csrf
+                                    <x-button type="submit" color="neutral" variant="ghost" size="sm">Salin</x-button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-sm text-neutral-400">Belum ada periode. Tambahkan periode pertama.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
-<div class="max-w-4xl">
-    <form action="{{ route('admin.periods.update', $period->id) }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true" class="space-y-6">
-        @csrf
-        @method('PUT')
-        
-        {{-- SECTION 1: Informasi Periode --}}
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
-                <h2 class="text-sm font-bold text-neutral-900">Informasi Periode</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">Tentukan nama dan batas waktu pendaftaran mahasiswa baru.</p>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="name" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Nama Periode <span class="text-error-500">*</span></label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $period->name) }}" required
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('name') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('name')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="year" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Tahun <span class="text-error-500">*</span></label>
-                    <input type="number" id="year" name="year" value="{{ old('year', $period->year) }}" required
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('year') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('year')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="open_date" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Tanggal Buka <span class="text-error-500">*</span></label>
-                    <input type="date" id="open_date" name="open_date" value="{{ old('open_date', $period->open_date->format('Y-m-d')) }}" required
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('open_date') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('open_date')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="close_date" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Tanggal Tutup <span class="text-error-500">*</span></label>
-                    <input type="date" id="close_date" name="close_date" value="{{ old('close_date', $period->close_date->format('Y-m-d')) }}" required
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('close_date') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('close_date')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-            </div>
-        </div>
-
-        {{-- SECTION 3: Rekening Pembayaran --}}
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
-                <h2 class="text-sm font-bold text-neutral-900">Informasi Rekening Kampus</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">Rekening tujuan untuk transfer biaya pendaftaran dari mahasiswa.</p>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="university_bank_name" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Nama Bank</label>
-                    <input type="text" id="university_bank_name" name="university_bank_name" value="{{ old('university_bank_name', $period->university_bank_name) }}" placeholder="Cth: BRI, BCA, BNI"
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('university_bank_name') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('university_bank_name')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="university_bank_account" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Nomor Rekening</label>
-                    <input type="text" id="university_bank_account" name="university_bank_account" value="{{ old('university_bank_account', $period->university_bank_account) }}" placeholder="Cth: 1234567890"
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-mono text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('university_bank_account') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('university_bank_account')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-                <div class="md:col-span-2">
-                    <label for="university_bank_account_name" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Atas Nama (Pemilik Rekening)</label>
-                    <input type="text" id="university_bank_account_name" name="university_bank_account_name" value="{{ old('university_bank_account_name', $period->university_bank_account_name) }}" placeholder="Cth: YPIB Majalengka"
-                           class="w-full px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('university_bank_account_name') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                    @error('university_bank_account_name')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-                </div>
-            </div>
-        </div>
-
-        {{-- SECTION 4: Kontak --}}
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50">
-                <h2 class="text-sm font-bold text-neutral-900">Kontak WhatsApp Admin</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">Nomor kontak resmi yang dihubungi pendaftar untuk konfirmasi.</p>
-            </div>
-            <div class="p-6">
-                <label for="admin_whatsapp" class="block text-xs font-bold text-neutral-700 uppercase tracking-wide mb-2">Nomor WhatsApp</label>
-                <input type="text" id="admin_whatsapp" name="admin_whatsapp" value="{{ old('admin_whatsapp', $period->admin_whatsapp) }}" placeholder="Cth: 081234567890" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                       class="w-full md:w-1/2 px-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-mono text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors {{ $errors->has('admin_whatsapp') ? 'border-error-500 focus:ring-error-500' : '' }}">
-                @error('admin_whatsapp')<p class="mt-1.5 text-xs text-error-600 font-medium">{{ $message }}</p>@enderror
-            </div>
-        </div>
-
-        <div class="flex justify-end gap-3 pt-2">
-            <button type="submit" :disabled="submitting"
-                    class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                <span x-show="!submitting">Simpan Pengaturan</span>
-                <span x-show="submitting" style="display:none;" class="flex items-center gap-2">
-                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    Menyimpan...
-                </span>
-            </button>
-        </div>
-    </form>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        const formatNumber = (n) => {
-            return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        };
-
-        function setupCurrency(displayId, hiddenId) {
-            $('#' + displayId).on('input', function() {
-                let val = $(this).val();
-                let cleanVal = val.replace(/\D/g, "");
-                $(this).val(formatNumber(val));
-                $('#' + hiddenId).val(cleanVal);
-            });
-        }
-
-
-    });
-</script>
 @endsection

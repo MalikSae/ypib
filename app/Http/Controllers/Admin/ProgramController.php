@@ -30,7 +30,11 @@ class ProgramController extends Controller
         $perPage = $request->input('per_page', 10);
         $programs = $query->paginate($perPage)->appends($request->query());
 
-        return view('admin.programs.index', compact('programs'));
+        // Kuota dan biaya ditampilkan dari periode berjalan (nilainya diatur per periode).
+        $displayPeriod = \App\Models\PmbPeriod::displayPeriod();
+        Program::preloadTerms($programs->getCollection(), $displayPeriod);
+
+        return view('admin.programs.index', compact('programs', 'displayPeriod'));
     }
 
     public function create()
@@ -57,11 +61,6 @@ class ProgramController extends Controller
             'registration_track'              => 'required|in:reguler,non_reguler',
             'faculty_id'                      => 'required|exists:faculties,id',
             'accreditation'                   => 'nullable|string|max:50',
-            'quota'                           => 'required|integer|min:0',
-            'registration_fee'                => 'required|integer|min:0',
-            'referral_reward_amount'          => 'required|integer|min:0',
-            're_registration_reward_amount'   => 'required|integer|min:0',
-            're_registration_minimum_payment' => 'required|integer|min:0',
             'is_active'                       => 'boolean',
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
@@ -76,31 +75,18 @@ class ProgramController extends Controller
         \Illuminate\Support\Facades\DB::beginTransaction();
 
         try {
-            $feeDetails = [];
-            $totalReRegistrationFee = 0;
-            if ($request->has('fee_names') && is_array($request->fee_names)) {
-                foreach ($request->fee_names as $index => $name) {
-                    if (!empty($name) && isset($request->fee_amounts[$index])) {
-                        $amount = (int) preg_replace('/\D/', '', $request->fee_amounts[$index]);
-                        $feeDetails[] = [
-                            'name' => $name,
-                            'amount' => $amount
-                        ];
-                        $totalReRegistrationFee += $amount;
-                    }
-                }
-            }
-
             $program = new Program();
-            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
+            $program->fill($request->only(['name', 'kode_prodi', 'registration_track', 'faculty_id', 'accreditation', 'icon']));
             $program->slug = Program::uniqueSlug($request->name);
             $program->description = \App\Support\HtmlSanitizer::clean($request->description);
             $program->is_active = $request->has('is_active');
-            $program->re_registration_fee_details = $feeDetails;
-            $program->re_registration_fee = $totalReRegistrationFee;
-            $program->referral_reward_amount = $request->referral_reward_amount;
-            $program->re_registration_reward_amount = $request->re_registration_reward_amount;
             $program->save();
+
+            // Prodi baru belum punya biaya dan kuota per periode: tidak ditawarkan sampai admin
+            // mengaturnya di "Biaya & Kuota" (mencegah prodi tampil dengan harga bawaan).
+            foreach (\App\Models\PmbPeriod::where('status', '!=', \App\Models\PmbPeriod::STATUS_ARCHIVED)->get() as $period) {
+                \App\Models\PeriodProgram::seedFromPrograms($period, false, $program->id);
+            }
 
             // Handle Galleries
             if ($request->hasFile('gallery')) {
@@ -125,7 +111,7 @@ class ProgramController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
 
-            return redirect()->route('admin.programs.index')->with('success', 'Program Studi berhasil ditambahkan.');
+            return redirect()->route('admin.programs.index')->with('success', 'Program Studi berhasil ditambahkan. Atur biaya dan kuotanya di menu Periode PMB > Biaya & Kuota agar prodi ini ditawarkan.');
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             foreach ($createdPaths as $createdPath) {
@@ -162,11 +148,6 @@ class ProgramController extends Controller
             'registration_track'              => 'required|in:reguler,non_reguler',
             'faculty_id'                      => 'required|exists:faculties,id',
             'accreditation'                   => 'nullable|string|max:50',
-            'quota'                           => 'required|integer|min:0',
-            'registration_fee'                => 'required|integer|min:0',
-            'referral_reward_amount'          => 'required|integer|min:0',
-            're_registration_reward_amount'   => 'required|integer|min:0',
-            're_registration_minimum_payment' => 'required|integer|min:0',
             'is_active'                       => 'boolean',
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
@@ -183,31 +164,12 @@ class ProgramController extends Controller
         try {
             $program = Program::findOrFail($id);
 
-            $feeDetails = [];
-            $totalReRegistrationFee = 0;
-            if ($request->has('fee_names') && is_array($request->fee_names)) {
-                foreach ($request->fee_names as $index => $name) {
-                    if (!empty($name) && isset($request->fee_amounts[$index])) {
-                        $amount = (int) preg_replace('/\D/', '', $request->fee_amounts[$index]);
-                        $feeDetails[] = [
-                            'name' => $name,
-                            'amount' => $amount
-                        ];
-                        $totalReRegistrationFee += $amount;
-                    }
-                }
-            }
-
-            $program->fill($request->except(['gallery', 'is_active', 'fee_names', 'fee_amounts', 're_registration_fee', 'referral_reward_amount', 're_registration_reward_amount']));
+            $program->fill($request->only(['name', 'kode_prodi', 'registration_track', 'faculty_id', 'accreditation', 'icon']));
             if ($program->isDirty('name') || empty($program->slug)) {
                 $program->slug = Program::uniqueSlug($request->name, $program->id);
             }
             $program->description = \App\Support\HtmlSanitizer::clean($request->description);
             $program->is_active = $request->has('is_active');
-            $program->re_registration_fee_details = $feeDetails;
-            $program->re_registration_fee = $totalReRegistrationFee;
-            $program->referral_reward_amount = $request->referral_reward_amount;
-            $program->re_registration_reward_amount = $request->re_registration_reward_amount;
             $program->save();
 
             // Handle Galleries

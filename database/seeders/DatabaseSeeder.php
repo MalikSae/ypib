@@ -164,13 +164,15 @@ class DatabaseSeeder extends Seeder
         // Tanggal relatif terhadap hari ini: periode hasil seed tidak boleh langsung
         // berstatus tutup (PmbPeriod::isOpen() menegakkan open_date/close_date).
         $year = now()->year;
-        PmbPeriod::create([
+        $seededPeriod = PmbPeriod::create([
             'name'                  => 'PMB ' . $year . '/' . ($year + 1),
             'year'                  => $year,
             'open_date'             => now()->startOfMonth()->toDateString(),
             'close_date'            => now()->addMonths(6)->endOfMonth()->toDateString(),
-            'is_active'             => true,
+            're_registration_deadline' => now()->addMonths(8)->endOfMonth()->toDateString(),
+            'status'                => 'published',
         ]);
+        \App\Models\PeriodProgram::seedFromPrograms($seededPeriod);
 
         $this->call([
             FacilitySeeder::class,

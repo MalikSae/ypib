@@ -282,8 +282,9 @@ class PlatformSecurityAndConfigTest extends TestCase
         $admin = $this->makeUser('admin');
         $period = $this->period();
 
-        $this->actingAs($admin)->put("/admin/pengaturan/{$period->id}", [
+        $this->actingAs($admin)->put("/admin/periode/{$period->id}", [
             'name' => 'PMB Baru', 'year' => 2026, 'open_date' => '2026-01-01', 'close_date' => '2026-12-31',
+            're_registration_deadline' => '2027-02-28', 'payment_grace_days' => 3, 'nim_sequence_start' => 1,
             'admin_whatsapp' => '08123', 'is_active' => 0, 'id' => 999,
         ])->assertRedirect(route('admin.periods.index'));
 

@@ -22,10 +22,11 @@
                             <i class="ti ti-bolt text-xs text-neutral-900"></i>
                         </div>
                         <span class="text-white/90 font-bold text-sm">
-                            Pendaftaran dibuka hingga
-                            <span class="text-[#F1B10E]">
-                                {{ isset($period) && $period->close_date ? \Carbon\Carbon::parse($period->close_date)->translatedFormat('d F Y') : 'N/A' }}
-                            </span>
+                            @php [$bannerLabel, $bannerDate] = isset($period) && $period ? $period->publicBanner() : ['Pendaftaran belum dibuka', null]; @endphp
+                            {{ $bannerLabel }}
+                            @if($bannerDate)
+                                <span class="text-[#F1B10E]">{{ $bannerDate }}</span>
+                            @endif
                         </span>
                     </div>
 
@@ -179,7 +180,7 @@
                             <!-- Badges -->
                             <div class="flex flex-wrap gap-2 mb-8">
                                 <span class="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-bold">
-                                    Kuota {{ $program->quota }}
+                                    Kuota {{ $program->termsFor($period ?? null)->quota }}
                                 </span>
                                 <span class="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-bold">
                                     Akreditasi {{ $program->accreditation ?? '-' }}
@@ -191,7 +192,7 @@
                         <div class="flex items-end justify-between pt-6 mt-auto">
                             <div>
                                 <div class="font-black text-lg text-neutral-900 leading-none mb-1">
-                                    Rp {{ number_format($program->registration_fee, 0, ',', '.') }}
+                                    Rp {{ number_format($program->termsFor($period ?? null)->registration_fee, 0, ',', '.') }}
                                 </div>
                                 <div class="text-[11px] font-semibold text-neutral-400 uppercase tracking-wide">
                                     Biaya Pendaftaran
@@ -450,7 +451,13 @@
                 Siap Mulai<br><span class="text-secondary-400">Perjalananmu?</span>
             </h2>
             <p class="text-xl text-primary-100 font-medium mb-12 max-w-2xl mx-auto">
-                Daftarkan dirimu sekarang sebelum kuota penuh. Pendaftaran ditutup pada <strong class="text-white">{{ isset($period) && $period ? \Carbon\Carbon::parse($period->close_date)->translatedFormat('d F Y') : 'N/A' }}</strong>.
+                @if(isset($period) && $period && $period->isOpen())
+                    Daftarkan dirimu sekarang sebelum kuota penuh. Pendaftaran ditutup pada <strong class="text-white">{{ \Carbon\Carbon::parse($period->close_date)->translatedFormat('d F Y') }}</strong>.
+                @elseif(isset($period) && $period)
+                    {{ $period->publicBanner()[0] }} <strong class="text-white">{{ $period->publicBanner()[1] }}</strong>.
+                @else
+                    Pendaftaran belum dibuka. Pantau terus informasi terbaru dari kami.
+                @endif
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">

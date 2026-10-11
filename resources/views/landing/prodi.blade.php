@@ -80,7 +80,7 @@
                     </p>
                 @endif
 
-                @if(!empty($program->re_registration_fee_details) && count($program->re_registration_fee_details) > 0)
+                @if(!empty($program->termsFor($period ?? null)->re_registration_fee_details) && count($program->termsFor($period ?? null)->re_registration_fee_details) > 0)
                 <div style="margin-bottom:48px;">
                     <h3 style="font-size:22px; font-weight:700;  margin:0 0 24px 0; letter-spacing:-0.5px;" class="text-neutral-900">
                         Rincian Biaya Daftar Ulang
@@ -95,7 +95,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($program->re_registration_fee_details as $index => $detail)
+                                @foreach($program->termsFor($period ?? null)->re_registration_fee_details as $index => $detail)
                                 <tr style="border-bottom:1px solid #DEE3E9; background:{{ $loop->even ? '#F9FAFB' : '#FFFFFF' }};">
                                     <td style="padding:16px 24px; font-size:14px;  text-align:center;" class="text-neutral-500">{{ $index + 1 }}</td>
                                     <td style="padding:16px 24px; font-size:14px; font-weight:500;  text-transform:uppercase;" class="text-neutral-900">{{ $detail['name'] }}</td>
@@ -109,7 +109,7 @@
                                 <tr>
                                     <td colspan="2" style="padding:16px 24px; text-align:right; font-weight:800; font-size:15px;" class="text-neutral-900">JUMLAH</td>
                                     <td style="padding:16px 24px; text-align:right; font-weight:800; font-size:18px;" class="text-primary-600">
-                                        {{ number_format($program->re_registration_fee, 0, ',', '.') }}
+                                        {{ number_format($program->termsFor($period ?? null)->re_registration_fee, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             </tfoot>
@@ -166,7 +166,7 @@
                         <div>
                             <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;" class="text-neutral-500 mb-1">Biaya Pendaftaran</div>
                             <div style="font-size:32px; font-weight:700; letter-spacing:-1px; line-height:1;" class="text-neutral-900">
-                                Rp {{ number_format($program->registration_fee,0,',','.') }}
+                                Rp {{ number_format($program->termsFor($period ?? null)->registration_fee,0,',','.') }}
                             </div>
                         </div>
                         <!-- Accreditation Logo -->
@@ -192,17 +192,24 @@
                         <div style="font-size:14px; font-weight:500;" class="text-neutral-600">Kuota Mahasiswa</div>
                         <div style="font-size:16px; font-weight:700;" class="text-neutral-900 flex items-center gap-2">
                             <svg style="width:18px;height:18px;" class="text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
-                            {{ $program->quota }} Kursi
+                            {{ $program->termsFor($period ?? null)->quota }} Kursi
                         </div>
                     </div>
 
                     <!-- CTA Button -->
-                    <a href="{{ route('registration.create', ['prodi' => $program->id]) }}" 
-                       class="flex items-center justify-center gap-2 w-full py-3 mt-1 rounded-lg text-white font-semibold text-base transition-colors hover:bg-[#071f5c]" 
-                       style="background: #0B2B7F;">
-                        Daftar ke Prodi Ini
-                        <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </a>
+                    @if(isset($period) && $period && $period->isOpen())
+                        <a href="{{ route('registration.create', ['prodi' => $program->id]) }}"
+                           class="flex items-center justify-center gap-2 w-full py-3 mt-1 rounded-lg text-white font-semibold text-base transition-colors hover:bg-[#071f5c]"
+                           style="background: #0B2B7F;">
+                            Daftar ke Prodi Ini
+                            <svg style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                        </a>
+                    @else
+                        @php [$closedLabel, $closedDate] = isset($period) && $period ? $period->publicBanner() : ['Pendaftaran belum dibuka', null]; @endphp
+                        <div class="flex items-center justify-center w-full py-3 mt-1 rounded-lg bg-neutral-100 text-neutral-500 font-semibold text-sm text-center" aria-disabled="true">
+                            {{ $closedLabel }}@if($closedDate) {{ $closedDate }}@endif
+                        </div>
+                    @endif
                 </div>
             </div>
 

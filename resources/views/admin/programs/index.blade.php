@@ -54,7 +54,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Prodi</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tipe</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Fakultas</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota <span class="normal-case font-normal">(periode berjalan)</span></th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
@@ -86,11 +86,11 @@
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200">
-                            {{ $program->quota }}
+                            {{ $program->termsFor($displayPeriod)->quota }}
                         </span>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($program->registration_fee, 0, ',', '.') }}</span>
+                        <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($program->termsFor($displayPeriod)->registration_fee, 0, ',', '.') }}</span>
                     </td>
                     <td class="px-6 py-4">
                         {{-- Toggle Status --}}

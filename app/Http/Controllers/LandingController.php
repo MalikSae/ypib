@@ -12,9 +12,10 @@ class LandingController extends Controller
 {
     public function index()
     {
-        $programs = Program::with('faculty')->active()->get();
-        $period   = PmbPeriod::active()->first();
-        $faculties = Faculty::with(['programs' => fn($q) => $q->active()])->get();
+        $period   = PmbPeriod::displayPeriod();
+        $programs = Program::with('faculty')->offeredIn($period)->get();
+        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredIn($period)])->get();
+        Program::preloadTerms($programs->concat($faculties->pluck('programs')->flatten()), $period);
         $partners  = Partner::where('is_active', true)->orderBy('id')->get();
         $facilities = Facility::active()->get();
 
@@ -23,11 +24,12 @@ class LandingController extends Controller
 
     public function preview()
     {
-        $programs  = Program::with('faculty', 'galleries')->active()->get();
-        $faculties = Faculty::with(['programs' => fn($q) => $q->active()])->get();
+        $period    = PmbPeriod::displayPeriod();
+        $programs  = Program::with('faculty', 'galleries')->offeredIn($period)->get();
+        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredIn($period)])->get();
         $partners  = Partner::where('is_active', true)->orderBy('id')->get();
         $facilities = Facility::active()->get();
-        $period    = PmbPeriod::active()->first();
+        Program::preloadTerms($programs->concat($faculties->pluck('programs')->flatten()), $period);
 
         return view('landing.preview', compact(
             'programs', 'faculties', 'partners', 'facilities', 'period'
@@ -36,8 +38,8 @@ class LandingController extends Controller
 
     public function prodi(string $slug)
     {
-        $program = Program::with(['faculty', 'galleries'])->where('slug', $slug)->where('is_active', true)->firstOrFail();
-        $period  = PmbPeriod::active()->first();
+        $period  = PmbPeriod::displayPeriod();
+        $program = Program::with(['faculty', 'galleries'])->offeredIn($period)->where('slug', $slug)->firstOrFail();
 
         return view('landing.prodi', compact('program', 'period'));
     }

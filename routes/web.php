@@ -95,9 +95,30 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // Pengaturan PMB
-        Route::get('/pengaturan', [\App\Http\Controllers\Admin\PmbPeriodController::class, 'index'])->name('periods.index');
-        Route::put('/pengaturan/{id}', [\App\Http\Controllers\Admin\PmbPeriodController::class, 'update'])->name('periods.update');
+        // Periode PMB
+        Route::redirect('/pengaturan', '/admin/periode');
+        Route::prefix('periode')->name('periods.')->group(function () {
+            $c = \App\Http\Controllers\Admin\PmbPeriodController::class;
+
+            Route::get('/', [$c, 'index'])->name('index');
+            Route::get('/buat', [$c, 'create'])->name('create');
+            Route::post('/', [$c, 'store'])->name('store');
+            Route::post('/pilih', [$c, 'select'])->name('select');
+            Route::get('/{id}/edit', [$c, 'edit'])->whereNumber('id')->name('edit');
+            Route::put('/{id}', [$c, 'update'])->whereNumber('id')->name('update');
+            Route::post('/{id}/tayangkan', [$c, 'publish'])->whereNumber('id')->name('publish');
+            Route::post('/{id}/batalkan-tayang', [$c, 'unpublish'])->whereNumber('id')->name('unpublish');
+            Route::get('/{id}/arsip', [$c, 'archiveConfirm'])->whereNumber('id')->name('archive.confirm');
+            Route::post('/{id}/arsip', [$c, 'archive'])->whereNumber('id')->name('archive');
+            Route::post('/{id}/buka-kembali', [$c, 'reopen'])->whereNumber('id')->name('reopen');
+            Route::post('/{id}/salin', [$c, 'duplicate'])->whereNumber('id')->name('duplicate');
+
+            // Biaya, kuota, dan komisi per prodi pada periode ini (K6).
+            $p = \App\Http\Controllers\Admin\PeriodProgramController::class;
+            Route::get('/{id}/biaya', [$p, 'edit'])->whereNumber('id')->name('pricing');
+            Route::put('/{id}/biaya', [$p, 'update'])->whereNumber('id')->name('pricing.update');
+            Route::post('/{id}/biaya/salin', [$p, 'copy'])->whereNumber('id')->name('pricing.copy');
+        });
 
         // Pengaturan Email
         Route::get('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'mail'])->name('settings.mail');
