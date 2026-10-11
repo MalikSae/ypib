@@ -19,7 +19,8 @@ class RegistrationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Registration::with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
+        $periodId = \App\Support\AdminPeriod::id();
+        $query = Registration::forPeriod($periodId)->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -39,7 +40,7 @@ class RegistrationController extends Controller
         $registrations = $query->latest()->paginate(20)->withQueryString();
 
         // Calculate counts for the tabs
-        $statusCounts = Registration::select('status', \DB::raw('count(*) as total'))
+        $statusCounts = Registration::forPeriod($periodId)->select('status', \DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
@@ -47,7 +48,12 @@ class RegistrationController extends Controller
         
         $programs = \App\Models\Program::where('is_active', true)->get();
 
-        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations', 'programs'));
+        // NIK yang dipakai lebih dari satu pendaftaran aktif (tanda "NIK ganda", K7).
+        $duplicateNiks = Registration::whereIn('nik', $registrations->pluck('nik')->filter()->unique())
+            ->select('nik')->groupBy('nik')->havingRaw('COUNT(*) > 1')
+            ->pluck('nik')->flip()->all();
+
+        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations', 'programs', 'duplicateNiks'));
     }
 
     public function show(int $id)
@@ -72,7 +78,13 @@ class RegistrationController extends Controller
             $cities = ["Cirebon","Majalengka","Indramayu","Kuningan","Bandung","Jakarta","Surabaya","Semarang","Yogyakarta","Bekasi","Tangerang","Bogor","Depok"];
         }
 
-        return view('admin.registrations.show', compact('registration', 'referrers', 'cities'));
+        // Pendaftaran lain dengan NIK sama (tanda "NIK ganda" / "ber-NIM sebelumnya").
+        $nikMatches = Registration::with(['period', 'firstChoiceProgram'])
+            ->where('nik', $registration->nik)
+            ->where('id', '!=', $registration->id)
+            ->latest('id')->get();
+
+        return view('admin.registrations.show', compact('registration', 'referrers', 'cities', 'nikMatches'));
     }
 
     public function confirmPayment(Request $request, int $id)
@@ -152,19 +164,32 @@ class RegistrationController extends Controller
                     'converted_at' => now(),
                 ]);
 
-            Referrer::where('id', $registration->referrer_id)->increment('total_conversions');
+            // Satu komisi pendaftaran per orang (NIK) seumur hidup (K8): berlaku lintas periode
+            // dan lintas prodi. Reward berstatus cancelled tidak dihitung.
+            $personAlreadyRewarded = Reward::where('reward_type', 'registration')
+                ->where('status', '!=', 'cancelled')
+                ->where('nik', $registration->nik)
+                ->exists();
 
-            if (!$registration->rewards()->where('reward_type', 'registration')->exists()) {
-                $amount = $registration->firstChoiceProgram?->referral_reward_amount ?? 50000;
-                Reward::create([
-                    'referrer_id'     => $registration->referrer_id,
-                    'registration_id' => $registration->id,
-                    'amount'          => $amount,
-                    'reward_type'     => 'registration',
-                    'status'          => 'approved',
-                    'approved_by'     => Auth::id(),
-                    'approved_at'     => now(),
-                ]);
+            if (!$personAlreadyRewarded
+                && !$registration->rewards()->where('reward_type', 'registration')->exists()) {
+                $amount = $registration->programTerms()?->referral_reward_amount ?? 50000;
+
+                DB::transaction(function () use ($registration, $amount) {
+                    Reward::create([
+                        'referrer_id'     => $registration->referrer_id,
+                        'registration_id' => $registration->id,
+                        'nik'             => $registration->nik,
+                        'amount'          => $amount,
+                        'reward_type'     => 'registration',
+                        'status'          => 'approved',
+                        'approved_by'     => Auth::id(),
+                        'approved_at'     => now(),
+                    ]);
+
+                    // Counter hanya bertambah bila komisi benar-benar dibuat.
+                    Referrer::where('id', $registration->referrer_id)->increment('total_conversions');
+                });
             }
         }
 
@@ -297,7 +322,52 @@ class RegistrationController extends Controller
             ]);
         });
 
-        return redirect()->back()->with('success', 'Data pendaftar berhasil diperbarui.');
+        $message = 'Data pendaftar berhasil diperbarui.';
+
+        if ($registration->wasChanged('nik')) {
+            $others = Registration::where('nik', $registration->nik)->where('id', '!=', $registration->id)->count();
+            if ($others > 0) {
+                $message .= " Peringatan: NIK ini juga dipakai {$others} pendaftaran lain (NIK ganda). Tinjau di bagian peringatan NIK.";
+            }
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Penanda admin: NIK pada pendaftaran ber-NIM ini boleh mendaftar lagi pada prodi yang sama
+     * (mis. kembali setelah cuti atau keluar). Alasan wajib; perubahan tercatat di log pendaftaran.
+     */
+    public function setReapply(Request $request, int $id)
+    {
+        $registration = Registration::findOrFail($id);
+
+        if (empty($registration->nim) && $registration->status !== 'daftar_ulang_selesai') {
+            return redirect()->back()->with('error', 'Penanda ini hanya untuk pendaftaran yang sudah ber-NIM.');
+        }
+
+        $data = $request->validate([
+            'allowed' => 'required|boolean',
+            'note'    => 'required|string|max:1000',
+        ], [
+            'note.required' => 'Alasan wajib diisi.',
+        ]);
+
+        $allowed = (bool) $data['allowed'];
+
+        $registration->forceFill([
+            'reapply_allowed' => $allowed,
+            'reapply_note'    => $allowed ? $data['note'] : null,
+        ])->save();
+
+        PaymentLog::create([
+            'registration_id' => $registration->id,
+            'acted_by'        => Auth::id(),
+            'action'          => $allowed ? 'reapply_allowed' : 'reapply_revoked',
+            'note'            => ($allowed ? 'Admin mengizinkan NIK ini mendaftar lagi pada prodi yang sama. ' : 'Admin mencabut izin daftar lagi. ') . 'Alasan: ' . $data['note'],
+        ]);
+
+        return redirect()->back()->with('success', $allowed ? 'NIK ini diizinkan mendaftar lagi pada prodi yang sama.' : 'Izin daftar lagi dicabut.');
     }
 
     public function resetExam(int $id)
@@ -403,6 +473,7 @@ class RegistrationController extends Controller
             }
         }
 
+        try {
         \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request) {
             $registration->status = 'daftar_ulang_selesai';
             
@@ -430,12 +501,19 @@ class RegistrationController extends Controller
                     ->where('reward_type', 're_registration')
                     ->first();
 
-                if (!$existingReward) {
-                    $amount = $registration->firstChoiceProgram?->re_registration_reward_amount ?? 0;
+                // Satu komisi daftar ulang per orang (NIK) seumur hidup (K8).
+                $personAlreadyRewarded = Reward::where('reward_type', 're_registration')
+                    ->where('status', '!=', 'cancelled')
+                    ->where('nik', $registration->nik)
+                    ->exists();
+
+                if (!$existingReward && !$personAlreadyRewarded) {
+                    $amount = $registration->programTerms()?->re_registration_reward_amount ?? 0;
                     if ($amount > 0) {
                         Reward::create([
                             'referrer_id'     => $registration->referrer_id,
                             'registration_id' => $registration->id,
+                            'nik'             => $registration->nik,
                             'amount'          => $amount,
                             'reward_type'     => 're_registration',
                             'status'          => 'approved',
@@ -446,6 +524,12 @@ class RegistrationController extends Controller
                 }
             }
         });
+        } catch (\RuntimeException $e) {
+            // Urutan NIM penuh: tidak ada yang tersimpan (transaksi dibatalkan).
+            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return redirect()->back()->with('error', 'NIM bentrok dengan NIM lain yang baru terbit. Coba konfirmasi ulang sekali lagi.');
+        }
 
         return redirect()->back()->with('success', 'Pembayaran daftar ulang berhasil dikonfirmasi.');
     }
@@ -742,7 +826,8 @@ class RegistrationController extends Controller
 
     public function trash(Request $request)
     {
-        $query = Registration::onlyTrashed()->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
+        $periodId = \App\Support\AdminPeriod::id();
+        $query = Registration::forPeriod($periodId)->onlyTrashed()->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -752,7 +837,7 @@ class RegistrationController extends Controller
         }
 
         $registrations = $query->latest('deleted_at')->paginate(20)->withQueryString();
-        $totalRegistrations = Registration::onlyTrashed()->count();
+        $totalRegistrations = Registration::forPeriod($periodId)->onlyTrashed()->count();
 
         return view('admin.registrations.trash', compact('registrations', 'totalRegistrations'));
     }
@@ -760,6 +845,16 @@ class RegistrationController extends Controller
     public function restore(int $id)
     {
         $registration = Registration::onlyTrashed()->findOrFail($id);
+
+        // Satu pendaftaran aktif per akun per periode: pulihkan akan bentrok bila sudah ada yang baru.
+        $conflict = Registration::where('user_id', $registration->user_id)
+            ->where('period_id', $registration->period_id)
+            ->exists();
+
+        if ($conflict) {
+            return redirect()->back()->with('error', 'Tidak dapat dipulihkan: akun ini sudah punya pendaftaran aktif pada periode yang sama. Hapus atau selesaikan yang aktif dulu.');
+        }
+
         $registration->restore();
 
         return redirect()->back()->with('success', 'Pendaftar berhasil dipulihkan. Reward/komisi terkait perlu dicek manual jika diperlukan.');
@@ -769,7 +864,11 @@ class RegistrationController extends Controller
     {
         $request->validate(['format' => 'nullable|in:xlsx,csv']);
 
-        $export = new \App\Exports\RegistrationExport($request->query('prodi'), $request->query('status'));
+        $export = new \App\Exports\RegistrationExport(
+            $request->query('prodi'),
+            $request->query('status'),
+            \App\Support\AdminPeriod::id()
+        );
         $stamp = date('Ymd_His');
 
         if ($request->query('format') === 'csv') {
@@ -811,9 +910,10 @@ class RegistrationController extends Controller
         $statusDaftarUlang = ['daftar_ulang_selesai'];
 
         $programs = \App\Models\Program::orderBy('name')->get();
+        $periodId = \App\Support\AdminPeriod::id();
 
-        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang) {
-            $base = Registration::where('first_choice_program_id', $program->id);
+        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang, $periodId) {
+            $base = Registration::forPeriod($periodId)->where('first_choice_program_id', $program->id);
 
             // Pendaftar = hanya yang sudah lunas (exclude belum bayar)
             $pendaftar   = (clone $base)->whereNotIn('status', $statusBelumBayar)->count();
@@ -846,9 +946,10 @@ class RegistrationController extends Controller
         $statusDaftarUlang = ['daftar_ulang_selesai'];
 
         $programs = \App\Models\Program::orderBy('name')->get();
+        $periodId = \App\Support\AdminPeriod::id();
 
-        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang) {
-            $base = Registration::where('first_choice_program_id', $program->id);
+        $rows = $programs->map(function ($program) use ($statusBelumBayar, $statusLulus, $statusDaftarUlang, $periodId) {
+            $base = Registration::forPeriod($periodId)->where('first_choice_program_id', $program->id);
 
             return [
                 'nama_prodi'   => $program->name,

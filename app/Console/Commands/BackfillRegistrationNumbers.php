@@ -82,7 +82,13 @@ class BackfillRegistrationNumbers extends Command
                     if (empty($r->firstChoiceProgram?->kode_prodi)) {
                         $skip[] = 'NIM dilewati: prodi "' . ($r->firstChoiceProgram?->name ?? '?') . '" belum punya Kode Prodi';
                     } else {
-                        $nim = $r->generateNim();
+                        try {
+                            $nim = $r->generateNim();
+                        } catch (\RuntimeException $e) {
+                            $nim = null;
+                            $skip[] = 'NIM dilewati: ' . $e->getMessage();
+                        }
+
                         if ($nim === null) {
                             $skip[] = 'NIM dilewati: tidak dapat dibentuk';
                         } else {

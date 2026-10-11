@@ -201,7 +201,11 @@ $activeStatus = request('status', '');
                     <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                         {{-- Pendaftar (Nama + Email) --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $reg->full_name }}</div>
+                            <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $reg->full_name }}
+                                @if(isset($duplicateNiks[$reg->nik]))
+                                    <span title="NIK ini dipakai lebih dari satu pendaftaran" class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning-50 text-warning-700 border border-warning-200 whitespace-nowrap">NIK ganda</span>
+                                @endif
+                            </div>
                             <div class="text-xs text-neutral-400 mt-0.5">{{ $reg->user?->email }}</div>
                         </td>
 

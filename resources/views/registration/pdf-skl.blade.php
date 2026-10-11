@@ -59,19 +59,19 @@
 
     <ol>
         <li>Pembayaran paket kuliah dilaksanakan sesuai jadwal yang diinformasikan panitia
-            @if(($registration->firstChoiceProgram->re_registration_minimum_payment ?? 0) > 0)
-                , dengan pembayaran tahap awal minimal <strong>Rp {{ number_format($registration->firstChoiceProgram->re_registration_minimum_payment, 0, ',', '.') }}</strong>
+            @if(($registration->programTerms()->re_registration_minimum_payment ?? 0) > 0)
+                , dengan pembayaran tahap awal minimal <strong>Rp {{ number_format($registration->programTerms()->re_registration_minimum_payment, 0, ',', '.') }}</strong>
             @endif
             .</li>
         <li>Pembayaran dilakukan melalui:<br>
             <strong>{{ $registration->period->university_bank_name ?? '-' }}</strong><br>
             No. Rekening: <strong>{{ $registration->period->university_bank_account ?? '-' }}</strong><br>
             Atas Nama: <strong>{{ $registration->period->university_bank_account_name ?? '-' }}</strong></li>
-        <li>Total biaya Paket Kuliah sebesar <strong>Rp {{ number_format($registration->firstChoiceProgram->re_registration_fee ?? 0, 0, ',', '.') }}</strong>
-            @if(!empty($registration->firstChoiceProgram->re_registration_fee_details))
+        <li>Total biaya Paket Kuliah sebesar <strong>Rp {{ number_format($registration->programTerms()->re_registration_fee ?? 0, 0, ',', '.') }}</strong>
+            @if(!empty($registration->programTerms()->re_registration_fee_details))
                 , dengan rincian:
                 <ul>
-                @foreach($registration->firstChoiceProgram->re_registration_fee_details as $detail)
+                @foreach($registration->programTerms()->re_registration_fee_details as $detail)
                     <li>{{ $detail['name'] }}: Rp {{ number_format($detail['amount'], 0, ',', '.') }}</li>
                 @endforeach
                 </ul>

@@ -12,6 +12,7 @@ class Reward extends Model
     protected $fillable = [
         'referrer_id',
         'registration_id',
+        'nik',
         'amount',
         'reward_type',
         'status',

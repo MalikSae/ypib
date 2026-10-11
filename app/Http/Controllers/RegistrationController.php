@@ -13,29 +13,34 @@ class RegistrationController extends Controller
 {
     public function create(Request $request)
     {
-        $period = PmbPeriod::active()->first();
+        $hasAnyRegistration = Auth::check() && Registration::where('user_id', Auth::id())->exists();
+        $period = PmbPeriod::current();
 
         if (!$period) {
-            return redirect()->route('landing')->with('error', 'Pendaftaran belum dibuka.');
+            // Pendaftar lama tetap diarahkan ke halaman statusnya.
+            if ($hasAnyRegistration) {
+                return redirect()->route('registration.status');
+            }
+
+            $message = PmbPeriod::displayPeriod()
+                ? 'Pendaftaran belum dibuka atau sudah ditutup.'
+                : 'Pendaftaran belum dibuka.';
+
+            return redirect()->route('landing')->with('error', $message);
         }
 
-        // Pendaftar yang sudah punya registrasi tetap diarahkan ke status (lihat bawah).
-        if (!$period->isOpen() && !(Auth::check() && Registration::where('user_id', Auth::id())->exists())) {
-            return redirect()->route('landing')->with('error', 'Pendaftaran belum dibuka atau sudah ditutup.');
+        // Hanya pendaftaran di periode berjalan yang mengalihkan ke status; akun yang mendaftar
+        // pada tahun ajaran lalu boleh mendaftar lagi (K1, diperiksa K7 saat submit).
+        if (Auth::check() && Registration::where('user_id', Auth::id())->where('period_id', $period->id)->exists()) {
+            return redirect()->route('registration.status');
         }
-        
+
         $prodiId = $request->query('prodi');
         if (!$prodiId) {
             return redirect()->route('landing')->with('error', 'Silakan pilih program studi terlebih dahulu.');
         }
 
-        // Jika sudah login dan sudah punya registrasi, redirect ke status
-        if (Auth::check()) {
-            $existing = Registration::where('user_id', Auth::id())->first();
-            if ($existing) {
-                return redirect()->route('registration.status');
-            }
-        } else {
+        if (!Auth::check()) {
             session()->put('url.intended', request()->fullUrl());
         }
 
@@ -49,22 +54,36 @@ class RegistrationController extends Controller
 
     public function status()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with(['firstChoiceProgram', 'secondChoiceProgram', 'period'])
-            ->latest()
-            ->first();
+        $registration = $this->ownRegistration(['firstChoiceProgram', 'secondChoiceProgram', 'period'], false);
 
         $timelineStages = $registration ? $registration->getTimelineStages() : [];
+        $reapply = $registration ? $this->reapplyOffer($registration) : null;
+        $windowNotice = $registration ? \App\Support\RegistrationWindow::notice($registration) : null;
 
-        return view('registration.status', compact('registration', 'timelineStages'));
+        // Riwayat: seluruh pendaftaran akun ini, dan langkah tertunda di pendaftaran lain (T7).
+        $myRegistrations = collect();
+        $pendingElsewhere = collect();
+
+        if ($registration) {
+            $myRegistrations = Registration::with(['period', 'firstChoiceProgram'])
+                ->where('user_id', Auth::id())
+                ->latest('id')
+                ->get();
+
+            $actionStatuses = ['menunggu_pembayaran', 'terdaftar', 'menunggu_tes_tulis', 'diterima'];
+            $pendingElsewhere = $myRegistrations->filter(fn ($other) => $other->id !== $registration->id
+                && in_array($other->status, $actionStatuses, true)
+                && !$other->period?->isArchived());
+        }
+
+        return view('registration.status', compact(
+            'registration', 'timelineStages', 'reapply', 'windowNotice', 'myRegistrations', 'pendingElsewhere'
+        ));
     }
 
     public function documents()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with('documents')
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration('documents');
 
         if (in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
             return redirect()->route('registration.status')->with('error', 'Selesaikan pembayaran terlebih dahulu.');
@@ -101,10 +120,15 @@ class RegistrationController extends Controller
             'payment_proof.max'      => 'Ukuran file maksimal 2MB.',
         ]);
 
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         if (!in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
             return redirect()->route('registration.status')->with('error', 'Upload tidak dapat dilakukan pada tahap pendaftaran saat ini.');
+        }
+
+        // Bukti pertama hanya dalam masa bayar periode; periode arsip hanya baca (PMB_ENFORCE_WINDOW).
+        if ($denied = \App\Support\RegistrationWindow::denyFirstProof($registration->loadMissing('period'))) {
+            return redirect()->route('registration.status')->with('error', $denied);
         }
 
         // Hapus file lama jika ada
@@ -131,10 +155,15 @@ class RegistrationController extends Controller
             'alumni_card_proof.max'      => 'Ukuran file maksimal 2MB.',
         ]);
 
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         if (!in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
             return redirect()->route('registration.status')->with('error', 'Upload tidak dapat dilakukan pada tahap pendaftaran saat ini.');
+        }
+
+        // Bukti pertama hanya dalam masa bayar periode; periode arsip hanya baca (PMB_ENFORCE_WINDOW).
+        if ($denied = \App\Support\RegistrationWindow::denyFirstProof($registration->loadMissing('period'))) {
+            return redirect()->route('registration.status')->with('error', $denied);
         }
 
         // Hapus file lama jika ada
@@ -165,11 +194,15 @@ class RegistrationController extends Controller
             'label.required_if' => 'Nama dokumen wajib diisi untuk dokumen tambahan.',
         ]);
 
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         // Gerbang yang sama dengan halaman documents()
         if (in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
             return redirect()->route('registration.status')->with('error', 'Selesaikan pembayaran terlebih dahulu.');
+        }
+
+        if ($denied = \App\Support\RegistrationWindow::denyMutation($registration->loadMissing('period'))) {
+            return redirect()->route('registration.documents')->with('error', $denied);
         }
 
         if (!$registration->isFormComplete()) {
@@ -234,10 +267,14 @@ class RegistrationController extends Controller
             're_registration_payment_proof.max'      => 'Ukuran file maksimal 2MB.',
         ]);
 
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         if ($registration->status !== 'diterima' && $registration->status !== 'menunggu_konfirmasi_daftar_ulang') {
             return redirect()->route('registration.status')->with('error', 'Status pendaftaran belum memenuhi syarat untuk daftar ulang.');
+        }
+
+        if ($denied = \App\Support\RegistrationWindow::denyReRegistrationProof($registration->loadMissing('period'))) {
+            return redirect()->route('registration.status')->with('error', $denied);
         }
 
         // Hapus file lama jika ada
@@ -256,10 +293,7 @@ class RegistrationController extends Controller
 
     public function reRegistration()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with(['firstChoiceProgram', 'period'])
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration(['firstChoiceProgram', 'period']);
 
         if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
             return redirect()->route('registration.status')->with('error', 'Anda belum sampai pada tahap Daftar Ulang.');
@@ -270,10 +304,7 @@ class RegistrationController extends Controller
 
     public function detail()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with('firstChoiceProgram')
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration('firstChoiceProgram');
 
         $canEdit = !$registration->isDetailLocked();
 
@@ -282,10 +313,14 @@ class RegistrationController extends Controller
 
     public function updateDetail(Request $request)
     {
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         if ($registration->isDetailLocked()) {
             return redirect()->back()->with('error', 'Data tidak bisa diedit lagi karena pendaftaran sudah diproses.');
+        }
+
+        if ($denied = \App\Support\RegistrationWindow::denyMutation($registration->loadMissing('period'))) {
+            return redirect()->back()->with('error', $denied);
         }
 
         $section = $request->input('section');
@@ -336,10 +371,27 @@ class RegistrationController extends Controller
 
         $validatedData = $request->validate($rules);
 
+        // Mengubah NIK tidak boleh dipakai melewati aturan satu proses aktif per orang (K7).
+        if ($section === 'data_diri'
+            && (string) $validatedData['nik'] !== (string) $registration->nik
+            && \App\Support\NikGuard::blocks($validatedData['nik'], (int) $registration->first_choice_program_id, $registration->id)) {
+            return redirect()->back()->withInput()->withErrors([
+                'nik' => \App\Support\NikGuard::message($registration->period),
+            ]);
+        }
+
         // Pindah prodi: tolak bila prodi tujuan sudah penuh pada periode ini.
         if ($section === 'program_jalur'
             && (int) $validatedData['first_choice_program_id'] !== (int) $registration->first_choice_program_id) {
             $target = \App\Models\Program::find($validatedData['first_choice_program_id']);
+
+            // Prodi tujuan harus ditawarkan pada periode pendaftaran ini (period_programs).
+            if ($target && !\App\Models\Program::offeredIn($registration->period_id)->whereKey($target->id)->exists()) {
+                return redirect()->back()->withInput()->withErrors([
+                    'first_choice_program_id' => 'Program studi tujuan tidak ditawarkan pada periode pendaftaran Anda.',
+                ]);
+            }
+
             if ($target && $target->isFull($registration->period_id)) {
                 return redirect()->back()->withInput()->withErrors([
                     'first_choice_program_id' => 'Kuota program studi tujuan sudah penuh. Silakan pilih program studi lain.',
@@ -356,10 +408,7 @@ class RegistrationController extends Controller
 
     public function downloadPdf()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with(['firstChoiceProgram', 'documents'])
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration(['firstChoiceProgram', 'documents']);
 
         // Nomor pendaftaran baru diberikan saat pembayaran dikonfirmasi. Sebelum itu formulir
         // tetap bisa diunduh tanpa QR (view sudah menangani $qrCodeBase64 yang null).
@@ -378,10 +427,7 @@ class RegistrationController extends Controller
 
     public function downloadSkl()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with(['firstChoiceProgram', 'period'])
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration(['firstChoiceProgram', 'period']);
 
         if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
             return redirect()->route('registration.status')->with('error', 'Anda belum dinyatakan lulus.');
@@ -395,10 +441,7 @@ class RegistrationController extends Controller
 
     public function downloadEktm()
     {
-        $registration = Registration::where('user_id', Auth::id())
-            ->with(['firstChoiceProgram.faculty', 'documents'])
-            ->latest()
-            ->firstOrFail();
+        $registration = $this->ownRegistration(['firstChoiceProgram.faculty', 'documents']);
 
         if (empty($registration->nim)) {
             return redirect()->back()->with('error', 'NIM belum tersedia, e-KTM belum bisa didownload.');
@@ -465,7 +508,7 @@ class RegistrationController extends Controller
 
     public function exam()
     {
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration();
 
         if ($registration->status !== 'menunggu_tes_tulis') {
             $session = \App\Models\ExamSession::where('registration_id', $registration->id)->where('status', 'completed')->first();
@@ -473,6 +516,10 @@ class RegistrationController extends Controller
                 return view('registration.exam', ['session' => $session, 'registration' => $registration, 'isCompleted' => true]);
             }
             return redirect()->route('registration.status')->with('error', 'Status Anda belum memenuhi syarat untuk tes tulis.');
+        }
+
+        if ($denied = \App\Support\RegistrationWindow::denyMutation($registration->loadMissing('period'))) {
+            return redirect()->route('registration.status')->with('error', $denied);
         }
 
         $session = \App\Models\ExamSession::where('registration_id', $registration->id)->first();
@@ -525,6 +572,10 @@ class RegistrationController extends Controller
             return response()->json(['success' => false, 'message' => 'Ujian sudah selesai'], 403);
         }
 
+        if ($denied = \App\Support\RegistrationWindow::denyMutation($session->registration->loadMissing('period'))) {
+            return response()->json(['success' => false, 'message' => $denied], 403);
+        }
+
         $answer->update(['selected_option' => $validated['selected_option']]);
 
         return response()->json(['success' => true]);
@@ -532,7 +583,12 @@ class RegistrationController extends Controller
 
     public function submitExam(Request $request)
     {
-        $registration = Registration::where('user_id', Auth::id())->latest()->firstOrFail();
+        $registration = $this->ownRegistration('period');
+
+        if ($denied = \App\Support\RegistrationWindow::denyMutation($registration)) {
+            return redirect()->route('registration.status')->with('error', $denied);
+        }
+
         $session = \App\Models\ExamSession::where('registration_id', $registration->id)
             ->where('status', 'in_progress')
             ->firstOrFail();
@@ -574,12 +630,65 @@ class RegistrationController extends Controller
 
     public function interview()
     {
-        $registration = Registration::where('user_id', Auth::id())->with('period')->latest()->firstOrFail();
+        $registration = $this->ownRegistration('period');
 
         if ($registration->status !== 'menunggu_interview') {
             return redirect()->route('registration.status')->with('error', 'Status Anda bukan di tahap interview saat ini.');
         }
 
         return view('registration.interview', compact('registration'));
+    }
+
+    /**
+     * Pendaftaran yang sedang dilihat akun ini: `?periode=` bila ada, selain itu di periode
+     * berjalan, selain itu yang terbaru. Hanya milik akun yang login.
+     */
+    private function ownRegistration(array|string $with = [], bool $orFail = true): ?Registration
+    {
+        $registration = \App\Support\CurrentRegistration::forRequest(Auth::user(), request());
+
+        if (!$registration) {
+            if ($orFail) {
+                abort(404);
+            }
+
+            return null;
+        }
+
+        return $with ? $registration->load($with) : $registration;
+    }
+
+    /**
+     * Tawaran "Daftar di periode berjalan" pada halaman status: ada periode berjalan, akun belum
+     * punya pendaftaran di sana, dan NIK tidak terblokir K7.
+     *
+     * @return array{period: PmbPeriod, url: string}|null
+     */
+    private function reapplyOffer(Registration $registration): ?array
+    {
+        $current = PmbPeriod::current();
+
+        if (!$current || (int) $registration->period_id === (int) $current->id) {
+            return null;
+        }
+
+        if (Registration::where('user_id', Auth::id())->where('period_id', $current->id)->exists()) {
+            return null;
+        }
+
+        if (\App\Support\NikGuard::blocks((string) $registration->nik, (int) $registration->first_choice_program_id)) {
+            return null;
+        }
+
+        // `create` mewajibkan ?prodi=, jadi arahkan ke prodi yang sama bila ditawarkan di periode ini.
+        $sameProgramOffered = \App\Models\Program::offeredIn($current)
+            ->whereKey($registration->first_choice_program_id)->exists();
+
+        return [
+            'period' => $current,
+            'url'    => $sameProgramOffered
+                ? route('registration.create', ['prodi' => $registration->first_choice_program_id])
+                : route('landing') . '#program-studi',
+        ];
     }
 }

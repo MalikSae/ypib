@@ -10,7 +10,7 @@
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
             <h1 class="text-xl font-semibold text-neutral-900 mb-1">Status Pendaftaran</h1>
-            <p class="text-sm text-neutral-500">PMB YPIB Majalengka 2025/2026</p>
+            <p class="text-sm text-neutral-500">{{ $registration?->period?->name ?? 'PMB YPIB Majalengka' }}</p>
         </div>
     </div>
 
@@ -58,6 +58,66 @@
     @php
         $status = $registration->status;
     @endphp
+
+    {{-- Batas waktu periode pendaftaran ini --}}
+    @if(!empty($windowNotice))
+        <div class="{{ $windowNotice['tone'] === 'warning' ? 'pub-flash-warning' : 'pub-flash-success' }}">
+            {{ $windowNotice['text'] }}
+        </div>
+    @endif
+
+    {{-- Langkah tertunda di pendaftaran periode lain --}}
+    @foreach($pendingElsewhere as $other)
+        <div class="pub-flash-warning flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span>
+                Pendaftaran <strong>{{ $other->period?->name }}</strong>
+                ({{ $other->firstChoiceProgram?->name ?? '-' }}) menunggu tindakan Anda:
+                {{ $other->getStatusLabel() }}.
+            </span>
+            <a href="{{ route('registration.status', ['periode' => $other->period_id]) }}" class="font-semibold underline whitespace-nowrap">Buka</a>
+        </div>
+    @endforeach
+
+    {{-- Daftar lagi di periode berjalan (K1): hanya bila belum punya pendaftaran di sana --}}
+    @if(!empty($reapply))
+        <div class="pub-card mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <div class="text-sm font-semibold text-neutral-900">Pendaftaran {{ $reapply['period']->name }} sedang dibuka</div>
+                <p class="text-sm text-neutral-500 mt-0.5">
+                    Anda dapat mendaftar lagi sampai {{ $reapply['period']->close_date->isoFormat('D MMMM Y') }}.
+                    Pendaftaran sebelumnya tetap tersimpan.
+                </p>
+            </div>
+            <a href="{{ $reapply['url'] }}" class="btn-primary flex-shrink-0 whitespace-nowrap">Daftar di Periode Ini</a>
+        </div>
+    @endif
+
+    {{-- Riwayat pendaftaran akun ini (pemilih periode) --}}
+    @if($myRegistrations->count() > 1)
+        <div class="pub-card mb-6">
+            <div class="text-sm font-semibold text-neutral-900 mb-3">Pendaftaran Saya</div>
+            <ul class="divide-y divide-neutral-100">
+                @foreach($myRegistrations as $mine)
+                    <li class="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div>
+                            <div class="text-sm font-medium text-neutral-900">{{ $mine->period?->name ?? '-' }}</div>
+                            <div class="text-xs text-neutral-500">{{ $mine->firstChoiceProgram?->name ?? '-' }} &middot; {{ $mine->getStatusLabel() }}</div>
+                        </div>
+                        @if($mine->id === $registration->id)
+                            <span class="text-xs font-semibold text-primary-600 whitespace-nowrap">Sedang dilihat</span>
+                        @else
+                            <a href="{{ route('registration.status', ['periode' => $mine->period_id]) }}"
+                               class="text-sm font-semibold text-primary-600 whitespace-nowrap">Lihat</a>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+            <div class="mt-3 text-xs text-neutral-500">
+                Halaman dokumen, data, daftar ulang, dan unduhan mengikuti pendaftaran yang sedang dilihat.
+                <a href="{{ route('registration.status', ['periode' => 'reset']) }}" class="font-semibold text-primary-600">Kembali ke pendaftaran utama</a>
+            </div>
+        </div>
+    @endif
 
     {{-- Timeline Card --}}
     <div class="pub-card mb-4">
@@ -147,7 +207,7 @@
                                             @endif
                                         </div>
                                         <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
-                                        <span>Nominal</span><strong class="text-orange-700">Rp {{ number_format($registration->firstChoiceProgram?->registration_fee ?? 0, 0, ',', '.') }}</strong>
+                                        <span>Nominal</span><strong class="text-orange-700">Rp {{ number_format($registration->programTerms()?->registration_fee ?? 0, 0, ',', '.') }}</strong>
                                     </div>
                                 </div>
 

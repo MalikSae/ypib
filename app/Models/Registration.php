@@ -96,6 +96,18 @@ class Registration extends Model
         return $this->belongsTo(Program::class, 'first_choice_program_id');
     }
 
+    /** Batasi ke satu periode; null = semua periode (filter periode panel admin). */
+    public function scopeForPeriod($query, ?int $periodId)
+    {
+        return $periodId ? $query->where('period_id', $periodId) : $query;
+    }
+
+    /** Biaya, kuota, dan komisi prodi pilihan pada periode pendaftaran ini (K6). */
+    public function programTerms(): ?PeriodProgram
+    {
+        return $this->firstChoiceProgram?->termsFor($this->period_id);
+    }
+
     public function secondChoiceProgram()
     {
         return $this->belongsTo(Program::class, 'second_choice_program_id');
@@ -361,18 +373,28 @@ class Registration extends Model
         $trackCode = $program->registration_track === 'non_reguler' ? '2' : '1';
         $prefix = $yearCode . $program->kode_prodi . $trackCode;
 
+        // Urutan dihitung per awalan, bukan global per tahun. withTrashed() + lockForUpdate():
+        // NIM milik pendaftar yang dihapus tidak dipakai ulang, dan penerbitan bersamaan
+        // pada awalan yang sama berurutan. Wajib dipanggil di dalam DB::transaction.
         $maxSequence = self::withTrashed()
             ->whereNotNull('nim')
-            ->where('nim', 'like', $yearCode . '%')
+            ->where('nim', 'like', $prefix . '%')
             ->lockForUpdate()
             ->selectRaw('MAX(CAST(SUBSTRING(nim, -3) AS UNSIGNED)) as max_seq')
             ->value('max_seq');
 
-        $startFloor = (self::YEAR_SEQUENCE_START[$yearCode] ?? 1) - 1;
-        $nextSequence = max($maxSequence ?? 0, $startFloor) + 1;
-        $sequence = str_pad($nextSequence, 3, '0', STR_PAD_LEFT);
+        // Lantai urutan: kolom periode; cadangan konstanta lama bila periode belum diatur.
+        $periodStart = (int) ($this->period?->nim_sequence_start ?? 0);
+        $start = $periodStart > 1 ? $periodStart : (self::YEAR_SEQUENCE_START[$yearCode] ?? 1);
+        $nextSequence = max((int) ($maxSequence ?? 0) + 1, $start);
 
-        return $prefix . $sequence;
+        if ($nextSequence > 999) {
+            throw new \RuntimeException(
+                "Urutan NIM untuk awalan {$prefix} sudah penuh (maksimum 999). Hubungi pengembang untuk menambah kapasitas."
+            );
+        }
+
+        return $prefix . str_pad((string) $nextSequence, 3, '0', STR_PAD_LEFT);
     }
 
     /**

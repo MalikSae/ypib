@@ -144,6 +144,7 @@ Route::prefix('admin')
             Route::get('/{registration}', [AdminRegistrationController::class, 'show'])->whereNumber('registration')->name('show');
             Route::post('/{id}/update-data', [AdminRegistrationController::class, 'updateData'])->name('update-data');
             Route::post('/{id}/reset-tes-tulis', [AdminRegistrationController::class, 'resetExam'])->name('reset-exam');
+            Route::post('/{id}/izin-daftar-lagi', [AdminRegistrationController::class, 'setReapply'])->name('reapply');
             Route::delete('/{id}', [AdminRegistrationController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/restore', [AdminRegistrationController::class, 'restore'])->name('restore');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');

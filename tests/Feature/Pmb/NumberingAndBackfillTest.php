@@ -72,7 +72,88 @@ class NumberingAndBackfillTest extends TestCase
         $nimB = $b->fresh()->nim;
         $this->assertStringStartsWith($year . '12345' . '1', $nimA);
         $this->assertStringStartsWith($year . '12345' . '2', $nimB);
-        $this->assertNotSame(substr($nimA, -3), substr($nimB, -3), 'urutan harus berlanjut per tahun');
+        // Urutan dihitung per awalan: jalur reguler dan non-reguler masing-masing mulai dari lantai.
+        $this->assertSame(substr($nimA, -3), substr($nimB, -3), 'setiap awalan memulai urutannya sendiri');
+    }
+
+    /** Konfirmasi daftar ulang oleh admin untuk pendaftar pada prodi tertentu; mengembalikan NIM. */
+    private function numberOne(int $programId, ?\App\Models\User $admin = null, array $extra = []): \App\Models\Registration
+    {
+        [, $registration] = $this->student('menunggu_konfirmasi_daftar_ulang', array_merge(
+            ['first_choice_program_id' => $programId, 're_registration_payment_proof' => 'x.png'],
+            $extra
+        ));
+
+        $this->actingAs($admin ?? $this->makeUser('admin'))
+            ->post("/admin/pendaftar/{$registration->id}/konfirmasi-daftar-ulang");
+
+        return $registration->fresh();
+    }
+
+    public function test_nim_sequence_is_independent_per_prefix(): void
+    {
+        $year = substr((string) $this->period()->year, -2);
+        $first = $this->program(['kode_prodi' => '11111']);
+        $second = $this->program(['kode_prodi' => '22222']);
+        $admin = $this->makeUser('admin');
+
+        $a1 = $this->numberOne($first->id, $admin);
+        $b1 = $this->numberOne($second->id, $admin);
+        $a2 = $this->numberOne($first->id, $admin);
+
+        $start = (int) substr($a1->nim, -3);
+        $this->assertStringStartsWith($year . '11111' . '1', $a1->nim);
+        $this->assertStringStartsWith($year . '22222' . '1', $b1->nim);
+        $this->assertSame($start, (int) substr($b1->nim, -3), 'awalan lain tidak ikut menaikkan urutan');
+        $this->assertSame($start + 1, (int) substr($a2->nim, -3));
+    }
+
+    public function test_period_sequence_start_sets_the_floor(): void
+    {
+        $period = $this->period();
+        $period->update(['nim_sequence_start' => 500]);
+        $program = $this->program(['kode_prodi' => '33333']);
+
+        $registration = $this->numberOne($program->id);
+
+        $this->assertStringEndsWith('500', $registration->nim);
+    }
+
+    public function test_nim_of_a_deleted_registration_is_not_reused(): void
+    {
+        $this->period();
+        $program = $this->program(['kode_prodi' => '44444']);
+        $admin = $this->makeUser('admin');
+
+        $first = $this->numberOne($program->id, $admin);
+        $firstNim = $first->nim;
+        $first->delete();
+
+        $second = $this->numberOne($program->id, $admin);
+
+        $this->assertNotSame($firstNim, $second->nim);
+        $this->assertSame((int) substr($firstNim, -3) + 1, (int) substr($second->nim, -3));
+    }
+
+    public function test_nim_sequence_overflow_is_refused_without_changing_the_registration(): void
+    {
+        $year = substr((string) $this->period()->year, -2);
+        $program = $this->program(['kode_prodi' => '55555']);
+        $admin = $this->makeUser('admin');
+
+        // Awalan sudah terpakai sampai 999.
+        $this->student('daftar_ulang_selesai', ['first_choice_program_id' => $program->id, 'nim' => $year . '55555' . '1' . '999']);
+
+        [, $next] = $this->student('menunggu_konfirmasi_daftar_ulang', [
+            'first_choice_program_id' => $program->id, 're_registration_payment_proof' => 'x.png',
+        ]);
+
+        $this->actingAs($admin)->post("/admin/pendaftar/{$next->id}/konfirmasi-daftar-ulang")
+            ->assertSessionHas('error', fn ($m) => str_contains($m, 'sudah penuh'));
+
+        $next->refresh();
+        $this->assertSame('menunggu_konfirmasi_daftar_ulang', $next->status);
+        $this->assertNull($next->nim);
     }
 
     // ── registrations:backfill-numbers ────────────────────────────────
@@ -131,7 +212,8 @@ class NumberingAndBackfillTest extends TestCase
 
         $noCode->update(['kode_prodi' => '54321']);
         $this->artisan('registrations:backfill-numbers', ['--apply' => true, '--acted-by' => $admin->id])->assertSuccessful();
-        $this->assertSame($year . '54321' . '1' . '402', $c->fresh()->nim);
+        // Awalan baru (54321) memulai urutannya sendiri dari lantai.
+        $this->assertSame($year . '54321' . '1' . '400', $c->fresh()->nim);
     }
 
     public function test_backfill_validates_options_and_reports_nothing_to_do(): void

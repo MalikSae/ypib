@@ -75,7 +75,17 @@ class RegistrationForm extends Component
                 'phone'       => 'required|string|max:20',
             ],
             2 => [
-                'first_choice_program_id' => ['required', \Illuminate\Validation\Rule::exists('programs', 'id')->where('is_active', true)],
+                'first_choice_program_id' => [
+                    'required',
+                    \Illuminate\Validation\Rule::exists('programs', 'id')->where('is_active', true),
+                    // Prodi harus ditawarkan pada periode berjalan (is_offered di period_programs).
+                    function (string $attribute, mixed $value, \Closure $fail) {
+                        $period = PmbPeriod::displayPeriod();
+                        if (!Program::offeredIn($period)->whereKey((int) $value)->exists()) {
+                            $fail('Program studi yang dipilih tidak ditawarkan pada periode ini.');
+                        }
+                    },
+                ],
                 'admission_path'          => 'required|in:umum,prestasi,tahfidz',
             ],
             3 => [
@@ -153,8 +163,9 @@ class RegistrationForm extends Component
 
     public function mount(): void
     {
-        $this->period   = PmbPeriod::active()->first();
-        $this->programs = Program::with('faculty')->active()->get();
+        $this->period   = PmbPeriod::displayPeriod();
+        $this->programs = Program::with('faculty')->offeredIn($this->period)->get();
+        Program::preloadTerms($this->programs, $this->period);
 
         // Pre-fill phone from logged-in user
         if ($user = Auth::user()) {
@@ -168,7 +179,7 @@ class RegistrationForm extends Component
 
         // Set pre-selected prodi from url
         $prodiId = request()->query('prodi');
-        if ($prodiId && Program::active()->where('id', $prodiId)->exists()) {
+        if ($prodiId && Program::offeredIn($this->period)->where('id', $prodiId)->exists()) {
             $this->first_choice_program_id = $prodiId;
         }
     }
@@ -196,8 +207,8 @@ class RegistrationForm extends Component
     /** Prodi pilihan masih punya kursi pada periode aktif? (quota 0 = tanpa batas) */
     protected function programHasSeat(): bool
     {
-        $program = Program::active()->find((int) $this->first_choice_program_id);
-        $period = PmbPeriod::active()->first();
+        $period = PmbPeriod::displayPeriod();
+        $program = Program::offeredIn($period)->find((int) $this->first_choice_program_id);
 
         if ($program && $program->isFull($period?->id)) {
             $this->addError('first_choice_program_id', 'Kuota program studi ini sudah penuh. Silakan pilih program studi lain.');
@@ -235,8 +246,9 @@ class RegistrationForm extends Component
             return;
         }
 
-        // Reload periode dari DB (hindari masalah serialisasi Livewire model)
-        $period = PmbPeriod::active()->first();
+        // Reload periode dari DB (hindari masalah serialisasi Livewire model).
+        // Pendaftaran baru hanya masuk ke periode berjalan.
+        $period = PmbPeriod::current();
 
         if (!$period || !$period->isOpen()) {
             session()->flash('error', 'Pendaftaran belum dibuka atau sudah ditutup.');
@@ -263,6 +275,15 @@ class RegistrationForm extends Component
                 $this->step = $step;
                 throw $e;
             }
+        }
+
+        // Satu proses aktif per orang (K7). Dicek di sini karena submit() sudah wajib login,
+        // dengan pesan generik; langkah-langkah form (terbuka untuk tamu) tidak mengecek NIK.
+        if (\App\Support\NikGuard::blocks($this->nik, (int) $this->first_choice_program_id)) {
+            $this->step = 1;
+            $this->addError('nik', \App\Support\NikGuard::message($period));
+
+            return;
         }
 
         try {

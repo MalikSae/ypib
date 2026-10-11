@@ -41,16 +41,16 @@
                             @endif
                         </div>
                         <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
-                        <span>Nominal</span><strong class="text-orange-700 text-base">Rp {{ number_format($registration->firstChoiceProgram?->re_registration_fee ?? 0, 0, ',', '.') }}</strong>
+                        <span>Nominal</span><strong class="text-orange-700 text-base">Rp {{ number_format($registration->programTerms()?->re_registration_fee ?? 0, 0, ',', '.') }}</strong>
                     </div>
 
 
-                    @if($registration->firstChoiceProgram && !empty($registration->firstChoiceProgram->re_registration_fee_details) && count($registration->firstChoiceProgram->re_registration_fee_details) > 0)
+                    @if($registration->firstChoiceProgram && !empty($registration->programTerms()->re_registration_fee_details) && count($registration->programTerms()->re_registration_fee_details) > 0)
                     <div class="mt-4 border-t border-dashed border-amber-300 pt-3">
                         <div class="text-xs font-bold text-amber-900 mb-2">Rincian Tagihan:</div>
                         <table class="w-full border-collapse text-xs">
                             <tbody>
-                                @foreach($registration->firstChoiceProgram->re_registration_fee_details as $detail)
+                                @foreach($registration->programTerms()->re_registration_fee_details as $detail)
                                 <tr>
                                     <td class="py-1 text-amber-900/80">{{ $detail['name'] }}</td>
                                     <td class="py-1 text-right font-semibold text-amber-900/80">Rp {{ number_format($detail['amount'], 0, ',', '.') }}</td>
@@ -66,11 +66,11 @@
                 <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-200/60">
                     <h2 class="text-[15px] font-bold text-neutral-900 mb-4">Upload Bukti Pembayaran</h2>
                     
-                    @if(($registration->firstChoiceProgram?->re_registration_minimum_payment ?? 0) > 0)
+                    @if(($registration->programTerms()?->re_registration_minimum_payment ?? 0) > 0)
                     <div class="bg-amber-50 border border-amber-300 rounded-lg p-3.5 mb-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
                             <span class="text-xs font-bold text-amber-900">Minimal Pembayaran Awal (DP)</span>
-                            <span class="text-lg font-bold text-orange-700">Rp {{ number_format($registration->firstChoiceProgram->re_registration_minimum_payment, 0, ',', '.') }}</span>
+                            <span class="text-lg font-bold text-orange-700">Rp {{ number_format($registration->programTerms()->re_registration_minimum_payment, 0, ',', '.') }}</span>
                         </div>
                         <p class="text-[11px] text-amber-900/70 mt-1.5 leading-relaxed">
                             Anda boleh membayar minimal sejumlah ini terlebih dahulu. Sisa tagihan dapat dilunasi menyusul sesuai ketentuan kampus.

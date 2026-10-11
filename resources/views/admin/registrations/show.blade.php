@@ -15,6 +15,53 @@
     </a>
 </div>
 
+{{-- Peringatan NIK: pendaftaran lain dengan NIK yang sama --}}
+@if($nikMatches->isNotEmpty())
+    <div class="mb-5 p-4 rounded-xl border border-warning-200 bg-warning-50">
+        <div class="text-sm font-bold text-neutral-900">
+            NIK ganda: {{ $nikMatches->count() }} pendaftaran lain memakai NIK yang sama
+        </div>
+        <ul class="mt-2 space-y-1 text-sm text-neutral-700">
+            @foreach($nikMatches as $match)
+                <li>
+                    <a href="{{ route('admin.registrations.show', $match->id) }}" class="font-semibold text-primary-700">{{ $match->full_name }}</a>
+                    &middot; {{ $match->period?->name ?? '-' }}
+                    &middot; {{ $match->firstChoiceProgram?->name ?? '-' }}
+                    &middot; {{ $match->getStatusLabel() }}
+                    @if($match->nim) &middot; <span class="font-mono">NIM {{ $match->nim }}</span> <span class="text-xs text-neutral-500">(ber-NIM sebelumnya)</span>@endif
+                    @if($match->reapply_allowed) &middot; <span class="text-xs text-success-700 font-semibold">diizinkan daftar lagi</span>@endif
+                </li>
+            @endforeach
+        </ul>
+        <p class="mt-2 text-xs text-neutral-500">Tinjau apakah ini orang yang sama. Tidak ada penghapusan otomatis; hapus atau tolak pendaftaran yang basi secara manual.</p>
+    </div>
+@endif
+
+{{-- Penanda izin daftar lagi (hanya pendaftaran ber-NIM) --}}
+@if($registration->nim || $registration->status === 'daftar_ulang_selesai')
+    <div class="mb-5 p-4 rounded-xl border border-neutral-200 bg-white">
+        <div class="text-sm font-bold text-neutral-900">Izin daftar lagi pada prodi yang sama</div>
+        @if($registration->reapply_allowed)
+            <p class="mt-1 text-sm text-neutral-600">Diizinkan. Alasan: {{ $registration->reapply_note }}</p>
+        @else
+            <p class="mt-1 text-sm text-neutral-600">Belum diizinkan. NIK ini tidak bisa mendaftar lagi pada prodi yang sama (prodi lain boleh).</p>
+        @endif
+        <form action="{{ route('admin.registrations.reapply', $registration->id) }}" method="POST" class="mt-3 flex flex-col sm:flex-row gap-3 sm:items-end">
+            @csrf
+            <input type="hidden" name="allowed" value="{{ $registration->reapply_allowed ? 0 : 1 }}">
+            <div class="flex-1">
+                <x-input-label for="reapply_note" value="Alasan" required="true" />
+                <x-text-input type="text" id="reapply_note" name="note" required maxlength="1000"
+                              placeholder="Cth: cuti selesai, kembali kuliah" :error="$errors->has('note')" />
+                <x-input-error :messages="$errors->get('note')" />
+            </div>
+            <x-button type="submit" color="{{ $registration->reapply_allowed ? 'danger' : 'primary' }}" variant="outline">
+                {{ $registration->reapply_allowed ? 'Cabut Izin' : 'Izinkan Daftar Lagi' }}
+            </x-button>
+        </form>
+    </div>
+@endif
+
 {{-- ── 2-Column Layout ── --}}
 <div class="detail-grid">
 
@@ -466,14 +513,14 @@
 
             <div style="margin-bottom: 16px;">
                 <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Total Tagihan</div>
-                <div style="font-size:20px;font-weight:700;color:#BF360C;">Rp {{ number_format($registration->firstChoiceProgram?->re_registration_fee ?? 0, 0, ',', '.') }}</div>
+                <div style="font-size:20px;font-weight:700;color:#BF360C;">Rp {{ number_format($registration->programTerms()?->re_registration_fee ?? 0, 0, ',', '.') }}</div>
             </div>
 
-            @if($registration->firstChoiceProgram && !empty($registration->firstChoiceProgram->re_registration_fee_details) && count($registration->firstChoiceProgram->re_registration_fee_details) > 0)
+            @if($registration->firstChoiceProgram && !empty($registration->programTerms()->re_registration_fee_details) && count($registration->programTerms()->re_registration_fee_details) > 0)
                 <div style="border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <tbody>
-                            @foreach($registration->firstChoiceProgram->re_registration_fee_details as $detail)
+                            @foreach($registration->programTerms()->re_registration_fee_details as $detail)
                             <tr style="border-bottom:1px solid #E5E7EB;">
                                 <td style="padding:10px 16px;" class="text-neutral-600">{{ $detail['name'] }}</td>
                                 <td style="padding:10px 16px;text-align:right;font-weight:600;" class="text-neutral-900">Rp {{ number_format($detail['amount'], 0, ',', '.') }}</td>

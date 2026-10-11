@@ -316,7 +316,7 @@ class AdminActionsTest extends TestCase
 
         foreach (['/admin/dashboard', '/admin/pendaftar', '/admin/pendaftar/rekap', '/admin/pendaftar/sampah', "/admin/pendaftar/{$registration->id}",
                   '/admin/afiliasi', '/admin/reward', '/admin/programs', '/admin/programs/create', '/admin/faculties', '/admin/partners',
-                  '/admin/facilities', '/admin/bank-soal', '/admin/panitia', '/admin/pengaturan', '/admin/pengaturan-email'] as $url) {
+                  '/admin/facilities', '/admin/bank-soal', '/admin/panitia', '/admin/periode', '/admin/periode/buat', '/admin/pengaturan-email'] as $url) {
             $this->actingAs($admin)->get($url)->assertOk();
         }
     }
