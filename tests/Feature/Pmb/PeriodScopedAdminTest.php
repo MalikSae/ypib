@@ -4,6 +4,7 @@ namespace Tests\Feature\Pmb;
 
 use App\Models\PmbPeriod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Concerns\BuildsPmbData;
 use Tests\TestCase;
 
@@ -150,6 +151,25 @@ class PeriodScopedAdminTest extends TestCase
         $this->post('/admin/periode/pilih', ['period' => 'all']);
         $this->get('/admin/dashboard')
             ->assertViewHas('topReferrers', fn ($rows) => (int) $rows->first()->conversions === 3);
+    }
+
+    public function test_dashboard_works_when_the_activity_feed_index_is_missing(): void
+    {
+        $admin = $this->makeUser('admin');
+        $this->inCurrent('A');
+
+        // Simulasi indeks payment_logs_created_at_index tidak ada (migrasi belum/gagal dijalankan):
+        // petunjuk FORCE INDEX tidak boleh dipakai, dan dashboard tetap 200.
+        \Illuminate\Support\Facades\Cache::put('perf.index.payment_logs_created_at', false, 60);
+
+        DB::enableQueryLog();
+        $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
+        $sql = collect(DB::getQueryLog())->pluck('query')->implode("\n");
+        DB::disableQueryLog();
+
+        $this->assertStringNotContainsString('force index', strtolower($sql));
+
+        \Illuminate\Support\Facades\Cache::forget('perf.index.payment_logs_created_at');
     }
 
     // ── Rekap dan ekspor ─────────────────────────────────────────────────

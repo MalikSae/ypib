@@ -63,9 +63,15 @@ class DashboardController extends Controller
         // Dengan filter periode, optimizer memilih memindai registrasi lalu filesort ribuan log
         // (ratusan ms); memaksa urutan indeks created_at hanya membaca log terbaru sampai 8 cocok.
         $activityFeed = \App\Models\PaymentLog::with(['registration', 'actor'])
-            ->when($pid, fn ($q) => $q
-                ->from(DB::raw('`payment_logs` force index (`payment_logs_created_at_index`)'))
-                ->whereHas('registration', fn ($r) => $r->where('period_id', $pid)))
+            ->when($pid, function ($q) use ($pid) {
+                // Petunjuk indeks hanya dipakai bila indeksnya benar-benar ada: nama indeks yang
+                // tidak ada membuat query gagal (galat 1176) dan dashboard menjadi 500.
+                if ($this->hasCreatedAtIndex()) {
+                    $q->from(DB::raw('`payment_logs` force index (`payment_logs_created_at_index`)'));
+                }
+
+                $q->whereHas('registration', fn ($r) => $r->where('period_id', $pid));
+            })
             ->latest()
             ->take(8)
             ->get();
@@ -73,5 +79,15 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact(
             'notifications', 'stats', 'statusBreakdown', 'topReferrers', 'recent', 'activityFeed'
         ));
+    }
+
+    /** Indeks created_at pada payment_logs ada? Di-cache sebentar agar tidak memeriksa tiap permintaan. */
+    private function hasCreatedAtIndex(): bool
+    {
+        return (bool) \Illuminate\Support\Facades\Cache::remember(
+            'perf.index.payment_logs_created_at',
+            600,
+            fn () => \Illuminate\Support\Facades\Schema::hasIndex('payment_logs', 'payment_logs_created_at_index')
+        );
     }
 }
