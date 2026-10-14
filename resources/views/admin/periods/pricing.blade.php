@@ -4,6 +4,24 @@
 
 @section('content')
 
+<style>
+    /* Tombol buka/tutup rincian biaya daftar ulang: tampak sebagai kontrol yang bisa diklik. */
+    .fee-toggle {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        width: 100%; padding: 10px 14px; text-align: left; cursor: pointer;
+        border: 1px solid #DEE3E9; border-radius: 10px; background: #F7F9FB;
+        color: #0B41CB; font-size: 14px; font-weight: 600;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .fee-toggle:hover { background: #F2F5FD; border-color: #B8C7F0; }
+    .fee-toggle:focus-visible { outline: 2px solid #0B41CB; outline-offset: 2px; }
+    .fee-toggle-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+    .fee-toggle-chevron { width: 16px; height: 16px; flex-shrink: 0; transition: transform 0.15s; }
+    .fee-toggle-chevron.is-open { transform: rotate(180deg); }
+    .fee-toggle-hint { color: #7A8794; font-size: 12px; font-weight: 500; }
+    .fee-toggle-total { color: #3B404F; font-weight: 700; white-space: nowrap; }
+</style>
+
 <div class="mb-6 flex flex-col md:flex-row md:items-center gap-3">
     <a href="{{ route('admin.periods.index') }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors shrink-0 decoration-none">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -119,10 +137,15 @@
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-neutral-100">
-                    <button type="button" @click="open = !open"
-                            class="text-sm font-semibold text-primary-600 hover:text-primary-700 bg-transparent border-none cursor-pointer">
-                        <span x-text="open ? 'Sembunyikan rincian biaya daftar ulang' : 'Rincian biaya daftar ulang'"></span>
-                        &middot; Total: Rp <span x-text="total.toLocaleString('id-ID')"></span>
+                    <button type="button" class="fee-toggle" @click="open = !open" :aria-expanded="open.toString()">
+                        <span class="fee-toggle-left">
+                            <svg class="fee-toggle-chevron" :class="{ 'is-open': open }" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                            <span x-text="open ? 'Sembunyikan rincian biaya daftar ulang' : 'Atur rincian biaya daftar ulang'"></span>
+                            <span class="fee-toggle-hint" x-text="'(' + items.length + ' komponen)'"></span>
+                        </span>
+                        <span class="fee-toggle-total">Total: Rp <span x-text="total.toLocaleString('id-ID')"></span></span>
                     </button>
 
                     <div x-show="open" x-cloak class="mt-3 space-y-2">
