@@ -36,6 +36,20 @@ class Campus extends Model
 
     private static ?int $defaultId = null;
 
+    /** Cache id kampus bawaan dibuang saat kampus berubah (proses panjang, test). */
+    protected static function booted(): void
+    {
+        $flush = fn () => static::$defaultId = null;
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
+
+    public static function flushDefaultCache(): void
+    {
+        static::$defaultId = null;
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

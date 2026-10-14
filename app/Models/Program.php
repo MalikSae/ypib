@@ -188,6 +188,107 @@ class Program extends Model
         return $quota > 0 && $this->occupiedSeats($periodId, $campusId) >= $quota;
     }
 
+    /**
+     * Prodi yang ditawarkan di setidaknya satu kampus aktif pada periode (untuk landing publik).
+     * Kampus bawaan: tidak ditandai `is_offered = false`. Kampus lain: baris `is_offered = true`.
+     */
+    public function scopeOfferedInAny($query, $period)
+    {
+        $periodId = static::periodId($period);
+        $defaultId = Campus::defaultId();
+        $query->where('programs.is_active', true);
+
+        if (!$periodId) {
+            return $query;
+        }
+
+        return $query->where(function ($any) use ($periodId, $defaultId) {
+            $any->whereNotExists(function ($sub) use ($periodId, $defaultId) {
+                $sub->selectRaw('1')->from('period_programs')
+                    ->whereColumn('period_programs.program_id', 'programs.id')
+                    ->where('period_programs.period_id', $periodId)
+                    ->where('period_programs.campus_id', $defaultId)
+                    ->where('period_programs.is_offered', false);
+            })->orWhereExists(function ($sub) use ($periodId, $defaultId) {
+                $sub->selectRaw('1')->from('period_programs')
+                    ->join('campuses', 'campuses.id', '=', 'period_programs.campus_id')
+                    ->whereColumn('period_programs.program_id', 'programs.id')
+                    ->where('period_programs.period_id', $periodId)
+                    ->where('period_programs.campus_id', '!=', $defaultId)
+                    ->where('period_programs.is_offered', true)
+                    ->where('campuses.is_active', true);
+            });
+        });
+    }
+
+    /**
+     * Isi relasi `offeringCampuses` (kampus bawaan lebih dulu) untuk banyak prodi dengan
+     * satu query, lalu muat biaya/kuota kampus pertama tiap prodi untuk `landingTerms()`.
+     */
+    public static function attachOfferingCampuses($programs, $period): void
+    {
+        // Semua instance (satu prodi bisa muncul dari beberapa relasi) ikut diisi.
+        $programs = collect($programs)->filter()->values();
+        $periodId = static::periodId($period);
+
+        if ($programs->isEmpty()) {
+            return;
+        }
+
+        $campuses = Campus::active()->orderByDesc('is_default')->orderBy('name')->get();
+        $defaultId = Campus::defaultId();
+
+        $rows = $periodId
+            ? PeriodProgram::where('period_id', $periodId)
+                ->whereIn('program_id', $programs->pluck('id')->unique())
+                ->get(['program_id', 'campus_id', 'is_offered'])
+                ->groupBy('program_id')
+            : collect();
+
+        $byFirstCampus = [];
+
+        foreach ($programs as $program) {
+            $programRows = $rows->get($program->id, collect());
+
+            $offering = $campuses->filter(function (Campus $campus) use ($programRows, $defaultId, $periodId) {
+                $row = $programRows->firstWhere('campus_id', $campus->id);
+
+                if ($campus->id === $defaultId) {
+                    return !$periodId || !$row || $row->is_offered;
+                }
+
+                return $row && $row->is_offered;
+            })->values();
+
+            $program->setRelation('offeringCampuses', $offering);
+            $first = $offering->first()?->id ?? $defaultId;
+            $byFirstCampus[$first][] = $program;
+        }
+
+        if (!$periodId) {
+            return;
+        }
+
+        foreach ($byFirstCampus as $campusId => $group) {
+            $terms = PeriodProgram::where('period_id', $periodId)
+                ->where('campus_id', $campusId)
+                ->whereIn('program_id', collect($group)->pluck('id')->unique())
+                ->get()->keyBy('program_id');
+
+            foreach ($group as $program) {
+                $program->termsCache[$periodId . '|' . $campusId] =
+                    $terms->get($program->id) ?? $program->fallbackTerms($periodId, $campusId);
+            }
+        }
+    }
+
+    /** Biaya dan kuota di kampus pertama yang menawarkan prodi ini (landing publik). */
+    public function landingTerms($period = null): PeriodProgram
+    {
+        $campus = $this->relationLoaded('offeringCampuses') ? $this->offeringCampuses->first() : null;
+
+        return $this->termsFor($period, $campus);
+    }
     /** Slug unik: tambahkan sufiks angka bila nama sama sudah dipakai. */
     public static function uniqueSlug(string $name, ?int $ignoreId = null): string
     {

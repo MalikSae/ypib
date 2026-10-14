@@ -56,6 +56,14 @@ class PeriodProgram extends Model
         return $this->belongsTo(Campus::class, 'campus_id');
     }
 
+    /** Baris tanpa kampus eksplisit (kode lama) menjadi milik kampus bawaan. */
+    protected static function booted(): void
+    {
+        static::creating(function (self $row) {
+            $row->campus_id ??= Campus::defaultId();
+        });
+    }
+
     /**
      * Pastikan setiap prodi punya baris pada periode ini di kampus bawaan. Nilai awal diambil
      * dari `programs` (cadangan). Prodi yang ditambah belakangan (`offered = false`) tidak

@@ -95,7 +95,10 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // Periode PMB
+        // Pilih periode tampilan (period picker di header, semua admin)
+        Route::post('/periode/pilih', [\App\Http\Controllers\Admin\PmbPeriodController::class, 'select'])->name('periods.select');
+
+        // Periode PMB (lintas kampus: hanya admin semua kampus)
         Route::redirect('/pengaturan', '/admin/periode');
         Route::prefix('periode')->name('periods.')->middleware('global.admin')->group(function () {
             $c = \App\Http\Controllers\Admin\PmbPeriodController::class;
@@ -103,7 +106,6 @@ Route::prefix('admin')
             Route::get('/', [$c, 'index'])->name('index');
             Route::get('/buat', [$c, 'create'])->name('create');
             Route::post('/', [$c, 'store'])->name('store');
-            Route::post('/pilih', [$c, 'select'])->name('select');
             Route::get('/{id}/edit', [$c, 'edit'])->whereNumber('id')->name('edit');
             Route::put('/{id}', [$c, 'update'])->whereNumber('id')->name('update');
             Route::post('/{id}/tayangkan', [$c, 'publish'])->whereNumber('id')->name('publish');
@@ -124,17 +126,19 @@ Route::prefix('admin')
         Route::get('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'mail'])->middleware('global.admin')->name('settings.mail');
         Route::put('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'updateMail'])->middleware('global.admin')->name('settings.mail.update');
 
-        // Master Data
-        Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
-        Route::resource('campuses', \App\Http\Controllers\Admin\CampusController::class)->except(['show'])->middleware('global.admin');
-        Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
-        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
-        Route::patch('partners/{partner}/toggle', [\App\Http\Controllers\Admin\PartnerController::class, 'toggleActive'])->name('partners.toggle');
-        Route::delete('programs/gallery/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'destroyGallery'])->name('programs.gallery.destroy');
-        Route::resource('facilities', \App\Http\Controllers\Admin\FacilityController::class)->except(['show']);
-        Route::patch('facilities/{facility}/toggle', [\App\Http\Controllers\Admin\FacilityController::class, 'toggleActive'])->name('facilities.toggle');
-        Route::resource('bank-soal', \App\Http\Controllers\Admin\ExamQuestionController::class)->except(['show']);
-        Route::resource('panitia', \App\Http\Controllers\Admin\PanitiaController::class)->except(['show'])->middleware('global.admin');
+        // Master data, seleksi, dan kampus: lintas kampus, hanya admin semua kampus
+        Route::middleware('global.admin')->group(function () {
+            Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
+            Route::resource('campuses', \App\Http\Controllers\Admin\CampusController::class)->except(['show']);
+            Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
+            Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
+            Route::patch('partners/{partner}/toggle', [\App\Http\Controllers\Admin\PartnerController::class, 'toggleActive'])->name('partners.toggle');
+            Route::delete('programs/gallery/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'destroyGallery'])->name('programs.gallery.destroy');
+            Route::resource('facilities', \App\Http\Controllers\Admin\FacilityController::class)->except(['show']);
+            Route::patch('facilities/{facility}/toggle', [\App\Http\Controllers\Admin\FacilityController::class, 'toggleActive'])->name('facilities.toggle');
+            Route::resource('bank-soal', \App\Http\Controllers\Admin\ExamQuestionController::class)->except(['show']);
+            Route::resource('panitia', \App\Http\Controllers\Admin\PanitiaController::class)->except(['show']);
+        });
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
@@ -160,7 +164,7 @@ Route::prefix('admin')
         });
 
         // Referrer management
-        Route::prefix('afiliasi')->name('referrers.')->group(function () {
+        Route::prefix('afiliasi')->name('referrers.')->middleware('global.admin')->group(function () {
             Route::get('/', [AdminReferrerController::class, 'index'])->name('index');
             Route::get('/export', [AdminReferrerController::class, 'export'])->name('export');
             Route::get('/{id}', [AdminReferrerController::class, 'show'])->name('show');
@@ -169,7 +173,7 @@ Route::prefix('admin')
         });
 
         // Reward management
-        Route::prefix('reward')->name('rewards.')->group(function () {
+        Route::prefix('reward')->name('rewards.')->middleware('global.admin')->group(function () {
             Route::get('/', [AdminRewardController::class, 'index'])->name('index');
             Route::post('/mass-disburse', [AdminRewardController::class, 'massDisburse'])->name('mass-disburse');
             Route::post('/export', [AdminRewardController::class, 'exportCsv'])->name('export');

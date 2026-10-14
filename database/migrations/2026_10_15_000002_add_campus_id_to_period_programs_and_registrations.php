@@ -78,7 +78,8 @@ return new class extends Migration
             Schema::table('registrations', fn (Blueprint $t) => $t->dropColumn('campus_id'));
         }
 
-        // Baris non-default dibuang supaya unique (period_id, program_id) bisa dipulihkan.
+        // PERINGATAN: baris biaya/kuota kampus non-default DIHAPUS di sini (data tidak bisa
+        // dipulihkan). Unique (period_id, program_id) hanya bisa kembali tanpa baris ganda.
         $defaultId = DB::table('campuses')->where('is_default', true)->value('id');
         if ($defaultId && Schema::hasColumn('period_programs', 'campus_id')) {
             DB::table('period_programs')->where('campus_id', '!=', $defaultId)->delete();

@@ -182,11 +182,14 @@
                             <!-- Badges -->
                             <div class="flex flex-wrap gap-2 mb-8">
                                 <span class="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-bold">
-                                    Kuota {{ $program->termsFor($period ?? null)->quota }}
+                                    Kuota {{ $program->landingTerms($period ?? null)->quota }}
                                 </span>
                                 <span class="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-bold">
                                     Akreditasi {{ $program->accreditation ?? '-' }}
                                 </span>
+                                @foreach($program->offeringCampuses ?? [] as $offeringCampus)
+                                    <span class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-xs font-bold">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
+                                @endforeach
                             </div>
                         </div>
 
@@ -194,7 +197,7 @@
                         <div class="flex items-end justify-between pt-6 mt-auto">
                             <div>
                                 <div class="font-black text-lg text-neutral-900 leading-none mb-1">
-                                    Rp {{ number_format($program->termsFor($period ?? null)->registration_fee, 0, ',', '.') }}
+                                    Rp {{ number_format($program->landingTerms($period ?? null)->registration_fee, 0, ',', '.') }}
                                 </div>
                                 <div class="text-[11px] font-semibold text-neutral-400 uppercase tracking-wide">
                                     Biaya Pendaftaran

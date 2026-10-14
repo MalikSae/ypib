@@ -13,9 +13,9 @@ class LandingController extends Controller
     public function index()
     {
         $period   = PmbPeriod::displayPeriod();
-        $programs = Program::with('faculty')->offeredIn($period)->get();
-        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredIn($period)])->get();
-        Program::preloadTerms($programs->concat($faculties->pluck('programs')->flatten()), $period);
+        $programs = Program::with('faculty')->offeredInAny($period)->get();
+        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredInAny($period)])->get();
+        Program::attachOfferingCampuses($programs->concat($faculties->pluck('programs')->flatten()), $period);
         $partners  = Partner::where('is_active', true)->orderBy('id')->get();
         $facilities = Facility::active()->get();
 
@@ -25,15 +25,15 @@ class LandingController extends Controller
     public function preview()
     {
         $period    = PmbPeriod::displayPeriod();
-        $programs  = Program::with('faculty', 'galleries')->offeredIn($period)->get();
-        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredIn($period)])->get();
+        $programs  = Program::with('faculty', 'galleries')->offeredInAny($period)->get();
+        $faculties = Faculty::with(['programs' => fn($q) => $q->offeredInAny($period)])->get();
         $partners  = Partner::where('is_active', true)->orderBy('id')->get();
         $facilities = Facility::active()->get();
-        Program::preloadTerms($programs->concat($faculties->pluck('programs')->flatten()), $period);
+        Program::attachOfferingCampuses($programs->concat($faculties->pluck('programs')->flatten()), $period);
 
         // Biaya pendaftaran terendah di antara prodi yang ditawarkan pada periode ini (hero).
         $startingFee = $programs
-            ->map(fn ($program) => (int) $program->termsFor($period)->registration_fee)
+            ->map(fn ($program) => (int) $program->landingTerms($period)->registration_fee)
             ->filter(fn ($fee) => $fee > 0)
             ->min();
 
@@ -45,7 +45,8 @@ class LandingController extends Controller
     public function prodi(string $slug)
     {
         $period  = PmbPeriod::displayPeriod();
-        $program = Program::with(['faculty', 'galleries'])->offeredIn($period)->where('slug', $slug)->firstOrFail();
+        $program = Program::with(['faculty', 'galleries'])->offeredInAny($period)->where('slug', $slug)->firstOrFail();
+        Program::attachOfferingCampuses([$program], $period);
 
         return view('landing.prodi', compact('program', 'period'));
     }

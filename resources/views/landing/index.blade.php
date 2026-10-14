@@ -204,7 +204,10 @@
                     <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-400">{{ $program->faculty->name }}</p>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
                         <span style="background:#E8F5E9;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-success-700">Akreditasi {{ $program->accreditation ?? '-' }}</span>
-                        <span style="background:#e6edfc;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-primary-600">Kuota {{ $program->termsFor($period ?? null)->quota }}</span>
+                        <span style="background:#e6edfc;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-primary-600">Kuota {{ $program->landingTerms($period ?? null)->quota }}</span>
+                        @foreach($program->offeringCampuses ?? [] as $offeringCampus)
+                            <span style="background:#F1F4F7;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;" class="text-neutral-600">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
+                        @endforeach
                     </div>
                     <div style="margin-top:auto;padding-top:16px;" class="border-t-neutral-100">
                         <a href="{{ route('prodi.show', $program->slug) }}"

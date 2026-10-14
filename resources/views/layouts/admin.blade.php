@@ -465,19 +465,19 @@
                     ['Rekap Pendaftaran', 'admin.registrations.recap', 'chart', request()->routeIs('admin.registrations.recap*')],
                 ]],
                 ['label' => 'SELEKSI', 'items' => [
-                    ['Bank Soal', 'admin.bank-soal.index', 'book', request()->routeIs('admin.bank-soal.*')],
+                    ['Bank Soal', 'admin.bank-soal.index', 'book', request()->routeIs('admin.bank-soal.*'), 'global' => true],
                     ['Panitia', 'admin.panitia.index', 'people', request()->routeIs('admin.panitia.*'), 'global' => true],
                 ]],
                 ['label' => 'AFILIASI', 'items' => [
-                    ['Data Afiliasi', 'admin.referrers.index', 'link', request()->routeIs('admin.referrers.*')],
-                    ['Komisi', 'admin.rewards.index', 'cash', request()->routeIs('admin.rewards.*')],
+                    ['Data Afiliasi', 'admin.referrers.index', 'link', request()->routeIs('admin.referrers.*'), 'global' => true],
+                    ['Komisi', 'admin.rewards.index', 'cash', request()->routeIs('admin.rewards.*'), 'global' => true],
                 ]],
                 ['label' => 'MASTER DATA', 'items' => [
                     ['Kampus', 'admin.campuses.index', 'pin', request()->routeIs('admin.campuses.*'), 'global' => true],
-                    ['Fakultas', 'admin.faculties.index', 'building', request()->routeIs('admin.faculties.*')],
-                    ['Program Studi', 'admin.programs.index', 'book', request()->routeIs('admin.programs.*')],
-                    ['Galeri', 'admin.facilities.index', 'image', request()->routeIs('admin.facilities.*')],
-                    ['Partner', 'admin.partners.index', 'building', request()->routeIs('admin.partners.*')],
+                    ['Fakultas', 'admin.faculties.index', 'building', request()->routeIs('admin.faculties.*'), 'global' => true],
+                    ['Program Studi', 'admin.programs.index', 'book', request()->routeIs('admin.programs.*'), 'global' => true],
+                    ['Galeri', 'admin.facilities.index', 'image', request()->routeIs('admin.facilities.*'), 'global' => true],
+                    ['Partner', 'admin.partners.index', 'building', request()->routeIs('admin.partners.*'), 'global' => true],
                 ]],
                 ['label' => 'PENGATURAN', 'items' => [
                     ['Periode PMB', 'admin.periods.index', 'calendar', request()->routeIs('admin.periods.*'), 'global' => true],

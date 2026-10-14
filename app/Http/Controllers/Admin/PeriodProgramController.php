@@ -53,7 +53,7 @@ class PeriodProgramController extends Controller
         }
 
         $request->validate([
-            'campus_id'                                  => 'required|integer|exists:campuses,id',
+            'campus_id'                                  => 'nullable|integer|exists:campuses,id',
             'programs'                                   => 'required|array|min:1',
             'programs.*.quota'                           => 'required|integer|min:0|max:100000',
             'programs.*.registration_fee'                => 'required|integer|min:0|max:2000000000',
@@ -69,7 +69,8 @@ class PeriodProgramController extends Controller
         $input = $request->input('programs');
         $knownIds = Program::whereIn('id', array_map('intval', array_keys($input)))->pluck('id')->all();
 
-        $campus = Campus::findOrFail((int) $request->input('campus_id'));
+        // Tanpa campus_id: kampus bawaan (kompatibel dengan klien lama).
+        $campus = Campus::findOrFail(Campus::idOf($request->input('campus_id')));
 
         DB::transaction(function () use ($period, $input, $knownIds, $campus) {
             foreach ($knownIds as $programId) {
