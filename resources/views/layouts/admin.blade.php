@@ -40,6 +40,25 @@
         .sidebar-label { transition: opacity 0.2s, width 0.2s; white-space: nowrap; overflow: hidden; }
         .sidebar-meta  { transition: opacity 0.2s; }
 
+        /* Tooltip nama menu saat sidebar hanya ikon. Dipasang lewat JS (position: fixed)
+           karena .sidebar-nav ber-overflow sehingga ::after akan terpotong. */
+        #nav-tooltip {
+            position: fixed;
+            z-index: 1000;
+            background: #0A1317;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-50%);
+            transition: opacity 0.15s;
+        }
+        #nav-tooltip.visible { opacity: 1; }
+
         /* Custom Scrollbar for Sidebar Nav */
         .sidebar-nav {
             flex: 1;
@@ -264,26 +283,6 @@
                 gap: 0;
                 position: relative;
             }
-            
-            #admin-sidebar.collapsed .nav-item::after {
-                content: attr(data-label);
-                position: absolute;
-                left: calc(100% + 12px);
-                top: 50%;
-                transform: translateY(-50%);
-                background: #0A1317;
-                color: #FFFFFF;
-                font-size: 12px;
-                font-weight: 600;
-                padding: 6px 12px;
-                border-radius: 8px;
-                white-space: nowrap;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.15s;
-                z-index: 100;
-            }
-            #admin-sidebar.collapsed .nav-item:hover::after { opacity: 1; }
         }
 
         /* ═══════════════════════════════════════
@@ -315,27 +314,6 @@
                 gap: 0;
                 position: relative;
             }
-
-            /* Tooltip on hover untuk tablet */
-            .nav-item::after {
-                content: attr(data-label);
-                position: absolute;
-                left: calc(100% + 12px);
-                top: 50%;
-                transform: translateY(-50%);
-                background: #0A1317;
-                color: #FFFFFF;
-                font-size: 12px;
-                font-weight: 600;
-                padding: 6px 12px;
-                border-radius: 8px;
-                white-space: nowrap;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.15s;
-                z-index: 100;
-            }
-            .nav-item:hover::after { opacity: 1; }
         }
 
         /* ═══════════════════════════════════════
@@ -715,5 +693,41 @@
 </script>
 @include('partials.pwa-register')
 @include('partials.pwa-install-banner', ['section' => 'admin'])
+    <div id="nav-tooltip" role="tooltip" aria-hidden="true"></div>
+    <script>
+        // Tooltip nama menu saat sidebar hanya ikon (desktop collapsed dan tablet).
+        (function () {
+            var sidebar = document.getElementById('admin-sidebar');
+            var tip = document.getElementById('nav-tooltip');
+            if (!sidebar || !tip) return;
+
+            function iconOnly() {
+                return window.innerWidth >= 768 && sidebar.getBoundingClientRect().width <= 80;
+            }
+
+            function show(el) {
+                if (!iconOnly()) return;
+                var label = el.getAttribute('data-label');
+                if (!label) return;
+                var rect = el.getBoundingClientRect();
+                tip.textContent = label;
+                tip.style.left = (rect.right + 12) + 'px';
+                tip.style.top = (rect.top + rect.height / 2) + 'px';
+                tip.classList.add('visible');
+            }
+
+            function hide() { tip.classList.remove('visible'); }
+
+            sidebar.querySelectorAll('.nav-item[data-label]').forEach(function (el) {
+                el.addEventListener('mouseenter', function () { show(el); });
+                el.addEventListener('mouseleave', hide);
+                el.addEventListener('focus', function () { show(el); });
+                el.addEventListener('blur', hide);
+            });
+
+            sidebar.addEventListener('scroll', hide, true);
+            window.addEventListener('resize', hide);
+        })();
+    </script>
 </body>
 </html>
