@@ -36,6 +36,18 @@
     </div>
 </div>
 
+{{-- Pilih kampus: biaya, kuota, dan komisi diatur terpisah per kampus --}}
+<div class="mb-6 flex flex-wrap items-center gap-2">
+    <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 mr-1">Kampus</span>
+    @foreach($campuses as $option)
+        <a href="{{ route('admin.periods.pricing', ['id' => $period->id, 'campus' => $option->id]) }}"
+           class="decoration-none px-4 py-2 text-sm font-semibold rounded-xl border transition-colors
+                  {{ $option->id === $campus->id ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
+            {{ $option->name }}@unless($option->is_active) <span class="opacity-70">(nonaktif)</span>@endunless
+        </a>
+    @endforeach
+</div>
+
 @if($readOnly)
     <div class="mb-6 p-4 rounded-xl border border-warning-200 bg-warning-50 text-sm text-neutral-700">
         Periode ini diarsipkan sehingga biaya dan kuotanya hanya baca. Buka kembali periodenya bila perlu mengubah.
@@ -65,11 +77,14 @@
       x-data="{ submitting: false }" @submit="submitting = true">
     @csrf
     @method('PUT')
+    <input type="hidden" name="campus_id" value="{{ $campus->id }}">
 
     <fieldset @if($readOnly) disabled @endif class="space-y-4 border-0 p-0 m-0 min-w-0">
         @foreach($programs as $program)
             @php
-                $terms = $program->termsFor($period);
+                $terms = $program->termsFor($period, $campus);
+                // Kampus selain bawaan: prodi baru ditawarkan setelah admin mencentangnya.
+                $offeredNow = ($terms->exists || $campus->is_default) ? (bool) $terms->is_offered : false;
                 $details = old("programs.{$program->id}.fee_names")
                     ? collect(old("programs.{$program->id}.fee_names"))->map(fn ($n, $i) => [
                         'name' => $n, 'amount' => (int) preg_replace('/\D/', '', (string) (old("programs.{$program->id}.fee_amounts")[$i] ?? 0)),
@@ -94,7 +109,7 @@
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <input type="hidden" name="programs[{{ $program->id }}][is_offered]" value="0">
                         <input type="checkbox" name="programs[{{ $program->id }}][is_offered]" value="1"
-                               @checked(old("{$key}.is_offered", $terms->is_offered ? 1 : 0))
+                               @checked(old("{$key}.is_offered", $offeredNow ? 1 : 0))
                                class="w-5 h-5 accent-primary-600">
                         <span class="text-sm text-neutral-600">Ditawarkan pada periode ini</span>
                     </label>

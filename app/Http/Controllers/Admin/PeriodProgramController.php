@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Campus;
 use App\Models\PeriodProgram;
 use App\Models\PmbPeriod;
 use App\Models\Program;
@@ -19,18 +20,23 @@ class PeriodProgramController extends Controller
 {
     private const MAX_FEE_DETAILS = 20;
 
-    public function edit(int $id)
+    public function edit(Request $request, int $id)
     {
         $period = PmbPeriod::findOrFail($id);
 
+        $campuses = Campus::orderByDesc('is_default')->orderBy('name')->get();
+        $campus = $campuses->firstWhere('id', (int) $request->query('campus')) ?? $campuses->firstWhere('is_default', true);
+
         $programs = Program::with('faculty')->orderBy('name')->get();
-        Program::preloadTerms($programs, $period);
+        Program::preloadTerms($programs, $period, $campus);
 
         $otherPeriods = PmbPeriod::where('id', '!=', $period->id)
             ->orderByDesc('open_date')->orderByDesc('id')->get();
 
         return view('admin.periods.pricing', [
             'period'       => $period,
+            'campus'       => $campus,
+            'campuses'     => $campuses,
             'programs'     => $programs,
             'otherPeriods' => $otherPeriods,
             'readOnly'     => $period->isArchived(),
@@ -47,6 +53,7 @@ class PeriodProgramController extends Controller
         }
 
         $request->validate([
+            'campus_id'                                  => 'required|integer|exists:campuses,id',
             'programs'                                   => 'required|array|min:1',
             'programs.*.quota'                           => 'required|integer|min:0|max:100000',
             'programs.*.registration_fee'                => 'required|integer|min:0|max:2000000000',
@@ -62,14 +69,16 @@ class PeriodProgramController extends Controller
         $input = $request->input('programs');
         $knownIds = Program::whereIn('id', array_map('intval', array_keys($input)))->pluck('id')->all();
 
-        DB::transaction(function () use ($period, $input, $knownIds) {
+        $campus = Campus::findOrFail((int) $request->input('campus_id'));
+
+        DB::transaction(function () use ($period, $input, $knownIds, $campus) {
             foreach ($knownIds as $programId) {
                 $row = $input[$programId];
 
                 [$details, $total] = $this->feeDetails($row['fee_names'] ?? [], $row['fee_amounts'] ?? []);
 
                 PeriodProgram::updateOrCreate(
-                    ['period_id' => $period->id, 'program_id' => $programId],
+                    ['period_id' => $period->id, 'program_id' => $programId, 'campus_id' => $campus->id],
                     [
                         'is_offered'                      => !empty($row['is_offered']),
                         'quota'                           => (int) $row['quota'],
@@ -86,12 +95,13 @@ class PeriodProgramController extends Controller
 
         Log::info('PMB period pricing updated', [
             'period_id' => $period->id,
+            'campus_id' => $campus->id,
             'programs'  => count($knownIds),
             'by_user'   => Auth::id(),
         ]);
 
-        return redirect()->route('admin.periods.pricing', $period->id)
-            ->with('success', 'Biaya, kuota, dan komisi periode "' . $period->name . '" disimpan.');
+        return redirect()->route('admin.periods.pricing', ['id' => $period->id, 'campus' => $campus->id])
+            ->with('success', 'Biaya, kuota, dan komisi periode "' . $period->name . '" (' . $campus->name . ') disimpan.');
     }
 
     public function copy(Request $request, int $id)

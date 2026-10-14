@@ -33,7 +33,7 @@ class Program extends Model
         're_registration_fee_details' => 'array',
     ];
 
-    /** Cache nilai periode per instance: [period_id|0 => PeriodProgram]. */
+    /** Cache nilai periode per instance: ["period_id|campus_id" => PeriodProgram]. */
     protected array $termsCache = [];
 
     public function scopeActive($query)
@@ -41,21 +41,38 @@ class Program extends Model
         return $query->where('is_active', true);
     }
 
-    /** Prodi yang ditawarkan pada periode: aktif dan tidak ditandai `is_offered = false` di periode itu. */
-    public function scopeOfferedIn($query, $period)
+    /**
+     * Prodi yang ditawarkan pada periode di satu kampus (null = kampus bawaan).
+     * Kampus bawaan: aktif dan tidak ditandai `is_offered = false`. Kampus lain: harus punya
+     * baris `period_programs` dengan `is_offered = true` pada periode itu.
+     */
+    public function scopeOfferedIn($query, $period, $campus = null)
     {
         $periodId = static::periodId($period);
+        $campusId = Campus::idOf($campus);
         $query->where('programs.is_active', true);
 
         if (!$periodId) {
             return $query;
         }
 
-        return $query->whereNotExists(function ($sub) use ($periodId) {
+        if ($campusId !== Campus::defaultId()) {
+            return $query->whereExists(function ($sub) use ($periodId, $campusId) {
+                $sub->selectRaw('1')
+                    ->from('period_programs')
+                    ->whereColumn('period_programs.program_id', 'programs.id')
+                    ->where('period_programs.period_id', $periodId)
+                    ->where('period_programs.campus_id', $campusId)
+                    ->where('period_programs.is_offered', true);
+            });
+        }
+
+        return $query->whereNotExists(function ($sub) use ($periodId, $campusId) {
             $sub->selectRaw('1')
                 ->from('period_programs')
                 ->whereColumn('period_programs.program_id', 'programs.id')
                 ->where('period_programs.period_id', $periodId)
+                ->where('period_programs.campus_id', $campusId)
                 ->where('period_programs.is_offered', false);
         });
     }
@@ -75,29 +92,34 @@ class Program extends Model
     }
 
     /**
-     * Biaya, kuota, dan komisi prodi ini pada sebuah periode. Bila periode belum punya baris
-     * (atau periode tidak diketahui), dipakai nilai `programs` sebagai cadangan transisi.
+     * Biaya, kuota, dan komisi prodi ini pada sebuah periode di satu kampus (null = bawaan).
+     * Bila baris belum ada (atau periode tidak diketahui), dipakai nilai `programs` sebagai cadangan.
      */
-    public function termsFor($period = null): PeriodProgram
+    public function termsFor($period = null, $campus = null): PeriodProgram
     {
         $periodId = static::periodId($period);
-        $key = $periodId ?? 0;
+        $campusId = Campus::idOf($campus);
+        $key = ($periodId ?? 0) . '|' . $campusId;
 
         if (!array_key_exists($key, $this->termsCache)) {
             $row = $periodId
-                ? PeriodProgram::where('period_id', $periodId)->where('program_id', $this->id)->first()
+                ? PeriodProgram::where('period_id', $periodId)
+                    ->where('program_id', $this->id)
+                    ->where('campus_id', $campusId)
+                    ->first()
                 : null;
 
-            $this->termsCache[$key] = $row ?? $this->fallbackTerms($periodId);
+            $this->termsCache[$key] = $row ?? $this->fallbackTerms($periodId, $campusId);
         }
 
         return $this->termsCache[$key];
     }
 
-    /** Muat nilai satu periode untuk banyak prodi sekaligus (satu query, tanpa N+1). */
-    public static function preloadTerms($programs, $period): void
+    /** Muat nilai satu periode + kampus untuk banyak prodi sekaligus (satu query, tanpa N+1). */
+    public static function preloadTerms($programs, $period, $campus = null): void
     {
         $periodId = static::periodId($period);
+        $campusId = Campus::idOf($campus);
         $programs = collect($programs)->filter()->unique('id')->values();
 
         if (!$periodId || $programs->isEmpty()) {
@@ -105,21 +127,24 @@ class Program extends Model
         }
 
         $rows = PeriodProgram::where('period_id', $periodId)
+            ->where('campus_id', $campusId)
             ->whereIn('program_id', $programs->pluck('id'))
             ->get()
             ->keyBy('program_id');
 
         foreach ($programs as $program) {
-            $program->termsCache[$periodId] = $rows->get($program->id) ?? $program->fallbackTerms($periodId);
+            $program->termsCache[$periodId . '|' . $campusId] =
+                $rows->get($program->id) ?? $program->fallbackTerms($periodId, $campusId);
         }
     }
 
-    protected function fallbackTerms(?int $periodId): PeriodProgram
+    protected function fallbackTerms(?int $periodId, ?int $campusId = null): PeriodProgram
     {
         $terms = new PeriodProgram();
         $terms->forceFill([
             'period_id'  => $periodId,
             'program_id' => $this->id,
+            'campus_id'  => $campusId ?? Campus::defaultId(),
             'is_offered' => true,
         ]);
 
@@ -131,23 +156,36 @@ class Program extends Model
     }
 
     /**
-     * Jumlah kursi terpakai: pendaftar aktif (tidak ditolak, tidak dihapus)
-     * yang memilih prodi ini, opsional dibatasi satu periode.
+     * Jumlah kursi terpakai: pendaftar aktif (tidak ditolak, tidak dihapus) yang memilih
+     * prodi ini, opsional dibatasi satu periode dan satu kampus. Tanpa $campus, semua kampus
+     * dihitung. Pendaftaran tanpa kampus dihitung milik kampus bawaan.
      */
-    public function occupiedSeats(?int $periodId = null): int
+    public function occupiedSeats(?int $periodId = null, $campus = null): int
     {
+        $campusId = $campus === null ? null : Campus::idOf($campus);
+
         return Registration::where('first_choice_program_id', $this->id)
             ->when($periodId, fn ($q) => $q->where('period_id', $periodId))
+            ->when($campusId, function ($q) use ($campusId) {
+                $q->where(function ($w) use ($campusId) {
+                    $w->where('campus_id', $campusId);
+
+                    if ($campusId === Campus::defaultId()) {
+                        $w->orWhereNull('campus_id');
+                    }
+                });
+            })
             ->where('status', '!=', 'ditolak')
             ->count();
     }
 
-    /** quota 0/kosong berarti tanpa batas. */
-    public function isFull(?int $periodId = null): bool
+    /** quota 0/kosong berarti tanpa batas. Kuota dan kursi per kampus (null = kampus bawaan). */
+    public function isFull(?int $periodId = null, $campus = null): bool
     {
-        $quota = (int) $this->termsFor($periodId)->quota;
+        $campusId = Campus::idOf($campus);
+        $quota = (int) $this->termsFor($periodId, $campusId)->quota;
 
-        return $quota > 0 && $this->occupiedSeats($periodId) >= $quota;
+        return $quota > 0 && $this->occupiedSeats($periodId, $campusId) >= $quota;
     }
 
     /** Slug unik: tambahkan sufiks angka bila nama sama sudah dipakai. */

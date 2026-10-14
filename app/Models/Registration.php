@@ -16,6 +16,7 @@ class Registration extends Model
 
     protected $fillable = [
         'period_id',
+        'campus_id',
         'user_id',
         'referrer_id',
         'registration_number',
@@ -102,10 +103,23 @@ class Registration extends Model
         return $periodId ? $query->where('period_id', $periodId) : $query;
     }
 
-    /** Biaya, kuota, dan komisi prodi pilihan pada periode pendaftaran ini (K6). */
+    public function campus()
+    {
+        return $this->belongsTo(Campus::class);
+    }
+
+    /** Pendaftaran tanpa kampus (data lama) dianggap milik kampus bawaan. */
+    protected static function booted(): void
+    {
+        static::creating(function (self $registration) {
+            $registration->campus_id ??= Campus::defaultId();
+        });
+    }
+
+    /** Biaya, kuota, dan komisi prodi pilihan pada periode dan kampus pendaftaran ini (K6). */
     public function programTerms(): ?PeriodProgram
     {
-        return $this->firstChoiceProgram?->termsFor($this->period_id);
+        return $this->firstChoiceProgram?->termsFor($this->period_id, $this->campus_id);
     }
 
     public function secondChoiceProgram()

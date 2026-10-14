@@ -84,7 +84,9 @@ class PeriodsReadiness extends Command
         $this->section('Biaya, kuota, dan komisi (period_programs)');
         $activePrograms = Program::where('is_active', true)->get();
         foreach ($published as $period) {
-            $rows = PeriodProgram::where('period_id', $period->id)->get()->keyBy('program_id');
+            $rows = PeriodProgram::where('period_id', $period->id)
+                ->where('campus_id', \App\Models\Campus::defaultId())
+                ->get()->keyBy('program_id');
             $missing = $activePrograms->filter(fn ($program) => !$rows->has($program->id));
 
             if ($missing->isNotEmpty()) {

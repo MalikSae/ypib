@@ -14,6 +14,7 @@ class PeriodProgram extends Model
     protected $fillable = [
         'period_id',
         'program_id',
+        'campus_id',
         'is_offered',
         'quota',
         'registration_fee',
@@ -50,20 +51,29 @@ class PeriodProgram extends Model
         return $this->belongsTo(Program::class, 'program_id');
     }
 
+    public function campus()
+    {
+        return $this->belongsTo(Campus::class, 'campus_id');
+    }
+
     /**
-     * Pastikan setiap prodi punya baris pada periode ini. Nilai awal diambil dari `programs`
-     * (cadangan). Prodi yang ditambah belakangan (`offered = false`) tidak ditawarkan
-     * sampai admin mengaturnya.
+     * Pastikan setiap prodi punya baris pada periode ini di kampus bawaan. Nilai awal diambil
+     * dari `programs` (cadangan). Prodi yang ditambah belakangan (`offered = false`) tidak
+     * ditawarkan sampai admin mengaturnya. Kampus lain diatur manual oleh admin.
      */
     public static function seedFromPrograms(PmbPeriod $period, ?bool $offered = null, ?int $onlyProgramId = null): void
     {
-        $existing = static::where('period_id', $period->id)->pluck('program_id')->all();
+        $campusId = Campus::defaultId();
+
+        $existing = static::where('period_id', $period->id)
+            ->where('campus_id', $campusId)
+            ->pluck('program_id')->all();
 
         Program::query()
             ->whereNotIn('id', $existing)
             ->when($onlyProgramId, fn ($q) => $q->whereKey($onlyProgramId))
-            ->get()->each(function (Program $program) use ($period, $offered) {
-            $row = new static(['period_id' => $period->id, 'program_id' => $program->id]);
+            ->get()->each(function (Program $program) use ($period, $offered, $campusId) {
+            $row = new static(['period_id' => $period->id, 'program_id' => $program->id, 'campus_id' => $campusId]);
             $row->is_offered = $offered ?? (bool) $program->is_active;
 
             foreach (static::TERM_COLUMNS as $column) {
@@ -83,13 +93,20 @@ class PeriodProgram extends Model
         $copied = 0;
 
         foreach (static::where('period_id', $from->id)->get() as $source) {
-            $target = static::where('period_id', $to->id)->where('program_id', $source->program_id)->first();
+            $target = static::where('period_id', $to->id)
+                ->where('program_id', $source->program_id)
+                ->where('campus_id', $source->campus_id)
+                ->first();
 
             if ($target && !$overwrite) {
                 continue;
             }
 
-            $target ??= new static(['period_id' => $to->id, 'program_id' => $source->program_id]);
+            $target ??= new static([
+                'period_id'  => $to->id,
+                'program_id' => $source->program_id,
+                'campus_id'  => $source->campus_id,
+            ]);
             $target->is_offered = $source->is_offered;
             foreach (static::TERM_COLUMNS as $column) {
                 $target->{$column} = $source->{$column};

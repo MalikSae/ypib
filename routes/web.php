@@ -126,6 +126,7 @@ Route::prefix('admin')
 
         // Master Data
         Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
+        Route::resource('campuses', \App\Http\Controllers\Admin\CampusController::class)->except(['show']);
         Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
         Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
         Route::patch('partners/{partner}/toggle', [\App\Http\Controllers\Admin\PartnerController::class, 'toggleActive'])->name('partners.toggle');
