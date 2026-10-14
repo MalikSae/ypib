@@ -59,6 +59,38 @@
         }
         #nav-tooltip.visible { opacity: 1; }
 
+        /* Pemilih periode di topbar (dropdown kustom) */
+        .period-picker { position: relative; margin: 0; display: flex; align-items: center; gap: 6px; }
+        .period-picker-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            height: 34px; max-width: 190px; padding: 0 10px;
+            background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 8px;
+            font-size: 13px; font-weight: 600; color: #3B404F; cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .period-picker-button:hover { background: #F7F9FB; border-color: #CED0D4; }
+        .period-picker-button:focus-visible { outline: 2px solid #0B41CB; outline-offset: 2px; }
+        .period-picker-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .period-picker-chevron { width: 14px; height: 14px; flex-shrink: 0; color: #5D6C7B; transition: transform 0.15s; }
+        .period-picker-chevron.is-open { transform: rotate(180deg); }
+        .period-picker-panel {
+            position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+            width: 320px; max-width: calc(100vw - 32px); max-height: 360px; overflow-y: auto;
+            background: #FFFFFF; border: 1px solid #DEE3E9; border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(10, 19, 23, 0.14); padding: 6px;
+        }
+        .period-picker-item {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            width: 100%; padding: 9px 10px; border: 0; border-radius: 8px;
+            background: transparent; text-align: left; cursor: pointer; color: #3B404F;
+        }
+        .period-picker-item:hover { background: #F1F4F7; }
+        .period-picker-item.is-selected { background: #F2F5FD; color: #0B41CB; }
+        .period-picker-item-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .period-picker-item-name { font-size: 13px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+        .period-picker-item-meta { font-size: 11px; font-weight: 500; color: #7A8794; }
+        .period-picker-item.is-selected .period-picker-item-meta { color: #5C78C9; }
+        .period-picker-check { width: 16px; height: 16px; flex-shrink: 0; }
         /* Custom Scrollbar for Sidebar Nav */
         .sidebar-nav {
             flex: 1;
@@ -593,18 +625,60 @@
                 $adminPeriodId = \App\Support\AdminPeriod::id();
             @endphp
             @if($adminPeriodOptions->isNotEmpty())
-                <form method="POST" action="{{ route('admin.periods.select') }}" style="margin:0;display:flex;align-items:center;gap:6px;">
+                @php
+                    $adminPeriodCurrent = $adminPeriodOptions->firstWhere('id', $adminPeriodId);
+                    // Label ringkas: "2027/2028" bila nama memuatnya, selain itu nama dipotong.
+                    $adminPeriodShort = function ($period) {
+                        if (preg_match('/\d{4}\s*\/\s*\d{4}/', $period->name, $match)) {
+                            return preg_replace('/\s+/', '', $match[0]);
+                        }
+
+                        return \Illuminate\Support\Str::limit($period->name, 22);
+                    };
+                    $adminPeriodButton = $adminPeriodCurrent ? $adminPeriodShort($adminPeriodCurrent) : 'Semua periode';
+                    $adminPeriodButtonTitle = $adminPeriodCurrent ? $adminPeriodCurrent->name : 'Semua periode';
+                @endphp
+                <form method="POST" action="{{ route('admin.periods.select') }}" class="period-picker"
+                      x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
                     @csrf
-                    <label for="admin-period-select" class="topbar-username text-neutral-500" style="font-size:12px;font-weight:600;">Periode</label>
-                    <select id="admin-period-select" name="period" onchange="this.form.submit()" aria-label="Pilih periode"
-                            style="height:34px;border:1px solid #DEE3E9;border-radius:8px;padding:0 8px;font-size:13px;font-weight:600;max-width:200px;background:#fff;" class="text-neutral-700">
-                        <option value="all" @selected($adminPeriodId === null)>Semua periode</option>
+                    <span class="topbar-username text-neutral-500" style="font-size:12px;font-weight:600;">Periode</span>
+                    <button type="button" id="admin-period-select" class="period-picker-button"
+                            @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="listbox"
+                            aria-label="Pilih periode" title="{{ $adminPeriodButtonTitle }}">
+                        <span class="period-picker-label">{{ $adminPeriodButton }}</span>
+                        <svg class="period-picker-chevron" :class="{ 'is-open': open }" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div class="period-picker-panel" x-show="open" x-cloak x-transition.opacity.duration.100ms role="listbox" aria-label="Periode PMB">
+                        <button type="submit" name="period" value="all" role="option"
+                                class="period-picker-item {{ $adminPeriodId === null ? 'is-selected' : '' }}"
+                                aria-selected="{{ $adminPeriodId === null ? 'true' : 'false' }}">
+                            <span class="period-picker-item-text">
+                                <span class="period-picker-item-name">Semua periode</span>
+                                <span class="period-picker-item-meta">Gabungan seluruh tahun ajaran</span>
+                            </span>
+                            @if($adminPeriodId === null)
+                                <svg class="period-picker-check" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                            @endif
+                        </button>
+
                         @foreach($adminPeriodOptions as $adminPeriodOption)
-                            <option value="{{ $adminPeriodOption->id }}" @selected($adminPeriodId === $adminPeriodOption->id)>
-                                {{ $adminPeriodOption->name }}{{ $adminPeriodOption->isArchived() ? ' (arsip)' : '' }}
-                            </option>
+                            @php $isSelected = $adminPeriodId === $adminPeriodOption->id; @endphp
+                            <button type="submit" name="period" value="{{ $adminPeriodOption->id }}" role="option"
+                                    class="period-picker-item {{ $isSelected ? 'is-selected' : '' }}"
+                                    aria-selected="{{ $isSelected ? 'true' : 'false' }}">
+                                <span class="period-picker-item-text">
+                                    <span class="period-picker-item-name">{{ $adminPeriodOption->name }}{{ $adminPeriodOption->isArchived() ? ' (arsip)' : '' }}</span>
+                                    <span class="period-picker-item-meta">{{ $adminPeriodOption->phaseLabel() }} &middot; {{ $adminPeriodOption->open_date->isoFormat('D MMM Y') }} &ndash; {{ $adminPeriodOption->close_date->isoFormat('D MMM Y') }}</span>
+                                </span>
+                                @if($isSelected)
+                                    <svg class="period-picker-check" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                                @endif
+                            </button>
                         @endforeach
-                    </select>
+                    </div>
                 </form>
             @endif
             <span class="topbar-username text-neutral-600" style="font-size:14px;font-weight:500;">{{ auth()->user()->name }}</span>
