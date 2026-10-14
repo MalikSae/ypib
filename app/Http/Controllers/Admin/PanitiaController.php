@@ -32,6 +32,7 @@ class PanitiaController extends Controller
     public function create()
     {
         return view('admin.panitia.form', [
+            'campuses' => \App\Models\Campus::orderByDesc('is_default')->orderBy('name')->get(),
             'panitia' => new User(),
             'action' => route('admin.panitia.store'),
             'method' => 'POST'
@@ -44,6 +45,7 @@ class PanitiaController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'campus_id' => ['nullable', 'integer', 'exists:campuses,id'],
         ]);
 
         $user = User::create([
@@ -51,6 +53,7 @@ class PanitiaController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'panitia',
+            'campus_id' => $validated['campus_id'] ?? null,
             'email_verified_at' => now(), // Auto verify for admin-created accounts
         ]);
 
@@ -62,6 +65,7 @@ class PanitiaController extends Controller
         $this->ensurePanitia($panitium);
 
         return view('admin.panitia.form', [
+            'campuses' => \App\Models\Campus::orderByDesc('is_default')->orderBy('name')->get(),
             'panitia' => $panitium,
             'action' => route('admin.panitia.update', $panitium->id),
             'method' => 'PUT'
@@ -76,8 +80,10 @@ $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$panitium->id],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            'campus_id' => ['nullable', 'integer', 'exists:campuses,id'],
         ]);
 
+        $panitium->campus_id = $validated['campus_id'] ?? null;
         $panitium->name = $validated['name'];
         $panitium->email = $validated['email'];
         

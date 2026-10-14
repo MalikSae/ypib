@@ -17,6 +17,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'campus_id',
         'phone',
         'is_referrer',
         'referrer_id',
@@ -34,6 +35,12 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'is_referrer'       => 'boolean',
         ];
+    }
+
+    /** Kampus yang membatasi akses staf; null = semua kampus. */
+    public function campus()
+    {
+        return $this->belongsTo(Campus::class);
     }
 
     public function referrer()

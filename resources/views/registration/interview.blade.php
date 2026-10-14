@@ -43,8 +43,19 @@
             <p class="text-xl font-bold text-neutral-900 tracking-wider">{{ $registration->registration_number }}</p>
         </div>
 
+        @php $interviewCampus = $registration->resolvedCampus(); @endphp
+        @if($interviewCampus && ($interviewCampus->address || $interviewCampus->name))
+        <div class="mt-6 bg-neutral-50 border border-neutral-200 rounded-xl p-4 sm:p-5 text-center sm:text-left">
+            <h4 class="text-sm font-bold text-neutral-900 mb-1">Lokasi Interview</h4>
+            <p class="text-sm text-neutral-700 font-semibold">{{ $interviewCampus->name }}</p>
+            @if($interviewCampus->address)
+                <p class="text-xs text-neutral-500 leading-relaxed mt-0.5">{{ $interviewCampus->address }}</p>
+            @endif
+        </div>
+        @endif
+
         @php
-            $waNumber = $registration->period->admin_whatsapp ?? null;
+            $waNumber = $registration->contactWhatsapp() ?? null;
             $waNumberFormatted = $waNumber ? '62' . ltrim($waNumber, '0') : null;
         @endphp
 

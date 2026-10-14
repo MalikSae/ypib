@@ -196,17 +196,17 @@
                                         Informasi Pembayaran
                                     </div>
                                     <div class="grid grid-cols-[100px_1fr] gap-2 text-[13px] text-amber-900/80">
-                                        <span>Bank</span><strong class="text-amber-950">{{ $registration->period->university_bank_name ?? '-' }}</strong>
+                                        <span>Bank</span><strong class="text-amber-950">{{ $registration->paymentBank()['name'] ?? '-' }}</strong>
                                         <span>No. Rekening</span>
                                         <div class="flex items-center gap-1.5">
-                                            <strong class="font-mono text-amber-950">{{ $registration->period->university_bank_account ?? '-' }}</strong>
-                                            @if(!empty($registration->period->university_bank_account))
-                                                <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->period->university_bank_account }}').then(() => alert('Nomor rekening berhasil disalin!'))" class="bg-transparent border-none p-0.5 cursor-pointer text-amber-800 flex items-center justify-center transition-colors hover:text-primary-700" title="Salin nomor rekening">
+                                            <strong class="font-mono text-amber-950">{{ $registration->paymentBank()['account'] ?? '-' }}</strong>
+                                            @if(!empty($registration->paymentBank()['account']))
+                                                <button type="button" onclick="navigator.clipboard.writeText('{{ $registration->paymentBank()['account'] }}').then(() => alert('Nomor rekening berhasil disalin!'))" class="bg-transparent border-none p-0.5 cursor-pointer text-amber-800 flex items-center justify-center transition-colors hover:text-primary-700" title="Salin nomor rekening">
                                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg>
                                                 </button>
                                             @endif
                                         </div>
-                                        <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->period->university_bank_account_name ?? '-' }}</strong>
+                                        <span>Atas Nama</span><strong class="text-amber-950">{{ $registration->paymentBank()['account_name'] ?? '-' }}</strong>
                                         <span>Nominal</span><strong class="text-orange-700">Rp {{ number_format($registration->programTerms()?->registration_fee ?? 0, 0, ',', '.') }}</strong>
                                     </div>
                                 </div>
@@ -237,7 +237,7 @@
                                         </div>
                                         <div class="text-[11px] mt-2 leading-relaxed text-neutral-400">
                                             <div>Format file: JPG, PNG, PDF. Maks: 2MB.</div>
-                                            <div class="mt-0.5">Atau konfirmasi ke admin: <strong>{{ $registration->period->admin_whatsapp ?? '(0233) 123456' }}</strong></div>
+                                            <div class="mt-0.5">Atau konfirmasi ke admin: <strong>{{ $registration->contactWhatsapp() ?? '(0233) 123456' }}</strong></div>
                                         </div>
                                     </form>
                                 </div>

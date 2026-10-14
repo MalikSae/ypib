@@ -97,7 +97,7 @@ Route::prefix('admin')
 
         // Periode PMB
         Route::redirect('/pengaturan', '/admin/periode');
-        Route::prefix('periode')->name('periods.')->group(function () {
+        Route::prefix('periode')->name('periods.')->middleware('global.admin')->group(function () {
             $c = \App\Http\Controllers\Admin\PmbPeriodController::class;
 
             Route::get('/', [$c, 'index'])->name('index');
@@ -121,12 +121,12 @@ Route::prefix('admin')
         });
 
         // Pengaturan Email
-        Route::get('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'mail'])->name('settings.mail');
-        Route::put('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'updateMail'])->name('settings.mail.update');
+        Route::get('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'mail'])->middleware('global.admin')->name('settings.mail');
+        Route::put('/pengaturan-email', [\App\Http\Controllers\Admin\SettingController::class, 'updateMail'])->middleware('global.admin')->name('settings.mail.update');
 
         // Master Data
         Route::resource('faculties', \App\Http\Controllers\Admin\FacultyController::class)->except(['show']);
-        Route::resource('campuses', \App\Http\Controllers\Admin\CampusController::class)->except(['show']);
+        Route::resource('campuses', \App\Http\Controllers\Admin\CampusController::class)->except(['show'])->middleware('global.admin');
         Route::resource('programs', \App\Http\Controllers\Admin\ProgramController::class)->except(['show']);
         Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->except(['show']);
         Route::patch('partners/{partner}/toggle', [\App\Http\Controllers\Admin\PartnerController::class, 'toggleActive'])->name('partners.toggle');
@@ -134,7 +134,7 @@ Route::prefix('admin')
         Route::resource('facilities', \App\Http\Controllers\Admin\FacilityController::class)->except(['show']);
         Route::patch('facilities/{facility}/toggle', [\App\Http\Controllers\Admin\FacilityController::class, 'toggleActive'])->name('facilities.toggle');
         Route::resource('bank-soal', \App\Http\Controllers\Admin\ExamQuestionController::class)->except(['show']);
-        Route::resource('panitia', \App\Http\Controllers\Admin\PanitiaController::class)->except(['show']);
+        Route::resource('panitia', \App\Http\Controllers\Admin\PanitiaController::class)->except(['show'])->middleware('global.admin');
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {
             Route::get('/', [AdminRegistrationController::class, 'index'])->name('index');
@@ -183,7 +183,7 @@ Route::prefix('admin')
         });
 
         // User management
-        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->middleware('global.admin')->name('users.reset-password');
         
         // Komponen Showcase
         Route::get('/komponen', [\App\Http\Controllers\Admin\ComponentShowcaseController::class, 'index'])->name('komponen');

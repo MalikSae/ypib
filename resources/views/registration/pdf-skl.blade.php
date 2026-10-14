@@ -64,9 +64,9 @@
             @endif
             .</li>
         <li>Pembayaran dilakukan melalui:<br>
-            <strong>{{ $registration->period->university_bank_name ?? '-' }}</strong><br>
-            No. Rekening: <strong>{{ $registration->period->university_bank_account ?? '-' }}</strong><br>
-            Atas Nama: <strong>{{ $registration->period->university_bank_account_name ?? '-' }}</strong></li>
+            <strong>{{ $registration->paymentBank()['name'] ?? '-' }}</strong><br>
+            No. Rekening: <strong>{{ $registration->paymentBank()['account'] ?? '-' }}</strong><br>
+            Atas Nama: <strong>{{ $registration->paymentBank()['account_name'] ?? '-' }}</strong></li>
         <li>Total biaya Paket Kuliah sebesar <strong>Rp {{ number_format($registration->programTerms()->re_registration_fee ?? 0, 0, ',', '.') }}</strong>
             @if(!empty($registration->programTerms()->re_registration_fee_details))
                 , dengan rincian:
@@ -77,7 +77,7 @@
                 </ul>
             @endif
         </li>
-        <li>Bukti pembayaran dikirim ke WhatsApp Admin: <strong>{{ $registration->period->admin_whatsapp ?? '-' }}</strong>.</li>
+        <li>Bukti pembayaran dikirim ke WhatsApp Admin: <strong>{{ $registration->contactWhatsapp() ?? '-' }}</strong>.</li>
         <li>Melengkapi seluruh berkas administrasi yang dipersyaratkan oleh panitia PMB.</li>
     </ol>
 

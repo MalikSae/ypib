@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'global.admin' => \App\Http\Middleware\GlobalAdminOnly::class,
         ]);
 
         // Global (bukan grup web) agar header juga terpasang pada 404 untuk rute yang tidak ada.

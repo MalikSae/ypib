@@ -49,7 +49,7 @@ class RegistrationController extends Controller
         $programs = \App\Models\Program::where('is_active', true)->get();
 
         // NIK yang dipakai lebih dari satu pendaftaran aktif (tanda "NIK ganda", K7).
-        $duplicateNiks = Registration::whereIn('nik', $registrations->pluck('nik')->filter()->unique())
+        $duplicateNiks = Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->whereIn('nik', $registrations->pluck('nik')->filter()->unique())
             ->select('nik')->groupBy('nik')->havingRaw('COUNT(*) > 1')
             ->pluck('nik')->flip()->all();
 
@@ -79,7 +79,7 @@ class RegistrationController extends Controller
         }
 
         // Pendaftaran lain dengan NIK sama (tanda "NIK ganda" / "ber-NIM sebelumnya").
-        $nikMatches = Registration::with(['period', 'firstChoiceProgram'])
+        $nikMatches = Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->with(['period', 'firstChoiceProgram'])
             ->where('nik', $registration->nik)
             ->where('id', '!=', $registration->id)
             ->latest('id')->get();
@@ -124,7 +124,7 @@ class RegistrationController extends Controller
             $year = $registration->period?->year ?? date('Y');
             do {
                 $number = 'PMB-' . $year . '-' . str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
-            } while (Registration::where('registration_number', $number)->exists());
+            } while (Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->where('registration_number', $number)->exists());
 
             $registration->registration_number = $number;
         }
@@ -325,7 +325,7 @@ class RegistrationController extends Controller
         $message = 'Data pendaftar berhasil diperbarui.';
 
         if ($registration->wasChanged('nik')) {
-            $others = Registration::where('nik', $registration->nik)->where('id', '!=', $registration->id)->count();
+            $others = Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->where('nik', $registration->nik)->where('id', '!=', $registration->id)->count();
             if ($others > 0) {
                 $message .= " Peringatan: NIK ini juga dipakai {$others} pendaftaran lain (NIK ganda). Tinjau di bagian peringatan NIK.";
             }

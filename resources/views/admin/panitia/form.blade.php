@@ -38,6 +38,18 @@
                         <x-input-error :messages="$errors->get('email')" />
                     </div>
 
+                    <div>
+                        <x-input-label for="campus_id" value="Kampus" />
+                        <x-select id="campus_id" name="campus_id" :error="$errors->has('campus_id')">
+                            <option value="">Semua kampus</option>
+                            @foreach($campuses as $campus)
+                                <option value="{{ $campus->id }}" @selected(old('campus_id', $panitia->campus_id) == $campus->id)>{{ $campus->name }}</option>
+                            @endforeach
+                        </x-select>
+                        <div class="text-xs text-neutral-400 mt-1.5">Panitia kampus hanya bisa memindai pendaftar kampusnya.</div>
+                        <x-input-error :messages="$errors->get('campus_id')" />
+                    </div>
+
                 </div>
             </div>
 

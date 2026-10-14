@@ -111,9 +111,51 @@ class Registration extends Model
     /** Pendaftaran tanpa kampus (data lama) dianggap milik kampus bawaan. */
     protected static function booted(): void
     {
+        // Staf yang dibatasi ke satu kampus hanya melihat pendaftaran kampusnya.
+        static::addGlobalScope(new \App\Models\Scopes\CampusScope());
+
         static::creating(function (self $registration) {
             $registration->campus_id ??= Campus::defaultId();
         });
+    }
+
+    /** Kampus pendaftaran ini; data lama tanpa kampus dianggap kampus bawaan. */
+    public function resolvedCampus(): ?Campus
+    {
+        return $this->campus ?? Campus::default();
+    }
+
+    /** WhatsApp admin: milik kampus bila diisi, selain itu milik periode. */
+    public function contactWhatsapp(): ?string
+    {
+        $campus = $this->resolvedCampus();
+
+        return filled($campus?->admin_whatsapp) ? $campus->admin_whatsapp : $this->period?->admin_whatsapp;
+    }
+
+    /**
+     * Rekening pembayaran: milik kampus bila nama bank dan nomor rekening diisi, selain itu
+     * milik periode.
+     *
+     * @return array{name: ?string, account: ?string, account_name: ?string}
+     */
+    public function paymentBank(): array
+    {
+        $campus = $this->resolvedCampus();
+
+        if ($campus?->hasBankDetails()) {
+            return [
+                'name'         => $campus->university_bank_name,
+                'account'      => $campus->university_bank_account,
+                'account_name' => $campus->university_bank_account_name,
+            ];
+        }
+
+        return [
+            'name'         => $this->period?->university_bank_name,
+            'account'      => $this->period?->university_bank_account,
+            'account_name' => $this->period?->university_bank_account_name,
+        ];
     }
 
     /** Biaya, kuota, dan komisi prodi pilihan pada periode dan kampus pendaftaran ini (K6). */
@@ -261,7 +303,7 @@ class Registration extends Model
 
         if ($status === 'menunggu_interview') {
             $t5State = 'active';
-            $t5Description = 'Silakan datang ke kampus untuk melakukan tahap interview dan verifikasi dokumen.';
+            $t5Description = 'Silakan datang ke ' . ($this->resolvedCampus()?->name ?? 'kampus') . ' untuk melakukan tahap interview dan verifikasi dokumen.';
             $t5ActionUrl = route('registration.interview');
             $t5ActionLabel = 'Lihat Instruksi';
         } elseif (in_array($status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
@@ -390,7 +432,7 @@ class Registration extends Model
         // Urutan dihitung per awalan, bukan global per tahun. withTrashed() + lockForUpdate():
         // NIM milik pendaftar yang dihapus tidak dipakai ulang, dan penerbitan bersamaan
         // pada awalan yang sama berurutan. Wajib dipanggil di dalam DB::transaction.
-        $maxSequence = self::withTrashed()
+        $maxSequence = self::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->withTrashed()
             ->whereNotNull('nim')
             ->where('nim', 'like', $prefix . '%')
             ->lockForUpdate()
@@ -424,7 +466,7 @@ class Registration extends Model
         // MAX(urutan) termasuk data soft-delete: count() bisa menerbitkan nomor ganda
         // setelah pendaftar dihapus. Wajib dipanggil di dalam DB::transaction
         // agar lockForUpdate efektif.
-        $maxSequence = self::withTrashed()
+        $maxSequence = self::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->withTrashed()
             ->whereNotNull('letter_number')
             ->where('letter_number', 'like', '%/' . $year)
             ->lockForUpdate()

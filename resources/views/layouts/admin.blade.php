@@ -462,6 +462,7 @@
         </a>
 
         {{-- Kelola Kampus --}}
+        @unless(auth()->user()?->campus_id)
         <a href="{{ route('admin.campuses.index') }}"
            data-label="Kampus"
            class="nav-item {{ request()->routeIs('admin.campuses.*') ? 'active' : '' }}">
@@ -471,6 +472,7 @@
             </svg>
             <span class="sidebar-label">Kelola Kampus</span>
         </a>
+        @endunless
 
         {{-- Kelola Prodi --}}
         <a href="{{ route('admin.programs.index') }}"
@@ -522,6 +524,7 @@
             <span class="sidebar-label">Rekap Pendaftaran</span>
         </a>
         {{-- Kelola Panitia --}}
+        @unless(auth()->user()?->campus_id)
         <a href="{{ route('admin.panitia.index') }}"
            data-label="Kelola Panitia"
            class="nav-item {{ request()->routeIs('admin.panitia.*') ? 'active' : '' }}">
@@ -530,6 +533,7 @@
             </svg>
             <span class="sidebar-label">Kelola Panitia</span>
         </a>
+        @endunless
 
         {{-- Bank Soal --}}
         <a href="{{ route('admin.bank-soal.index') }}"
@@ -563,6 +567,7 @@
         <div class="nav-section-label text-neutral-400" style="font-size:11px;font-weight:700;letter-spacing:0.08em;margin-top:24px;margin-bottom:8px;padding:0 12px;">PENGATURAN</div>
 
         {{-- Program PMB --}}
+        @unless(auth()->user()?->campus_id)
         <a href="{{ route('admin.periods.index') }}"
            data-label="Periode PMB"
            class="nav-item {{ request()->routeIs('admin.periods.*') ? 'active' : '' }}">
@@ -571,8 +576,10 @@
             </svg>
             <span class="sidebar-label">Periode PMB</span>
         </a>
+        @endunless
 
         {{-- Integrasi Email --}}
+        @unless(auth()->user()?->campus_id)
         <a href="{{ route('admin.settings.mail') }}"
            data-label="Integrasi Email"
            class="nav-item {{ request()->routeIs('admin.settings.mail') ? 'active' : '' }}">
@@ -581,6 +588,7 @@
             </svg>
             <span class="sidebar-label">Integrasi Email</span>
         </a>
+        @endunless
 
         {{-- Komponen UI Showcase (Dev only) --}}
         @if(app()->environment('local'))

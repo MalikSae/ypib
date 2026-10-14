@@ -164,7 +164,7 @@ class Program extends Model
     {
         $campusId = $campus === null ? null : Campus::idOf($campus);
 
-        return Registration::where('first_choice_program_id', $this->id)
+        return Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->where('first_choice_program_id', $this->id)
             ->when($periodId, fn ($q) => $q->where('period_id', $periodId))
             ->when($campusId, function ($q) use ($campusId) {
                 $q->where(function ($w) use ($campusId) {

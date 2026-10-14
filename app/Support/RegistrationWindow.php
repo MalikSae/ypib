@@ -122,7 +122,7 @@ class RegistrationWindow
 
     private static function contact(Registration $registration): string
     {
-        $whatsapp = trim((string) $registration->period?->admin_whatsapp);
+        $whatsapp = trim((string) $registration->contactWhatsapp());
 
         return $whatsapp !== '' ? ' Silakan hubungi admin di WhatsApp ' . $whatsapp . '.' : ' Silakan hubungi admin.';
     }

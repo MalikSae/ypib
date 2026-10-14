@@ -28,7 +28,7 @@ class NikGuard
      */
     public static function inspect(string $nik, ?int $programId, ?int $exceptRegistrationId = null): array
     {
-        $matches = Registration::with('period')
+        $matches = Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->with('period')
             ->where('nik', $nik)
             ->when($exceptRegistrationId, fn ($q) => $q->where('id', '!=', $exceptRegistrationId))
             ->get();
