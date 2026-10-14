@@ -71,16 +71,13 @@
             <span class="text-sm text-neutral-500">{{ count($recapByReferrer) }} afiliasi dengan komisi siap cair</span>
             
             <div class="flex items-center gap-3">
-                <button type="submit" id="btn-mass-disburse-referrers" disabled 
-                        formaction="{{ route('admin.rewards.referrers.mass-disburse') }}" 
-                        onclick="return confirm('Cairkan semua reward untuk afiliasi yang dipilih? Pastikan transfer manual sudah dilakukan.')" 
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-neutral-100 text-neutral-400">
+                <x-button type="submit" id="btn-mass-disburse-referrers" disabled formaction="{{ route('admin.rewards.referrers.mass-disburse') }}" onclick="return confirm('Cairkan semua reward untuk afiliasi yang dipilih? Pastikan transfer manual sudah dilakukan.')" color="primary">
                     Cairkan Terpilih
-                </button>
-                <button type="submit" formaction="{{ route('admin.rewards.referrers.export') }}" 
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors duration-200">
+                </x-button>
+                <x-button type="submit" formaction="{{ route('admin.rewards.referrers.export') }}" 
+                        color="neutral" variant="outline">
                     Export CSV
-                </button>
+                </x-button>
             </div>
         </div>
         
@@ -121,18 +118,18 @@
                         </td>
                         <td class="px-5 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button type="button"
+                                <x-button type="button"
                                         x-data
                                         x-on:click="$dispatch('open-partial-modal', { referrerId: {{ $referrerId }}, referrerName: '{{ addslashes($recap['referrer']?->user?->name ?? '—') }}' })"
-                                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors duration-200">
+                                        color="neutral" variant="outline">
                                     Lihat Rincian
-                                </button>
-                                <button type="submit"
+                                </x-button>
+                                <x-button type="submit"
                                         formaction="{{ route('admin.rewards.disburse.referrer', $referrerId) }}"
                                         onclick="return confirm('Apakah Anda yakin sudah mentransfer Rp {{ number_format($recap['total_amount'], 0, ',', '.') }} ke afiliasi ini dan ingin mengubah statusnya menjadi Cair?')"
-                                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 transition-colors duration-200">
+                                        color="primary">
                                     Cairkan Semua
-                                </button>
+                                </x-button>
                             </div>
                         </td>
                     </tr>
@@ -210,10 +207,8 @@
             const hasChecked = document.querySelectorAll('.referrer-checkbox:checked').length > 0;
             if (hasChecked) {
                 btnMassDisburse.disabled = false;
-                btnMassDisburse.className = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white hover:bg-neutral-800 shadow-sm";
             } else {
                 btnMassDisburse.disabled = true;
-                btnMassDisburse.className = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-neutral-100 text-neutral-400 cursor-not-allowed";
             }
         }
 
@@ -242,19 +237,19 @@
                 </x-select>
             </div>
 
-            <x-button type="submit" color="primary" size="sm">Filter</x-button>
+            <x-button type="submit" color="primary">Filter</x-button>
             @if(request('status'))
                 <a href="{{ route('admin.rewards.index', ['tab' => 'detail']) }}" class="decoration-none">
-                    <x-button type="button" variant="outline" color="neutral" size="sm">Reset</x-button>
+                    <x-button type="button" variant="outline" color="neutral">Reset</x-button>
                 </a>
             @endif
 
             <div class="flex-1"></div>
             
-            <button form="mass_action_form" type="submit" formaction="{{ route('admin.rewards.export') }}" 
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors duration-200">
+            <x-button form="mass_action_form" type="submit" formaction="{{ route('admin.rewards.export') }}" 
+                    color="neutral" variant="outline">
                 Export CSV
-            </button>
+            </x-button>
         </form>
     </div>
 
@@ -497,19 +492,19 @@
                     </div>
                 </div>
                 <div class="bg-neutral-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-neutral-200">
-                    <button type="button" 
+                    <x-button type="button" 
                             @click="closeModal()" 
                             :disabled="isSubmitting"
-                            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                            color="neutral" variant="outline" class="w-full sm:w-auto">
                         Batal
-                    </button>
-                    <button type="button" 
+                    </x-button>
+                    <x-button type="button" 
                             @click="submitSelected()" 
                             :disabled="selectedIds.length === 0 || isSubmitting"
-                            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto">
+                            color="primary" class="w-full sm:w-auto">
                         <span x-show="!isSubmitting">Cairkan Terpilih (<span x-text="formatCurrency(totalSelectedAmount)"></span>)</span>
                         <span x-show="isSubmitting">Memproses...</span>
-                    </button>
+                    </x-button>
                 </div>
             </div>
         </div>

@@ -12,9 +12,9 @@
         <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Arsip Pendaftar Terhapus</h1>
         <p class="mt-0.5 text-sm text-neutral-400">Daftar pendaftar yang telah dihapus (soft delete). Komisi afiliasi untuk mereka sudah disesuaikan otomatis.</p>
     </div>
-    <a href="{{ route('admin.registrations.index') }}" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-neutral-600 bg-white border border-neutral-300 rounded-xl shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 whitespace-nowrap">
+    <a href="{{ route('admin.registrations.index') }}" class="decoration-none"><x-button type="button" color="neutral" variant="outline">
         &larr; Kembali ke Data Utama
-    </a>
+    </x-button></a>
 </div>
 
 {{-- ============================================================ --}}
@@ -31,14 +31,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
                 </div>
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari nama, nomor pendaftaran..."
-                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                <x-text-input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama, nomor pendaftaran..." class="pl-10" />
             </div>
-            <x-button type="submit" color="primary" size="sm">Cari</x-button>
+            <x-button type="submit" color="primary">Cari</x-button>
             @if(request('search'))
                 <a href="{{ route('admin.registrations.trash') }}" class="decoration-none">
-                    <x-button type="button" variant="outline" color="neutral" size="sm">Reset</x-button>
+                    <x-button type="button" variant="outline" color="neutral">Reset</x-button>
                 </a>
             @endif
         </form>
@@ -83,9 +82,9 @@
                         <td class="px-5 py-4 text-right">
                             <form method="POST" action="{{ route('admin.registrations.restore', $reg->id) }}" onsubmit="return confirm('Yakin ingin memulihkan pendaftar ini? Reward komisi tidak akan dipulihkan secara otomatis.')">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-lg shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 whitespace-nowrap">
+                                <x-button type="submit" size="sm">
                                     Pulihkan
-                                </button>
+                                </x-button>
                             </form>
                         </td>
                     </tr>

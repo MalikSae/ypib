@@ -118,35 +118,27 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                         <x-input-label :for="'quota_'.$program->id" value="Kuota (0 = tanpa batas)" />
-                        <x-text-input type="number" min="0" :id="'quota_'.$program->id" :name="'programs['.$program->id.'][quota]'"
-                                      :value="old($key.'.quota', $terms->quota)" required :error="$errors->has($key.'.quota')" />
+                        <x-text-input type="number" min="0" :id="'quota_'.$program->id" :name="'programs['.$program->id.'][quota]'" :value="old($key.'.quota', $terms->quota)" required :error="$errors->has($key.'.quota')" />
                         <x-input-error :messages="$errors->get($key.'.quota')" />
                     </div>
                     <div>
                         <x-input-label :for="'fee_'.$program->id" value="Biaya Pendaftaran (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'fee_'.$program->id" :name="'programs['.$program->id.'][registration_fee]'"
-                                      :value="old($key.'.registration_fee', $terms->registration_fee)" required :error="$errors->has($key.'.registration_fee')" />
+                        <x-text-input type="number" min="0" step="1000" :id="'fee_'.$program->id" :name="'programs['.$program->id.'][registration_fee]'" :value="old($key.'.registration_fee', $terms->registration_fee)" required :error="$errors->has($key.'.registration_fee')" />
                         <x-input-error :messages="$errors->get($key.'.registration_fee')" />
                     </div>
                     <div>
                         <x-input-label :for="'dp_'.$program->id" value="Minimal DP Daftar Ulang (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'dp_'.$program->id" :name="'programs['.$program->id.'][re_registration_minimum_payment]'"
-                                      :value="old($key.'.re_registration_minimum_payment', $terms->re_registration_minimum_payment)" required
-                                      :error="$errors->has($key.'.re_registration_minimum_payment')" />
+                        <x-text-input type="number" min="0" step="1000" :id="'dp_'.$program->id" :name="'programs['.$program->id.'][re_registration_minimum_payment]'" :value="old($key.'.re_registration_minimum_payment', $terms->re_registration_minimum_payment)" required :error="$errors->has($key.'.re_registration_minimum_payment')" />
                         <x-input-error :messages="$errors->get($key.'.re_registration_minimum_payment')" />
                     </div>
                     <div>
                         <x-input-label :for="'ref_'.$program->id" value="Komisi Pendaftaran (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'ref_'.$program->id" :name="'programs['.$program->id.'][referral_reward_amount]'"
-                                      :value="old($key.'.referral_reward_amount', $terms->referral_reward_amount)" required
-                                      :error="$errors->has($key.'.referral_reward_amount')" />
+                        <x-text-input type="number" min="0" step="1000" :id="'ref_'.$program->id" :name="'programs['.$program->id.'][referral_reward_amount]'" :value="old($key.'.referral_reward_amount', $terms->referral_reward_amount)" required :error="$errors->has($key.'.referral_reward_amount')" />
                         <x-input-error :messages="$errors->get($key.'.referral_reward_amount')" />
                     </div>
                     <div>
                         <x-input-label :for="'rereg_'.$program->id" value="Komisi Daftar Ulang (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'rereg_'.$program->id" :name="'programs['.$program->id.'][re_registration_reward_amount]'"
-                                      :value="old($key.'.re_registration_reward_amount', $terms->re_registration_reward_amount)" required
-                                      :error="$errors->has($key.'.re_registration_reward_amount')" />
+                        <x-text-input type="number" min="0" step="1000" :id="'rereg_'.$program->id" :name="'programs['.$program->id.'][re_registration_reward_amount]'" :value="old($key.'.re_registration_reward_amount', $terms->re_registration_reward_amount)" required :error="$errors->has($key.'.re_registration_reward_amount')" />
                         <x-input-error :messages="$errors->get($key.'.re_registration_reward_amount')" />
                     </div>
                 </div>
@@ -166,12 +158,8 @@
                     <div x-show="open" x-cloak class="mt-3 space-y-2">
                         <template x-for="(item, index) in items" :key="index">
                             <div class="flex gap-2 items-start">
-                                <input type="text" x-model="item.name" :name="'programs[{{ $program->id }}][fee_names][]'"
-                                       placeholder="Contoh: Dana Pengembangan Pendidikan"
-                                       class="flex-1 h-10 border border-neutral-300 rounded-lg px-3 text-sm text-neutral-900 focus:border-primary-600 outline-none">
-                                <input type="number" min="0" x-model="item.amount" :name="'programs[{{ $program->id }}][fee_amounts][]'"
-                                       placeholder="0"
-                                       class="w-40 h-10 border border-neutral-300 rounded-lg px-3 text-sm text-neutral-900 focus:border-primary-600 outline-none">
+                                <x-text-input type="text" x-model="item.name" :name="'programs[{{ $program->id }}][fee_names][]'" placeholder="Contoh: Dana Pengembangan Pendidikan" class="flex-1" />
+                                <x-text-input type="number" min="0" x-model="item.amount" :name="'programs[{{ $program->id }}][fee_amounts][]'" placeholder="0" class="w-40" />
                                 <button type="button" @click="items.splice(index, 1)" aria-label="Hapus rincian"
                                         class="h-10 px-2 text-error hover:text-error-700 bg-transparent border-none cursor-pointer">&times;</button>
                             </div>

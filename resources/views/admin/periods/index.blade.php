@@ -11,12 +11,12 @@
         <p class="mt-0.5 text-sm text-neutral-400">Kelola tahun ajaran: tanggal pendaftaran, masa bayar, tenggat daftar ulang, dan rekening.</p>
     </div>
     <a href="{{ route('admin.periods.create') }}" class="decoration-none shrink-0">
-        <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200 shadow-sm">
-            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <x-button type="button">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Tambah Periode
-        </button>
+        </x-button>
     </a>
 </div>
 

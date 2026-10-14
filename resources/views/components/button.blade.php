@@ -30,6 +30,11 @@
             'outline' => 'border border-success text-success hover:bg-success-light focus:ring-success',
             'ghost' => 'text-success hover:bg-success-light focus:ring-success',
         ],
+        'warning' => [
+            'solid' => 'bg-warning-700 text-white hover:bg-warning-800 focus:ring-warning-500',
+            'outline' => 'border border-warning-600 text-warning-700 hover:bg-warning-50 focus:ring-warning-500',
+            'ghost' => 'text-warning-700 hover:bg-warning-50 focus:ring-warning-500',
+        ],
         'danger' => [
             'solid' => 'bg-error text-white hover:bg-error-dark focus:ring-error',
             'outline' => 'border border-error text-error hover:bg-error-light focus:ring-error',

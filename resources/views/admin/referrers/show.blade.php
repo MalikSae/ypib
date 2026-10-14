@@ -298,18 +298,15 @@
             <div class="flex flex-col gap-3">
                 <form method="POST" action="{{ route('admin.referrers.toggle', $referrer->id) }}" class="m-0">
                     @csrf
-                    <button type="submit"
-                            onclick="return confirm('Toggle status afiliasi ini?')"
-                            class="w-full flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-colors border {{ $referrer->status === 'active' ? 'border-neutral-200 bg-white text-error-600 hover:bg-error-50' : 'border-neutral-200 bg-white text-success-600 hover:bg-success-50' }}">
+                    <x-button type="submit" onclick="return confirm('Toggle status afiliasi ini?')" :color="$referrer->status === 'active' ? 'danger' : 'success'" variant="outline" class="w-full">
                         {{ $referrer->status === 'active' ? 'Nonaktifkan Akun Afiliasi' : 'Aktifkan Akun Afiliasi' }}
-                    </button>
+                    </x-button>
                 </form>
 
                 @if($referrer->user_id)
-                <button type="button" onclick="openResetModal('{{ $referrer->user_id }}', '{{ addslashes($referrer->user?->name) }}')"
-                        class="w-full flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-bold transition-colors border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50">
+                <x-button type="button" onclick="openResetModal('{{ $referrer->user_id }}', '{{ addslashes($referrer->user?->name) }}')" color="neutral" variant="outline" class="w-full">
                     Reset Password Akun
-                </button>
+                </x-button>
                 @endif
             </div>
         </div>
@@ -339,9 +336,7 @@
                     </button>
                 </div>
                 <div class="relative">
-                    <input type="password" id="show_new_pwd" name="password" required minlength="8" 
-                           class="w-full pl-4 pr-10 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                           placeholder="Masukkan password baru">
+                    <x-text-input type="password" id="show_new_pwd" name="password" required minlength="8" placeholder="Masukkan password baru" class="pr-10" />
                     <button type="button" onclick="togglePasswordVisibility('show_new_pwd', 'show_eye_1')" class="absolute inset-y-0 right-0 px-3 flex items-center text-neutral-400 hover:text-neutral-600">
                         <svg id="show_eye_1" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -353,9 +348,7 @@
             <div class="mb-6">
                 <label class="block text-sm font-semibold text-neutral-700 mb-2">Konfirmasi Password</label>
                 <div class="relative">
-                    <input type="password" id="show_conf_pwd" name="password_confirmation" required minlength="8" 
-                           class="w-full pl-4 pr-10 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                           placeholder="Ulangi password baru">
+                    <x-text-input type="password" id="show_conf_pwd" name="password_confirmation" required minlength="8" placeholder="Ulangi password baru" class="pr-10" />
                     <button type="button" onclick="togglePasswordVisibility('show_conf_pwd', 'show_eye_2')" class="absolute inset-y-0 right-0 px-3 flex items-center text-neutral-400 hover:text-neutral-600">
                         <svg id="show_eye_2" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -365,8 +358,8 @@
                 </div>
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeResetModal()" class="px-5 py-2.5 text-sm font-bold text-neutral-600 bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-colors">Batal</button>
-                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white rounded-xl hover:opacity-90 transition-opacity" style="background-color:#EF4444;">Simpan Password</button>
+                <x-button type="submit" onclick="closeResetModal()" color="neutral" variant="ghost">Batal</x-button>
+                <x-button type="submit" color="danger">Simpan Password</x-button>
             </div>
         </form>
     </div>
@@ -385,27 +378,21 @@
             <div class="space-y-4 mb-6">
                 <div>
                     <label class="block text-sm font-semibold text-neutral-700 mb-1">Nama Bank <span class="text-error-500">*</span></label>
-                    <input type="text" name="bank_name" required value="{{ old('bank_name', $referrer->bank_name) }}" 
-                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                           placeholder="Contoh: BCA / Mandiri">
+                    <x-text-input type="text" name="bank_name" required value="{{ old('bank_name', $referrer->bank_name) }}" placeholder="Contoh: BCA / Mandiri" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-neutral-700 mb-1">Nomor Rekening <span class="text-error-500">*</span></label>
-                    <input type="text" name="bank_account_number" required value="{{ old('bank_account_number', $referrer->bank_account_number) }}" 
-                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                           placeholder="Contoh: 1234567890">
+                    <x-text-input type="text" name="bank_account_number" required value="{{ old('bank_account_number', $referrer->bank_account_number) }}" placeholder="Contoh: 1234567890" />
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-neutral-700 mb-1">Nama Pemilik Rekening <span class="text-error-500">*</span></label>
-                    <input type="text" name="bank_account_name" required value="{{ old('bank_account_name', $referrer->bank_account_name) }}" 
-                           class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
-                           placeholder="Contoh: Asep Kopi">
+                    <x-text-input type="text" name="bank_account_name" required value="{{ old('bank_account_name', $referrer->bank_account_name) }}" placeholder="Contoh: Asep Kopi" />
                 </div>
             </div>
             
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeEditBankModal()" class="px-5 py-2.5 text-sm font-bold text-neutral-600 bg-neutral-100 rounded-xl hover:bg-neutral-200 transition-colors">Batal</button>
-                <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors">Simpan Rekening</button>
+                <x-button type="submit" onclick="closeEditBankModal()" color="neutral" variant="ghost">Batal</x-button>
+                <x-button type="submit" color="primary">Simpan Rekening</x-button>
             </div>
         </form>
     </div>

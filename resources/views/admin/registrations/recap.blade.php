@@ -13,14 +13,12 @@
         <p class="mt-0.5 text-sm text-neutral-400">Ringkasan jumlah pendaftar, kelulusan, dan konfirmasi daftar ulang per prodi.</p>
     </div>
     <div class="flex items-center gap-3 flex-shrink-0">
-        <a href="{{ route('admin.registrations.recap.export') }}"
-           id="btn-export-rekap"
-           class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 transition-colors">
+        <a href="{{ route('admin.registrations.recap.export') }}" id="btn-export-rekap" class="decoration-none"><x-button type="button">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             Export Excel
-        </a>
+        </x-button></a>
     </div>
 </div>
 

@@ -14,7 +14,7 @@
         <p class="text-sm text-neutral-400 mt-0.5">{{ now()->translatedFormat('l, d F Y') }}</p>
     </div>
     <a href="{{ route('admin.registrations.index') }}" class="decoration-none">
-        <x-button color="primary" size="sm">Lihat Semua Pendaftar</x-button>
+        <x-button color="primary">Lihat Semua Pendaftar</x-button>
     </a>
 </div>
 

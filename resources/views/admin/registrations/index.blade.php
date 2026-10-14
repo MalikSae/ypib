@@ -96,14 +96,13 @@ $activeStatus = request('status', '');
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
                 </div>
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari nama, nomor pendaftaran..."
-                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
+                <x-text-input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama, nomor pendaftaran..." class="pl-10" />
             </div>
-            <x-button type="submit" color="primary" size="sm">Cari</x-button>
+            <x-button type="submit" color="primary">Cari</x-button>
             @if(request('search'))
                 <a href="{{ route('admin.registrations.index', array_filter(['status' => $activeStatus])) }}" class="decoration-none">
-                    <x-button type="button" variant="outline" color="neutral" size="sm">Reset</x-button>
+                    <x-button type="button" variant="outline" color="neutral">Reset</x-button>
                 </a>
             @endif
         </form>
@@ -123,19 +122,19 @@ $activeStatus = request('status', '');
                     @endif
                 @endforeach
             </x-select>
-            <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-success-600 border border-transparent rounded-xl shadow-sm hover:bg-success-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success-500 whitespace-nowrap">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <x-button type="submit" color="neutral" variant="outline">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export Excel
-            </button>
-            <button type="submit" name="format" value="csv" title="Untuk data besar (ribuan baris)" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-success-700 bg-success-50 border border-success-200 rounded-xl transition whitespace-nowrap">
+            </x-button>
+            <x-button type="submit" name="format" value="csv" color="neutral" variant="outline" title="Untuk data besar (ribuan baris)">
                 Export CSV
-            </button>
-            <a href="{{ route('admin.registrations.trash') }}" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-error-600 bg-error-50 border border-error-100 rounded-xl hover:bg-error-100 transition whitespace-nowrap">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            </x-button>
+            <a href="{{ route('admin.registrations.trash') }}" class="decoration-none"><x-button type="button" color="neutral" variant="outline">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 Lihat Arsip
-            </a>
+            </x-button></a>
         </form>
     </div>
 

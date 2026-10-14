@@ -112,10 +112,10 @@
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Data Diri</div>
-                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-data-modal')" style="font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;background:#F1F4F7;color:#082e8f;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                <x-button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-data-modal')" color="primary" variant="ghost" size="sm">
                     <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                     Edit Data
-                </button>
+                </x-button>
             </div>
             <div class="field-grid">
                 @php
@@ -229,11 +229,9 @@
                                        style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
                                 <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
                             </div>
-                            <button type="submit"
-                                    style="height:40px;border-radius:9999px;padding:0 20px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background 0.15s;"
-                                    onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
+                            <x-button type="submit" class="shrink-0">
                                 Upload
-                            </button>
+                            </x-button>
                         </div>
                     </form>
                 @endif
@@ -350,11 +348,9 @@
                                     <div style="display:flex;gap:8px;align-items:center;">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
                                                style="flex:1;font-size:11px;">
-                                        <button type="submit"
-                                                onclick="return confirm('Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui.')"
-                                                style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap;">
+                                        <x-button type="submit" onclick="return confirm('Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui.')" size="sm">
                                             Ganti
-                                        </button>
+                                        </x-button>
                                     </div>
                                 </form>
                                 @endif
@@ -386,11 +382,9 @@
                                     <div style="display:flex;gap:8px;align-items:center;">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
                                                style="flex:1;font-size:11px;">
-                                        <button type="submit"
-                                                onclick="return confirm('Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui.')"
-                                                style="height:32px;background:#082e8f;color:white;border:none;border-radius:6px;font-size:11px;font-weight:700;padding:0 12px;cursor:pointer;white-space:nowrap;">
+                                        <x-button type="submit" onclick="return confirm('Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui.')" size="sm">
                                             Upload
-                                        </button>
+                                        </x-button>
                                     </div>
                                 </form>
                                 @endif
@@ -420,23 +414,16 @@
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
                         <div style="flex:1;min-width:200px;">
                             <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika revisi)</label>
-                            <input type="text" name="bulk_note" placeholder="Catatan untuk dokumen terpilih..."
-                                   style="width:100%;height:36px;border-radius:6px;font-size:12px;border:1px solid #D1D5DB;padding:0 10px;box-sizing:border-box;">
+                            <x-text-input type="text" name="bulk_note" placeholder="Catatan untuk dokumen terpilih..." />
                         </div>
-                        <button type="submit" name="bulk_status" value="disetujui"
-                                onclick="return confirm('Setujui ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')"
-                                style="height:36px;background:#15803d;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.15s;"
-                                onmouseover="this.style.background='#166534'" onmouseout="this.style.background='#15803d'">
-                            <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                        <x-button type="submit" name="bulk_status" value="disetujui" onclick="return confirm('Setujui ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')" color="success" size="sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                             Setujui Terpilih
-                        </button>
-                        <button type="submit" name="bulk_status" value="perlu_revisi"
-                                onclick="return confirm('Minta revisi ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')"
-                                style="height:36px;background:#c2410c;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.15s;"
-                                onmouseover="this.style.background='#9a3412'" onmouseout="this.style.background='#c2410c'">
-                            <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                        </x-button>
+                        <x-button type="submit" name="bulk_status" value="perlu_revisi" onclick="return confirm('Minta revisi ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')" color="warning" size="sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                             Minta Revisi
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -479,12 +466,12 @@
                         <div>
                             <form action="{{ route('admin.registrations.reset-exam', $registration->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mereset sesi tes tulis peserta ini? Seluruh jawaban akan dihapus dan peserta harus mengerjakan ulang.')" style="margin:0;">
                                 @csrf
-                                <button type="submit" style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
-                                    <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <x-button type="submit" color="danger" variant="outline" size="sm">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                     </svg>
                                     Reset Tes
-                                </button>
+                                </x-button>
                             </form>
                         </div>
                     @else
@@ -647,16 +634,13 @@
                 @if(!$registration->payment_proof && $registration->registration_type !== 'alumni' || $registration->registration_type === 'alumni' && !$registration->alumni_card_proof)
                     <div style="margin-bottom: 16px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti/kartu)</label>
-                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Diverifikasi manual..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'" class="border-neutral-300">{{ old('note') }}</textarea>
+                        <x-textarea name="note" rows="2" placeholder="Misal: Diverifikasi manual...">{{ old('note') }}</x-textarea>
                     </div>
                 @endif
 
-                <button type="submit"
-                        onclick="return confirm('{{ $registration->registration_type === 'alumni' ? 'Verifikasi alumni dan generate nomor pendaftaran?' : 'Konfirmasi pembayaran dan generate nomor pendaftaran?' }}')"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                        onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
+                <x-button type="submit" onclick="return confirm('{{ $registration->registration_type === 'alumni' ? 'Verifikasi alumni dan generate nomor pendaftaran?' : 'Konfirmasi pembayaran dan generate nomor pendaftaran?' }}')" class="w-full">
                     {{ $registration->registration_type === 'alumni' ? 'Verifikasi & Konfirmasi Alumni' : 'Konfirmasi Pembayaran' }}
-                </button>
+                </x-button>
             </form>
         </div>
         @endif
@@ -743,16 +727,13 @@
                     </div>
                     <div style="margin-bottom: 16px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti)</label>
-                        <textarea name="note" rows="2" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;resize:vertical;outline:none;transition:border 0.15s;" placeholder="Misal: Bayar tunai untuk daftar ulang..." onfocus="this.style.border='1px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'" class="border-neutral-300">{{ old('note') }}</textarea>
+                        <x-textarea name="note" rows="2" placeholder="Misal: Bayar tunai untuk daftar ulang...">{{ old('note') }}</x-textarea>
                     </div>
                 @endif
 
-                <button type="submit"
-                        onclick="return confirm('Konfirmasi pembayaran daftar ulang?')"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                        onmouseover="this.style.background='#052066'" onmouseout="this.style.background='#082e8f'" class="bg-primary-600 text-white">
+                <x-button type="submit" onclick="return confirm('Konfirmasi pembayaran daftar ulang?')" class="w-full">
                     Konfirmasi Daftar Ulang
-                </button>
+                </x-button>
             </form>
         </div>
         @endif
@@ -764,15 +745,13 @@
             <form method="POST" action="{{ route('admin.registrations.add-note', $registration->id) }}">
                 @csrf
                 <input type="hidden" name="notes_checksum" value="{{ md5((string) $registration->internal_notes) }}">
-                <textarea name="note" rows="4"
-                          style="width:100%;border-radius:8px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;min-height:100px;outline:none;box-sizing:border-box;margin-bottom:12px;transition:border 0.15s;"
-                          onfocus="this.style.border='2px solid #082e8f'" onblur="this.style.border='1px solid #CED0D4'"
-                          placeholder="Tulis catatan untuk tim internal..." class="border-neutral-300 text-neutral-900">{{ $registration->internal_notes }}</textarea>
-                <button type="submit"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                        onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'" class="bg-neutral-100 text-primary-600 border-neutral-300">
+                <x-textarea name="note" rows="4"
+                         
+                         
+                          placeholder="Tulis catatan untuk tim internal..." class="mb-3">{{ $registration->internal_notes }}</x-textarea>
+                <x-button type="submit" color="neutral" variant="outline" class="w-full">
                     Simpan Catatan
-                </button>
+                </x-button>
             </form>
         </div>
 
@@ -801,9 +780,9 @@
                         </button>
                     </div>
                     <div style="position:relative;">
-                        <input type="password" id="reg_new_pwd" name="password" required minlength="8" 
-                               style="width:100%;height:44px;border-radius:8px;padding:0 40px 0 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;border:1px solid #CED0D4;" 
-                               class="text-neutral-900 bg-white" placeholder="Masukkan password baru">
+                        <x-text-input type="password" id="reg_new_pwd" name="password" required minlength="8" 
+                               
+                               placeholder="Masukkan password baru" class="pr-10" />
                         <button type="button" onclick="toggleRegPassword('reg_new_pwd', 'reg_eye_1')" style="position:absolute;right:0;top:0;bottom:0;padding:0 12px;background:none;border:none;cursor:pointer;display:flex;align-items:center;" class="text-neutral-400">
                             <svg id="reg_eye_1" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -815,9 +794,9 @@
                 <div style="margin-bottom:16px;">
                     <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Konfirmasi Password</label>
                     <div style="position:relative;">
-                        <input type="password" id="reg_conf_pwd" name="password_confirmation" required minlength="8" 
-                               style="width:100%;height:44px;border-radius:8px;padding:0 40px 0 12px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;border:1px solid #CED0D4;" 
-                               class="text-neutral-900 bg-white" placeholder="Ulangi password baru">
+                        <x-text-input type="password" id="reg_conf_pwd" name="password_confirmation" required minlength="8" 
+                               
+                               placeholder="Ulangi password baru" class="pr-10" />
                         <button type="button" onclick="toggleRegPassword('reg_conf_pwd', 'reg_eye_2')" style="position:absolute;right:0;top:0;bottom:0;padding:0 12px;background:none;border:none;cursor:pointer;display:flex;align-items:center;" class="text-neutral-400">
                             <svg id="reg_eye_2" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -826,11 +805,9 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:background 0.15s;background-color:#EF4444;color:white;"
-                        onmouseover="this.style.backgroundColor='#DC2626'" onmouseout="this.style.backgroundColor='#EF4444'">
+                <x-button type="submit" color="danger" class="w-full">
                     Simpan Password Baru
-                </button>
+                </x-button>
             </form>
         </div>
         @endif
@@ -850,11 +827,9 @@
                         </option>
                     @endforeach
                 </x-select>
-                <button type="submit"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;"
-                        onmouseover="this.style.background='#e6edfc'" onmouseout="this.style.background='#F1F4F7'" class="bg-neutral-100 text-primary-600 border-neutral-300">
+                <x-button type="submit" color="neutral" variant="outline" class="w-full">
                     Simpan Afiliator
-                </button>
+                </x-button>
             </form>
         </div>
 
@@ -896,11 +871,9 @@
             <form method="POST" action="{{ route('admin.registrations.destroy', $registration->id) }}" onsubmit="return confirm('Yakin ingin menghapus pendaftar ini? Data akan diarsipkan dan komisi terkait akan disesuaikan otomatis.')">
                 @csrf
                 @method('DELETE')
-                <button type="submit"
-                        style="width:100%;height:44px;border-radius:9999px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;border:none;background-color:#DC2626;color:#ffffff;"
-                        onmouseover="this.style.backgroundColor='#B91C1C'" onmouseout="this.style.backgroundColor='#DC2626'" class="shadow-sm">
+                <x-button type="submit" color="danger" class="w-full">
                     Hapus Pendaftar
-                </button>
+                </x-button>
             </form>
         </div>
 

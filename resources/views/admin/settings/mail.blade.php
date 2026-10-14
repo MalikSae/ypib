@@ -18,10 +18,10 @@
 
             <div class="mb-5">
                 <label for="resend_api_key" class="block text-sm font-semibold text-neutral-700 mb-2">Resend API Key</label>
-                <input type="password" name="resend_api_key" id="resend_api_key" 
-                    class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                <x-text-input type="password" name="resend_api_key" id="resend_api_key" 
+                    
                     value="" autocomplete="new-password"
-                    placeholder="{{ $hasResendKey ? '•••••••• (tersimpan — isi untuk mengganti)' : 're_123456789...' }}">
+                    placeholder="{{ $hasResendKey ? '•••••••• (tersimpan — isi untuk mengganti)' : 're_123456789...' }}" />
                 @error('resend_api_key')
                     <p class="text-error text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -36,11 +36,11 @@
 
             <div class="mb-5">
                 <label for="mail_from_address" class="block text-sm font-semibold text-neutral-700 mb-2">Alamat Email Pengirim (From Address)</label>
-                <input type="email" name="mail_from_address" id="mail_from_address" 
-                    class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                <x-text-input type="email" name="mail_from_address" id="mail_from_address" 
+                    
                     value="{{ old('mail_from_address', $fromAddress) }}" 
                     required 
-                    placeholder="no-reply@domainkampus.ac.id">
+                    placeholder="no-reply@domainkampus.ac.id" />
                 @error('mail_from_address')
                     <p class="text-error text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -49,20 +49,20 @@
 
             <div class="mb-8">
                 <label for="mail_from_name" class="block text-sm font-semibold text-neutral-700 mb-2">Nama Pengirim (From Name)</label>
-                <input type="text" name="mail_from_name" id="mail_from_name" 
-                    class="w-full px-4 py-2 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" 
+                <x-text-input type="text" name="mail_from_name" id="mail_from_name" 
+                    
                     value="{{ old('mail_from_name', $fromName) }}" 
                     required 
-                    placeholder="PMB YPIB">
+                    placeholder="PMB YPIB" />
                 @error('mail_from_name')
                     <p class="text-error text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="flex items-center justify-end">
-                <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-primary-600 text-white font-semibold text-sm rounded-xl hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors">
+                <x-button type="submit" color="primary">
                     Simpan Pengaturan
-                </button>
+                </x-button>
             </div>
         </form>
     </div>
