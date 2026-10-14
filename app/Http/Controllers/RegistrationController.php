@@ -35,11 +35,7 @@ class RegistrationController extends Controller
             return redirect()->route('registration.status');
         }
 
-        $prodiId = $request->query('prodi');
-        if (!$prodiId) {
-            return redirect()->route('landing')->with('error', 'Silakan pilih program studi terlebih dahulu.');
-        }
-
+        // ?prodi= dan ?kampus= hanya pra-pilihan; kampus dan prodi dipilih di langkah 2 form.
         if (!Auth::check()) {
             session()->put('url.intended', request()->fullUrl());
         }
@@ -386,13 +382,14 @@ class RegistrationController extends Controller
             $target = \App\Models\Program::find($validatedData['first_choice_program_id']);
 
             // Prodi tujuan harus ditawarkan pada periode pendaftaran ini (period_programs).
-            if ($target && !\App\Models\Program::offeredIn($registration->period_id)->whereKey($target->id)->exists()) {
+            // Prodi tujuan harus ditawarkan di kampus pendaftaran ini pada periodenya (period_programs).
+            if ($target && !\App\Models\Program::offeredIn($registration->period_id, $registration->campus_id)->whereKey($target->id)->exists()) {
                 return redirect()->back()->withInput()->withErrors([
-                    'first_choice_program_id' => 'Program studi tujuan tidak ditawarkan pada periode pendaftaran Anda.',
+                    'first_choice_program_id' => 'Program studi tujuan tidak ditawarkan di kampus dan periode pendaftaran Anda.',
                 ]);
             }
 
-            if ($target && $target->isFull($registration->period_id)) {
+            if ($target && $target->isFull($registration->period_id, $registration->campus_id)) {
                 return redirect()->back()->withInput()->withErrors([
                     'first_choice_program_id' => 'Kuota program studi tujuan sudah penuh. Silakan pilih program studi lain.',
                 ]);
@@ -681,13 +678,16 @@ class RegistrationController extends Controller
         }
 
         // `create` mewajibkan ?prodi=, jadi arahkan ke prodi yang sama bila ditawarkan di periode ini.
-        $sameProgramOffered = \App\Models\Program::offeredIn($current)
+        $sameProgramOffered = \App\Models\Program::offeredIn($current, $registration->campus_id)
             ->whereKey($registration->first_choice_program_id)->exists();
 
         return [
             'period' => $current,
             'url'    => $sameProgramOffered
-                ? route('registration.create', ['prodi' => $registration->first_choice_program_id])
+                ? route('registration.create', array_filter([
+                    'prodi'  => $registration->first_choice_program_id,
+                    'kampus' => $registration->campus?->slug,
+                ]))
                 : route('landing') . '#program-studi',
         ];
     }

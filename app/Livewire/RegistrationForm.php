@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Campus;
 use App\Models\PmbPeriod;
 use App\Models\Program;
 use App\Models\ReferralClick;
@@ -36,6 +37,8 @@ class RegistrationForm extends Component
 
     // Step 2 — Program Studi & Jalur
     public $programs;
+    public $campuses;
+    public string $campus_id = '';
     public string $first_choice_program_id  = '';
     public string $admission_path = '';
 
@@ -75,13 +78,17 @@ class RegistrationForm extends Component
                 'phone'       => 'required|string|max:20',
             ],
             2 => [
+                'campus_id' => [
+                    'required',
+                    \Illuminate\Validation\Rule::exists('campuses', 'id')->where('is_active', true),
+                ],
                 'first_choice_program_id' => [
                     'required',
                     \Illuminate\Validation\Rule::exists('programs', 'id')->where('is_active', true),
-                    // Prodi harus ditawarkan pada periode berjalan (is_offered di period_programs).
+                    // Prodi harus ditawarkan pada periode berjalan di kampus yang dipilih (period_programs).
                     function (string $attribute, mixed $value, \Closure $fail) {
                         $period = PmbPeriod::displayPeriod();
-                        if (!Program::offeredIn($period)->whereKey((int) $value)->exists()) {
+                        if (!Program::offeredIn($period, (int) $this->campus_id)->whereKey((int) $value)->exists()) {
                             $fail('Program studi yang dipilih tidak ditawarkan pada periode ini.');
                         }
                     },
@@ -120,6 +127,8 @@ class RegistrationForm extends Component
             'gender.required'                 => 'Jenis kelamin wajib dipilih.',
             'address.required'                => 'Alamat wajib diisi.',
             'phone.required'                  => 'Nomor HP wajib diisi.',
+            'campus_id.required'              => 'Pilih kampus terlebih dahulu.',
+            'campus_id.exists'                => 'Kampus yang dipilih tidak tersedia.',
             'first_choice_program_id.required'=> 'Pilih pilihan prodi pertama.',
             'first_choice_program_id.exists'  => 'Program studi yang dipilih tidak tersedia.',
             'admission_path.required'         => 'Silakan pilih jalur pendaftaran.',
@@ -163,9 +172,28 @@ class RegistrationForm extends Component
 
     public function mount(): void
     {
-        $this->period   = PmbPeriod::displayPeriod();
-        $this->programs = Program::with('faculty')->offeredIn($this->period)->get();
-        Program::preloadTerms($this->programs, $this->period);
+        $this->period = PmbPeriod::displayPeriod();
+
+        // Hanya kampus aktif yang menawarkan minimal satu prodi pada periode ini.
+        $this->campuses = Campus::active()->orderByDesc('is_default')->orderBy('name')->get()
+            ->filter(fn (Campus $campus) => Program::offeredIn($this->period, $campus)->exists())
+            ->values();
+
+        // ?kampus=slug memilih kampus; satu-satunya kampus dipilih otomatis.
+        $slug = request()->query('kampus');
+        $chosen = $slug ? $this->campuses->firstWhere('slug', $slug) : null;
+        $chosen ??= $this->campuses->count() === 1 ? $this->campuses->first() : null;
+
+        // Prodi dari URL (?prodi=) tanpa kampus eksplisit: pakai kampus pertama yang menawarkannya.
+        $prodiId = request()->query('prodi');
+        if (!$chosen && $prodiId) {
+            $chosen = $this->campuses->first(
+                fn (Campus $campus) => Program::offeredIn($this->period, $campus)->whereKey((int) $prodiId)->exists()
+            );
+        }
+
+        $this->campus_id = $chosen ? (string) $chosen->id : '';
+        $this->loadPrograms();
 
         // Pre-fill phone from logged-in user
         if ($user = Auth::user()) {
@@ -178,10 +206,31 @@ class RegistrationForm extends Component
         }
 
         // Set pre-selected prodi from url
-        $prodiId = request()->query('prodi');
-        if ($prodiId && Program::offeredIn($this->period)->where('id', $prodiId)->exists()) {
-            $this->first_choice_program_id = $prodiId;
+        if ($prodiId && $this->campus_id && $this->programs->contains('id', (int) $prodiId)) {
+            $this->first_choice_program_id = (string) $prodiId;
         }
+    }
+
+    /** Daftar prodi mengikuti kampus terpilih; tanpa kampus daftar kosong. */
+    protected function loadPrograms(): void
+    {
+        $campusId = $this->campus_id !== '' ? (int) $this->campus_id : null;
+
+        $this->programs = $campusId
+            ? Program::with('faculty')->offeredIn($this->period, $campusId)->get()
+            : collect();
+
+        if ($campusId) {
+            Program::preloadTerms($this->programs, $this->period, $campusId);
+        }
+    }
+
+    /** Ganti kampus: daftar prodi dimuat ulang dan pilihan prodi lama dibuang. */
+    public function updatedCampusId(): void
+    {
+        $this->first_choice_program_id = '';
+        $this->resetErrorBag(['campus_id', 'first_choice_program_id']);
+        $this->loadPrograms();
     }
 
     /**
@@ -208,9 +257,10 @@ class RegistrationForm extends Component
     protected function programHasSeat(): bool
     {
         $period = PmbPeriod::displayPeriod();
-        $program = Program::offeredIn($period)->find((int) $this->first_choice_program_id);
+        $campusId = (int) $this->campus_id;
+        $program = Program::offeredIn($period, $campusId)->find((int) $this->first_choice_program_id);
 
-        if ($program && $program->isFull($period?->id)) {
+        if ($program && $program->isFull($period?->id, $campusId)) {
             $this->addError('first_choice_program_id', 'Kuota program studi ini sudah penuh. Silakan pilih program studi lain.');
 
             return false;
@@ -290,7 +340,7 @@ class RegistrationForm extends Component
             // Kunci baris prodi agar dua pendaftar bersamaan tidak sama-sama merebut kursi terakhir.
             \Illuminate\Support\Facades\DB::beginTransaction();
             $lockedProgram = Program::whereKey((int) $this->first_choice_program_id)->lockForUpdate()->first();
-            if ($lockedProgram && $lockedProgram->isFull($period->id)) {
+            if ($lockedProgram && $lockedProgram->isFull($period->id, (int) $this->campus_id)) {
                 \Illuminate\Support\Facades\DB::rollBack();
                 $this->step = 2;
                 $this->addError('first_choice_program_id', 'Kuota program studi ini sudah penuh. Silakan pilih program studi lain.');
@@ -300,6 +350,7 @@ class RegistrationForm extends Component
 
             Registration::create([
                 'period_id'                => $period->id,
+                'campus_id'                => (int) $this->campus_id,
                 'user_id'                  => $user->id,
                 'referrer_id'              => $this->resolveReferrer()?->id,
                 'registration_number'      => null, // digenerate admin saat konfirmasi bayar

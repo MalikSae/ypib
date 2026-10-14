@@ -234,7 +234,12 @@
                                 <label class="block text-sm font-medium text-neutral-700">Program Studi</label>
                                 <select name="first_choice_program_id" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                     <option value="">Pilih Program Studi</option>
-                                    @php $programs = \App\Models\Program::where('is_active', true)->get(); @endphp
+                                    {{-- Prodi yang ditawarkan di kampus pendaftaran ini, ditambah prodi yang sedang dipilih. --}}
+                                    @php
+                                        $programs = \App\Models\Program::offeredIn($registration->period_id, $registration->campus_id)
+                                            ->orWhere('programs.id', $registration->first_choice_program_id)
+                                            ->get();
+                                    @endphp
                                     @foreach($programs as $program)
                                         <option value="{{ $program->id }}" {{ old('first_choice_program_id', $registration->first_choice_program_id) == $program->id ? 'selected' : '' }}>
                                             {{ $program->name }}
@@ -242,6 +247,9 @@
                                     @endforeach
                                 </select>
                                 @error('first_choice_program_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                @if($registration->campus)
+                                    <p class="text-xs text-neutral-400 mt-1">Kampus: {{ $registration->campus->name }}</p>
+                                @endif
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700">Jalur Pendaftaran</label>

@@ -192,9 +192,20 @@
         </h2>
         
         <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Kampus <span class="text-red-500">*</span></label>
+            <select wire:model.live="campus_id" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-primary-500 bg-gray-50">
+                <option value="">-- Pilih Kampus --</option>
+                @foreach($campuses as $campus)
+                    <option value="{{ $campus->id }}">{{ $campus->name }}@if($campus->address) &mdash; {{ $campus->city ?: $campus->address }}@endif</option>
+                @endforeach
+            </select>
+            @error('campus_id') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Program Studi <span class="text-red-500">*</span></label>
-            <select wire:model.live="first_choice_program_id" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-primary-500 bg-gray-50">
-                <option value="">-- Pilih Program Studi --</option>
+            <select wire:model.live="first_choice_program_id" @disabled($campus_id === '') class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-primary-500 bg-gray-50 disabled:opacity-60">
+                <option value="">{{ $campus_id === '' ? '-- Pilih kampus terlebih dahulu --' : '-- Pilih Program Studi --' }}</option>
                 @foreach($programs as $program)
                     <option value="{{ $program->id }}">{{ $program->name }}</option>
                 @endforeach
@@ -232,7 +243,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
                             </svg>
-                            Kuota {{ $selectedProgram->termsFor($period)->quota }}
+                            Kuota {{ $selectedProgram->termsFor($period, $campus_id ?: null)->quota }}
                         </div>
                     </div>
                 </div>
@@ -441,6 +452,7 @@
                         $firstProg  = $programs->firstWhere('id', $first_choice_program_id);
                         $pathLabels = ['umum' => 'Jalur Reguler', 'prestasi' => 'Jalur Prestasi', 'tahfidz' => 'Jalur Tahfidz'];
                     @endphp
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Kampus</span><span class="font-medium">{{ $campuses->firstWhere('id', (int) $campus_id)?->name ?? '-' }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Program Studi</span><span class="font-medium">{{ $firstProg?->name ?? '-' }}</span></div>
                     <div class="flex flex-col md:contents"><span class="text-gray-500 text-xs md:text-sm">Jalur Pendaftaran</span><span class="font-medium">{{ $pathLabels[$admission_path] ?? '-' }}</span></div>
                 </div>
@@ -471,7 +483,7 @@
 
             @if($period)
             <div class="border rounded-xl p-4 text-sm text-primary-600" style="background-color:#e6edfc; border-color:#DBEAFE;">
-                <strong>Biaya pendaftaran: Rp {{ number_format($firstProg?->termsFor($period)->registration_fee ?? 0, 0, ',', '.') }}</strong><br>
+                <strong>Biaya pendaftaran: Rp {{ number_format($firstProg?->termsFor($period, $campus_id ?: null)->registration_fee ?? 0, 0, ',', '.') }}</strong><br>
                 Setelah submit, Anda akan mendapat nomor pendaftaran dan instruksi pembayaran.
             </div>
             @endif
