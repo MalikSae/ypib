@@ -134,9 +134,10 @@ class ReferrerController extends Controller
 
         $baseUrl = config('app.url');
 
-        // Satu tautan per kampus aktif (landing kampus), ditambah tautan umum ke form pendaftaran.
+        // Tautan khusus untuk tiap kampus aktif selain kampus bawaan (landing kampus). Landing kampus
+        // bawaan adalah halaman utama yang sama dengan tautan umum, jadi tidak diberi kartu sendiri.
         $base = $baseUrl . '/ref/' . $referrer->code;
-        $linkTargets = \App\Models\Campus::active()->orderByDesc('is_default')->orderBy('name')->get()
+        $linkTargets = \App\Models\Campus::active()->where('is_default', false)->orderBy('name')->get()
             ->map(fn ($campus) => [
                 'label' => $campus->name,
                 'hint'  => 'Halaman kampus: prodi, biaya, dan kuota ' . $campus->name . '.',
@@ -145,9 +146,9 @@ class ReferrerController extends Controller
             ])
             ->push([
                 'label' => 'Link Umum',
-                'hint'  => 'Langsung ke form pendaftaran; kampus dipilih sendiri oleh pendaftar.',
+                'hint'  => 'Untuk semua kampus: langsung ke form pendaftaran, kampus dipilih sendiri oleh pendaftar.',
                 'url'   => $base,
-                'share' => 'Daftar kuliah di YPIB Majalengka lewat link ini: ',
+                'share' => 'Daftar kuliah di YPIB lewat link ini: ',
             ]);
 
         return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'linkTargets'));

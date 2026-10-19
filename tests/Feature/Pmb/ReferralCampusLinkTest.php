@@ -72,7 +72,7 @@ class ReferralCampusLinkTest extends TestCase
         $this->assertSame(0, ReferralClick::count());
     }
 
-    public function test_dashboard_lists_one_link_per_active_campus_plus_the_general_link(): void
+    public function test_dashboard_lists_a_link_per_extra_campus_plus_the_general_link(): void
     {
         $referrer = $this->referrer();
         $referrer->user->forceFill(['is_referrer' => true])->save();
@@ -81,14 +81,15 @@ class ReferralCampusLinkTest extends TestCase
 
         $base = rtrim(config('app.url'), '/') . '/ref/' . $referrer->code;
 
-        $this->assertStringContainsString($base . '?kampus=majalengka', $html);
         $this->assertStringContainsString($base . '?kampus=cirebon', $html);
+        // Kampus bawaan tidak punya kartu: halamannya sama dengan tautan umum.
+        $this->assertStringNotContainsString('?kampus=majalengka', $html);
         $this->assertStringContainsString('Link Umum', $html);
         $this->assertStringContainsString(urlencode('Daftar kuliah di YPIB Kampus Cirebon lewat link ini: ' . $base . '?kampus=cirebon'), $html);
 
-        // Kampus nonaktif tidak punya tautan.
+        // Kampus nonaktif tidak punya tautan; tinggal tautan umum.
         $this->crb()->update(['is_active' => false]);
-        $this->actingAs($referrer->user)->get('/afiliasi/dashboard')->assertOk()->assertDontSee('?kampus=cirebon');
+        $this->actingAs($referrer->user)->get('/afiliasi/dashboard')->assertOk()->assertDontSee('?kampus=cirebon')->assertSee('Link Umum');
     }
 
     public function test_commission_attribution_is_unchanged_by_the_campus_in_the_link(): void

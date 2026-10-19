@@ -63,7 +63,7 @@ Aplikasi lama tidak mengenal `campus_id`, jadi rollback kode tanpa rollback data
 
 - Migrasi `2026_10_19_000003_add_campus_id_to_referral_clicks_table` menambah `referral_clicks.campus_id` (kosong untuk klik lama dan klik tautan umum).
 - `/ref/KODE?kampus=cirebon` mencatat klik, menyimpan cookie `ref` (7 hari, klik terakhir menang), lalu membuka landing kampus (`/cirebon`). `?kampus=majalengka` membuka `/`. Tanpa `?kampus=`, atau dengan kampus tidak dikenal/nonaktif, perilaku lama berlaku (form pendaftaran).
-- Dashboard afiliasi menampilkan satu tautan per kampus aktif ditambah "Link Umum". Afiliator yang sudah menyebarkan `/ref/KODE` tidak perlu mengganti tautan.
+- Dashboard afiliasi menampilkan satu kartu tautan untuk tiap kampus aktif selain kampus bawaan (mis. Kampus Cirebon) ditambah "Link Umum". Kampus bawaan tidak punya kartu karena landing-nya (`/`) sama dengan tautan umum. Afiliator yang sudah menyebarkan `/ref/KODE` tidak perlu mengganti tautan.
 - Komisi tidak berubah: tetap mengikuti kampus tempat pendaftar mendaftar, bukan kampus di tautan.
 
 ## 9. Perilaku tambahan
