@@ -232,18 +232,18 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100">
                     <div class="text-xs text-neutral-500 mb-1 font-semibold">Total Klik Link</div>
-                    <div class="text-2xl font-black text-neutral-900">{{ number_format($referrer->total_clicks) }}</div>
+                    <div class="text-2xl font-black text-neutral-900">{{ number_format($referrer->total_clicks, 0, ',', '.') }}</div>
                 </div>
                 <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100">
                     <div class="text-xs text-neutral-500 mb-1 font-semibold">Pendaftar Sukses</div>
-                    <div class="text-2xl font-black text-primary-600">{{ number_format($referrer->total_conversions) }}</div>
+                    <div class="text-2xl font-black text-primary-600">{{ number_format($referrer->total_conversions, 0, ',', '.') }}</div>
                 </div>
             </div>
             @if($referrer->total_clicks > 0)
             <div class="mt-4 pt-4 border-t border-neutral-100">
                 <div class="flex justify-between items-center text-sm">
                     <span class="text-neutral-500 font-medium">Conversion Rate</span>
-                    <span class="font-bold text-neutral-900">{{ number_format(($referrer->total_conversions / $referrer->total_clicks) * 100, 0) }}%</span>
+                    <span class="font-bold text-neutral-900">{{ number_format(($referrer->total_conversions / $referrer->total_clicks) * 100, 0, ',', '.') }}%</span>
                 </div>
                 <!-- Progress Bar -->
                 <div class="w-full bg-neutral-100 rounded-full h-1.5 mt-2">

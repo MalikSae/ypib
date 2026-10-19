@@ -188,7 +188,7 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="text-sm font-bold text-neutral-600">
-                            {{ $referrer->total_clicks > 0 ? number_format(($referrer->total_conversions / $referrer->total_clicks) * 100, 0) : 0 }}%
+                            {{ $referrer->total_clicks > 0 ? number_format(($referrer->total_conversions / $referrer->total_clicks) * 100, 0, ',', '.') : 0 }}%
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">

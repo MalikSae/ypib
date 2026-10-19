@@ -123,22 +123,22 @@
                     </div>
                     <div>
                         <x-input-label :for="'fee_'.$program->id" value="Biaya Pendaftaran (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'fee_'.$program->id" :name="'programs['.$program->id.'][registration_fee]'" :value="old($key.'.registration_fee', $terms->registration_fee)" required :error="$errors->has($key.'.registration_fee')" />
+                        <x-money-input :id="'fee_'.$program->id" :name="'programs['.$program->id.'][registration_fee]'" :value="old($key.'.registration_fee', $terms->registration_fee)" required :error="$errors->has($key.'.registration_fee')" />
                         <x-input-error :messages="$errors->get($key.'.registration_fee')" />
                     </div>
                     <div>
                         <x-input-label :for="'dp_'.$program->id" value="Minimal DP Daftar Ulang (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'dp_'.$program->id" :name="'programs['.$program->id.'][re_registration_minimum_payment]'" :value="old($key.'.re_registration_minimum_payment', $terms->re_registration_minimum_payment)" required :error="$errors->has($key.'.re_registration_minimum_payment')" />
+                        <x-money-input :id="'dp_'.$program->id" :name="'programs['.$program->id.'][re_registration_minimum_payment]'" :value="old($key.'.re_registration_minimum_payment', $terms->re_registration_minimum_payment)" required :error="$errors->has($key.'.re_registration_minimum_payment')" />
                         <x-input-error :messages="$errors->get($key.'.re_registration_minimum_payment')" />
                     </div>
                     <div>
                         <x-input-label :for="'ref_'.$program->id" value="Komisi Pendaftaran (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'ref_'.$program->id" :name="'programs['.$program->id.'][referral_reward_amount]'" :value="old($key.'.referral_reward_amount', $terms->referral_reward_amount)" required :error="$errors->has($key.'.referral_reward_amount')" />
+                        <x-money-input :id="'ref_'.$program->id" :name="'programs['.$program->id.'][referral_reward_amount]'" :value="old($key.'.referral_reward_amount', $terms->referral_reward_amount)" required :error="$errors->has($key.'.referral_reward_amount')" />
                         <x-input-error :messages="$errors->get($key.'.referral_reward_amount')" />
                     </div>
                     <div>
                         <x-input-label :for="'rereg_'.$program->id" value="Komisi Daftar Ulang (Rp)" />
-                        <x-text-input type="number" min="0" step="1000" :id="'rereg_'.$program->id" :name="'programs['.$program->id.'][re_registration_reward_amount]'" :value="old($key.'.re_registration_reward_amount', $terms->re_registration_reward_amount)" required :error="$errors->has($key.'.re_registration_reward_amount')" />
+                        <x-money-input :id="'rereg_'.$program->id" :name="'programs['.$program->id.'][re_registration_reward_amount]'" :value="old($key.'.re_registration_reward_amount', $terms->re_registration_reward_amount)" required :error="$errors->has($key.'.re_registration_reward_amount')" />
                         <x-input-error :messages="$errors->get($key.'.re_registration_reward_amount')" />
                     </div>
                 </div>
@@ -152,14 +152,16 @@
                             <span x-text="open ? 'Sembunyikan rincian biaya daftar ulang' : 'Atur rincian biaya daftar ulang'"></span>
                             <span class="fee-toggle-hint" x-text="'(' + items.length + ' komponen)'"></span>
                         </span>
-                        <span class="fee-toggle-total">Total: Rp <span x-text="total.toLocaleString('id-ID')"></span></span>
+                        <span class="fee-toggle-total">Total: Rp <span x-text="rupiah(total)"></span></span>
                     </button>
 
                     <div x-show="open" x-cloak class="mt-3 space-y-2">
                         <template x-for="(item, index) in items" :key="index">
                             <div class="flex gap-2 items-start">
                                 <x-text-input type="text" x-model="item.name" :name="'programs[{{ $program->id }}][fee_names][]'" placeholder="Contoh: Dana Pengembangan Pendidikan" class="flex-1" />
-                                <x-text-input type="number" min="0" x-model="item.amount" :name="'programs[{{ $program->id }}][fee_amounts][]'" placeholder="0" class="w-40" />
+                                <input type="text" inputmode="numeric" autocomplete="off" name="programs[{{ $program->id }}][fee_amounts][]" placeholder="0"
+                                       :value="rupiah(item.amount)" @input="item.amount = Number(moneyField($event.target)) || 0"
+                                       class="h-11 w-40 border rounded-lg px-3.5 text-sm text-neutral-900 placeholder-neutral-400 bg-white outline-none focus:border-2 focus:border-primary-600 transition-colors border-neutral-300">
                                 <button type="button" @click="items.splice(index, 1)" aria-label="Hapus rincian"
                                         class="h-10 px-2 text-error hover:text-error-700 bg-transparent border-none cursor-pointer">&times;</button>
                             </div>

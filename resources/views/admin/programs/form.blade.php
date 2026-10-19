@@ -227,7 +227,7 @@
                                 <div x-show="on" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                                     <div>
                                         <x-input-label for="offer_fee_{{ $campusId }}" value="Biaya pendaftaran (Rp)" />
-                                        <x-text-input type="number" min="0" id="offer_fee_{{ $campusId }}" name="offers[{{ $campusId }}][fee]"
+                                        <x-money-input id="offer_fee_{{ $campusId }}" name="offers[{{ $campusId }}][fee]"
                                                       :value="old('offers.' . $campusId . '.fee', $row['fee'])" :disabled="$offers['readOnly']"
                                                       :error="$errors->has('offers.' . $campusId . '.fee')" />
                                         <x-input-error :messages="$errors->get('offers.' . $campusId . '.fee')" />
