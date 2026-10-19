@@ -50,7 +50,7 @@
                     </h1>
 
                     <!-- Subtitle -->
-                    <p class="text-lg text-white/65 mb-12 leading-relaxed font-medium max-w-xl">
+                    <p class="text-lg text-white/65 {{ $isCampusPage ? 'mb-8' : 'mb-12' }} leading-relaxed font-medium max-w-xl">
                         @if($isCampusPage)
                             Universitas YPIB Majalengka &mdash; {{ $campus->name }}. Pilih program studi yang dibuka di kampus ini.
                         @else
@@ -59,7 +59,8 @@
                     </p>
 
                     @if($isCampusPage && ($campus->address || $campus->admin_whatsapp))
-                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-x-8 gap-y-3 mb-10 text-sm font-medium text-white/80">
+                        {{-- Spasi lewat inline style: kelas utilitas baru tidak ada di CSS hasil build --}}
+                        <div class="text-sm font-medium text-white/80" style="display:flex;flex-wrap:wrap;gap:12px 32px;margin-bottom:40px;">
                             @if($campus->address)
                                 <div class="flex items-start gap-2"><i class="ti ti-map-pin text-lg text-[#F1B10E] shrink-0"></i><span>{{ $campus->address }}</span></div>
                             @endif

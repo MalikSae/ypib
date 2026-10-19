@@ -77,6 +77,21 @@ class CampusLandingTest extends TestCase
             ->assertSee('<title>PMB Universitas YPIB Majalengka</title>', false);
     }
 
+    public function test_campus_page_navbar_overlays_the_hero_like_the_main_landing(): void
+    {
+        $this->cirebonOnlyProgram();
+
+        // Navbar transparan dengan logo putih hanya terbaca bila hero menempel di atas halaman:
+        // body tidak boleh diberi pt-20 (itu untuk halaman dalam seperti detail prodi).
+        $campusBody = $this->get('/cirebon')->assertOk()->getContent();
+        $mainBody = $this->get('/')->assertOk()->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<body[^>]*\bpt-20\b/', $campusBody);
+        $this->assertDoesNotMatchRegularExpression('/<body[^>]*\bpt-20\b/', $mainBody);
+        $this->assertStringContainsString("isHome: true", $campusBody);
+
+        $program = Program::first();
+        $this->assertMatchesRegularExpression('/<body[^>]*\bpt-20\b/', $this->get('/prodi/' . $program->slug)->getContent());
+    }
     public function test_default_campus_redirects_and_unknown_or_inactive_campus_is_404(): void
     {
         $this->period();

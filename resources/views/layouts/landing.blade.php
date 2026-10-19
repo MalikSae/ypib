@@ -241,7 +241,7 @@
         }
     </style>
 </head>
-<body class="font-sans text-neutral-900 bg-neutral-50 antialiased selection:bg-primary-200 selection:text-primary-900 overflow-x-hidden flex flex-col min-h-screen {{ !request()->routeIs('landing') ? 'pt-20' : '' }}">
+<body class="font-sans text-neutral-900 bg-neutral-50 antialiased selection:bg-primary-200 selection:text-primary-900 overflow-x-hidden flex flex-col min-h-screen {{ !request()->routeIs('landing', 'campus.landing') ? 'pt-20' : '' }}">
 
     <!-- Page Loader -->
     <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-neutral-50 transition-opacity duration-500">
