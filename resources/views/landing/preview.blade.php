@@ -46,13 +46,17 @@
 
                     <!-- Headline -->
                     <h1 class="text-[42px] md:text-[54px] lg:text-[64px] font-black tracking-tight text-white mb-6 leading-[1.1]">
-                        Wujudkan <span class="text-[#F1B10E]">Karirmu</span><br>di Bidang Kesehatan & Teknologi.
+                        @if($isCampusPage)
+                            {{ $campus->heroHeadlineHtml() }}
+                        @else
+                            Wujudkan <span class="text-[#F1B10E]">Karirmu</span><br>di Bidang Kesehatan & Teknologi.
+                        @endif
                     </h1>
 
                     <!-- Subtitle -->
                     <p class="text-lg text-white/65 {{ $isCampusPage ? 'mb-8' : 'mb-12' }} leading-relaxed font-medium max-w-xl">
                         @if($isCampusPage)
-                            Universitas YPIB Majalengka &mdash; {{ $campus->name }}. Pilih program studi yang dibuka di kampus ini.
+                            {{ $campus->heroSubtitle() }}
                         @else
                             Universitas YPIB Majalengka - pilihan cerdas untuk karir di kesehatan, farmasi, dan teknologi.
                         @endif

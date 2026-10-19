@@ -22,6 +22,9 @@ class Campus extends Model
         'slug',
         'city',
         'address',
+        'hero_headline',
+        'hero_highlight',
+        'hero_subtitle',
         'admin_whatsapp',
         'university_bank_name',
         'university_bank_account',
@@ -83,6 +86,34 @@ class Campus extends Model
     public function registrations()
     {
         return $this->hasMany(Registration::class);
+    }
+
+    /**
+     * Judul hero landing kampus sebagai HTML aman: teks di-escape, lalu kata sorotan
+     * (hero_highlight) yang ada di judul dibungkus warna aksen. Kosong: judul netral.
+     */
+    public function heroHeadlineHtml(): \Illuminate\Support\HtmlString
+    {
+        $headline = $this->hero_headline ?: 'Wujudkan Karirmu di ' . $this->name . '.';
+        $highlight = $this->hero_headline ? (string) $this->hero_highlight : 'Karirmu';
+
+        $html = e($headline);
+
+        if ($highlight !== '' && str_contains($headline, $highlight)) {
+            $html = \Illuminate\Support\Str::replaceFirst(
+                e($highlight),
+                '<span class="text-[#F1B10E]">' . e($highlight) . '</span>',
+                $html
+            );
+        }
+
+        return new \Illuminate\Support\HtmlString($html);
+    }
+
+    public function heroSubtitle(): string
+    {
+        return $this->hero_subtitle
+            ?: 'Universitas YPIB Majalengka — ' . $this->name . '. Pilih program studi yang dibuka di kampus ini.';
     }
 
     /** Rekening kampus; kosong berarti pakai rekening periode. */

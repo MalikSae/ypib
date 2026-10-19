@@ -66,6 +66,67 @@
                 </div>
             </div>
 
+            {{-- Teks hero landing kampus (/slug). Kampus bawaan memakai landing utama, jadi tidak perlu. --}}
+            @if(isset($campus) && $campus->is_default)
+                <div class="mt-6 p-4 rounded-xl border border-neutral-200 text-sm text-neutral-500">
+                    Kampus bawaan memakai landing utama, jadi tidak memerlukan teks hero khusus.
+                </div>
+            @else
+                <div class="mt-6 p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5"
+                     x-data="{
+                        h: @js(old('hero_headline', $campus->hero_headline ?? '')),
+                        k: @js(old('hero_highlight', $campus->hero_highlight ?? '')),
+                        s: @js(old('hero_subtitle', $campus->hero_subtitle ?? '')),
+                        get i() { return this.k && this.h.includes(this.k) ? this.h.indexOf(this.k) : -1; }
+                     }">
+                    <div>
+                        <div class="text-sm font-bold text-neutral-900">Teks Hero Landing <span class="text-error-600">*</span></div>
+                        <p class="mt-0.5 text-xs text-neutral-400">Tampil di bagian atas halaman kampus ini. Tulis sesuai prodi yang benar-benar dibuka di kampus ini, bukan klaim umum.</p>
+                    </div>
+
+                    <div>
+                        <x-input-label for="hero_headline" value="Judul Hero" required="true" />
+                        <x-text-input type="text" id="hero_headline" name="hero_headline" x-model="h" maxlength="90"
+                                      :value="old('hero_headline', $campus->hero_headline ?? '')"
+                                      placeholder="Wujudkan Karirmu di Bidang Farmasi." :error="$errors->has('hero_headline')" />
+                        <div class="mt-1 flex justify-between text-xs text-neutral-400">
+                            <span>10 sampai 90 karakter, tanpa tanda &lt; atau &gt;.</span>
+                            <span><span x-text="h.length"></span>/90</span>
+                        </div>
+                        <x-input-error :messages="$errors->get('hero_headline')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="hero_highlight" value="Kata Sorotan (opsional)" />
+                        <x-text-input type="text" id="hero_highlight" name="hero_highlight" x-model="k" maxlength="40"
+                                      :value="old('hero_highlight', $campus->hero_highlight ?? '')"
+                                      placeholder="Karirmu" :error="$errors->has('hero_highlight')" />
+                        <p class="mt-1 text-xs text-neutral-400">Bagian judul yang diberi warna kuning. Harus sama persis dengan teks di judul (huruf besar/kecil dibedakan).</p>
+                        <p class="mt-1 text-xs text-error-600" x-show="k && i < 0" x-cloak>Kata sorotan tidak ditemukan di judul.</p>
+                        <x-input-error :messages="$errors->get('hero_highlight')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="hero_subtitle" value="Deskripsi Hero" required="true" />
+                        <x-textarea id="hero_subtitle" name="hero_subtitle" x-model="s" rows="3" maxlength="180"
+                                    :error="$errors->has('hero_subtitle')">{{ old('hero_subtitle', $campus->hero_subtitle ?? '') }}</x-textarea>
+                        <div class="mt-1 flex justify-between text-xs text-neutral-400">
+                            <span>20 sampai 180 karakter, sebutkan prodi yang dibuka.</span>
+                            <span><span x-text="s.length"></span>/180</span>
+                        </div>
+                        <x-input-error :messages="$errors->get('hero_subtitle')" />
+                    </div>
+
+                    {{-- Pratinjau --}}
+                    <div class="rounded-xl p-5 text-white" style="background:linear-gradient(135deg,#0B2B7F,#09183E);">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-white/40 mb-2">Pratinjau</div>
+                        <div class="text-2xl font-black leading-tight">
+                            <span x-text="i < 0 ? (h || 'Judul hero') : h.slice(0, i)"></span><span x-show="i >= 0" class="text-[#F1B10E]" x-text="k"></span><span x-text="i < 0 ? '' : h.slice(i + k.length)"></span>
+                        </div>
+                        <p class="mt-3 text-sm text-white/70" x-text="s || 'Deskripsi hero'"></p>
+                    </div>
+                </div>
+            @endif
             <div class="mt-6 p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
                 <div>
                     <div class="text-sm font-bold text-neutral-900">Rekening Pembayaran</div>

@@ -85,17 +85,39 @@ class CampusController extends Controller
 
     private function validated(Request $request, ?Campus $campus = null): array
     {
+        // Teks hero wajib untuk kampus non-bawaan (landing /{slug}); kampus bawaan memakai landing utama.
+        $heroRequired = ($campus?->is_default) ? 'nullable' : 'required';
+
         $data = $request->validate([
             'name'                         => ['required', 'string', 'max:255', Rule::unique('campuses', 'name')->ignore($campus?->id)],
             'slug'                         => ['nullable', 'string', 'max:100', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
             'code'                         => ['required', 'string', 'max:20', Rule::unique('campuses', 'code')->ignore($campus?->id)],
+            'hero_headline'                => [$heroRequired, 'string', 'min:10', 'max:90', 'regex:/^[^<>]*$/'],
+            'hero_highlight'               => ['nullable', 'string', 'max:40', 'regex:/^[^<>]*$/'],
+            'hero_subtitle'                => [$heroRequired, 'string', 'min:20', 'max:180', 'regex:/^[^<>]*$/'],
             'city'                         => 'nullable|string|max:255',
             'address'                      => 'nullable|string|max:1000',
             'admin_whatsapp'               => 'nullable|string|max:20',
             'university_bank_name'         => 'nullable|string|max:255',
             'university_bank_account'      => 'nullable|string|max:255',
             'university_bank_account_name' => 'nullable|string|max:255',
+        ], [
+            'hero_headline.required' => 'Judul hero wajib diisi untuk kampus ini.',
+            'hero_headline.min'      => 'Judul hero minimal :min karakter.',
+            'hero_headline.max'      => 'Judul hero maksimal :max karakter.',
+            'hero_headline.regex'    => 'Judul hero tidak boleh memuat tanda < atau >.',
+            'hero_highlight.max'     => 'Kata sorotan maksimal :max karakter.',
+            'hero_highlight.regex'   => 'Kata sorotan tidak boleh memuat tanda < atau >.',
+            'hero_subtitle.required' => 'Deskripsi hero wajib diisi untuk kampus ini.',
+            'hero_subtitle.min'      => 'Deskripsi hero minimal :min karakter.',
+            'hero_subtitle.max'      => 'Deskripsi hero maksimal :max karakter.',
+            'hero_subtitle.regex'    => 'Deskripsi hero tidak boleh memuat tanda < atau >.',
         ]);
+
+        // Kata sorotan harus benar-benar ada di judul (huruf besar/kecil dibedakan).
+        if (!empty($data['hero_highlight']) && !str_contains((string) ($data['hero_headline'] ?? ''), $data['hero_highlight'])) {
+            throw ValidationException::withMessages(['hero_highlight' => 'Kata sorotan harus ada persis di dalam judul hero.']);
+        }
 
         // Slug = alamat landing (/cirebon). Kosong: pertahankan slug lama, atau turunkan dari kota/nama.
         $slug = $data['slug'] ?? null;

@@ -152,7 +152,11 @@ class CampusLandingTest extends TestCase
 
     private function campusPayload(array $extra = []): array
     {
-        return array_merge(['name' => 'Kampus Bandung', 'code' => 'BDG', 'city' => 'Bandung', 'is_active' => 1], $extra);
+        return array_merge([
+            'name' => 'Kampus Bandung', 'code' => 'BDG', 'city' => 'Bandung', 'is_active' => 1,
+            'hero_headline' => 'Wujudkan Karirmu di Bidang Teknologi.', 'hero_highlight' => 'Karirmu',
+            'hero_subtitle' => 'Kampus Bandung membuka S1 Ilmu Komputer dan Sistem Informasi.',
+        ], $extra);
     }
 
     public function test_slug_is_derived_from_city_and_stays_stable_when_campus_is_renamed(): void
@@ -166,6 +170,7 @@ class CampusLandingTest extends TestCase
         $cirebon = $this->crb();
         $this->actingAs($admin)->put("/admin/campuses/{$cirebon->id}", [
             'name' => 'Universitas YPIB Cirebon', 'code' => 'CRB', 'is_active' => 1,
+            'hero_headline' => $cirebon->hero_headline, 'hero_subtitle' => $cirebon->hero_subtitle,
         ])->assertRedirect(route('admin.campuses.index'));
 
         $this->assertSame('cirebon', $cirebon->fresh()->slug);
@@ -195,5 +200,86 @@ class CampusLandingTest extends TestCase
             ->assertSessionHasErrors('slug');
 
         $this->assertNull(Campus::where('code', 'ADM')->first());
+    }
+    // ── Teks hero ──────────────────────────────────────────────────────────
+
+    public function test_hero_copy_is_required_for_non_default_campuses(): void
+    {
+        $admin = $this->admin();
+
+        foreach (['hero_headline', 'hero_subtitle'] as $field) {
+            $this->actingAs($admin)->post('/admin/campuses', $this->campusPayload([$field => '']))
+                ->assertSessionHasErrors($field);
+        }
+        $this->assertNull(Campus::where('code', 'BDG')->first());
+
+        // Kampus yang sudah ada (non-bawaan) juga wajib: tidak ada kampus tanpa hero khusus.
+        $cirebon = $this->crb();
+        $this->actingAs($admin)->put("/admin/campuses/{$cirebon->id}", [
+            'name' => $cirebon->name, 'code' => 'CRB', 'is_active' => 1, 'hero_headline' => '', 'hero_subtitle' => '',
+        ])->assertSessionHasErrors(['hero_headline', 'hero_subtitle']);
+    }
+
+    public function test_hero_copy_rules(): void
+    {
+        $admin = $this->admin();
+        $bad = [
+            'hero_headline' => ['pendek', str_repeat('a', 91), 'Judul <b>tebal</b> di sini'],
+            'hero_subtitle' => ['terlalu pendek', str_repeat('a', 181), 'Deskripsi dengan <script>alert(1)</script> di dalamnya'],
+            'hero_highlight' => [str_repeat('a', 41), 'Tidak Ada Di Judul', 'karirmu', '<i>x</i>'],
+        ];
+
+        foreach ($bad as $field => $values) {
+            foreach ($values as $value) {
+                $this->actingAs($admin)->post('/admin/campuses', $this->campusPayload([$field => $value]))
+                    ->assertSessionHasErrors($field);
+            }
+        }
+
+        $this->assertNull(Campus::where('code', 'BDG')->first());
+
+        // Kata sorotan opsional.
+        $this->actingAs($admin)->post('/admin/campuses', $this->campusPayload(['hero_highlight' => '']))->assertSessionHasNoErrors();
+        $this->assertNull(Campus::where('code', 'BDG')->value('hero_highlight'));
+    }
+
+    public function test_default_campus_does_not_need_hero_copy(): void
+    {
+        $default = Campus::find(Campus::defaultId());
+
+        $this->actingAs($this->admin())->put("/admin/campuses/{$default->id}", [
+            'name' => $default->name, 'code' => $default->code, 'is_active' => 1,
+        ])->assertSessionHasNoErrors();
+    }
+
+    public function test_campus_page_renders_hero_copy_with_highlight_and_escapes_it(): void
+    {
+        $this->cirebonOnlyProgram();
+        $this->crb()->forceFill([
+            'hero_headline' => 'Wujudkan Karirmu di Bidang Farmasi.',
+            'hero_highlight' => 'Karirmu',
+            'hero_subtitle' => 'Kampus Cirebon membuka S1 Farmasi & Profesi Apoteker.',
+        ])->save();
+
+        $html = $this->get('/cirebon')->assertOk()->getContent();
+
+        $this->assertStringContainsString('Wujudkan <span class="text-[#F1B10E]">Karirmu</span> di Bidang Farmasi.', $html);
+        $this->assertStringContainsString('Kampus Cirebon membuka S1 Farmasi &amp; Profesi Apoteker.', $html);
+        $this->assertStringNotContainsString('Kesehatan &amp; Teknologi', $html, 'klaim umum landing utama tidak boleh muncul');
+        $this->assertStringNotContainsString('di Bidang Kesehatan', $html);
+
+        // Data tidak tepercaya di-escape (jaring pengaman bila data masuk tanpa lewat form).
+        $this->crb()->forceFill(['hero_headline' => 'Judul <script>x()</script>', 'hero_highlight' => null])->save();
+        $this->assertStringNotContainsString('<script>x()</script>', $this->get('/cirebon')->getContent());
+    }
+
+    public function test_campus_without_hero_copy_gets_a_neutral_fallback(): void
+    {
+        $this->cirebonOnlyProgram();
+        $this->crb()->forceFill(['hero_headline' => null, 'hero_highlight' => null, 'hero_subtitle' => null])->save();
+
+        $this->get('/cirebon')->assertOk()
+            ->assertSee('Kampus Cirebon', false)
+            ->assertDontSee('Kesehatan &amp; Teknologi', false);
     }
 }
