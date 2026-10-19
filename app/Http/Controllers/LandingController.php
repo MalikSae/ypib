@@ -39,8 +39,13 @@ class LandingController extends Controller
             ->filter(fn ($fee) => $fee > 0)
             ->min();
 
+        // Tombol hero ke landing tiap kampus selain kampus bawaan, hanya yang punya prodi dibuka.
+        $campusLinks = Campus::active()->where('is_default', false)->orderBy('name')->get()
+            ->filter(fn (Campus $campus) => Program::offeredIn($period, $campus)->exists())
+            ->values();
+
         return view('landing.preview', compact(
-            'programs', 'faculties', 'partners', 'facilities', 'period', 'startingFee'
+            'programs', 'faculties', 'partners', 'facilities', 'period', 'startingFee', 'campusLinks'
         ));
     }
 
@@ -82,8 +87,10 @@ class LandingController extends Controller
         $partners   = collect();
         $facilities = collect();
 
+        $campusLinks = collect();
+
         return view('landing.preview', compact(
-            'programs', 'faculties', 'partners', 'facilities', 'period', 'startingFee', 'campus'
+            'programs', 'faculties', 'partners', 'facilities', 'period', 'startingFee', 'campus', 'campusLinks'
         ));
     }
 

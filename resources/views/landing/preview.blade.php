@@ -75,22 +75,31 @@
                     @endif
 
                     <!-- CTA Buttons -->
-                    <div class="flex flex-row items-center flex-wrap gap-4 mb-4 lg:mb-16 relative z-20">
+                    <div class="flex flex-row items-center flex-wrap gap-4 {{ !empty($startingFee) ? 'mb-6' : 'mb-4 lg:mb-16' }} relative z-20">
                         <a href="#program-studi" class="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-black rounded-2xl bg-[#F1B10E] text-neutral-900 hover:bg-yellow-400 transition-all shadow-[0_10px_30px_rgba(241,177,14,0.35)] transform hover:-translate-y-1">
                             Daftar Sekarang
                         </a>
-                        @if(!empty($startingFee))
-                            <div class="flex items-center gap-3 px-1 sm:px-2">
-                                <div class="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
-                                    <i class="ti ti-wallet text-base sm:text-lg"></i>
-                                </div>
-                                <div class="text-left">
-                                    <div class="text-[10px] sm:text-[11px] font-bold text-white/40 uppercase tracking-wider mb-0.5">Biaya Pendaftaran</div>
-                                    <div class="text-sm sm:text-base font-bold text-white whitespace-nowrap">Mulai Rp {{ number_format($startingFee, 0, ',', '.') }}</div>
-                                </div>
-                            </div>
-                        @endif
+                        @foreach(($campusLinks ?? collect()) as $campusLink)
+                            <a href="{{ $campusLink->landingUrl() }}"
+                               class="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold rounded-2xl border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all">
+                                <i class="ti ti-map-pin"></i>
+                                {{ $campusLink->name }}
+                            </a>
+                        @endforeach
                     </div>
+
+                    {{-- Biaya pendaftaran di bawah tombol --}}
+                    @if(!empty($startingFee))
+                        <div class="flex items-center gap-3 px-1 sm:px-2 mb-4 lg:mb-16 relative z-20">
+                            <div class="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                                <i class="ti ti-wallet text-base sm:text-lg"></i>
+                            </div>
+                            <div class="text-left">
+                                <div class="text-[10px] sm:text-[11px] font-bold text-white/40 uppercase tracking-wider mb-0.5">Biaya Pendaftaran</div>
+                                <div class="text-sm sm:text-base font-bold text-white whitespace-nowrap">Mulai Rp {{ number_format($startingFee, 0, ',', '.') }}</div>
+                            </div>
+                        </div>
+                    @endif
 
                 </div>
 

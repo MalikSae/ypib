@@ -53,6 +53,45 @@ class CampusLandingTest extends TestCase
             ->assertSee('0813999888');
     }
 
+    public function test_main_landing_hero_has_a_campus_button_and_the_fee_sits_below_the_buttons(): void
+    {
+        $this->cirebonOnlyProgram();
+        $this->program(['name' => 'Prodi Majalengka']);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $register = strpos($html, 'Daftar Sekarang');
+        $campusButton = strpos($html, 'href="' . url('/cirebon') . '"');
+        $fee = strpos($html, 'Mulai Rp');
+
+        $this->assertNotFalse($register);
+        $this->assertNotFalse($campusButton, 'tombol Kampus Cirebon harus ada');
+        $this->assertNotFalse($fee);
+        $this->assertTrue($register < $campusButton && $campusButton < $fee, 'urutan: Daftar Sekarang, tombol kampus, lalu biaya');
+        $this->assertStringContainsString('Kampus Cirebon', substr($html, $campusButton, 400));
+    }
+
+    public function test_campus_button_is_hidden_without_offered_programs_or_when_inactive_and_on_campus_pages(): void
+    {
+        $this->period();
+        $this->program();
+
+        // Cirebon belum membuka prodi: tidak ada tombol di landing utama.
+        $this->assertStringNotContainsString('href="' . url('/cirebon') . '"', $this->get('/')->assertOk()->getContent());
+
+        $this->cirebonOnlyProgram();
+        $this->assertStringContainsString('href="' . url('/cirebon') . '"', $this->get('/')->getContent());
+
+        // Halaman kampus sendiri tidak menampilkan tombol kampus lain.
+        $campusPage = $this->get('/cirebon')->assertOk()->getContent();
+        $hero = substr($campusPage, 0, strpos($campusPage, 'id="program-studi"'));
+        $this->assertStringNotContainsString('border-2 border-white/30', $hero, 'landing kampus tidak punya tombol kampus lain');
+
+        // Kampus nonaktif tidak tampil sebagai tombol.
+        $this->crb()->update(['is_active' => false]);
+        $this->assertStringNotContainsString('href="' . url('/cirebon') . '"', $this->get('/')->getContent());
+    }
+
     public function test_campus_page_seo_and_links(): void
     {
         $program = $this->cirebonOnlyProgram();
