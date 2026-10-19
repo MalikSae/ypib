@@ -71,6 +71,21 @@ class CampusLandingTest extends TestCase
         $this->assertStringContainsString('Kampus Cirebon', substr($html, $campusButton, 400));
     }
 
+    public function test_fee_is_below_the_buttons_on_main_landing_but_beside_them_on_a_campus_landing(): void
+    {
+        $this->cirebonOnlyProgram();
+        $this->program(['name' => 'Prodi Majalengka']);
+
+        $main = $this->get('/')->assertOk()->getContent();
+        $campus = $this->get('/cirebon')->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($main, 'data-fee-position="below"'));
+        $this->assertSame(0, substr_count($main, 'data-fee-position="beside"'));
+
+        $this->assertSame(1, substr_count($campus, 'data-fee-position="beside"'));
+        $this->assertSame(0, substr_count($campus, 'data-fee-position="below"'));
+    }
+
     public function test_campus_button_is_hidden_without_offered_programs_or_when_inactive_and_on_campus_pages(): void
     {
         $this->period();
