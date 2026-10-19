@@ -134,7 +134,23 @@ class ReferrerController extends Controller
 
         $baseUrl = config('app.url');
 
-        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl'));
+        // Satu tautan per kampus aktif (landing kampus), ditambah tautan umum ke form pendaftaran.
+        $base = $baseUrl . '/ref/' . $referrer->code;
+        $linkTargets = \App\Models\Campus::active()->orderByDesc('is_default')->orderBy('name')->get()
+            ->map(fn ($campus) => [
+                'label' => $campus->name,
+                'hint'  => 'Halaman kampus: prodi, biaya, dan kuota ' . $campus->name . '.',
+                'url'   => $base . '?kampus=' . $campus->slug,
+                'share' => 'Daftar kuliah di YPIB ' . $campus->name . ' lewat link ini: ',
+            ])
+            ->push([
+                'label' => 'Link Umum',
+                'hint'  => 'Langsung ke form pendaftaran; kampus dipilih sendiri oleh pendaftar.',
+                'url'   => $base,
+                'share' => 'Daftar kuliah di YPIB Majalengka lewat link ini: ',
+            ]);
+
+        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'linkTargets'));
     }
 
     public function updateBank(Request $request)

@@ -57,3 +57,10 @@ Data lama sengaja tidak diubah otomatis:
 ## 7. Rollback
 
 Aplikasi lama tidak mengenal `campus_id`, jadi rollback kode tanpa rollback database aman selama kolom baru dibiarkan (semuanya nullable atau punya default). Rollback database (`migrate:rollback`) menghapus data biaya kampus non-bawaan (lihat bagian 2).
+
+## 8. Tautan afiliasi per kampus
+
+- Migrasi `2026_10_19_000003_add_campus_id_to_referral_clicks_table` menambah `referral_clicks.campus_id` (kosong untuk klik lama dan klik tautan umum).
+- `/ref/KODE?kampus=cirebon` mencatat klik, menyimpan cookie `ref` (7 hari, klik terakhir menang), lalu membuka landing kampus (`/cirebon`). `?kampus=majalengka` membuka `/`. Tanpa `?kampus=`, atau dengan kampus tidak dikenal/nonaktif, perilaku lama berlaku (form pendaftaran).
+- Dashboard afiliasi menampilkan satu tautan per kampus aktif ditambah "Link Umum". Afiliator yang sudah menyebarkan `/ref/KODE` tidak perlu mengganti tautan.
+- Komisi tidak berubah: tetap mengikuti kampus tempat pendaftar mendaftar, bukan kampus di tautan.

@@ -11,6 +11,7 @@ class ReferralClick extends Model
 
     protected $fillable = [
         'referrer_id',
+        'campus_id',
         'ip_address',
         'user_agent',
         'converted',
@@ -25,5 +26,10 @@ class ReferralClick extends Model
     public function referrer()
     {
         return $this->belongsTo(Referrer::class);
+    }
+
+    public function campus()
+    {
+        return $this->belongsTo(Campus::class);
     }
 }
