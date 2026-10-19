@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campus;
+use App\Models\PeriodProgram;
+use App\Models\PmbPeriod;
+use App\Support\AdminPeriod;
 use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\ProgramGallery;
@@ -60,7 +63,9 @@ class ProgramController extends Controller
         if (File::exists($iconPath)) {
             $icons = array_map('basename', File::files($iconPath));
         }
-        return view('admin.programs.form', compact('faculties', 'icons'));
+        $offers = $this->offerData(null);
+
+        return view('admin.programs.form', compact('faculties', 'icons', 'offers'));
     }
 
     public function store(Request $request)
@@ -80,7 +85,16 @@ class ProgramController extends Controller
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
             'gallery.*'                       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'offers'                          => 'nullable|array',
+            'offers.*.fee'                    => 'nullable|integer|min:0|max:2000000000',
+            'offers.*.quota'                  => 'nullable|integer|min:0|max:100000',
         ], [
+            'offers.*.fee.integer'   => 'Biaya pendaftaran harus berupa angka.',
+            'offers.*.fee.min'       => 'Biaya pendaftaran tidak boleh negatif.',
+            'offers.*.fee.max'       => 'Biaya pendaftaran terlalu besar.',
+            'offers.*.quota.integer' => 'Kuota harus berupa angka bulat.',
+            'offers.*.quota.min'     => 'Kuota tidak boleh negatif (0 = tanpa batas).',
+            'offers.*.quota.max'     => 'Kuota terlalu besar.',
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
             'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
@@ -102,6 +116,8 @@ class ProgramController extends Controller
             foreach (\App\Models\PmbPeriod::where('status', '!=', \App\Models\PmbPeriod::STATUS_ARCHIVED)->get() as $period) {
                 \App\Models\PeriodProgram::seedFromPrograms($period, false, $program->id);
             }
+
+            $this->syncCampusOffers($program, $request);
 
             // Handle Galleries
             if ($request->hasFile('gallery')) {
@@ -147,7 +163,9 @@ class ProgramController extends Controller
         if (File::exists($iconPath)) {
             $icons = array_map('basename', File::files($iconPath));
         }
-        return view('admin.programs.form', compact('program', 'faculties', 'icons'));
+        $offers = $this->offerData($program);
+
+        return view('admin.programs.form', compact('program', 'faculties', 'icons', 'offers'));
     }
 
     public function update(Request $request, $id)
@@ -167,7 +185,16 @@ class ProgramController extends Controller
             'icon'                            => 'nullable|string|max:255',
             'description'                     => 'nullable|string',
             'gallery.*'                       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'offers'                          => 'nullable|array',
+            'offers.*.fee'                    => 'nullable|integer|min:0|max:2000000000',
+            'offers.*.quota'                  => 'nullable|integer|min:0|max:100000',
         ], [
+            'offers.*.fee.integer'   => 'Biaya pendaftaran harus berupa angka.',
+            'offers.*.fee.min'       => 'Biaya pendaftaran tidak boleh negatif.',
+            'offers.*.fee.max'       => 'Biaya pendaftaran terlalu besar.',
+            'offers.*.quota.integer' => 'Kuota harus berupa angka bulat.',
+            'offers.*.quota.min'     => 'Kuota tidak boleh negatif (0 = tanpa batas).',
+            'offers.*.quota.max'     => 'Kuota terlalu besar.',
             'kode_prodi.size'   => 'Kode Prodi harus tepat 5 karakter.',
             'kode_prodi.regex'  => 'Kode Prodi harus berupa 5 digit angka.',
             'kode_prodi.unique' => 'Kode Prodi ini sudah digunakan oleh program studi lain pada jalur pendaftaran yang sama.',
@@ -186,6 +213,8 @@ class ProgramController extends Controller
             $program->description = \App\Support\HtmlSanitizer::clean($request->description);
             $program->is_active = $request->has('is_active');
             $program->save();
+
+            $this->syncCampusOffers($program, $request);
 
             // Handle Galleries
             if ($request->hasFile('gallery')) {
@@ -222,6 +251,112 @@ class ProgramController extends Controller
         }
     }
 
+    /** Periode yang dikelola kartu Kampus: pilihan di header admin, atau periode tampilan bila "Semua periode". */
+    private function offerPeriod(): ?PmbPeriod
+    {
+        return AdminPeriod::current() ?? PmbPeriod::displayPeriod();
+    }
+
+    /**
+     * Data kartu "Kampus": per kampus, apakah prodi ditawarkan pada periode terpilih beserta
+     * biaya pendaftaran dan kuotanya. Kampus yang belum punya nilai diisi awal dari kampus bawaan.
+     *
+     * @return array{period: ?PmbPeriod, readOnly: bool, rows: array<int, array<string, mixed>>}
+     */
+    private function offerData(?Program $program): array
+    {
+        $period = $this->offerPeriod();
+        $defaultId = Campus::defaultId();
+        $campuses = Campus::orderByDesc('is_default')->orderBy('name')->get();
+
+        $rows = [];
+
+        foreach ($campuses as $campus) {
+            $row = ($program && $period)
+                ? PeriodProgram::where('period_id', $period->id)->where('program_id', $program->id)->where('campus_id', $campus->id)->first()
+                : null;
+
+            // Kampus bawaan tanpa baris dianggap menawarkan prodi (perilaku lama); kampus lain tidak.
+            $offered = $row ? (bool) $row->is_offered : ($program && $campus->id === $defaultId);
+
+            $fee = (int) ($row?->registration_fee ?? 0);
+            $quota = (int) ($row?->quota ?? 0);
+
+            if (!$offered && $fee === 0 && $quota === 0 && $program && $period) {
+                $defaults = $program->termsFor($period, $defaultId);
+                $fee = (int) $defaults->registration_fee;
+                $quota = (int) $defaults->quota;
+            }
+
+            $rows[] = [
+                'campus'     => $campus,
+                'offered'    => $offered,
+                'fee'        => $fee,
+                'quota'      => $quota,
+                'seats'      => ($program && $period) ? $program->occupiedSeats($period->id, $campus) : 0,
+            ];
+        }
+
+        return [
+            'period'   => $period,
+            'readOnly' => !$period || $period->isArchived(),
+            'rows'     => $rows,
+        ];
+    }
+
+    /**
+     * Simpan kartu "Kampus" ke period_programs untuk periode terpilih. Hanya biaya pendaftaran
+     * dan kuota yang diubah di sini; baris baru meminjam nilai lain (daftar ulang, komisi) dari
+     * kampus bawaan sebagai titik awal, dan dirapikan di Biaya & Kuota.
+     * Periode arsip dan form tanpa kartu (tanda `offers_present`) tidak disentuh.
+     */
+    private function syncCampusOffers(Program $program, Request $request): void
+    {
+        $period = $this->offerPeriod();
+
+        if (!$period || $period->isArchived() || !$request->boolean('offers_present')) {
+            return;
+        }
+
+        $offers = (array) $request->input('offers', []);
+        $defaultId = Campus::defaultId();
+        $defaultRow = PeriodProgram::where('period_id', $period->id)
+            ->where('program_id', $program->id)->where('campus_id', $defaultId)->first();
+
+        foreach (Campus::all() as $campus) {
+            $input = (array) ($offers[$campus->id] ?? []);
+            $offered = !empty($input['offered']);
+
+            $row = PeriodProgram::where('period_id', $period->id)
+                ->where('program_id', $program->id)->where('campus_id', $campus->id)->first();
+
+            if ($offered) {
+                if (!$row) {
+                    $row = new PeriodProgram(['period_id' => $period->id, 'program_id' => $program->id, 'campus_id' => $campus->id]);
+
+                    if ($defaultRow) {
+                        foreach (PeriodProgram::TERM_COLUMNS as $column) {
+                            $row->{$column} = $defaultRow->{$column};
+                        }
+                    }
+                }
+
+                $row->is_offered = true;
+                $row->registration_fee = (int) ($input['fee'] ?? $row->registration_fee ?? 0);
+                $row->quota = (int) ($input['quota'] ?? $row->quota ?? 0);
+                $row->save();
+            } elseif ($row) {
+                $row->is_offered = false;
+                $row->save();
+            } elseif ($campus->id === $defaultId) {
+                // Kampus bawaan tanpa baris = ditawarkan, jadi "tidak" harus dicatat eksplisit.
+                PeriodProgram::create([
+                    'period_id' => $period->id, 'program_id' => $program->id,
+                    'campus_id' => $campus->id, 'is_offered' => false,
+                ]);
+            }
+        }
+    }
     public function destroy(Program $program)
     {
         // Pendaftar (termasuk yang di-soft-delete) masih mereferensikan prodi ini lewat FK.

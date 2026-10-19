@@ -8,7 +8,7 @@
 <div class="mb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
     <div>
         <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Kelola Kampus</h1>
-        <p class="mt-0.5 text-sm text-neutral-400">Kampus penyelenggara. Biaya, kuota, dan komisi prodi diatur per kampus di halaman Biaya &amp; Kuota periode.</p>
+        <p class="mt-0.5 text-sm text-neutral-400">Kampus penyelenggara. Prodi yang dibuka di tiap kampus diatur di form <strong>Program Studi</strong> (kartu "Dibuka di Kampus Mana?"); biaya daftar ulang dan komisi di <strong>Periode &rarr; Biaya &amp; Kuota</strong>.</p>
     </div>
     <a href="{{ route('admin.campuses.create') }}" class="decoration-none shrink-0">
         <x-button type="button">

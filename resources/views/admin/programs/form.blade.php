@@ -178,6 +178,79 @@
                 @endif
             </div>
 
+            {{-- Kampus yang membuka prodi ini pada periode terpilih (period_programs) --}}
+            <div class="mt-8">
+                <label class="block text-sm font-semibold text-neutral-900 mb-3">Dibuka di Kampus Mana?</label>
+
+                @if(!$offers['period'])
+                    <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 text-sm text-neutral-500">
+                        Belum ada periode PMB. Buat periode dulu di menu Periode PMB, lalu atur kampus untuk prodi ini.
+                    </div>
+                @else
+                    <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-neutral-600">
+                            <div>Periode: <strong class="text-neutral-900">{{ $offers['period']->name }}</strong>
+                                <span class="text-xs text-neutral-400">(ikut pemilih periode di pojok atas)</span></div>
+                            <a href="{{ route('admin.periods.pricing', $offers['period']->id) }}" class="text-xs font-semibold text-primary-600 hover:text-primary-700 decoration-none">
+                                Atur biaya daftar ulang &amp; fee affiliate di Biaya &amp; Kuota &rarr;
+                            </a>
+                        </div>
+
+                        @if($offers['readOnly'])
+                            <p class="text-xs text-warning-700">Periode ini diarsipkan sehingga pengaturan kampus hanya bisa dilihat.</p>
+                        @else
+                            <input type="hidden" name="offers_present" value="1">
+                        @endif
+
+                        @foreach($offers['rows'] as $row)
+                            @php
+                                $campusId = $row['campus']->id;
+                                $on = (bool) old("offers.{$campusId}.offered", $row['offered']);
+                            @endphp
+                            <div class="rounded-lg bg-white border border-neutral-200 p-4"
+                                 x-data="{ on: @js($on) }">
+                                <div class="flex items-center justify-between gap-3">
+                                    <label class="flex items-center gap-3 text-sm font-semibold text-neutral-900 {{ $offers['readOnly'] ? '' : 'cursor-pointer' }}">
+                                        <input type="checkbox" name="offers[{{ $campusId }}][offered]" value="1" x-model="on"
+                                               class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                                               @disabled($offers['readOnly'])>
+                                        {{ $row['campus']->name }}
+                                        @unless($row['campus']->is_active)
+                                            <span class="text-xs font-normal text-neutral-400">(kampus nonaktif)</span>
+                                        @endunless
+                                    </label>
+                                    @if($row['seats'] > 0)
+                                        <span class="text-xs text-neutral-500 whitespace-nowrap">{{ $row['seats'] }} pendaftar</span>
+                                    @endif
+                                </div>
+
+                                <div x-show="on" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <x-input-label for="offer_fee_{{ $campusId }}" value="Biaya pendaftaran (Rp)" />
+                                        <x-text-input type="number" min="0" id="offer_fee_{{ $campusId }}" name="offers[{{ $campusId }}][fee]"
+                                                      :value="old('offers.' . $campusId . '.fee', $row['fee'])" :disabled="$offers['readOnly']"
+                                                      :error="$errors->has('offers.' . $campusId . '.fee')" />
+                                        <x-input-error :messages="$errors->get('offers.' . $campusId . '.fee')" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="offer_quota_{{ $campusId }}" value="Kuota (0 = tanpa batas)" />
+                                        <x-text-input type="number" min="0" id="offer_quota_{{ $campusId }}" name="offers[{{ $campusId }}][quota]"
+                                                      :value="old('offers.' . $campusId . '.quota', $row['quota'])" :disabled="$offers['readOnly']"
+                                                      :error="$errors->has('offers.' . $campusId . '.quota')" />
+                                        <x-input-error :messages="$errors->get('offers.' . $campusId . '.quota')" />
+                                    </div>
+                                </div>
+
+                                @if($row['seats'] > 0 && !$offers['readOnly'])
+                                    <p x-show="!on" x-cloak class="mt-3 text-xs text-warning-700">
+                                        {{ $row['seats'] }} pendaftar sudah ada di kampus ini. Prodi hanya berhenti menerima pendaftar baru; pendaftar lama tidak berubah.
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
             <div class="flex justify-end gap-3 pt-6 border-t border-neutral-200 mt-8">
                 <a href="{{ route('admin.programs.index') }}" class="decoration-none">
                     <x-button type="button" color="neutral" variant="ghost">Batal</x-button>
