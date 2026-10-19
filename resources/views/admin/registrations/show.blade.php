@@ -416,11 +416,11 @@
                             <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika revisi)</label>
                             <x-text-input type="text" name="bulk_note" placeholder="Catatan untuk dokumen terpilih..." />
                         </div>
-                        <x-button type="submit" name="bulk_status" value="disetujui" onclick="return confirm('Setujui ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')" color="success" size="sm">
+                        <x-button type="submit" name="bulk_status" value="disetujui" @click="if (!confirm('Setujui ' + selected.length + ' dokumen terpilih?')) $event.preventDefault()" color="success" size="sm">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                             Setujui Terpilih
                         </x-button>
-                        <x-button type="submit" name="bulk_status" value="perlu_revisi" onclick="return confirm('Minta revisi ' + document.querySelectorAll('input[name=\'document_ids[]\']').length + ' dokumen terpilih?')" color="warning" size="sm">
+                        <x-button type="submit" name="bulk_status" value="perlu_revisi" @click="if (!confirm('Minta revisi ' + selected.length + ' dokumen terpilih?')) $event.preventDefault()" color="warning" size="sm">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                             Minta Revisi
                         </x-button>

@@ -494,13 +494,13 @@
                 <div class="bg-neutral-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-neutral-200">
                     <x-button type="button" 
                             @click="closeModal()" 
-                            :disabled="isSubmitting"
+                            ::disabled="isSubmitting"
                             color="neutral" variant="outline" class="w-full sm:w-auto">
                         Batal
                     </x-button>
                     <x-button type="button" 
                             @click="submitSelected()" 
-                            :disabled="selectedIds.length === 0 || isSubmitting"
+                            ::disabled="selectedIds.length === 0 || isSubmitting"
                             color="primary" class="w-full sm:w-auto">
                         <span x-show="!isSubmitting">Cairkan Terpilih (<span x-text="formatCurrency(totalSelectedAmount)"></span>)</span>
                         <span x-show="isSubmitting">Memproses...</span>
