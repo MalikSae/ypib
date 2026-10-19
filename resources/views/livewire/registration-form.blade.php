@@ -196,7 +196,7 @@
             <select wire:model.live="campus_id" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-primary-500 bg-gray-50">
                 <option value="">-- Pilih Kampus --</option>
                 @foreach($campuses as $campus)
-                    <option value="{{ $campus->id }}">{{ $campus->name }}@if($campus->address) &mdash; {{ $campus->city ?: $campus->address }}@endif</option>
+                    <option value="{{ $campus->id }}">{{ $campus->name }}</option>
                 @endforeach
             </select>
             @error('campus_id') <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span> @enderror

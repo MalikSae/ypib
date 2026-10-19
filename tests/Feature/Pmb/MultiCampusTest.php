@@ -193,6 +193,23 @@ class MultiCampusTest extends TestCase
 
     // ── Form pendaftaran ───────────────────────────────────────────────────
 
+    public function test_campus_dropdown_shows_the_campus_name_only(): void
+    {
+        $this->period();
+        $program = $this->program();
+        $this->offerInCirebon($program);
+        $this->crb()->update(['address' => 'Jl. Perjuangan No. 10a, Kota Cirebon']);
+
+        $html = Livewire::actingAs($this->makeUser())->test(RegistrationForm::class)
+            ->set('step', 2)->html();
+
+        // Nama kampus sudah memuat kotanya, jadi tidak diberi akhiran "— Cirebon" lagi.
+        $this->assertStringContainsString('>Kampus Cirebon</option>', $html);
+        $this->assertStringContainsString('>Kampus Majalengka</option>', $html);
+        $this->assertStringNotContainsString('Kampus Cirebon &mdash;', $html);
+        $this->assertStringNotContainsString('Kampus Cirebon —', $html);
+    }
+
     public function test_form_lists_only_programs_of_the_chosen_campus(): void
     {
         $this->period();
