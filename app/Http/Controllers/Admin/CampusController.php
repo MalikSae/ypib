@@ -7,6 +7,7 @@ use App\Models\Campus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CampusController extends Controller
 {
@@ -28,7 +29,7 @@ class CampusController extends Controller
         $data = $this->validated($request);
 
         $campus = new Campus($data);
-        $campus->slug = Str::slug($data['name']);
+        $campus->slug = $data['slug'];
         $campus->is_default = false;
         $campus->save();
 
@@ -50,7 +51,7 @@ class CampusController extends Controller
         }
 
         $campus->fill($data);
-        $campus->slug = Str::slug($data['name']);
+        $campus->slug = $data['slug'];
         $campus->save();
 
         return redirect()->route('admin.campuses.index')->with('success', 'Kampus berhasil diperbarui.');
@@ -72,18 +73,21 @@ class CampusController extends Controller
         return redirect()->route('admin.campuses.index')->with('success', 'Kampus berhasil dihapus.');
     }
 
+    /** Segmen pertama semua rute terdaftar, ditambah path statis yang dilayani web server. */
+    private function reservedSlugs(): array
+    {
+        return collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
+            ->map(fn ($route) => explode('/', trim($route->uri(), '/'))[0])
+            ->filter(fn ($segment) => $segment !== '' && !str_starts_with($segment, '{'))
+            ->merge(['storage', 'build', 'images', 'vendor', 'up', 'sanctum'])
+            ->unique()->values()->all();
+    }
+
     private function validated(Request $request, ?Campus $campus = null): array
     {
         $data = $request->validate([
-            'name'                         => ['required', 'string', 'max:255', function (string $attr, $value, \Closure $fail) use ($campus) {
-                $exists = Campus::where('slug', Str::slug((string) $value))
-                    ->when($campus, fn ($q) => $q->where('id', '!=', $campus->id))
-                    ->exists();
-
-                if ($exists) {
-                    $fail('Nama kampus sudah digunakan (atau terlalu mirip dengan kampus lain).');
-                }
-            }],
+            'name'                         => ['required', 'string', 'max:255', Rule::unique('campuses', 'name')->ignore($campus?->id)],
+            'slug'                         => ['nullable', 'string', 'max:100', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
             'code'                         => ['required', 'string', 'max:20', Rule::unique('campuses', 'code')->ignore($campus?->id)],
             'city'                         => 'nullable|string|max:255',
             'address'                      => 'nullable|string|max:1000',
@@ -93,6 +97,27 @@ class CampusController extends Controller
             'university_bank_account_name' => 'nullable|string|max:255',
         ]);
 
+        // Slug = alamat landing (/cirebon). Kosong: pertahankan slug lama, atau turunkan dari kota/nama.
+        $slug = $data['slug'] ?? null;
+        $slug = $slug ?: ($campus?->slug ?? Str::slug($data['city'] ?: $data['name']));
+
+        if ($slug === '') {
+            throw ValidationException::withMessages(['slug' => 'Alamat halaman tidak valid.']);
+        }
+
+        if (in_array($slug, $this->reservedSlugs(), true)) {
+            throw ValidationException::withMessages(['slug' => 'Alamat ini dicadangkan sistem. Gunakan alamat lain.']);
+        }
+
+        $taken = Campus::where('slug', $slug)
+            ->when($campus, fn ($q) => $q->where('id', '!=', $campus->id))
+            ->exists();
+
+        if ($taken) {
+            throw ValidationException::withMessages(['slug' => 'Alamat halaman sudah dipakai kampus lain.']);
+        }
+
+        $data['slug'] = $slug;
         $data['code'] = strtoupper($data['code']);
         $data['is_active'] = $request->boolean('is_active');
 

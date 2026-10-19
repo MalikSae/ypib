@@ -1,5 +1,10 @@
 @extends('layouts.landing')
-@section('title', 'PMB Universitas YPIB Majalengka')
+@php $isCampusPage = isset($campus) && $campus; @endphp
+@section('title', $isCampusPage ? 'PMB ' . $campus->name . ' — Universitas YPIB Majalengka' : 'PMB Universitas YPIB Majalengka')
+@if($isCampusPage)
+@section('meta-description', 'Penerimaan Mahasiswa Baru Universitas YPIB Majalengka — ' . $campus->name . ($campus->address ? ', ' . $campus->address : '') . '. Lihat program studi, biaya, dan daftar sekarang.')
+@section('canonical', route('campus.landing', $campus->slug))
+@endif
 @section('content')
     <!-- SECTION 1: HERO -->
     <section class="relative pt-32 lg:pt-36 pb-0 overflow-hidden bg-gradient-to-br from-[#0B2B7F] to-[#09183E]">
@@ -46,8 +51,23 @@
 
                     <!-- Subtitle -->
                     <p class="text-lg text-white/65 mb-12 leading-relaxed font-medium max-w-xl">
-                        Universitas YPIB Majalengka - pilihan cerdas untuk karir di kesehatan, farmasi, dan teknologi.
+                        @if($isCampusPage)
+                            Universitas YPIB Majalengka &mdash; {{ $campus->name }}. Pilih program studi yang dibuka di kampus ini.
+                        @else
+                            Universitas YPIB Majalengka - pilihan cerdas untuk karir di kesehatan, farmasi, dan teknologi.
+                        @endif
                     </p>
+
+                    @if($isCampusPage && ($campus->address || $campus->admin_whatsapp))
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-x-8 gap-y-3 mb-10 text-sm font-medium text-white/80">
+                            @if($campus->address)
+                                <div class="flex items-start gap-2"><i class="ti ti-map-pin text-lg text-[#F1B10E] shrink-0"></i><span>{{ $campus->address }}</span></div>
+                            @endif
+                            @if($campus->admin_whatsapp)
+                                <div class="flex items-center gap-2"><i class="ti ti-brand-whatsapp text-lg text-[#F1B10E] shrink-0"></i><span>{{ $campus->admin_whatsapp }}</span></div>
+                            @endif
+                        </div>
+                    @endif
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-row items-center flex-wrap gap-4 mb-4 lg:mb-16 relative z-20">
@@ -187,9 +207,11 @@
                                 <span class="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-bold">
                                     Akreditasi {{ $program->accreditation ?? '-' }}
                                 </span>
-                                @foreach($program->offeringCampuses ?? [] as $offeringCampus)
-                                    <span class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-xs font-bold">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
-                                @endforeach
+                                @unless($isCampusPage)
+                                    @foreach($program->offeringCampuses ?? [] as $offeringCampus)
+                                        <span class="px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-xs font-bold">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
+                                    @endforeach
+                                @endunless
                             </div>
                         </div>
 
@@ -203,12 +225,18 @@
                                     Biaya Pendaftaran
                                 </div>
                             </div>
-                            <a href="{{ route('prodi.show', $program->slug) }}" class="px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-primary-600 transition-colors flex items-center gap-2">
+                            <a href="{{ route('prodi.show', array_filter(['slug' => $program->slug, 'kampus' => $isCampusPage ? $campus->slug : null])) }}" class="px-6 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-primary-600 transition-colors flex items-center gap-2">
                                 Lihat Detail
                             </a>
                         </div>
                     </div>
                 @endforeach
+
+                @if($programs->isEmpty())
+                    <div class="col-span-full text-center py-16 px-6 bg-white rounded-[2rem] border border-neutral-100 text-neutral-500 font-medium">
+                        {{ $isCampusPage ? 'Program studi kampus ini belum dibuka untuk periode ini.' : 'Program studi belum tersedia.' }}
+                    </div>
+                @endif
             </div>
             
         </div>
@@ -344,6 +372,7 @@
     </section>
 
 
+    @unless($isCampusPage)
     <!-- SECTION 6: MITRA KERJA SAMA -->
     <section class="py-20 bg-white border-t border-neutral-200 overflow-hidden">
         <div class="text-center mb-12">
@@ -436,6 +465,8 @@
             </div>
         </div>
     </section>
+
+    @endunless
 
     <!-- SECTION 8: FINAL CTA -->
     <section class="py-24 bg-gradient-to-br from-[#0B2B7F] to-[#09183E] relative overflow-hidden">

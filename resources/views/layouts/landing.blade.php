@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+@php
+    $campusPage = (isset($campus) && $campus && !$campus->is_default) ? $campus : null;
+    $landingBase = $campusPage ? route('campus.landing', $campusPage->slug) : route('landing');
+@endphp<!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +9,9 @@
     @include('partials.pwa-head', ['manifestPath' => 'manifest-public.json'])
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'PMB YPIB Majalengka 2025/2026')</title>
+    @hasSection('canonical')
+    <link rel="canonical" href="@yield('canonical')">
+    @endif
     <meta name="description" content="@yield('meta-description', 'Penerimaan Mahasiswa Baru YPIB Majalengka 2025/2026. Daftarkan dirimu sekarang dan raih masa depan bersama kami.')">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -249,24 +255,24 @@
         </div>
     </div>
     <!-- NAVBAR -->
-    <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" x-data="{ isHome: {{ request()->routeIs('landing') ? 'true' : 'false' }}, scrolled: {{ request()->routeIs('landing') ? 'false' : 'true' }}, mobileOpen: false }" @scroll.window="scrolled = !isHome || window.scrollY > 20">
+    <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" x-data="{ isHome: {{ request()->routeIs('landing', 'campus.landing') ? 'true' : 'false' }}, scrolled: {{ request()->routeIs('landing', 'campus.landing') ? 'false' : 'true' }}, mobileOpen: false }" @scroll.window="scrolled = !isHome || window.scrollY > 20">
         <div :class="scrolled ? 'bg-white/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)] border-b border-neutral-100' : 'bg-transparent'" class="transition-all duration-300">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
                     <!-- Logo -->
-                    <a href="{{ route('landing') }}" class="flex items-center gap-3">
+                    <a href="{{ $landingBase }}" class="flex items-center gap-3">
                         <img :src="scrolled ? '{{ asset('images/logo-ypib.png') }}' : '{{ asset('images/logo-ypib-white.png') }}'" alt="Logo YPIB" class="h-12 w-auto transition-all duration-300">
                     </a>
 
                     <!-- Desktop Menu -->
                     <div class="hidden md:flex items-center gap-1">
-                        <a href="{{ route('landing') }}" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                        <a href="{{ $landingBase }}" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                            :class="scrolled ? 'text-primary-600 bg-primary-50' : 'text-[#F1B10E] bg-white/10'">Beranda</a>
-                        <a href="{{ route('landing') }}#program-studi" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                        <a href="{{ $landingBase }}#program-studi" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                            :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Program Studi</a>
-                        <a href="{{ route('landing') }}#cara-daftar" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                        <a href="{{ $landingBase }}#cara-daftar" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                            :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Cara Daftar</a>
-                        <a href="{{ route('landing') }}#jalur" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                        <a href="{{ $landingBase }}#jalur" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                            :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Jalur Masuk</a>
                     </div>
 
@@ -319,13 +325,13 @@
         <div x-show="mobileOpen" x-transition x-cloak class="md:hidden absolute w-full shadow-2xl pb-6 border-t transition-colors duration-300"
              :class="scrolled ? 'bg-white/95 backdrop-blur-xl border-neutral-100' : 'bg-[#09183E]/95 backdrop-blur-xl border-white/10'">
             <div class="px-4 pt-4 space-y-1">
-                <a href="{{ route('landing') }}" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
+                <a href="{{ $landingBase }}" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
                    :class="scrolled ? 'text-primary-600 bg-primary-50' : 'text-[#F1B10E] bg-white/10'">Beranda</a>
-                <a href="{{ route('landing') }}#program-studi" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
+                <a href="{{ $landingBase }}#program-studi" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
                    :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Program Studi</a>
-                <a href="{{ route('landing') }}#cara-daftar" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
+                <a href="{{ $landingBase }}#cara-daftar" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
                    :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Cara Daftar</a>
-                <a href="{{ route('landing') }}#jalur" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
+                <a href="{{ $landingBase }}#jalur" @click="mobileOpen = false" class="block px-4 py-3 rounded-xl text-base font-bold"
                    :class="scrolled ? 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50' : 'text-white/70 hover:text-white hover:bg-white/10'">Jalur Masuk</a>
                 <div class="pt-4 px-2">
                     @auth
@@ -390,14 +396,38 @@
                 <div>
                     <h4 class="font-bold text-lg mb-6 text-white">Tautan Cepat</h4>
                     <ul class="space-y-4 text-sm font-medium text-neutral-400">
-                        <li><a href="{{ route('landing') }}" class="hover:text-primary-400 transition-colors">Beranda</a></li>
-                        <li><a href="{{ route('landing') }}#program-studi" class="hover:text-primary-400 transition-colors">Program Studi</a></li>
-                        <li><a href="{{ route('landing') }}#jalur" class="hover:text-primary-400 transition-colors">Jalur Pendaftaran</a></li>
+                        <li><a href="{{ $landingBase }}" class="hover:text-primary-400 transition-colors">Beranda</a></li>
+                        <li><a href="{{ $landingBase }}#program-studi" class="hover:text-primary-400 transition-colors">Program Studi</a></li>
+                        <li><a href="{{ $landingBase }}#jalur" class="hover:text-primary-400 transition-colors">Jalur Pendaftaran</a></li>
                         <li><a href="{{ url('/afiliasi') }}" class="hover:text-primary-400 transition-colors">Affiliator YPIB</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-primary-400 transition-colors">Login Pendaftar</a></li>
                     </ul>
                 </div>
 
+                @if($campusPage)
+                {{-- Footer satu kampus: hanya data kampus ini --}}
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-white">{{ $campusPage->name }}</h4>
+                    <ul class="space-y-4 text-sm font-medium text-neutral-400">
+                        @if($campusPage->address)
+                        <li class="flex items-start gap-3">
+                            <i class="ti ti-map-pin text-lg text-neutral-500 shrink-0"></i>
+                            <span class="leading-relaxed">{{ $campusPage->address }}</span>
+                        </li>
+                        @endif
+                        @if($campusPage->admin_whatsapp)
+                        <li class="flex items-center gap-3">
+                            <i class="ti ti-phone text-lg text-neutral-500 shrink-0"></i>
+                            <span>{{ $campusPage->admin_whatsapp }}</span>
+                        </li>
+                        @endif
+                        <li class="flex items-center gap-3">
+                            <i class="ti ti-mail text-lg text-neutral-500 shrink-0"></i>
+                            <span>info@ypib.ac.id</span>
+                        </li>
+                    </ul>
+                </div>
+                @else
                 <!-- Col 3 -->
                 <div>
                     <h4 class="font-bold text-lg mb-6 text-white">Kampus Majalengka</h4>
@@ -431,6 +461,7 @@
                         </li>
                     </ul>
                 </div>
+                @endif
             </div>
 
             <div class="border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-neutral-500">

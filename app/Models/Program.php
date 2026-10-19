@@ -282,6 +282,36 @@ class Program extends Model
         }
     }
 
+    /**
+     * Landing satu kampus: semua prodi dianggap ditawarkan di kampus itu, biaya/kuotanya dimuat
+     * dengan satu query untuk semua instance. `landingTerms()` lalu membaca kampus ini.
+     */
+    public static function attachCampus($programs, $period, Campus $campus): void
+    {
+        $programs = collect($programs)->filter()->values();
+        $periodId = static::periodId($period);
+
+        if ($programs->isEmpty()) {
+            return;
+        }
+
+        $terms = $periodId
+            ? PeriodProgram::where('period_id', $periodId)
+                ->where('campus_id', $campus->id)
+                ->whereIn('program_id', $programs->pluck('id')->unique())
+                ->get()->keyBy('program_id')
+            : collect();
+
+        foreach ($programs as $program) {
+            $program->setRelation('offeringCampuses', collect([$campus]));
+
+            if ($periodId) {
+                $program->termsCache[$periodId . '|' . $campus->id] =
+                    $terms->get($program->id) ?? $program->fallbackTerms($periodId, $campus->id);
+            }
+        }
+    }
+
     /** Biaya dan kuota di kampus pertama yang menawarkan prodi ini (landing publik). */
     public function landingTerms($period = null): PeriodProgram
     {

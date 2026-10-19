@@ -28,6 +28,14 @@
                     <x-input-error :messages="$errors->get('name')" />
                 </div>
 
+                <div>
+                    <x-input-label for="slug" value="Alamat Halaman Landing" />
+                    <x-text-input type="text" id="slug" name="slug" :value="old('slug', $campus->slug ?? '')"
+                                  placeholder="cirebon" :error="$errors->has('slug')" />
+                    <p class="mt-1 text-xs text-neutral-400">Halaman publik kampus: {{ url('/') }}/<strong>{{ old('slug', $campus->slug ?? 'alamat') }}</strong>. Kosongkan untuk dibuat otomatis dari kota. Mengubahnya memutus tautan lama.</p>
+                    <x-input-error :messages="$errors->get('slug')" />
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <x-input-label for="code" value="Kode Kampus" required="true" />
