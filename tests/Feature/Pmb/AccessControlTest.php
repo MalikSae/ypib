@@ -50,45 +50,6 @@ class AccessControlTest extends TestCase
         $this->assertFalse((bool) $user->is_referrer);
     }
 
-    public function test_panitia_endpoints_only_touch_panitia_accounts(): void
-    {
-        $operator = $this->makeUser('operator');
-        $victims = [$this->makeUser('admin'), $this->makeUser('operator'), $this->makeUser('mahasiswa')];
-        $panitia = $this->makeUser('panitia');
-
-        foreach ($victims as $victim) {
-            $this->actingAs($operator)->get("/admin/panitia/{$victim->id}/edit")->assertNotFound();
-            $this->actingAs($operator)->put("/admin/panitia/{$victim->id}", [
-                'name' => 'X', 'email' => $victim->email, 'password' => 'Hacked#12345', 'password_confirmation' => 'Hacked#12345',
-            ])->assertNotFound();
-            $this->actingAs($operator)->delete("/admin/panitia/{$victim->id}")->assertNotFound();
-
-            $this->assertTrue(Hash::check('password-lama', $victim->fresh()->password));
-            $this->assertNotNull(User::find($victim->id));
-        }
-
-        $this->actingAs($operator)->get("/admin/panitia/{$panitia->id}/edit")->assertOk();
-        $this->actingAs($operator)->put("/admin/panitia/{$panitia->id}", [
-            'name' => 'Panitia Baru', 'email' => $panitia->email, 'password' => 'NewPass#12345', 'password_confirmation' => 'NewPass#12345',
-        ])->assertRedirect(route('admin.panitia.index'));
-        $this->assertSame('Panitia Baru', $panitia->fresh()->name);
-
-        $this->actingAs($operator)->delete("/admin/panitia/{$panitia->id}")->assertRedirect(route('admin.panitia.index'));
-        $this->assertNull(User::find($panitia->id));
-    }
-
-    public function test_panitia_search_stays_within_role(): void
-    {
-        $admin = $this->makeUser('admin');
-        $this->makeUser('panitia', ['name' => 'Budi Panitia', 'email' => 'budi@panitia.test']);
-        $this->makeUser('mahasiswa', ['name' => 'Siswa', 'email' => 'budi-siswa@siswa.test']);
-
-        $html = $this->actingAs($admin)->get('/admin/panitia?search=budi')->getContent();
-
-        $this->assertStringContainsString('Budi Panitia', $html);
-        $this->assertStringNotContainsString('budi-siswa@siswa.test', $html);
-    }
-
     public function test_staff_password_reset_rules(): void
     {
         $operator = $this->makeUser('operator');

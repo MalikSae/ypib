@@ -466,7 +466,6 @@
                 ]],
                 ['label' => 'SELEKSI', 'items' => [
                     ['Bank Soal', 'admin.bank-soal.index', 'book', request()->routeIs('admin.bank-soal.*'), 'global' => true],
-                    ['Panitia', 'admin.panitia.index', 'people', request()->routeIs('admin.panitia.*'), 'global' => true],
                 ]],
                 ['label' => 'AFILIASI', 'items' => [
                     ['Data Afiliasi', 'admin.referrers.index', 'link', request()->routeIs('admin.referrers.*'), 'global' => true],
@@ -481,17 +480,20 @@
                 ]],
                 ['label' => 'PENGATURAN', 'items' => [
                     ['Periode PMB', 'admin.periods.index', 'calendar', request()->routeIs('admin.periods.*'), 'global' => true],
+                    ['Akun Staf', 'admin.staff.index', 'people', request()->routeIs('admin.staff.*'), 'super' => true],
                     ['Integrasi Email', 'admin.settings.mail', 'mail', request()->routeIs('admin.settings.mail'), 'global' => true],
                 ]],
             ];
 
             $campusScoped = (bool) auth()->user()?->campus_id;
+            // 'super' = hanya admin semua kampus (akun staf).
+            $superAdmin = auth()->user()?->role === 'admin' && !$campusScoped;
         @endphp
 
         @foreach($menu as $group)
             @php
                 // Item lintas kampus disembunyikan untuk admin kampus; grup kosong ikut hilang.
-                $visible = array_values(array_filter($group['items'], fn ($item) => !($item['global'] ?? false) || !$campusScoped));
+                $visible = array_values(array_filter($group['items'], fn ($item) => (!($item['global'] ?? false) || !$campusScoped) && (!($item['super'] ?? false) || $superAdmin)));
             @endphp
             @continue(empty($visible))
 

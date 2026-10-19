@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'campus_id',
+        'is_active',
         'phone',
         'is_referrer',
         'referrer_id',
@@ -34,6 +35,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'is_referrer'       => 'boolean',
+            'is_active'         => 'boolean',
         ];
     }
 

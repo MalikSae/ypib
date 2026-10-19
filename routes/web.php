@@ -137,7 +137,19 @@ Route::prefix('admin')
             Route::resource('facilities', \App\Http\Controllers\Admin\FacilityController::class)->except(['show']);
             Route::patch('facilities/{facility}/toggle', [\App\Http\Controllers\Admin\FacilityController::class, 'toggleActive'])->name('facilities.toggle');
             Route::resource('bank-soal', \App\Http\Controllers\Admin\ExamQuestionController::class)->except(['show']);
-            Route::resource('panitia', \App\Http\Controllers\Admin\PanitiaController::class)->except(['show']);
+        });
+
+        // Akun staf (admin, operator, panitia): hanya admin semua kampus
+        Route::prefix('akun-staf')->name('staff.')->middleware('super.admin')->group(function () {
+            $c = \App\Http\Controllers\Admin\StaffController::class;
+
+            Route::get('/', [$c, 'index'])->name('index');
+            Route::get('/tambah', [$c, 'create'])->name('create');
+            Route::post('/', [$c, 'store'])->name('store');
+            Route::get('/{user}/edit', [$c, 'edit'])->whereNumber('user')->name('edit');
+            Route::put('/{user}', [$c, 'update'])->whereNumber('user')->name('update');
+            Route::patch('/{user}/toggle', [$c, 'toggle'])->whereNumber('user')->name('toggle');
+            Route::post('/{user}/reset-password', [$c, 'resetPassword'])->whereNumber('user')->name('reset-password');
         });
 
         Route::prefix('pendaftar')->name('registrations.')->group(function () {

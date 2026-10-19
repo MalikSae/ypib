@@ -121,7 +121,7 @@ class MultiCampusTest extends TestCase
         $campusAdmin = $this->makeUser('admin', ['campus_id' => $this->crb()->id]);
         $globalAdmin = $this->makeUser('admin');
 
-        foreach (['/admin/campuses', '/admin/periode', "/admin/periode/{$period->id}/biaya", '/admin/panitia',
+        foreach (['/admin/campuses', '/admin/periode', "/admin/periode/{$period->id}/biaya", '/admin/akun-staf',
                   '/admin/pengaturan-email', '/admin/afiliasi', '/admin/reward', '/admin/programs',
                   '/admin/faculties', '/admin/bank-soal'] as $uri) {
             $this->actingAs($campusAdmin)->get($uri)->assertForbidden();
