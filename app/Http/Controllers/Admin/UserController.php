@@ -15,10 +15,11 @@ class UserController extends Controller
      */
     public function resetPassword(Request $request, User $user)
     {
-        // Akun staf (admin/operator) hanya boleh direset oleh admin atau pemilik akun sendiri.
+        // Akun staf (admin/operator/panitia) hanya boleh direset oleh admin atau pemilik akun sendiri.
+        // Pengelolaan lengkapnya ada di Pengaturan > Akun Staf.
         $actor = $request->user();
         abort_if(
-            in_array($user->role, ['admin', 'operator'], true)
+            in_array($user->role, ['admin', 'operator', 'panitia'], true)
                 && $actor->role !== 'admin'
                 && $actor->id !== $user->id,
             403,
@@ -32,6 +33,14 @@ $request->validate([
         $user->forceFill([
             'password' => Hash::make($request->password),
         ])->save();
+
+        // Password lama tidak boleh tetap dipakai oleh sesi yang sudah terbuka.
+        \App\Support\StaffSessions::forget($user);
+        \Illuminate\Support\Facades\Log::info('User password reset', [
+            'target_id' => $user->id,
+            'target_role' => $user->role,
+            'by_user' => auth()->id(),
+        ]);
 
         $referrer = \App\Models\Referrer::where('user_id', $user->id)->first();
         if ($referrer) {

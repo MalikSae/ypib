@@ -50,6 +50,8 @@ class LandingController extends Controller
      */
     public function campus(string $campusSlug)
     {
+        abort_unless(in_array($campusSlug, Campus::knownSlugs(), true), 404);
+
         $campus = Campus::where('slug', $campusSlug)->first();
         abort_unless($campus && $campus->is_active, 404);
 

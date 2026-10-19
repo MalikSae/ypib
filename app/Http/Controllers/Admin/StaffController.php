@@ -146,7 +146,7 @@ class StaffController extends Controller
         $user->forceFill(['is_active' => $activate])->save();
 
         if (!$activate) {
-            $this->forgetSessions($user);
+            \App\Support\StaffSessions::forget($user);
         }
 
         $this->audit($activate ? 'activated' : 'deactivated', $user);
@@ -163,7 +163,7 @@ class StaffController extends Controller
         ]);
 
         $user->forceFill(['password' => Hash::make($request->input('password'))])->save();
-        $this->forgetSessions($user);
+        \App\Support\StaffSessions::forget($user);
 
         $this->audit('password_reset', $user);
 
@@ -213,19 +213,6 @@ class StaffController extends Controller
         }
 
         return null;
-    }
-
-    private function forgetSessions(User $user): void
-    {
-        // Tabel sessions hanya terisi bila driver 'database'; tanpa tabel tidak ada yang perlu dihapus.
-        if (!Schema::hasTable('sessions')) {
-            return;
-        }
-
-        DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->when($user->id === auth()->id(), fn ($q) => $q->where('id', '!=', session()->getId()))
-            ->delete();
     }
 
     private function audit(string $action, User $target, array $extra = []): void

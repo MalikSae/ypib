@@ -221,4 +221,5 @@ require __DIR__.'/auth.php';
 // Wajib paling akhir: rute lain lebih dulu. Slug yang sama dengan rute sistem ditolak di form Kampus.
 Route::get('/{campusSlug}', [LandingController::class, 'campus'])
     ->where('campusSlug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->middleware('throttle:60,1')
     ->name('campus.landing');

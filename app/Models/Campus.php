@@ -39,10 +39,24 @@ class Campus extends Model
 
     private static ?int $defaultId = null;
 
+    public const SLUGS_CACHE_KEY = 'campus_slugs';
+
+    /**
+     * Semua slug kampus (cache 1 menit, dibuang saat kampus berubah). Dipakai rute /{slug} supaya
+     * path asing dari bot tidak menjalankan query ke database.
+     */
+    public static function knownSlugs(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember(static::SLUGS_CACHE_KEY, 60, fn () => static::pluck('slug')->all());
+    }
+
     /** Cache id kampus bawaan dibuang saat kampus berubah (proses panjang, test). */
     protected static function booted(): void
     {
-        $flush = fn () => static::$defaultId = null;
+        $flush = function () {
+            static::$defaultId = null;
+            \Illuminate\Support\Facades\Cache::forget(static::SLUGS_CACHE_KEY);
+        };
 
         static::saved($flush);
         static::deleted($flush);
@@ -97,17 +111,19 @@ class Campus extends Model
         $headline = $this->hero_headline ?: 'Wujudkan Karirmu di ' . $this->name . '.';
         $highlight = $this->hero_headline ? (string) $this->hero_highlight : 'Karirmu';
 
-        $html = e($headline);
+        $position = $highlight !== '' ? strpos($headline, $highlight) : false;
 
-        if ($highlight !== '' && str_contains($headline, $highlight)) {
-            $html = \Illuminate\Support\Str::replaceFirst(
-                e($highlight),
-                '<span class="text-[#F1B10E]">' . e($highlight) . '</span>',
-                $html
-            );
+        if ($position === false) {
+            return new \Illuminate\Support\HtmlString(e($headline));
         }
 
-        return new \Illuminate\Support\HtmlString($html);
+        // Pecah teks mentah lebih dulu, baru escape tiap potongan: mencari di teks yang sudah
+        // di-escape bisa mengenai bagian dalam entitas (mis. "amp" di "&amp;").
+        return new \Illuminate\Support\HtmlString(
+            e(substr($headline, 0, $position))
+            . '<span class="text-[#F1B10E]">' . e($highlight) . '</span>'
+            . e(substr($headline, $position + strlen($highlight)))
+        );
     }
 
     public function heroSubtitle(): string

@@ -76,8 +76,13 @@
                     <td class="px-6 py-4">
                         @if($account->id === auth()->id())
                             <x-badge-status :active="$account->is_active" />
+                        @elseif($account->is_active)
+                            {{-- Menonaktifkan memutus sesi akun seketika: minta konfirmasi (event submit naik ke pembungkus) --}}
+                            <div onsubmit="return confirm({{ \Illuminate\Support\Js::from('Nonaktifkan akun ' . $account->name . '? Sesi login akun ini akan diakhiri.') }})">
+                                <x-badge-status :active="true" :toggle-action="route('admin.staff.toggle', $account->id)" />
+                            </div>
                         @else
-                            <x-badge-status :active="$account->is_active" :toggle-action="route('admin.staff.toggle', $account->id)" />
+                            <x-badge-status :active="false" :toggle-action="route('admin.staff.toggle', $account->id)" />
                         @endif
                     </td>
                     <td class="px-6 py-4 text-center">
