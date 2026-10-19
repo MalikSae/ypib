@@ -28,9 +28,9 @@ class StaffController extends Controller
 
     public function index(Request $request)
     {
-        $search = trim((string) $request->input('search'));
-        $role = (string) $request->input('role');
-        $campus = (string) $request->input('campus');
+        $search = \App\Support\QueryInput::string($request, 'search');
+        $role = \App\Support\QueryInput::string($request, 'role');
+        $campus = \App\Support\QueryInput::string($request, 'campus');
 
         $staff = User::with('campus')
             ->whereIn('role', array_keys(self::ROLES))

@@ -39,24 +39,10 @@ class Campus extends Model
 
     private static ?int $defaultId = null;
 
-    public const SLUGS_CACHE_KEY = 'campus_slugs';
-
-    /**
-     * Semua slug kampus (cache 1 menit, dibuang saat kampus berubah). Dipakai rute /{slug} supaya
-     * path asing dari bot tidak menjalankan query ke database.
-     */
-    public static function knownSlugs(): array
-    {
-        return \Illuminate\Support\Facades\Cache::remember(static::SLUGS_CACHE_KEY, 60, fn () => static::pluck('slug')->all());
-    }
-
     /** Cache id kampus bawaan dibuang saat kampus berubah (proses panjang, test). */
     protected static function booted(): void
     {
-        $flush = function () {
-            static::$defaultId = null;
-            \Illuminate\Support\Facades\Cache::forget(static::SLUGS_CACHE_KEY);
-        };
+        $flush = fn () => static::$defaultId = null;
 
         static::saved($flush);
         static::deleted($flush);
@@ -90,6 +76,37 @@ class Campus extends Model
         }
 
         return $campus ? (int) $campus : static::defaultId();
+    }
+
+    public function slugRedirects()
+    {
+        return $this->hasMany(CampusSlugRedirect::class);
+    }
+
+    /**
+     * Kampus aktif dengan slug ini, atau slug lamanya (alias hasil penggantian slug).
+     */
+    public static function findActiveBySlug(string $slug): ?self
+    {
+        if ($slug === '') {
+            return null;
+        }
+
+        $campus = static::active()->where('slug', $slug)->first();
+
+        if ($campus) {
+            return $campus;
+        }
+
+        $alias = CampusSlugRedirect::where('slug', $slug)->first();
+
+        return $alias ? static::active()->find($alias->campus_id) : null;
+    }
+
+    /** Alamat landing publik: / untuk kampus bawaan, /slug untuk kampus lain. */
+    public function landingUrl(): string
+    {
+        return $this->is_default ? route('landing') : route('campus.landing', $this->slug);
     }
 
     public function periodPrograms()

@@ -180,12 +180,12 @@ class RegistrationForm extends Component
             ->values();
 
         // ?kampus=slug memilih kampus; satu-satunya kampus dipilih otomatis.
-        $slug = request()->query('kampus');
+        $slug = \App\Support\QueryInput::string(request(), 'kampus');
         $chosen = $slug ? $this->campuses->firstWhere('slug', $slug) : null;
         $chosen ??= $this->campuses->count() === 1 ? $this->campuses->first() : null;
 
         // Prodi dari URL (?prodi=) tanpa kampus eksplisit: pakai kampus pertama yang menawarkannya.
-        $prodiId = request()->query('prodi');
+        $prodiId = \App\Support\QueryInput::string(request(), 'prodi');
         if (!$chosen && $prodiId) {
             $chosen = $this->campuses->first(
                 fn (Campus $campus) => Program::offeredIn($this->period, $campus)->whereKey((int) $prodiId)->exists()

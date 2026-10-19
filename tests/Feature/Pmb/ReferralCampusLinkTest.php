@@ -57,7 +57,8 @@ class ReferralCampusLinkTest extends TestCase
         $this->crb()->update(['is_active' => false]);
         $this->get('/ref/' . $referrer->code . '?kampus=cirebon')->assertRedirect(route('registration.create'))->assertCookie('ref');
 
-        $this->assertSame(4, ReferralClick::count());
+        // Keempat permintaan dari IP yang sama tanpa kampus valid dihitung satu klik (dedupe 5 menit).
+        $this->assertSame(1, ReferralClick::count());
         $this->assertNull(ReferralClick::whereNotNull('campus_id')->first(), 'klik tanpa kampus valid tidak mencatat kampus');
     }
 

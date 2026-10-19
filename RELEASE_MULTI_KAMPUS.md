@@ -26,8 +26,9 @@ Idempoten: aman dijalankan ulang bila berhenti di tengah. `down()` migrasi `0000
 ## 3. Sebelum rilis (H-1)
 
 1. Backup database produksi.
-2. Aset `public/build` yang ada sudah memuat semua kelas Tailwind yang dipakai view multi-kampus (diperiksa dengan membandingkan selector build dengan kelas di view). Bila ada view baru yang memakai kelas yang belum pernah dipakai, jalankan `npm run build` dan commit `public/build`; kelas yang tidak ada di build tidak berefek (contoh: `mb-10` di hero landing, yang diganti inline style).
-3. Pastikan SMTP/Integrasi Email tidak diperlukan: pembuatan akun staf memakai password manual, tanpa email.
+2. Pastikan `APP_URL` di `.env` produksi sudah domain asli (tautan afiliasi di dashboard dibangun darinya); nilai lokal seperti `http://ypib.test` membuat semua tautan yang dibagikan salah.
+3. Aset `public/build` yang ada sudah memuat semua kelas Tailwind yang dipakai view multi-kampus (diperiksa dengan membandingkan selector build dengan kelas di view). Bila ada view baru yang memakai kelas yang belum pernah dipakai, jalankan `npm run build` dan commit `public/build`; kelas yang tidak ada di build tidak berefek (contoh: `mb-10` di hero landing, yang diganti inline style).
+4. Pastikan SMTP/Integrasi Email tidak diperlukan: pembuatan akun staf memakai password manual, tanpa email.
 
 ## 4. Setelah migrasi: langkah manual (wajib)
 
@@ -49,7 +50,7 @@ Data lama sengaja tidak diubah otomatis:
 
 ## 6. Perilaku yang perlu diketahui
 
-- Rute `/{slug}` berada paling akhir; slug kampus yang sama dengan rute sistem (`admin`, `daftar`, `login`, dst.) ditolak di form Kampus. Mengganti slug kampus memutus tautan lama.
+- Rute `/{slug}` berada paling akhir; slug kampus yang sama dengan rute sistem (`admin`, `daftar`, `login`, dst.) ditolak di form Kampus. Mengganti slug kampus tidak memutus tautan lama: slug lama dialihkan 301 ke yang baru (tabel `campus_slug_redirects`), termasuk tautan afiliasi `?kampus=slug-lama`.
 - Galeri dan mitra bersifat global, jadi disembunyikan di halaman kampus non-bawaan.
 - Jalur pemulihan bila semua admin terkunci: `php artisan users:create-admin email@contoh.com "Nama"` (password acak ditampilkan sekali). Membatasi akun ke kampus: `php artisan users:set-campus email KODE`.
 - Seeder data uji `CirebonDummySeeder` hanya untuk lingkungan lokal dan menolak berjalan di production.
@@ -64,3 +65,10 @@ Aplikasi lama tidak mengenal `campus_id`, jadi rollback kode tanpa rollback data
 - `/ref/KODE?kampus=cirebon` mencatat klik, menyimpan cookie `ref` (7 hari, klik terakhir menang), lalu membuka landing kampus (`/cirebon`). `?kampus=majalengka` membuka `/`. Tanpa `?kampus=`, atau dengan kampus tidak dikenal/nonaktif, perilaku lama berlaku (form pendaftaran).
 - Dashboard afiliasi menampilkan satu tautan per kampus aktif ditambah "Link Umum". Afiliator yang sudah menyebarkan `/ref/KODE` tidak perlu mengganti tautan.
 - Komisi tidak berubah: tetap mengikuti kampus tempat pendaftar mendaftar, bukan kampus di tautan.
+
+## 9. Perilaku tambahan
+
+- Klik tautan afiliasi dihitung maksimal sekali per 5 menit untuk kombinasi afiliator + kampus + IP (cookie tetap dipasang pada setiap klik). Ini memakai cache aplikasi (`CACHE_STORE`).
+- Migrasi `2026_10_19_000004_create_campus_slug_redirects_table` menyimpan slug lama kampus. Slug lama kampus lain tidak bisa dipakai ulang.
+- Rute landing kampus dibatasi 120 permintaan per menit per IP.
+- Parameter query berbentuk array (`?kampus[]=x`) pada halaman yang diubah di fitur ini diperlakukan sebagai kosong, bukan error 500.

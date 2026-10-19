@@ -50,10 +50,17 @@ class LandingController extends Controller
      */
     public function campus(string $campusSlug)
     {
-        abort_unless(in_array($campusSlug, Campus::knownSlugs(), true), 404);
-
         $campus = Campus::where('slug', $campusSlug)->first();
-        abort_unless($campus && $campus->is_active, 404);
+
+        if (!$campus) {
+            // Slug lama (kampus diganti slug-nya): alihkan permanen ke alamat baru.
+            $current = Campus::findActiveBySlug($campusSlug);
+            abort_unless($current, 404);
+
+            return redirect($current->landingUrl(), 301);
+        }
+
+        abort_unless($campus->is_active, 404);
 
         if ($campus->is_default) {
             return redirect()->route('landing', [], 301);
@@ -87,7 +94,7 @@ class LandingController extends Controller
         Program::attachOfferingCampuses([$program], $period);
 
         // ?kampus=slug: tampilkan biaya dan kuota kampus itu (bila prodi ditawarkan di sana).
-        $campus = $program->offeringCampuses->firstWhere('slug', (string) $request->query('kampus'));
+        $campus = $program->offeringCampuses->firstWhere('slug', \App\Support\QueryInput::string($request, 'kampus'));
 
         if ($campus) {
             $program->setRelation('offeringCampuses', $program->offeringCampuses

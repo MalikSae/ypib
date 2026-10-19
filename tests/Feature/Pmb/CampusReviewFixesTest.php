@@ -4,7 +4,6 @@ namespace Tests\Feature\Pmb;
 
 use App\Models\Campus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -73,27 +72,7 @@ class CampusReviewFixesTest extends TestCase
 
     // ── Rute /{slug} ───────────────────────────────────────────────────────
 
-    public function test_unknown_paths_do_not_query_the_campuses_table_once_slugs_are_cached(): void
-    {
-        $this->period();
-        Cache::flush();
-
-        $this->get('/pertama-tidak-ada')->assertNotFound(); // mengisi cache slug
-
-        $queries = [];
-        DB::listen(function ($query) use (&$queries) {
-            if (str_contains($query->sql, 'campuses')) {
-                $queries[] = $query->sql;
-            }
-        });
-
-        $this->get('/wp-login')->assertNotFound();
-        $this->get('/phpmyadmin')->assertNotFound();
-
-        $this->assertSame([], $queries, 'path asing tidak boleh menjalankan query kampus');
-    }
-
-    public function test_slug_cache_follows_campus_changes(): void
+    public function test_landing_follows_a_changed_campus_slug(): void
     {
         $program = $this->program();
         $this->period();
@@ -109,7 +88,7 @@ class CampusReviewFixesTest extends TestCase
 
     public function test_catch_all_route_is_throttled(): void
     {
-        for ($i = 0; $i < 60; $i++) {
+        for ($i = 0; $i < 120; $i++) {
             $this->get('/bukan-kampus')->assertNotFound();
         }
 

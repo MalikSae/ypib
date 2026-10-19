@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campus;
+use App\Models\CampusSlugRedirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -50,9 +51,17 @@ class CampusController extends Controller
             $data['is_active'] = true;
         }
 
+        $oldSlug = $campus->slug;
+
         $campus->fill($data);
         $campus->slug = $data['slug'];
         $campus->save();
+
+        // Slug berubah: slug lama dialihkan ke yang baru, dan slug baru tidak lagi dianggap alias.
+        if ($oldSlug !== $campus->slug) {
+            CampusSlugRedirect::where('slug', $campus->slug)->delete();
+            CampusSlugRedirect::updateOrCreate(['slug' => $oldSlug], ['campus_id' => $campus->id]);
+        }
 
         return redirect()->route('admin.campuses.index')->with('success', 'Kampus berhasil diperbarui.');
     }
@@ -137,6 +146,15 @@ class CampusController extends Controller
 
         if ($taken) {
             throw ValidationException::withMessages(['slug' => 'Alamat halaman sudah dipakai kampus lain.']);
+        }
+
+        // Slug lama kampus lain masih dialihkan ke kampus itu, jadi tidak boleh dipakai ulang.
+        $aliasTaken = CampusSlugRedirect::where('slug', $slug)
+            ->when($campus, fn ($q) => $q->where('campus_id', '!=', $campus->id))
+            ->exists();
+
+        if ($aliasTaken) {
+            throw ValidationException::withMessages(['slug' => 'Alamat ini pernah dipakai kampus lain dan masih dialihkan ke sana.']);
         }
 
         $data['slug'] = $slug;

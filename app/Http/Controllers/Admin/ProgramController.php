@@ -27,10 +27,11 @@ class ProgramController extends Controller
         $displayPeriod = \App\Models\PmbPeriod::displayPeriod();
 
         $campuses = Campus::orderByDesc('is_default')->orderBy('name')->get();
-        $campusFilter = $campuses->firstWhere('id', (int) $request->input('campus'));
+        $campusFilter = $campuses->firstWhere('id', (int) \App\Support\QueryInput::string($request, 'campus'));
 
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
+        $searchTerm = \App\Support\QueryInput::string($request, 'search');
+
+        if ($searchTerm !== '') {
             // Dikelompokkan agar OR tidak lolos dari filter kampus.
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', '%' . $searchTerm . '%')
@@ -44,7 +45,8 @@ class ProgramController extends Controller
             $query->inCampus($displayPeriod, $campusFilter);
         }
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = (int) \App\Support\QueryInput::string($request, 'per_page', '10');
+        $perPage = in_array($perPage, [5, 10, 25, 50, 100], true) ? $perPage : 10;
         $programs = $query->paginate($perPage)->appends($request->query());
 
         // Kolom Kampus, lalu biaya/kuota kampus yang difilter (tanpa filter: kampus bawaan).
@@ -52,7 +54,9 @@ class ProgramController extends Controller
         $termsCampus = $campusFilter ?? Campus::default();
         Program::preloadTerms($programs->getCollection(), $displayPeriod, $termsCampus);
 
-        return view('admin.programs.index', compact('programs', 'displayPeriod', 'campuses', 'campusFilter', 'termsCampus'));
+        $search = $searchTerm;
+
+        return view('admin.programs.index', compact('programs', 'displayPeriod', 'campuses', 'campusFilter', 'termsCampus', 'search', 'perPage'));
     }
 
     public function create()

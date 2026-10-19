@@ -26,11 +26,11 @@
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
             <x-select name="per_page" id="per_page" onchange="this.form.submit()" style="width:auto;">
-                <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                <option value="5" {{ $perPage === 5 ? 'selected' : '' }}>5</option>
+                <option value="10" {{ $perPage === 10 ? 'selected' : '' }}>10</option>
+                <option value="25" {{ $perPage === 25 ? 'selected' : '' }}>25</option>
+                <option value="50" {{ $perPage === 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ $perPage === 100 ? 'selected' : '' }}>100</option>
             </x-select>
         </div>
 
@@ -48,7 +48,7 @@
             <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                 <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <x-text-input type="text" name="search" value="{{ request('search') }}" placeholder="Cari program studi..." class="pl-10" />
+            <x-text-input type="text" name="search" value="{{ $search }}" placeholder="Cari program studi..." class="pl-10" />
         </div>
         <button type="submit" class="hidden">Submit</button>
     </form>
