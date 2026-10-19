@@ -222,6 +222,29 @@ class Program extends Model
     }
 
     /**
+     * Prodi yang terkait dengan satu kampus pada periode, tanpa memandang status aktif prodi
+     * (untuk filter di admin). Kampus bawaan: tidak ditandai `is_offered = false`.
+     * Kampus lain: punya baris `is_offered = true` (di periode itu, atau periode mana pun bila periode kosong).
+     */
+    public function scopeInCampus($query, $period, $campus)
+    {
+        $periodId = static::periodId($period);
+        $campusId = Campus::idOf($campus);
+        $isDefault = $campusId === Campus::defaultId();
+
+        $rows = function ($sub) use ($periodId, $campusId) {
+            $sub->selectRaw('1')->from('period_programs')
+                ->whereColumn('period_programs.program_id', 'programs.id')
+                ->where('period_programs.campus_id', $campusId)
+                ->when($periodId, fn ($q) => $q->where('period_programs.period_id', $periodId));
+        };
+
+        return $isDefault
+            ? $query->whereNotExists(fn ($sub) => $rows($sub->where('period_programs.is_offered', false)))
+            : $query->whereExists(fn ($sub) => $rows($sub->where('period_programs.is_offered', true)));
+    }
+
+    /**
      * Isi relasi `offeringCampuses` (kampus bawaan lebih dulu) untuk banyak prodi dengan
      * satu query, lalu muat biaya/kuota kampus pertama tiap prodi untuk `landingTerms()`.
      */

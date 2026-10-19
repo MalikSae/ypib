@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Campus;
 use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\ProgramGallery;
@@ -19,22 +20,36 @@ class ProgramController extends Controller
     {
         $query = Program::with('faculty')->orderBy('name');
 
+        // Kuota dan biaya ditampilkan dari periode berjalan (nilainya diatur per periode).
+        $displayPeriod = \App\Models\PmbPeriod::displayPeriod();
+
+        $campuses = Campus::orderByDesc('is_default')->orderBy('name')->get();
+        $campusFilter = $campuses->firstWhere('id', (int) $request->input('campus'));
+
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
-            $query->where('name', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('faculty', function($q) use ($searchTerm) {
-                      $q->where('name', 'like', '%' . $searchTerm . '%');
+            // Dikelompokkan agar OR tidak lolos dari filter kampus.
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('faculty', function ($f) use ($searchTerm) {
+                      $f->where('name', 'like', '%' . $searchTerm . '%');
                   });
+            });
+        }
+
+        if ($campusFilter) {
+            $query->inCampus($displayPeriod, $campusFilter);
         }
 
         $perPage = $request->input('per_page', 10);
         $programs = $query->paginate($perPage)->appends($request->query());
 
-        // Kuota dan biaya ditampilkan dari periode berjalan (nilainya diatur per periode).
-        $displayPeriod = \App\Models\PmbPeriod::displayPeriod();
-        Program::preloadTerms($programs->getCollection(), $displayPeriod);
+        // Kolom Kampus, lalu biaya/kuota kampus yang difilter (tanpa filter: kampus bawaan).
+        Program::attachOfferingCampuses($programs->getCollection(), $displayPeriod);
+        $termsCampus = $campusFilter ?? Campus::default();
+        Program::preloadTerms($programs->getCollection(), $displayPeriod, $termsCampus);
 
-        return view('admin.programs.index', compact('programs', 'displayPeriod'));
+        return view('admin.programs.index', compact('programs', 'displayPeriod', 'campuses', 'campusFilter', 'termsCampus'));
     }
 
     public function create()

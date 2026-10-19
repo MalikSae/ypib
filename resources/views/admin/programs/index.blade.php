@@ -33,6 +33,16 @@
                 <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
             </x-select>
         </div>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <label for="campus" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Kampus:</label>
+            <x-select name="campus" id="campus" onchange="this.form.submit()" style="width:auto;">
+                <option value="">Semua kampus</option>
+                @foreach($campuses as $campusOption)
+                    <option value="{{ $campusOption->id }}" @selected($campusFilter?->id === $campusOption->id)>{{ $campusOption->name }}</option>
+                @endforeach
+            </x-select>
+        </div>
         
         <div class="relative w-full sm:w-72">
             <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
@@ -54,7 +64,8 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Prodi</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tipe</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Fakultas</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota <span class="normal-case font-normal">(periode berjalan)</span></th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kampus</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota <span class="normal-case font-normal">(periode berjalan, {{ $termsCampus->name }})</span></th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
@@ -85,12 +96,21 @@
                         <span class="text-sm font-medium text-neutral-600">{{ $program->faculty->name }}</span>
                     </td>
                     <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1.5">
+                            @forelse($program->offeringCampuses ?? [] as $offeringCampus)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200 whitespace-nowrap">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
+                            @empty
+                                <span class="text-xs text-neutral-400">Belum ditawarkan</span>
+                            @endforelse
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
                         <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200">
-                            {{ $program->termsFor($displayPeriod)->quota }}
+                            {{ $program->termsFor($displayPeriod, $termsCampus)->quota }}
                         </span>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($program->termsFor($displayPeriod)->registration_fee, 0, ',', '.') }}</span>
+                        <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($program->termsFor($displayPeriod, $termsCampus)->registration_fee, 0, ',', '.') }}</span>
                     </td>
                     <td class="px-6 py-4">
                         {{-- Toggle Status --}}
@@ -113,7 +133,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-16 text-center text-sm text-neutral-400">
+                    <td colspan="9" class="px-6 py-16 text-center text-sm text-neutral-400">
                         Belum ada program studi terdaftar.
                     </td>
                 </tr>
