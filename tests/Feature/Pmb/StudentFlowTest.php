@@ -210,6 +210,65 @@ class StudentFlowTest extends TestCase
         $this->actingAs($user)->postJson('/pendaftaran/tes-tulis/jawab', ['exam_answer_id' => $answers[0]->id, 'selected_option' => 'c'])->assertForbidden();
     }
 
+    public function test_registered_student_can_take_exam_without_any_document(): void
+    {
+        $this->questions(2);
+        [$user, $registration] = $this->student('terdaftar');
+
+        $this->assertSame(0, $registration->documents()->count());
+        $this->actingAs($user)->get('/pendaftaran/tes-tulis')->assertOk();
+
+        foreach (ExamAnswer::orderBy('id')->get() as $answer) {
+            $this->actingAs($user)->postJson('/pendaftaran/tes-tulis/jawab', ['exam_answer_id' => $answer->id, 'selected_option' => 'a'])->assertOk();
+        }
+        $this->actingAs($user)->post('/pendaftaran/tes-tulis/selesai')->assertSessionHas('success');
+
+        $this->assertSame('menunggu_interview', $registration->fresh()->status);
+    }
+
+    public function test_documents_stage_is_optional_and_exam_and_interview_are_open_after_registration(): void
+    {
+        [, $registration] = $this->student('terdaftar');
+
+        $stages = collect($registration->getTimelineStages())->keyBy('number');
+
+        $this->assertSame('optional', $stages[3]['state']);
+        $this->assertSame('active', $stages[4]['state']);
+        $this->assertSame('active', $stages[5]['state']);
+    }
+
+    public function test_registered_student_can_skip_exam_and_go_to_interview(): void
+    {
+        [$user, $registration] = $this->student('terdaftar', ['registration_number' => 'PMB-2026-7001']);
+        $panitia = $this->makeUser('panitia');
+
+        $this->actingAs($user)->get('/pendaftaran/interview')->assertOk();
+
+        $this->actingAs($panitia)->get('/panitia/scan/PMB-2026-7001')->assertOk()->assertDontSee('Status Tidak Valid');
+        $this->actingAs($panitia)->post('/panitia/scan/PMB-2026-7001/selesai', ['hasil' => 'diterima'])->assertSessionHas('success');
+
+        $this->assertSame('diterima', $registration->fresh()->status);
+        $this->assertSame('skipped', collect($registration->fresh()->getTimelineStages())->firstWhere('number', 4)['state']);
+    }
+
+    public function test_panitia_sees_notice_when_exam_and_documents_are_missing(): void
+    {
+        $this->student('terdaftar', ['registration_number' => 'PMB-2026-7002']);
+
+        $this->actingAs($this->makeUser('panitia'))->get('/panitia/scan/PMB-2026-7002')
+            ->assertOk()
+            ->assertSee('Belum mengerjakan tes tulis.')
+            ->assertSee('Dokumen utama: 0 dari 3 disetujui.');
+    }
+
+    public function test_ektm_without_photo_points_to_documents_page(): void
+    {
+        [$user] = $this->student('daftar_ulang_selesai', ['nim' => '26999990001']);
+
+        $this->actingAs($user)->get('/pendaftaran/e-ktm/download')->assertRedirect(route('registration.documents'))
+            ->assertSessionHas('error', 'Unggah Foto Close Up di halaman Dokumen untuk mengunduh e-KTM.');
+    }
+
     public function test_exam_answer_of_another_student_is_forbidden(): void
     {
         $this->questions(1);

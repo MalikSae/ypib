@@ -137,6 +137,9 @@
                     } elseif ($stage['state'] === 'active') {
                         $circleClass = 'bg-orange-600 text-white border-[3px] border-white';
                         $textClass = 'text-orange-600';
+                    } elseif ($stage['state'] === 'optional') {
+                        $circleClass = 'bg-primary-50 text-primary-600 border-[3px] border-white';
+                        $textClass = 'text-neutral-700';
                     } elseif ($stage['state'] === 'rejected') {
                         $circleClass = 'bg-red-600 text-white border-[3px] border-white';
                         $textClass = 'text-red-600';
@@ -257,8 +260,8 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                             </a>
                         </div>
-                    @elseif($stage['state'] === 'completed')
-                        <div class="text-xs mt-0.5 text-green-600 font-semibold">Berkas Disetujui</div>
+                    @elseif($stage['state'] === 'optional')
+                        <div class="text-xs mt-0.5 text-neutral-400">{!! $stage['description'] !!}</div>
                         @if(!empty($stage['action_url']))
                             <div class="mt-2.5">
                                 <a href="{{ $stage['action_url'] }}" class="inline-flex items-center gap-2 h-9 px-4 text-xs font-semibold bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors">

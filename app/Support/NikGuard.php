@@ -19,7 +19,7 @@ class NikGuard
     /** Status yang menahan pendaftaran baru sampai tenggat daftar ulang lewat. */
     private const ACCEPTED_STATUSES = ['diterima', 'menunggu_konfirmasi_daftar_ulang'];
 
-    /** Status setelah dokumen terverifikasi: menahan selama periode belum arsip. */
+    /** Status setelah mulai tes tulis atau interview: menahan selama periode belum arsip. */
     private const VERIFIED_STATUSES = ['menunggu_tes_tulis', 'menunggu_interview'];
 
     /**

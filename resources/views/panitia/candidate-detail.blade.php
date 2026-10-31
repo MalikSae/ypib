@@ -19,6 +19,32 @@
     </div>
 </x-card>
 
+@php
+    $mandatoryTypes = \App\Models\RegistrationDocument::MANDATORY_TYPES;
+    $approvedMandatory = $registration->documents
+        ->whereIn('document_type', $mandatoryTypes)
+        ->where('status', 'disetujui')
+        ->count();
+    $notices = [];
+    if (!$registration->examSession || $registration->examSession->status !== 'completed') {
+        $notices[] = 'Belum mengerjakan tes tulis.';
+    }
+    if ($approvedMandatory < count($mandatoryTypes)) {
+        $notices[] = 'Dokumen utama: ' . $approvedMandatory . ' dari ' . count($mandatoryTypes) . ' disetujui.';
+    }
+@endphp
+@if($notices)
+<div class="mb-4 rounded-xl border border-warning-200 bg-warning-50 p-4 text-sm text-warning-700">
+    <div class="font-semibold mb-1">Perlu diperhatikan</div>
+    <ul class="list-disc pl-5 space-y-0.5">
+        @foreach($notices as $notice)
+            <li>{{ $notice }}</li>
+        @endforeach
+    </ul>
+    <div class="text-xs mt-1 opacity-80">Informasi saja, tidak menghalangi keputusan interview.</div>
+</div>
+@endif
+
 <!-- FORM KEPUTUSAN (Selalu Terlihat di Luar Tab) -->
 <x-card class="border-2 border-primary-600 mb-6 p-0 overflow-hidden shadow-sm">
     <div class="p-5 border-b border-neutral-200 bg-white">

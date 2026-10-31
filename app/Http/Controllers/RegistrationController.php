@@ -412,7 +412,7 @@ class RegistrationController extends Controller
 
         $foto = $registration->documents->where('document_type', 'foto')->first();
         if (!$foto) {
-            return redirect()->back()->with('error', 'Foto pendaftar tidak ditemukan.');
+            return redirect()->route('registration.documents')->with('error', 'Unggah Foto Close Up di halaman Dokumen untuk mengunduh e-KTM.');
         }
 
         $fotoPath = \App\Support\PrivateFile::absolutePath($foto->file_path);
@@ -473,7 +473,7 @@ class RegistrationController extends Controller
     {
         $registration = $this->ownRegistration();
 
-        if ($registration->status !== 'menunggu_tes_tulis') {
+        if (!$registration->canTakeExam()) {
             $session = \App\Models\ExamSession::where('registration_id', $registration->id)->where('status', 'completed')->first();
             if ($session) {
                 return view('registration.exam', ['session' => $session, 'registration' => $registration, 'isCompleted' => true]);
@@ -595,7 +595,7 @@ class RegistrationController extends Controller
     {
         $registration = $this->ownRegistration('period');
 
-        if ($registration->status !== 'menunggu_interview') {
+        if (!$registration->canBeInterviewed()) {
             return redirect()->route('registration.status')->with('error', 'Status Anda bukan di tahap interview saat ini.');
         }
 

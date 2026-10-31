@@ -271,39 +271,30 @@ class Registration extends Model
             'action_label' => null
         ];
 
-        // TAHAP 3 - Pemberkasan Dokumen
+        // TAHAP 3 - Pemberkasan Dokumen (opsional, tidak menahan tes tulis)
         $t3State = 'locked';
         $t3ActionUrl = null;
         $t3ActionLabel = null;
-        $t3RequiresForm = false;
 
-        if (in_array($status, ['menunggu_tes_tulis', 'menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
-            $t3State = 'completed';
-            $t3ActionUrl = route('registration.documents');
-            $t3ActionLabel = 'Lihat/Kelola Dokumen';
-        } elseif ($status === 'terdaftar') {
-            $t3State = 'active';
+        if (in_array($status, ['terdaftar', 'menunggu_tes_tulis', 'menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
+            $t3State = 'optional';
+
             if (!$this->isFormComplete()) {
                 $t3ActionUrl = route('registration.detail');
                 $t3ActionLabel = 'Lengkapi Formulir';
-                $t3RequiresForm = true;
             } else {
                 $t3ActionUrl = route('registration.documents');
                 $t3ActionLabel = 'Upload Dokumen';
             }
-
-        } elseif (in_array($status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
-            $t3State = 'locked';
         }
-        
+
         $stages[] = [
             'number' => 3,
-            'label' => 'Pemberkasan Dokumen',
+            'label' => 'Pemberkasan Dokumen (Opsional)',
             'state' => $t3State,
-            'description' => 'Lengkapi dan unggah dokumen pendaftaran Anda.',
+            'description' => 'Unggah dokumen pendaftaran kapan saja. Tidak wajib untuk lanjut ke tes tulis.',
             'action_url' => $t3ActionUrl,
             'action_label' => $t3ActionLabel,
-            'requires_form_completion' => $t3RequiresForm,
         ];
 
         // TAHAP 4 - Tes Tulis Online
@@ -313,12 +304,12 @@ class Registration extends Model
         $t4Description = 'Tunggu instruksi selanjutnya untuk mengikuti tes tulis online.';
 
         if ($this->examSession) {
-            if ($status === 'menunggu_tes_tulis') {
+            if ($this->canTakeExam()) {
                 $t4State = 'active';
                 $t4Description = 'Kerjakan tes tulis online sekarang. Tidak ada batas waktu, jawaban tersimpan otomatis.';
                 $t4ActionUrl = route('registration.exam');
                 $t4ActionLabel = 'Lanjutkan Ujian';
-            } elseif ($this->examSession->status === 'completed' && $status !== 'menunggu_tes_tulis') {
+            } elseif ($this->examSession->status === 'completed') {
                 $t4State = 'completed';
                 $resultLabelStr = $this->examSession->result_label === 'sangat_baik' ? 'Sangat Baik' : 'Baik';
                 $t4Description = "Tes tulis selesai. Hasil: {$resultLabelStr}";
@@ -326,13 +317,14 @@ class Registration extends Model
                 $t4ActionLabel = 'Lihat Hasil';
             }
         } else {
-            if ($status === 'menunggu_tes_tulis') {
+            if ($this->canTakeExam()) {
                 $t4State = 'active';
                 $t4Description = 'Kerjakan tes tulis online sekarang. Tidak ada batas waktu, jawaban tersimpan otomatis.';
                 $t4ActionUrl = route('registration.exam');
                 $t4ActionLabel = 'Mulai Ujian';
-            } elseif (in_array($status, ['menunggu_interview', 'diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
-                $t4State = 'completed';
+            } elseif (in_array($status, ['menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
+                $t4State = 'skipped';
+                $t4Description = 'Tidak dikerjakan.';
             }
         }
 
@@ -347,13 +339,13 @@ class Registration extends Model
 
         // TAHAP 5 - Interview
         $t5State = 'locked';
-        $t5Description = 'Tahap wawancara bagi pendaftar yang lolos tes tulis.';
+        $t5Description = 'Tahap wawancara dan verifikasi dokumen di kampus.';
         $t5ActionUrl = null;
         $t5ActionLabel = null;
 
-        if ($status === 'menunggu_interview') {
+        if ($this->canBeInterviewed()) {
             $t5State = 'active';
-            $t5Description = 'Silakan datang ke ' . ($this->resolvedCampus()?->name ?? 'kampus') . ' untuk melakukan tahap interview dan verifikasi dokumen.';
+            $t5Description = 'Silakan datang ke ' . ($this->resolvedCampus()?->name ?? 'kampus') . ' untuk melakukan tahap interview. Bawa dokumen pendaftaran jika ada.';
             $t5ActionUrl = route('registration.interview');
             $t5ActionLabel = 'Lihat Instruksi';
         } elseif (in_array($status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
@@ -454,6 +446,21 @@ class Registration extends Model
                 'menunggu_konfirmasi_daftar_ulang',
                 'daftar_ulang_selesai',
             ], true);
+    }
+
+    /** Setelah dapat nomor pendaftaran, tes tulis dan interview boleh dijalani tanpa dokumen. */
+    public const EXAM_OPEN_STATUSES = ['terdaftar', 'menunggu_tes_tulis'];
+
+    public const INTERVIEW_OPEN_STATUSES = ['terdaftar', 'menunggu_tes_tulis', 'menunggu_interview'];
+
+    public function canTakeExam(): bool
+    {
+        return in_array($this->status, self::EXAM_OPEN_STATUSES, true);
+    }
+
+    public function canBeInterviewed(): bool
+    {
+        return in_array($this->status, self::INTERVIEW_OPEN_STATUSES, true);
     }
 
     public function isFormComplete(): bool

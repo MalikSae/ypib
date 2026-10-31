@@ -81,9 +81,9 @@ Warna: `neutral-*` untuk teks (bukan `gray-*`), `primary-600` untuk aksen (bukan
 
 ```
 menunggu_pembayaran → menunggu_konfirmasi → terdaftar
-  → [gerbang: isFormComplete()? belum lengkap → wajib ke /pendaftaran/detail dulu]
-  → [upload 6 dokumen wajib via /pendaftaran/dokumen, admin review per-dokumen]
-  → menunggu_tes_tulis (otomatis setelah semua dokumen wajib disetujui)
+  → [upload dokumen via /pendaftaran/dokumen bersifat OPSIONAL, tidak menahan tahap berikutnya; gerbang isFormComplete() hanya untuk halaman dokumen]
+  → [tes tulis dan interview sama-sama terbuka sejak terdaftar (lihat Registration::EXAM_OPEN_STATUSES / INTERVIEW_OPEN_STATUSES): tes tulis tidak wajib sebelum interview]
+  → menunggu_tes_tulis (hanya muncul bila admin mereset tes; persetujuan dokumen TIDAK mengubah status; dokumen boleh menyusul kapan saja, tidak mengunci daftar ulang)
   → menunggu_interview (otomatis setelah submit tes tulis)
   → diterima / ditolak (via Panitia PMB scan QR di /panitia)
   → menunggu_konfirmasi_daftar_ulang → daftar_ulang_selesai

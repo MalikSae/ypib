@@ -213,7 +213,7 @@ class AdminActionsTest extends TestCase
     }
 
     // ── Review dokumen ────────────────────────────────────────────────
-    public function test_document_review_progression_and_isolation(): void
+    public function test_document_review_keeps_status_and_isolates_registrations(): void
     {
         $admin = $this->makeUser('admin');
         [, $registration] = $this->student('terdaftar');
@@ -235,8 +235,9 @@ class AdminActionsTest extends TestCase
         $this->assertSame('terdaftar', $registration->fresh()->status);
 
         $this->actingAs($admin)->post("/admin/pendaftar/document/{$docs['akta_lahir']->id}/review", ['status' => 'disetujui'])->assertSessionHas('success');
-        $this->assertSame('menunggu_tes_tulis', $registration->fresh()->status);
-        $this->assertSame(1, PaymentLog::where('registration_id', $registration->id)->where('action', 'documents_approved')->count());
+        // dokumen opsional: persetujuan tidak lagi mengubah status
+        $this->assertSame('terdaftar', $registration->fresh()->status);
+        $this->assertSame(0, PaymentLog::where('registration_id', $registration->id)->where('action', 'documents_approved')->count());
     }
 
     // ── Edit data & hapus/pulihkan ────────────────────────────────────

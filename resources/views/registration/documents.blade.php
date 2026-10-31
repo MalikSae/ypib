@@ -23,12 +23,12 @@
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
             <h1 class="text-xl font-semibold text-neutral-900 mb-1">Pemberkasan Dokumen</h1>
-            <p class="text-sm text-neutral-500">Lengkapi berkas pendaftaran Anda</p>
+            <p class="text-sm text-neutral-500">Opsional. Unggah dokumen kapan saja, tidak menahan tes tulis</p>
         </div>
         <div class="flex-shrink-0 w-full sm:w-auto">
             <div class="bg-white px-4 py-2 rounded-full border border-neutral-200 text-sm font-semibold text-neutral-700 shadow-sm flex items-center gap-2 w-full sm:w-fit justify-center">
                 <div class="w-2 h-2 rounded-full {{ $approvedMandatory === $totalMandatory ? 'bg-green-500' : 'bg-orange-500' }}"></div>
-                Progress: {{ $approvedMandatory }} dari {{ $totalMandatory }} Dokumen Wajib Disetujui
+                Progress: {{ $approvedMandatory }} dari {{ $totalMandatory }} Dokumen Utama Disetujui
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3">
         <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
         <div class="text-sm text-blue-900">
-            Unggah semua dokumen wajib di bawah ini. Format file yang diizinkan: <strong>JPG, PNG, PDF</strong> dengan ukuran maksimal <strong>15MB</strong>. Dokumen yang sudah disetujui tidak dapat diubah kembali.
+            Unggah dokumen di bawah ini. Format file yang diizinkan: <strong>JPG, PNG, PDF</strong> dengan ukuran maksimal <strong>15MB</strong>. Dokumen yang sudah disetujui tidak dapat diubah kembali.
         </div>
     </div>
 

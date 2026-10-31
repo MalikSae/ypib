@@ -546,34 +546,7 @@ class RegistrationController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        // Auto-progress check
-        $this->checkAndProgressDocuments($document->registration);
-
         return redirect()->back()->with('success', 'Review dokumen berhasil disimpan.');
-    }
-
-    private function checkAndProgressDocuments($registration)
-    {
-        $mandatoryCount = count(RegistrationDocument::MANDATORY_TYPES);
-        
-        $approvedMandatoryCount = RegistrationDocument::where('registration_id', $registration->id)
-            ->whereIn('document_type', RegistrationDocument::MANDATORY_TYPES)
-            ->where('status', 'disetujui')
-            ->count();
-
-        if ($approvedMandatoryCount === $mandatoryCount) {
-            // Check if status is still in early stages
-            if ($registration->status === 'terdaftar') {
-                $registration->update(['status' => 'menunggu_tes_tulis']);
-                
-                PaymentLog::create([
-                    'registration_id' => $registration->id,
-                    'acted_by' => Auth::id(),
-                    'action' => 'documents_approved',
-                    'note' => 'Semua dokumen wajib disetujui, lanjut ke tahap Tes Tulis.',
-                ]);
-            }
-        }
     }
 
     public function uploadDocument(Request $request, $registrationId)
@@ -613,8 +586,6 @@ class RegistrationController extends Controller
             ]);
         }
 
-        $this->checkAndProgressDocuments($registration);
-
         PaymentLog::create([
             'registration_id' => $registration->id,
             'acted_by' => Auth::id(),
@@ -646,27 +617,6 @@ class RegistrationController extends Controller
                 'reviewed_by' => Auth::id(),
                 'reviewed_at' => now(),
             ]);
-
-        // Auto-progress check (same logic as single review)
-        $mandatoryCount = count(RegistrationDocument::MANDATORY_TYPES);
-
-        $approvedMandatoryCount = RegistrationDocument::where('registration_id', $registration->id)
-            ->whereIn('document_type', RegistrationDocument::MANDATORY_TYPES)
-            ->where('status', 'disetujui')
-            ->count();
-
-        if ($approvedMandatoryCount === $mandatoryCount) {
-            if ($registration->status === 'terdaftar') {
-                $registration->update(['status' => 'menunggu_tes_tulis']);
-
-                PaymentLog::create([
-                    'registration_id' => $registration->id,
-                    'acted_by'        => Auth::id(),
-                    'action'          => 'documents_approved',
-                    'note'            => 'Semua dokumen wajib disetujui (bulk), lanjut ke tahap Tes Tulis.',
-                ]);
-            }
-        }
 
         $count = count($request->document_ids);
         return redirect()->back()->with('success', "{$count} dokumen berhasil di-review.");

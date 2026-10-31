@@ -41,7 +41,7 @@ class DashboardController extends Controller
             return redirect()->route('panitia.dashboard')->with('error', 'Nomor pendaftaran tidak ditemukan.');
         }
 
-        if ($registration->status !== 'menunggu_interview') {
+        if (!$registration->canBeInterviewed()) {
             return view('panitia.invalid-status', [
                 'registration' => $registration,
                 'statusLabel' => $registration->getStatusLabel()
@@ -60,7 +60,7 @@ class DashboardController extends Controller
 
         $registration = Registration::where('registration_number', $registrationNumber)->firstOrFail();
 
-        if ($registration->status !== 'menunggu_interview') {
+        if (!$registration->canBeInterviewed()) {
             return redirect()->route('panitia.dashboard')->with('error', 'Pendaftar ini sudah diproses atau tidak valid.');
         }
 
