@@ -74,7 +74,7 @@
 
                 {{-- Upload bukti daftar ulang --}}
                 <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-200/60">
-                    <h2 class="text-[15px] font-bold text-neutral-900 mb-4">Upload Bukti Pembayaran</h2>
+                    <h2 class="text-[15px] font-bold text-neutral-900 mb-4">Konfirmasi Pembayaran</h2>
                     
                     @if($rePayments->whereIn('status', ['menunggu_verifikasi', 'terverifikasi'])->isEmpty() && ($registration->programTerms()?->re_registration_minimum_payment ?? 0) > 0)
                     <div class="bg-amber-50 border border-amber-300 rounded-lg p-3.5 mb-4">
@@ -92,7 +92,7 @@
                         @csrf
                         <div class="mb-4">
                             <label for="amount" class="block text-xs font-semibold text-neutral-700 mb-1.5">Nominal yang Dibayarkan (Rp)</label>
-                            <input type="text" inputmode="numeric" id="amount" name="amount" value="{{ old('amount') }}" placeholder="Contoh: 5.000.000" autocomplete="off"
+                            <input type="text" inputmode="numeric" id="amount" name="amount" value="{{ old('amount') }}" data-money data-max="{{ $limits['max'] ?? '' }}" placeholder="Contoh: 5.000.000" autocomplete="off"
                                    class="w-full h-[46px] rounded-xl border px-3.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-primary-600 {{ $errors->has('amount') ? 'border-red-500' : 'border-neutral-300' }}">
                             @error('amount')
                                 <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
@@ -181,4 +181,17 @@
         </div>
     </div>
 </section>
+<script>
+    // Titik ribuan saat mengetik; bila ada batas (data-max), nilai dipotong ke batas itu.
+    document.querySelectorAll('input[data-money]').forEach(function (el) {
+        function format() {
+            var digits = el.value.replace(/\D/g, '').replace(/^0+/, '');
+            var max = parseInt(el.dataset.max || '0', 10);
+            if (max && digits && parseInt(digits, 10) > max) digits = String(max);
+            el.value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        el.addEventListener('input', format);
+        format();
+    });
+</script>
 @endsection

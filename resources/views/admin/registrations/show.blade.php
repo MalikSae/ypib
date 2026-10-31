@@ -185,14 +185,12 @@
             @if($registration->payment_proof)
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;">
                     <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank"
-                       style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
-                       onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
+                       style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;color:#082e8f;font-size:13px;font-weight:600;text-decoration:none;">
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                         Lihat Bukti Bayar
                     </a>
-                    <span style="font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="text-neutral-400" title="{{ basename($registration->payment_proof) }}">{{ basename($registration->payment_proof) }}</span>
                 </div>
             @else
                 <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
@@ -547,60 +545,124 @@
         </div>
         @endif
 
-        {{-- Card 4.5: Pembayaran Daftar Ulang --}}
+        {{-- Card 4.5: Pembayaran Daftar Ulang (riwayat, verifikasi, dan catat pembayaran dalam satu card) --}}
         @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
         @php
             $rePayments = $registration->payments()->reRegistration()->get()->sortBy('id');
             $reFee = (int) ($registration->programTerms()?->re_registration_fee ?? 0);
             $reMin = \App\Support\RePayments::minimum($registration);
             $rePaid = $registration->reRegistrationPaid();
+            $pendingRe = $rePayments->firstWhere('status', 'menunggu_verifikasi');
+            $isDoneRe = $registration->status === 'daftar_ulang_selesai';
+            $reLabels = ['menunggu_verifikasi' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'ditolak' => 'Ditolak'];
         @endphp
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;" class="text-neutral-400">Pembayaran Daftar Ulang</div>
 
             <div style="font-size:13px;margin-bottom:16px;" class="text-neutral-600">
                 Terverifikasi <strong class="text-neutral-900 whitespace-nowrap">Rp {{ number_format($rePaid, 0, ',', '.') }}</strong>
-                @if($reFee > 0) dari tagihan <span class="whitespace-nowrap">Rp {{ number_format($reFee, 0, ',', '.') }}</span> @endif
+                @if($reFee > 0) dari <span class="whitespace-nowrap">Rp {{ number_format($reFee, 0, ',', '.') }}</span> @endif
                 @if($reMin > 0) · minimal <span class="whitespace-nowrap">Rp {{ number_format($reMin, 0, ',', '.') }}</span> @endif
             </div>
 
             @forelse($rePayments as $payment)
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;" class="border-t border-neutral-100">
-                    <div style="min-width:0;">
-                        <div style="font-size:14px;font-weight:700;white-space:nowrap;" class="text-neutral-900">Rp {{ number_format($payment->amount, 0, ',', '.') }}
-                            @if($payment->claimed_amount !== null && $payment->claimed_amount !== $payment->amount)
-                                <span style="font-size:11px;font-weight:500;" class="text-neutral-400">(diajukan Rp {{ number_format($payment->claimed_amount, 0, ',', '.') }})</span>
-                            @endif
-                        </div>
-                        <div style="font-size:12px;white-space:nowrap;" class="text-neutral-400">
-                            {{ $payment->created_at->translatedFormat('d M Y, H:i') }} ·
-                            {{ ['menunggu_verifikasi' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'ditolak' => 'Ditolak'][$payment->status] ?? $payment->status }}
+                <div style="margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap;">
+                        @if($payment->proof_path)
+                            <a href="{{ route('files.payment', $payment->id) }}" target="_blank"
+                               style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;color:#082e8f;font-size:13px;font-weight:600;text-decoration:none;">
+                                <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                                Lihat Bukti Bayar
+                            </a>
+                        @endif
+                        <div style="min-width:0;">
+                            <div style="font-size:14px;font-weight:700;white-space:nowrap;" class="text-neutral-900">
+                                Rp {{ number_format($payment->amount, 0, ',', '.') }}
+                                @if($payment->claimed_amount !== null && $payment->claimed_amount !== $payment->amount)
+                                    <span style="font-size:11px;font-weight:500;" class="text-neutral-400">(diajukan Rp {{ number_format($payment->claimed_amount, 0, ',', '.') }})</span>
+                                @endif
+                            </div>
+                            <div style="font-size:12px;white-space:nowrap;" class="text-neutral-400">
+                                {{ $payment->created_at->translatedFormat('d M Y, H:i') }} · {{ $reLabels[$payment->status] ?? $payment->status }}
+                            </div>
                         </div>
                     </div>
-                    @if($payment->proof_path)
-                        <a href="{{ route('files.payment', $payment->id) }}" target="_blank" style="flex-shrink:0;white-space:nowrap;font-size:13px;font-weight:600;text-decoration:none;" class="text-primary-600">Lihat Bukti</a>
-                    @endif
                 </div>
-                @if($payment->status === 'menunggu_verifikasi')
-                    <form method="POST" action="{{ route('admin.registrations.reject-re-payment', [$registration->id, $payment->id]) }}" style="display:flex;gap:8px;margin-bottom:12px;">
-                        @csrf
-                        <x-text-input type="text" name="note" placeholder="Alasan jika ditolak" />
-                        <x-button type="submit" color="danger" variant="outline" size="sm" data-confirm="Tolak pembayaran ini?" class="whitespace-nowrap">Tolak</x-button>
-                    </form>
-                @endif
             @empty
                 @if($registration->re_registration_payment_proof)
-                    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;">
                         <a href="{{ route('files.registration', [$registration->id, 're_registration_payment_proof']) }}" target="_blank"
-                           style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;">
-                            Lihat Bukti Daftar Ulang
+                           style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;color:#082e8f;font-size:13px;font-weight:600;text-decoration:none;">
+                            Lihat Bukti Bayar
                         </a>
-                        <span style="font-size:12px;" class="text-neutral-400 whitespace-nowrap">Nominal belum tercatat</span>
+                        <span style="font-size:12px;white-space:nowrap;" class="text-neutral-400">Nominal belum tercatat</span>
                     </div>
                 @else
-                    <p style="font-size:14px;margin:0;" class="text-neutral-400">Belum ada pembayaran daftar ulang.</p>
+                    <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada pembayaran daftar ulang.</p>
                 @endif
             @endforelse
+
+            {{-- Verifikasi atau catat pembayaran: satu langkah, konfirmasi lewat modal --}}
+            <form id="confirm-re-payment-form" method="POST"
+                  action="{{ route('admin.registrations.confirm-re-registration', $registration->id) }}"
+                  enctype="multipart/form-data"
+                  style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
+                @csrf
+                <div style="font-size:14px;font-weight:700;margin-bottom:4px;" class="text-neutral-900">
+                    {{ $pendingRe ? 'Verifikasi Pembayaran' : ($isDoneRe ? 'Catat Pembayaran Susulan' : 'Catat Pembayaran') }}
+                </div>
+                <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">
+                    @if($pendingRe)
+                        Periksa bukti di atas dan koreksi nominal bila berbeda, lalu verifikasi.
+                    @else
+                        Pendaftar bayar tunai atau di kantor? Isi nominal, unggah foto kuitansi atau isi catatan, lalu simpan. Langsung terverifikasi.
+                    @endif
+                </p>
+
+                @if ($errors->has('amount') || $errors->has('bukti_daftar_ulang') || $errors->has('note'))
+                    <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                        <ul style="margin:0;padding-left:20px;">
+                            @foreach(['amount', 'bukti_daftar_ulang', 'note'] as $field)
+                                @if($errors->has($field)) <li>{{ $errors->first($field) }}</li> @endif
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div style="margin-bottom:12px;">
+                    <x-input-label for="re_amount" value="Nominal dibayar (Rp)" required="true" />
+                    <x-text-input type="text" inputmode="numeric" id="re_amount" name="amount" data-money :value="old('amount', $pendingRe?->amount)" placeholder="Contoh: 5.000.000" autocomplete="off" />
+                </div>
+
+                @if(!$pendingRe && (!$registration->re_registration_payment_proof || $isDoneRe))
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Bukti pembayaran (opsional jika ada catatan)</label>
+                        <input type="file" name="bukti_daftar_ulang" accept=".jpg,.jpeg,.png,.pdf"
+                               style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                        <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
+                    </div>
+                @endif
+                @if(!$pendingRe && !$isDoneRe && !$registration->re_registration_payment_proof)
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika tidak ada bukti)</label>
+                        <x-textarea name="note" rows="2" placeholder="Misal: Dibayar tunai di kantor, diterima oleh ...">{{ old('note') }}</x-textarea>
+                    </div>
+                @endif
+
+                <x-button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-re-payment-modal')" class="w-full">
+                    {{ $pendingRe ? 'Verifikasi Pembayaran' : 'Simpan Pembayaran' }}
+                </x-button>
+                @if($pendingRe)
+                    <div style="text-align:center;margin-top:12px;">
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'reject-re-payment-modal')"
+                                style="background:none;border:0;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;" class="text-error-600">
+                            Tolak pembayaran ini
+                        </button>
+                    </div>
+                @endif
+            </form>
         </div>
         @endif
 
@@ -659,114 +721,45 @@
     {{-- ══════ KOLOM KANAN ══════ --}}
     <div class="detail-sidebar-col" style="position:sticky;top:88px;display:flex;flex-direction:column;gap:16px;">
 
-        {{-- Card Aksi: Override Status Kelulusan --}}
+        {{-- Card Aksi: Ubah keputusan kelulusan (jarang dipakai, jadi dilipat) --}}
         @if(in_array($registration->status, ['menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang']))
-        <x-card class="p-6 mb-6">
-            <h3 class="text-base font-bold text-neutral-900 mb-1">Override Status Kelulusan</h3>
-            <p class="text-sm text-neutral-500 mb-4">
-                Status saat ini: <span class="font-bold">{{ $registration->getStatusLabel() }}</span>. 
-                @if($registration->status === 'diterima')
-                    Klik tombol di bawah jika ingin mengubahnya menjadi Tidak Lulus.
-                @elseif($registration->status === 'ditolak')
-                    Klik tombol di bawah jika ingin mengubahnya menjadi Lulus.
-                @else
-                    Ubah status kelulusan pendaftar secara manual. Gunakan untuk fleksibilitas operasional di lapangan.
-                @endif
-            </p>
+        <div x-data="{ open: {{ $errors->has('hasil') || $errors->has('catatan') ? 'true' : 'false' }} }" style="border-radius:16px;" class="bg-white border-neutral-200 overflow-hidden">
+            <button type="button" x-on:click="open = !open" x-bind:aria-expanded="open"
+                    style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px;background:none;border:0;cursor:pointer;text-align:left;font-family:inherit;">
+                <span style="min-width:0;">
+                    <span style="display:block;font-size:14px;font-weight:700;" class="text-neutral-900">Ubah Keputusan</span>
+                    <span style="display:block;font-size:12px;" class="text-neutral-400">Status: {{ $registration->getStatusLabel() }}</span>
+                </span>
+                <svg class="w-4 h-4 shrink-0 text-neutral-400 transition-transform" x-bind:class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+            </button>
 
-            <form action="{{ route('admin.registrations.override-status', $registration->id) }}" method="POST" data-confirm="Yakin ubah status pendaftar ini?">
+            <form x-show="open" x-cloak style="display:none;padding:0 24px 24px;"
+                  action="{{ route('admin.registrations.override-status', $registration->id) }}" method="POST" data-confirm="Yakin ubah status pendaftar ini?">
                 @csrf
-                
-                <div class="grid {{ in_array($registration->status, ['diterima', 'ditolak']) ? 'grid-cols-1' : 'grid-cols-2' }} gap-3 mb-4">
+
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
                     @if($registration->status !== 'diterima')
-                    <label class="cursor-pointer relative">
-                        <input type="radio" name="hasil" value="diterima" class="peer sr-only" required>
-                        <div class="rounded-xl border-2 border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50 peer-checked:border-success-500 peer-checked:bg-success-50 transition text-center">
-                            <div class="font-bold text-neutral-900 text-sm">Lulus</div>
-                        </div>
-                        <div class="absolute top-1.5 right-1.5 opacity-0 peer-checked:opacity-100 text-success-500">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                        </div>
-                    </label>
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="hasil" value="diterima" class="peer sr-only" required>
+                            <span style="display:block;text-align:center;padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;" class="rounded-lg border border-neutral-300 text-neutral-700 peer-checked:border-success-500 peer-checked:bg-success-50 peer-checked:text-success-700">Lulus</span>
+                        </label>
                     @endif
-                    
                     @if($registration->status !== 'ditolak')
-                    <label class="cursor-pointer relative">
-                        <input type="radio" name="hasil" value="ditolak" class="peer sr-only" required>
-                        <div class="rounded-xl border-2 border-neutral-200 bg-white px-3 py-3 hover:bg-neutral-50 peer-checked:border-error-500 peer-checked:bg-error-50 transition text-center">
-                            <div class="font-bold text-neutral-900 text-sm">Tidak Lulus</div>
-                        </div>
-                        <div class="absolute top-1.5 right-1.5 opacity-0 peer-checked:opacity-100 text-error-500">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
-                        </div>
-                    </label>
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="hasil" value="ditolak" class="peer sr-only" required>
+                            <span style="display:block;text-align:center;padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap;" class="rounded-lg border border-neutral-300 text-neutral-700 peer-checked:border-error-500 peer-checked:bg-error-50 peer-checked:text-error-700">Tidak Lulus</span>
+                        </label>
                     @endif
                 </div>
-                
-                <div class="mb-4">
-                    <x-input-label for="override_catatan" value="Catatan Tambahan (Opsional)" />
-                    <x-textarea name="catatan" id="override_catatan" rows="2" placeholder="Alasan override..."></x-textarea>
-                </div>
-                
-                <x-button type="submit" color="primary" class="w-full justify-center">
-                    Simpan Perubahan Status
-                </x-button>
-            </form>
-        </x-card>
-        @endif
 
-        {{-- Card Aksi: Konfirmasi Daftar Ulang --}}
-        @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
-        @php
-            $pendingRe = $registration->payments()->reRegistration()->pending()->first();
-            $isDoneRe = $registration->status === 'daftar_ulang_selesai';
-        @endphp
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">{{ $isDoneRe ? 'Catat Pembayaran Susulan' : ($pendingRe ? 'Verifikasi Daftar Ulang' : 'Catat Pembayaran Daftar Ulang') }}</h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">
-                @if($pendingRe) Cek bukti di atas, koreksi nominal bila berbeda, lalu verifikasi.
-                @else Misal pembayaran tunai di kantor. Langsung terverifikasi. @endif
-            </p>
+                <x-text-input type="text" name="catatan" placeholder="Alasan (opsional)" class="mb-3" />
 
-            @if ($errors->has('bukti_daftar_ulang') || $errors->has('note') || $errors->has('amount'))
-                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
-                    <ul style="margin:0;padding-left:20px;">
-                        @foreach(['amount', 'bukti_daftar_ulang', 'note'] as $field)
-                            @if($errors->has($field)) <li>{{ $errors->first($field) }}</li> @endif
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST"
-                  action="{{ route('admin.registrations.confirm-re-registration', $registration->id) }}" enctype="multipart/form-data">
-                @csrf
-
-                <div style="margin-bottom: 12px;">
-                    <x-input-label for="re_amount" value="Nominal Dibayar (Rp)" required="true" />
-                    <x-text-input type="text" inputmode="numeric" id="re_amount" name="amount" :value="old('amount', $pendingRe?->amount)" placeholder="Contoh: 5.000.000" autocomplete="off" />
-                </div>
-
-                @if(!$pendingRe && (!$registration->re_registration_payment_proof || $isDoneRe))
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Upload Bukti (Opsional jika ada catatan)</label>
-                        <input type="file" name="bukti_daftar_ulang" accept=".jpg,.jpeg,.png,.pdf" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
-                    </div>
-                @endif
-                @if(!$pendingRe && !$isDoneRe && !$registration->re_registration_payment_proof)
-                    <div style="margin-bottom: 16px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti)</label>
-                        <x-textarea name="note" rows="2" placeholder="Misal: Bayar tunai untuk daftar ulang...">{{ old('note') }}</x-textarea>
-                    </div>
-                @endif
-
-                <x-button type="submit" data-confirm="{{ $pendingRe ? 'Verifikasi pembayaran daftar ulang ini?' : 'Catat pembayaran daftar ulang ini?' }}" class="w-full">
-                    {{ $pendingRe ? 'Verifikasi Pembayaran' : ($isDoneRe ? 'Catat Pembayaran' : 'Catat & Konfirmasi Daftar Ulang') }}
-                </x-button>
+                <x-button type="submit" class="w-full">Simpan</x-button>
             </form>
         </div>
         @endif
 
+        {{-- Card Aksi: Konfirmasi Daftar Ulang --}}
         {{-- Card Aksi 3: Catatan Internal --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
             <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Catatan Internal</h3>
@@ -1077,6 +1070,51 @@ function toggleRegPassword(inputId, iconId) {
         </div>
     </x-modal>
     @endif
+
+    @if(in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']))
+    <x-modal name="confirm-re-payment-modal" maxWidth="md">
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-neutral-900">Simpan pembayaran daftar ulang?</h3>
+            <p class="mt-2 text-sm text-neutral-500">
+                Pembayaran <strong class="text-neutral-900">{{ $registration->full_name }}</strong> dicatat sebagai terverifikasi.
+                @if($registration->status !== 'daftar_ulang_selesai')
+                    Bila total sudah mencapai minimal, NIM terbit dan status berubah menjadi Daftar Ulang Selesai.
+                @endif
+            </p>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button type="button" color="neutral" variant="ghost" x-on:click="$dispatch('close-modal', 'confirm-re-payment-modal')">Batal</x-button>
+                <x-button type="submit" form="confirm-re-payment-form">Ya, Simpan</x-button>
+            </div>
+        </div>
+    </x-modal>
+    @endif
+    @php $pendingRejectable = $registration->payments()->reRegistration()->pending()->first(); @endphp
+    @if($pendingRejectable)
+    <x-modal name="reject-re-payment-modal" maxWidth="md">
+        <form method="POST" action="{{ route('admin.registrations.reject-re-payment', [$registration->id, $pendingRejectable->id]) }}" class="p-6">
+            @csrf
+            <h3 class="text-lg font-bold text-neutral-900">Tolak pembayaran?</h3>
+            <p class="mt-2 text-sm text-neutral-500">Pendaftar akan diminta mengirim ulang bukti. Tulis alasannya agar jelas.</p>
+            <div class="mt-4">
+                <x-textarea name="note" rows="3" required placeholder="Misal: bukti tidak terbaca"></x-textarea>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button type="button" color="neutral" variant="ghost" x-on:click="$dispatch('close-modal', 'reject-re-payment-modal')">Batal</x-button>
+                <x-button type="submit" color="danger">Tolak Pembayaran</x-button>
+            </div>
+        </form>
+    </x-modal>
+    @endif
+    <script>
+        // Titik ribuan saat mengetik nominal.
+        document.querySelectorAll('input[data-money]').forEach(function (el) {
+            function format() {
+                el.value = el.value.replace(/\D/g, '').replace(/^0+/, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+            el.addEventListener('input', format);
+            format();
+        });
+    </script>
 
 @push('scripts')
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
