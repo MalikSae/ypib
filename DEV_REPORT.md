@@ -83,7 +83,7 @@ Berdasarkan `routes/web.php` dan `routes/auth.php`:
 
 ## 5. Alur Bisnis Utama
 **Alur Pendaftaran Mahasiswa Baru (PMB):**
-1. **Pendaftaran:** Pendaftar mengisi formulir awal dari landing page dan masuk ke sistem dengan status awal `menunggu_pembayaran` (jalur alumni: upload kartu alumni, tanpa biaya pendaftaran).
+1. **Pendaftaran:** Pendaftar mengisi formulir awal dari landing page dan masuk ke sistem dengan status awal `menunggu_pembayaran`.
 2. **Pembayaran:** Pendaftar mengunggah bukti bayar pendaftaran. Status berubah menjadi `menunggu_konfirmasi`.
 3. **Konfirmasi Admin:** Admin memvalidasi pembayaran. Jika sah, status menjadi `terdaftar`.
 4. **Lengkapi Form & Upload Dokumen:** Mahasiswa harus melengkapi form detail (jika belum lengkap). Setelah lengkap, mereka mengunggah dokumen pendaftaran: Foto, KK, dan Akta Lahir wajib (`RegistrationDocument::MANDATORY_TYPES`); KTP, transkrip nilai, surat keterangan sehat, dan sertifikat opsional. Dokumen berstatus `menunggu_review`. Admin mereview *per dokumen* (terima/tolak revisi).

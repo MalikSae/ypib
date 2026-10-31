@@ -87,18 +87,6 @@ class RegistrationWindowGateTest extends TestCase
         $this->assertNull($late->payment_proof);
     }
 
-    public function test_alumni_card_follows_the_same_gate(): void
-    {
-        $this->enforce();
-        $period = $this->window();
-        [, $registration] = $this->student('menunggu_pembayaran', ['period_id' => $period->id]);
-
-        $this->now('2026-04-10 10:00:00');
-        $this->upload($registration, '/pendaftaran/upload-kartu-alumni', 'alumni_card_proof')->assertSessionHas('error');
-
-        $this->assertSame('menunggu_pembayaran', $registration->fresh()->status);
-    }
-
     public function test_replacing_a_proof_already_under_review_is_not_date_limited(): void
     {
         $this->enforce();

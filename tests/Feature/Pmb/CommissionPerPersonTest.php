@@ -138,15 +138,15 @@ class CommissionPerPersonTest extends TestCase
         $this->assertSame(2, (int) $referrer->fresh()->total_conversions);
     }
 
-    public function test_alumni_registration_still_earns_no_commission(): void
+    public function test_alumni_registration_earns_commission_like_everyone_else(): void
     {
         $referrer = $this->referrer();
-        $registration = $this->pending($referrer, ['registration_type' => 'alumni', 'alumni_card_proof' => 'kartu/uji.jpg', 'payment_proof' => null]);
+        $registration = $this->pending($referrer, ['registration_type' => 'alumni', 'payment_proof' => 'bukti/uji.jpg']);
 
         $this->confirm($registration);
 
-        $this->assertSame(0, $this->rewardCount());
-        $this->assertSame(0, (int) $referrer->fresh()->total_conversions);
+        $this->assertSame(1, $this->rewardCount());
+        $this->assertSame(1, (int) $referrer->fresh()->total_conversions);
     }
 
     public function test_re_registration_commission_is_also_once_per_person(): void

@@ -48,27 +48,11 @@ class StudentFlowTest extends TestCase
 
             $this->actingAs($user)->post('/pendaftaran/upload-bukti', ['payment_proof' => UploadedFile::fake()->image('p.png')])
                 ->assertRedirect(route('registration.status'));
-            $this->actingAs($user)->post('/pendaftaran/upload-kartu-alumni', ['alumni_card_proof' => UploadedFile::fake()->image('a.png')])
-                ->assertRedirect(route('registration.status'));
 
             $registration->refresh();
             $this->assertSame($status, $registration->status, "status mundur pada {$status}");
             $this->assertSame('reguler', $registration->registration_type);
             $this->assertNull($registration->payment_proof);
-            $this->assertNull($registration->alumni_card_proof);
-        }
-    }
-
-    public function test_alumni_card_marks_alumni_while_payment_is_pending(): void
-    {
-        foreach (['menunggu_pembayaran', 'menunggu_konfirmasi'] as $status) {
-            [$user, $registration] = $this->student($status, ['registration_number' => null]);
-
-            $this->actingAs($user)->post('/pendaftaran/upload-kartu-alumni', ['alumni_card_proof' => UploadedFile::fake()->image('a.png')]);
-
-            $registration->refresh();
-            $this->assertSame('alumni', $registration->registration_type);
-            $this->assertSame('menunggu_konfirmasi', $registration->status);
         }
     }
 

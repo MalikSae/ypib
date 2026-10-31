@@ -6,7 +6,7 @@ Sistem Informasi PMB terpadu untuk YPIB Majalengka. Selain melayani pendaftaran 
 
 ### 1. Portal Publik & Pendaftaran (Calon Mahasiswa)
 - Landing page: Fakultas, Program Studi (halaman detail `/prodi/{slug}` + galeri), Fasilitas, dan Partner.
-- Formulir pendaftaran online bertahap (wizard 5 langkah, Livewire) dengan jalur umum dan **Jalur Alumni YPIB** (tanpa biaya pendaftaran).
+- Formulir pendaftaran online bertahap (wizard 5 langkah, Livewire).
 - Dashboard pendaftar (`/pendaftaran/status`) dengan timeline tahapan, upload bukti bayar, dan data diri lengkap (`/pendaftaran/detail`).
 - Upload dokumen per berkas (`/pendaftaran/dokumen`): Foto, KK, dan Akta Lahir wajib; KTP, transkrip nilai, surat keterangan sehat, dan sertifikat opsional.
 - Tes tulis online (CBT) dengan skor otomatis, lalu informasi jadwal interview.

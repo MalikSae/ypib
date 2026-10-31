@@ -50,7 +50,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pendaftaran', [RegistrationController::class, 'index'])->name('registration.index');
     Route::get('/pendaftaran/status', [RegistrationController::class, 'status'])->name('registration.status');
     Route::post('/pendaftaran/upload-bukti', [RegistrationController::class, 'uploadProof'])->name('registration.upload-proof');
-    Route::post('/pendaftaran/upload-kartu-alumni', [RegistrationController::class, 'uploadAlumniCard'])->name('registration.upload-alumni-card');
     Route::post('/pendaftaran/upload-daftar-ulang-bukti', [RegistrationController::class, 'uploadReRegistrationProof'])->name('registration.upload-re-registration-proof');
     Route::get('/pendaftaran/dokumen', [RegistrationController::class, 'documents'])->name('registration.documents');
     Route::get('/pendaftaran/daftar-ulang', [RegistrationController::class, 'reRegistration'])->name('registration.re-registration');

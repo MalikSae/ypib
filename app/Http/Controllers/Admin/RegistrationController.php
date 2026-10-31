@@ -96,26 +96,20 @@ class RegistrationController extends Controller
             return redirect()->back()->with('error', 'Pembayaran tidak dapat dikonfirmasi: status pendaftar saat ini "' . $registration->getStatusLabel() . '".');
         }
 
-        if ($registration->registration_type === 'alumni') {
-            if (!$registration->alumni_card_proof && !$request->filled('note')) {
-                return redirect()->back()->with('error', 'Kartu alumni belum diunggah. Silakan isi catatan jika ingin melewati (override manual).');
-            }
-        } else {
-            if (!$registration->payment_proof) {
-                $request->validate([
-                    'bukti_bayar' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
-                    'note'        => 'required_without:bukti_bayar|string|max:1000',
-                ], [
-                    'bukti_bayar.required_without' => 'Bukti bayar wajib diupload jika catatan kosong.',
-                    'note.required_without'        => 'Catatan wajib diisi jika bukti bayar tidak diupload.',
-                    'bukti_bayar.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
-                    'bukti_bayar.max'              => 'Ukuran file maksimal 2MB.',
-                ]);
+        if (!$registration->payment_proof) {
+            $request->validate([
+                'bukti_bayar' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
+                'note'        => 'required_without:bukti_bayar|string|max:1000',
+            ], [
+                'bukti_bayar.required_without' => 'Bukti bayar wajib diupload jika catatan kosong.',
+                'note.required_without'        => 'Catatan wajib diisi jika bukti bayar tidak diupload.',
+                'bukti_bayar.mimes'            => 'Format file harus JPG, PNG, atau PDF.',
+                'bukti_bayar.max'              => 'Ukuran file maksimal 2MB.',
+            ]);
 
-                if ($request->hasFile('bukti_bayar')) {
-                    $path = \App\Support\PrivateFile::store($request->file('bukti_bayar'), 'bukti-bayar');
-                    $registration->payment_proof = $path;
-                }
+            if ($request->hasFile('bukti_bayar')) {
+                $path = \App\Support\PrivateFile::store($request->file('bukti_bayar'), 'bukti-bayar');
+                $registration->payment_proof = $path;
             }
         }
 
@@ -155,7 +149,7 @@ class RegistrationController extends Controller
         ]);
 
         // Referral reward
-        if ($registration->referrer_id && $registration->registration_type !== 'alumni') {
+        if ($registration->referrer_id) {
             ReferralClick::where('referrer_id', $registration->referrer_id)
                 ->where('converted', false)
                 ->latest()
@@ -496,7 +490,7 @@ class RegistrationController extends Controller
             ]);
 
             // Referral reward untuk Daftar Ulang
-            if ($registration->referrer_id && $registration->registration_type !== 'alumni') {
+            if ($registration->referrer_id) {
                 $existingReward = Reward::where('registration_id', $registration->id)
                     ->where('reward_type', 're_registration')
                     ->first();

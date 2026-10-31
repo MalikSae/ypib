@@ -56,14 +56,14 @@ class AdminActionsTest extends TestCase
         }
     }
 
-    public function test_alumni_can_be_confirmed_manually_with_a_note(): void
+    public function test_legacy_alumni_without_payment_proof_must_supply_proof_or_note(): void
     {
         $admin = $this->makeUser('admin');
         [, $registration] = $this->student('menunggu_pembayaran', ['registration_type' => 'alumni', 'registration_number' => null]);
 
-        $this->actingAs($admin)->post("/admin/pendaftar/{$registration->id}/konfirmasi-bayar", ['note' => 'verifikasi manual'])
-            ->assertSessionHas('success');
-        $this->assertSame('terdaftar', $registration->fresh()->status);
+        $this->actingAs($admin)->post("/admin/pendaftar/{$registration->id}/konfirmasi-bayar")
+            ->assertSessionHasErrors();
+        $this->assertSame('menunggu_pembayaran', $registration->fresh()->status);
     }
 
     // ── Daftar ulang & NIM ────────────────────────────────────────────

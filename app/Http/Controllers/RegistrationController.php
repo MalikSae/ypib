@@ -141,42 +141,6 @@ class RegistrationController extends Controller
             ->with('success', 'Bukti transfer berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
     }
 
-    public function uploadAlumniCard(Request $request)
-    {
-        $request->validate([
-            'alumni_card_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ], [
-            'alumni_card_proof.required' => 'File kartu alumni wajib diupload.',
-            'alumni_card_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
-            'alumni_card_proof.max'      => 'Ukuran file maksimal 2MB.',
-        ]);
-
-        $registration = $this->ownRegistration();
-
-        if (!in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi'])) {
-            return redirect()->route('registration.status')->with('error', 'Upload tidak dapat dilakukan pada tahap pendaftaran saat ini.');
-        }
-
-        // Bukti pertama hanya dalam masa bayar periode; periode arsip hanya baca (PMB_ENFORCE_WINDOW).
-        if ($denied = \App\Support\RegistrationWindow::denyFirstProof($registration->loadMissing('period'))) {
-            return redirect()->route('registration.status')->with('error', $denied);
-        }
-
-        // Hapus file lama jika ada
-        \App\Support\PrivateFile::delete($registration->alumni_card_proof);
-
-        $path = \App\Support\PrivateFile::store($request->file('alumni_card_proof'), 'kartu-alumni');
-
-        $registration->update([
-            'alumni_card_proof' => $path,
-            'registration_type' => 'alumni',
-            'status'            => 'menunggu_konfirmasi',
-        ]);
-
-        return redirect()->route('registration.status')
-            ->with('success', 'Kartu alumni berhasil dikirim! Admin akan segera mengkonfirmasi pendaftaran Anda.');
-    }
-
     public function uploadDocumentFile(Request $request)
     {
         $request->validate([
