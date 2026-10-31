@@ -37,7 +37,7 @@ Berdasarkan file migrations, berikut adalah tabel-tabel utama di sistem dan fiel
 - **program_galleries**: galeri foto per prodi.
 - **referrers**: `id`, `user_id`, `referral_code`, `status`, `bank_name`, `bank_account`, `bank_account_name`.
 - **referral_clicks**: `id`, `referrer_id`, `ip_address`, `user_agent`.
-- **registrations**: `id`, `registration_number`, `nim`, `letter_number`, `user_id`, `period_id`, `first_choice_program_id`, `second_choice_program_id`, `referrer_id`, `status` (enum panjang pendaftaran), `registration_type` (reguler/alumni), `admission_path`, `payment_proof`, `alumni_card_proof`, `re_registration_payment_proof`, `document_proof` (legacy, tidak dibaca kode), `internal_notes`, `deleted_at` (soft delete), `active_key` (kolom turunan: satu pendaftaran aktif per akun per periode, unik), `reapply_allowed`/`reapply_note` (izin admin untuk NIK ber-NIM mendaftar lagi pada prodi yang sama), (dan field data diri lengkap). `nim` unik; indeks pada `nik`.
+- **registrations**: `id`, `registration_number`, `nim`, `letter_number`, `user_id`, `period_id`, `first_choice_program_id`, `second_choice_program_id`, `referrer_id`, `status` (enum panjang pendaftaran), `registration_type` (reguler/alumni, arsip), `admission_path`, `payment_proof`, `alumni_card_proof`, `re_registration_payment_proof`, `document_proof` (legacy, tidak dibaca kode), `internal_notes`, `deleted_at` (soft delete), `active_key` (kolom turunan: satu pendaftaran aktif per akun per periode, unik), `reapply_allowed`/`reapply_note` (izin admin untuk NIK ber-NIM mendaftar lagi pada prodi yang sama), (dan field data diri lengkap). `nim` unik; indeks pada `nik`.
 - **registration_documents**: `id`, `registration_id`, `document_type`, `file_path`, `status`, `review_note`, `reviewed_by`.
 - **payment_logs**: `id`, `registration_id`, `acted_by`, `action`, `note`.
 - **rewards**: `id`, `referrer_id`, `registration_id`, `nik` (NIK saat komisi dibuat; dasar satu komisi per orang), `reward_type` (`registration`/`re_registration`), `amount`, `status`, `approved_by`, `approved_at`, `disbursed_at`.
@@ -57,8 +57,8 @@ Berdasarkan `routes/web.php` dan `routes/auth.php`:
   - PWA installable + halaman offline (`sw.js`, `offline.html`).
   - Referral tracking (`/ref/{code}`).
 - **Pendaftaran (Mahasiswa):**
-  - Pembuatan pendaftaran (wizard 5 langkah via Livewire `RegistrationForm`; jalur umum / alumni).
-  - Status pendaftaran dan pengunggahan bukti bayar / kartu alumni / daftar ulang.
+  - Pembuatan pendaftaran (wizard 5 langkah via Livewire `RegistrationForm`; jalur umum).
+  - Status pendaftaran dan pengunggahan bukti bayar / daftar ulang.
   - Pengisian detail data diri, sekolah, ortu.
   - Upload dokumen berkas-berkas pendaftaran.
   - Download formulir pendaftaran, SKL, dan e-KTM.
@@ -98,7 +98,7 @@ Berdasarkan `routes/web.php` dan `routes/auth.php`:
 2. Admin mengaktifkan status Referrer.
 3. Referrer mendapat link unik (`/ref/{code}`). Setiap klik dicatat di `referral_clicks`.
 4. Jika klik berujung pada Registrasi (session), `referrer_id` disimpan di tabel `registrations`.
-5. Reward di tabel `rewards` dibuat langsung oleh `AdminRegistrationController`: tipe `registration` saat admin mengonfirmasi pembayaran (nominal dari `period_programs.referral_reward_amount` periode pendaftarannya, default 50.000) dan tipe `re_registration` saat daftar ulang dikonfirmasi (`period_programs.re_registration_reward_amount`, dilewati bila 0 atau jalur alumni). **Satu komisi per orang (NIK) seumur hidup** untuk tiap tipe, lintas periode, prodi, dan afiliator; reward `cancelled` tidak dihitung. Status awal `approved`. Pendaftar yang di-soft-delete menyesuaikan komisi otomatis.
+5. Reward di tabel `rewards` dibuat langsung oleh `AdminRegistrationController`: tipe `registration` saat admin mengonfirmasi pembayaran (nominal dari `period_programs.referral_reward_amount` periode pendaftarannya, default 50.000) dan tipe `re_registration` saat daftar ulang dikonfirmasi (`period_programs.re_registration_reward_amount`, dilewati bila 0). **Satu komisi per orang (NIK) seumur hidup** untuk tiap tipe, lintas periode, prodi, dan afiliator; reward `cancelled` tidak dihitung. Status awal `approved`. Pendaftar yang di-soft-delete menyesuaikan komisi otomatis.
 6. Admin melakukan *approve* lalu *disburse* komisi/reward yang bisa dilakukan massal.
 
 ## 6. Package/Library yang Digunakan
@@ -141,12 +141,12 @@ Sistem otorisasi menggunakan Guard standar (`web`), dilengkapi dengan role-based
 6. **Unique Constraints Prodi:** Constraint di database untuk `kode_prodi` adalah composite (terikat dengan `registration_track`).
 7. **Soft Delete Pendaftar:** `registrations` memakai `SoftDeletes`. Query yang menyentuh relasi registrasi (mis. dashboard panitia) harus menangani data terhapus (lihat fix `b9906b5`). Pembuatan NIM memakai `withTrashed()` agar urutan tidak bentrok.
 8. **NIM & Nomor SKL:** NIM dibuat saat konfirmasi daftar ulang, bukan saat pendaftaran. Nomor SKL dibuat saat status `diterima` (override admin atau konfirmasi panitia).
-9. **Batas Upload:** bukti bayar/kartu alumni/bukti daftar ulang maks 2MB; dokumen pendaftaran maks 15MB; gambar galeri prodi & fasilitas maks 5MB.
+9. **Batas Upload:** bukti bayar/bukti daftar ulang maks 2MB; dokumen pendaftaran maks 15MB; gambar galeri prodi & fasilitas maks 5MB.
 10. **Intervention Image v4:** API berbeda dari v2/v3 (lihat fix `a981cd8`); cek nama method di dokumentasi v4 sebelum mengubah kode e-KTM.
 11. **Integrasi Belum Aktif:** Xendit (pembayaran) dan Fonnte/Wablas (WhatsApp) belum terhubung; konfirmasi pembayaran masih manual oleh admin.
 12. **PWA:** service worker `public/sw.js` meng-cache area publik; ubah aset/rute penting bisa butuh bump versi cache.
 13. **Test:** suite PMB lengkap di `tests/Feature/Pmb/` (lihat bagian 11); jalankan `php artisan test` sebelum dan sesudah mengubah alur PMB.
-14. **Berkas Sensitif Privat:** bukti bayar, kartu alumni, bukti daftar ulang, dan dokumen pendaftaran disimpan di disk `local` (`storage/app/private`) lewat `App\Support\PrivateFile` dan hanya ditayangkan oleh `FileController` (rute `/berkas/*`, wajib login; pemilik, admin, operator; panitia hanya dokumen). Jangan memakai `Storage::url()` atau disk `public` untuk berkas ini. Berkas lama di disk `public` tetap terbaca (fallback) sampai dipindah dengan `php artisan files:privatize` (dukung `--dry-run`); jalankan sekali di server setelah deploy.
+14. **Berkas Sensitif Privat:** bukti bayar, bukti daftar ulang, dan dokumen pendaftaran disimpan di disk `local` (`storage/app/private`) lewat `App\Support\PrivateFile` dan hanya ditayangkan oleh `FileController` (rute `/berkas/*`, wajib login; pemilik, admin, operator; panitia hanya dokumen). Jangan memakai `Storage::url()` atau disk `public` untuk berkas ini. Berkas lama di disk `public` tetap terbaca (fallback) sampai dipindah dengan `php artisan files:privatize` (dukung `--dry-run`); jalankan sekali di server setelah deploy.
 15. **Hak Akses Akun:** `/admin/panitia/*` hanya boleh menyentuh akun berperan `panitia` (selain itu 404); reset password akun `admin`/`operator` hanya oleh admin atau pemilik akun. Jangan memakai route model binding `User` tanpa cek role di area admin.
 16. **Rahasia & Ekspor:** API key Resend disimpan terenkripsi (`enc:` + `Crypt`) lewat `Setting::setSecret()/getSecret()` dan tidak pernah dikirim ke browser (kosong = pertahankan, ada opsi hapus). Semua class export Excel memakai `SafeValueBinder` (teks berawalan `=` dan deretan digit >= 15 ditulis sebagai teks); CSV memakai `CsvSanitizer::row()`.
 17. **Komisi & Afiliator:** pergantian afiliator pendaftar ditolak bila ada komisi berstatus `disbursed`; komisi `pending`/`approved` dipindah atau dibatalkan (`cancelled`, bukan dihapus); `total_conversions` tidak pernah di bawah 0. Catatan internal diedit di tempat dengan optimistic lock (`notes_checksum`) dan isi lama dicatat di `payment_logs` (`internal_note_edited`). Reset tes tulis hanya sebelum keputusan interview.

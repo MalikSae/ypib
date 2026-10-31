@@ -171,48 +171,48 @@
             </div>
         </div>
 
-        {{-- Card 4: Bukti Pembayaran / Kartu Alumni --}}
+        {{-- Card 4: Bukti Pembayaran --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">
                 Bukti Pembayaran
             </div>
 
-                @if($registration->payment_proof)
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-                        <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank"
-                           style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
-                           onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
-                            <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
-                            Lihat Bukti Bayar
-                        </a>
-                        <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->payment_proof) }}</span>
-                    </div>
-                @else
-                    <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
-                @endif
+            @if($registration->payment_proof)
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                    <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank"
+                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                       onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
+                        <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                        Lihat Bukti Bayar
+                    </a>
+                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->payment_proof) }}</span>
+                </div>
+            @else
+                <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
+            @endif
 
-                {{-- Form upload admin --}}
-                @if(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
-                    <form method="POST"
-                          action="{{ route('admin.registrations.upload-bukti', $registration->id) }}"
-                          enctype="multipart/form-data"
-                          style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
-                        @csrf
-                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;" class="text-neutral-500">Upload Bukti Bayar (Admin)</div>
-                        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
-                            <div style="flex:1;min-width:200px;">
-                                <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
-                                       style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
-                                <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
-                            </div>
-                            <x-button type="submit" class="shrink-0">
-                                Upload
-                            </x-button>
+            {{-- Form upload admin --}}
+            @if(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
+                <form method="POST"
+                      action="{{ route('admin.registrations.upload-bukti', $registration->id) }}"
+                      enctype="multipart/form-data"
+                      style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
+                    @csrf
+                    <div style="font-size:12px;font-weight:700;margin-bottom:10px;" class="text-neutral-500">Upload Bukti Bayar (Admin)</div>
+                    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:200px;">
+                            <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
+                                   style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                            <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
                         </div>
-                    </form>
-                @endif
+                        <x-button type="submit" class="shrink-0">
+                            Upload
+                        </x-button>
+                    </div>
+                </form>
+            @endif
         </div>
 
         {{-- Card 4.3: Dokumen Pendaftaran --}}

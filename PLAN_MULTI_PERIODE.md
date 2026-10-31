@@ -63,13 +63,13 @@ terikat ke periodenya masing-masing.
 | # | Topik | Keputusan | Sumber |
 |---|---|---|---|
 | K1 | Daftar lagi | Boleh, dengan syarat K7 | Pemilik produk |
-| K2 | Pintu masuk | **Pendaftaran baru** hanya selama `open_date`..`close_date`. **Bukti bayar pertama** (atau kartu alumni) boleh diunggah sampai `close_date + payment_grace_days` (default 3 hari); setelah itu ditolak | Pemilik produk (D1); masa bayar: opsi A |
+| K2 | Pintu masuk | **Pendaftaran baru** hanya selama `open_date`..`close_date`. **Bukti bayar pertama** boleh diunggah sampai `close_date + payment_grace_days` (default 3 hari); setelah itu ditolak | Pemilik produk (D1); masa bayar: opsi A |
 | K3 | Pendaftar yang sudah melewati tahap bayar | Pendaftaran dengan status **selain `menunggu_pembayaran`** dianggap berjalan dan **boleh lanjut** (dokumen, ubah data, tes, daftar ulang) walaupun konfirmasi staf selesai setelah `close_date`. Penentunya status, bukan berkas, karena staf boleh mengonfirmasi hanya dengan catatan. Alur status yang ada sudah mengunci dokumen/tes sebelum `terdaftar`, jadi K3 tidak butuh gerbang baru | Pemilik produk (D1); N1, P4 |
 | K4 | Daftar ulang | Tenggat sendiri per periode (`re_registration_deadline`), **wajib diisi saat periode ditayangkan** | Pemilik produk + audit C1, N4 |
 | K5 | Aksi staf | Selalu boleh, termasuk memproses pendaftaran di periode arsip. Yang terkunci pada arsip hanya `period_programs` | Pemilik produk; N11 |
 | K6 | Biaya dan kuota | **Berbeda tiap periode** (tabel `period_programs`) | Pemilik produk (D2) |
 | K7 | Satu proses aktif per orang (NIK) | Pendaftaran baru atau perubahan NIK oleh pendaftar diblokir hanya bila ada pendaftaran lain dengan NIK sama yang (a) sudah ber-NIM **pada prodi pilihan yang sama** dan tidak bertanda `reapply_allowed` (prodi berbeda boleh, mis. lanjut jenjang), atau (b) berstatus `diterima` / `menunggu_konfirmasi_daftar_ulang` dan masih dalam tenggat daftar ulang (tidak berlaku bila tenggat kosong), atau (c) berstatus `menunggu_tes_tulis` / `menunggu_interview` di periode yang belum arsip. Status sebelum itu hanya memberi tanda peringatan admin. Diperiksa **hanya pada `submit()` dan simpan data diri** (5.5). Blokir keras aktif hanya bila `PMB_ENFORCE_NIK_BLOCK=true`; selain itu hanya tanda "NIK ganda" | **[ASUMSI]** rekomendasi D3; N2, P1, P2; (a) per prodi: keputusan pemilik (R1, opsi A); `reapply_allowed` dan saklar: keputusan pemilik (V3, V4) |
-| K8 | Komisi afiliator | Satu komisi pendaftaran dan satu komisi daftar ulang **per orang (NIK)** seumur hidup, tidak per prodi; NIK dicatat pada reward saat dibuat. Pendaftar `alumni` tetap tanpa komisi | **[ASUMSI]** rekomendasi D6; P2, P7; tidak per prodi: keputusan pemilik (S3, opsi A) |
+| K8 | Komisi afiliator | Satu komisi pendaftaran dan satu komisi daftar ulang **per orang (NIK)** seumur hidup, tidak per prodi; NIK dicatat pada reward saat dibuat. Pendaftar `alumni` juga mendapat komisi (alumni wajib bayar sejak 2026-10-31) | **[ASUMSI]** rekomendasi D6; P2, P7; tidak per prodi: keputusan pemilik (S3, opsi A) |
 | K9 | Format NIM | Tetap `yy + kode_prodi(5) + jalur(1) + urutan(3)`. Urutan dihitung **per awalan** (`yy+kode_prodi+jalur`), bukan global | Format: kode saat ini. Cakupan urutan: **[ASUMSI]** |
 | K10 | Fase periode | Diturunkan dari tanggal; `status` hanya untuk `draft` / `published` / `archived`. Tidak butuh scheduler | Audit C3 |
 
@@ -100,9 +100,9 @@ terikat ke periodenya masing-masing.
   `daftar_ulang_selesai`). `Admin\RegistrationController::updateData` juga mengubah `nik`.
 - `/admin/pengaturan` hanya `index` dan `update`; `is_active` tidak bisa diubah dari UI.
 - `Admin\RegistrationController::confirmPayment` menerima `note` sebagai pengganti bukti
-  (`required_without`), sehingga pendaftaran `terdaftar` bisa tanpa `payment_proof` maupun `alumni_card_proof`;
-  melewati komisi untuk `registration_type = 'alumni'`; memakai nilai cadangan `?? 50000`.
-- Alur kartu alumni mengubah `menunggu_pembayaran` menjadi `menunggu_konfirmasi`, sama dengan bukti bayar.
+  (`required_without`), sehingga pendaftaran `terdaftar` bisa tanpa `payment_proof`;
+  memakai nilai cadangan `?? 50000`.
+- Jalur kartu alumni (gratis) sudah dihapus: alumni wajib bayar dan komisi berlaku untuk semua.
 - Biaya, kuota, dan nominal reward ada di tabel **`programs`**, dibaca di:
   `registration/status.blade.php:150`, `re-registration.blade.php`, `livewire/registration-form.blade.php:474`,
   `registration/pdf-skl.blade.php:70-74` (SKL), `landing/*`, `admin/registrations/show.blade.php`,
@@ -204,7 +204,7 @@ Hanya empat aksi pendaftar yang mendapat gerbang baru. Aksi lain sudah dikunci a
 | Aksi | Periode | Syarat |
 |---|---|---|
 | Daftar baru (`create`, `submit`) | `current()` | `registration_open` dan lolos K7 |
-| Upload bukti bayar pertama / kartu alumni | periode milik pendaftaran | status `menunggu_pembayaran` dan `payment_open`. Mengganti bukti saat status sudah `menunggu_konfirmasi` tidak dibatasi tanggal |
+| Upload bukti bayar pertama | periode milik pendaftaran | status `menunggu_pembayaran` dan `payment_open`. Mengganti bukti saat status sudah `menunggu_konfirmasi` tidak dibatasi tanggal |
 | Upload bukti daftar ulang | periode milik pendaftaran | `re_registration_open` dan periode belum `archived` |
 | Aksi pendaftar yang **mengubah** data (dokumen, ubah data, tes) | periode milik pendaftaran | periode belum `archived` |
 | Aksi staf, halaman status, riwayat, dan semua unduhan (e-KTM, SKL, formulir) | - | selalu boleh, termasuk di periode arsip |
@@ -268,7 +268,7 @@ Ketentuan:
   `registration` berstatus selain `cancelled` untuk NIK yang sama (lintas periode), dibaca dari kolom
   `rewards.nik`, bukan dari NIK pendaftaran saat ini (menutup pergantian NIK).
 - `confirmReRegistration`: sama untuk komisi `re_registration`.
-- Dipertahankan: tidak ada komisi untuk `registration_type = 'alumni'`, dan nilai cadangan nominal bila
+- Dipertahankan: nilai cadangan nominal bila
   `period_programs` kosong: komisi pendaftaran **50.000**; komisi daftar ulang **0** (tidak dibuat bila 0).
 - Satu komisi per NIK berlaku walau orang yang sama mendaftar prodi lain (R1): komisi kedua tidak dibuat.
 - Perbaikan sampingan: `total_conversions` hari ini bertambah **sebelum** pemeriksaan reward ada; pindahkan agar hanya
@@ -353,8 +353,8 @@ termasuk test dan perbaikan test yang ada.
 - Migrasi `rewards.nik` + isi ulang; aturan komisi per orang (5.6) di `confirmPayment` dan
   `confirmReRegistration`; perbaiki penghitungan `total_conversions`; sesuaikan `referrers:recount`.
 - Test: NIM per awalan, dua prodi berurutan sendiri-sendiri; satu komisi per NIK lintas periode;
-  ganti NIK tidak membuka komisi kedua; ber-NIM + prodi lain tidak menghasilkan komisi kedua; alumni tetap
-  tanpa komisi; nilai cadangan 50.000 (pendaftaran) dan 0 (daftar ulang, tidak dibuat); NIM soft-delete tidak
+  ganti NIK tidak membuka komisi kedua; ber-NIM + prodi lain tidak menghasilkan komisi kedua;
+  nilai cadangan 50.000 (pendaftaran) dan 0 (daftar ulang, tidak dibuat); NIM soft-delete tidak
   dipakai ulang; `total_conversions` benar.
 
 ### T4. Gerbang pintu masuk (0,5 hari) — **diimplementasi**
@@ -364,7 +364,7 @@ termasuk test dan perbaikan test yang ada.
 - Saklar `PMB_ENFORCE_WINDOW` (default `false`) pada konfigurasi; diaktifkan setelah T8 selesai (N9).
 - Banner di halaman status: batas masa pendaftaran, masa bayar, dan tenggat daftar ulang.
 - Test: setiap baris tabel 5.3, termasuk pendaftar yang dikonfirmasi staf (tanpa bukti, hanya catatan)
-  setelah `close_date`, unggah bukti di hari ke-3 dan hari ke-4 masa bayar, kartu alumni, saklar mati/hidup,
+  setelah `close_date`, unggah bukti di hari ke-3 dan hari ke-4 masa bayar, saklar mati/hidup,
   dan **unduh e-KTM, SKL, formulir di periode arsip tetap berhasil**.
 
 ### T6. Filter periode di admin (1 hari) — **diimplementasi**

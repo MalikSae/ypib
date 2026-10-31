@@ -95,7 +95,7 @@ Seeder membuat akun admin dan operator (`admin@ypib.ac.id`, `operator@ypib.ac.id
 
 ## Catatan Deploy: Berkas Privat
 
-Berkas pendaftar (bukti bayar, kartu alumni, bukti daftar ulang, dokumen) kini disimpan privat di `storage/app/private` dan ditayangkan lewat `/berkas/*` (wajib login). Setelah deploy, pindahkan berkas lama dari `public/storage` sekali saja:
+Berkas pendaftar (bukti bayar, bukti daftar ulang, dokumen) kini disimpan privat di `storage/app/private` dan ditayangkan lewat `/berkas/*` (wajib login). Setelah deploy, pindahkan berkas lama dari `public/storage` sekali saja:
 
 ```bash
 php artisan files:privatize --dry-run   # lihat daftar yang akan dipindah

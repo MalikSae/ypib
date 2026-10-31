@@ -19,7 +19,7 @@ class RegistrationWindow
         return (bool) config('pmb.enforce_window');
     }
 
-    /** Bukti bayar / kartu alumni pertama: hanya dalam masa bayar periode. */
+    /** Bukti bayar pertama: hanya dalam masa bayar periode. */
     public static function denyFirstProof(Registration $registration): ?string
     {
         if ($message = self::denyMutation($registration)) {

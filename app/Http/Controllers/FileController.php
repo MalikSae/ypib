@@ -19,7 +19,7 @@ class FileController extends Controller
         're_registration_payment_proof',
     ];
 
-    /** Bukti bayar / kartu alumni / bukti daftar ulang: pemilik, admin, operator. */
+    /** Bukti bayar / bukti daftar ulang (kartu alumni lama tetap terbaca): pemilik, admin, operator. */
     public function registration(int $id, string $field)
     {
         abort_unless(in_array($field, self::REGISTRATION_FIELDS, true), 404);

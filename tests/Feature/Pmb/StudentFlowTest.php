@@ -27,7 +27,7 @@ class StudentFlowTest extends TestCase
         Storage::fake('public');
     }
 
-    // ── Bukti bayar & kartu alumni ────────────────────────────────────
+    // ── Bukti bayar ────────────────────────────────────
     public function test_payment_proof_is_stored_privately_and_moves_to_waiting_confirmation(): void
     {
         [$user, $registration] = $this->student('menunggu_pembayaran', ['registration_number' => null]);

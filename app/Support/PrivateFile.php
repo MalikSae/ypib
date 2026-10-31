@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Penyimpanan berkas sensitif pendaftar (bukti bayar, kartu alumni, dokumen).
+ * Penyimpanan berkas sensitif pendaftar (bukti bayar, dokumen).
  *
  * Berkas baru disimpan di disk `local` (storage/app/private) sehingga tidak bisa
  * diakses lewat URL publik; penayangan hanya lewat FileController (wajib login
