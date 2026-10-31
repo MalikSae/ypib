@@ -198,11 +198,7 @@ Route::prefix('admin')
         });
 
         // User management
-        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->middleware('global.admin')->name('users.reset-password');
-        
-        // Komponen Showcase
-        Route::get('/komponen', [\App\Http\Controllers\Admin\ComponentShowcaseController::class, 'index'])->name('komponen');
-    });
+        Route::post('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->middleware('global.admin')->name('users.reset-password');    });
 
 // ── Panitia PMB ─────────────────────────────────────────────────────────────
 Route::prefix('panitia')
