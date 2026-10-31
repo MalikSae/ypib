@@ -76,9 +76,70 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
+        $finance = $this->finance($pid);
+
         return view('admin.dashboard', compact(
-            'notifications', 'stats', 'statusBreakdown', 'topReferrers', 'recent', 'activityFeed'
+            'notifications', 'stats', 'statusBreakdown', 'topReferrers', 'recent', 'activityFeed', 'finance'
         ));
+    }
+
+    /**
+     * Rekap pembayaran terverifikasi per prodi: biaya pendaftaran (tarif saat konfirmasi) dan
+     * daftar ulang (jumlah pembayaran terverifikasi), plus sisa tagihan daftar ulang.
+     *
+     * @return array{rows: \Illuminate\Support\Collection, totals: array<string,int>, unrecorded: int}
+     */
+    private function finance(?int $pid): array
+    {
+        $registrationFees = Registration::forPeriod($pid)
+            ->whereNotNull('registration_fee_paid')
+            ->selectRaw('first_choice_program_id as program_id, sum(registration_fee_paid) as total')
+            ->groupBy('first_choice_program_id')
+            ->pluck('total', 'program_id');
+
+        $paidPerRegistration = DB::table('registration_payments')
+            ->where('type', 're_registration')
+            ->where('status', 'terverifikasi')
+            ->selectRaw('registration_id, sum(amount) as paid')
+            ->groupBy('registration_id');
+
+        $reRegistration = Registration::query()
+            ->when($pid, fn ($q) => $q->where('registrations.period_id', $pid))
+            ->joinSub($paidPerRegistration, 'p', 'p.registration_id', '=', 'registrations.id')
+            ->leftJoin('period_programs as pp', function ($join) {
+                $join->on('pp.period_id', '=', 'registrations.period_id')
+                    ->on('pp.program_id', '=', 'registrations.first_choice_program_id')
+                    ->whereRaw('pp.campus_id <=> registrations.campus_id');
+            })
+            ->selectRaw('registrations.first_choice_program_id as program_id, sum(p.paid) as paid, sum(greatest(coalesce(pp.re_registration_fee, 0) - p.paid, 0)) as outstanding')
+            ->groupBy('registrations.first_choice_program_id')
+            ->get()
+            ->keyBy('program_id');
+
+        $programIds = $registrationFees->keys()->merge($reRegistration->keys())->unique()->values();
+        $names = Program::whereIn('id', $programIds)->pluck('name', 'id');
+
+        $rows = $programIds->map(fn ($id) => [
+            'name'             => $names[$id] ?? 'Prodi dihapus',
+            'registration_fee' => (int) ($registrationFees[$id] ?? 0),
+            're_registration'  => (int) ($reRegistration[$id]->paid ?? 0),
+            'outstanding'      => (int) ($reRegistration[$id]->outstanding ?? 0),
+        ])->sortBy('name')->values();
+
+        $unrecorded = Registration::forPeriod($pid)
+            ->where('status', 'daftar_ulang_selesai')
+            ->whereDoesntHave('payments', fn ($q) => $q->reRegistration()->verified())
+            ->count();
+
+        return [
+            'rows'       => $rows,
+            'totals'     => [
+                'registration_fee' => (int) $rows->sum('registration_fee'),
+                're_registration'  => (int) $rows->sum('re_registration'),
+                'outstanding'      => (int) $rows->sum('outstanding'),
+            ],
+            'unrecorded' => $unrecorded,
+        ];
     }
 
     /** Indeks created_at pada payment_logs ada? Di-cache sebentar agar tidak memeriksa tiap permintaan. */

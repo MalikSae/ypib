@@ -239,6 +239,25 @@ class Registration extends Model
         return $this->hasMany(RegistrationDocument::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(RegistrationPayment::class)->latest('id');
+    }
+
+    /** Total pembayaran daftar ulang yang sudah diverifikasi admin. */
+    public function reRegistrationPaid(): int
+    {
+        return (int) $this->payments()->reRegistration()->verified()->sum('amount');
+    }
+
+    /** Sisa tagihan daftar ulang (0 bila tarif belum diatur atau sudah lunas). */
+    public function reRegistrationRemaining(): int
+    {
+        $fee = (int) ($this->programTerms()?->re_registration_fee ?? 0);
+
+        return max($fee - $this->reRegistrationPaid(), 0);
+    }
+
     public function getTimelineStages()
     {
         $status = $this->status;

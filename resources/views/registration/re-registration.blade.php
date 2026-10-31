@@ -22,7 +22,17 @@
                 </div>
             </div>
 
-            @if($registration->status === 'diterima' && !$registration->re_registration_payment_proof)
+            @php
+                $rePayments = $registration->payments()->reRegistration()->get()->sortBy('id');
+                $hasPending = $rePayments->where('status', 'menunggu_verifikasi')->isNotEmpty();
+                $limits = \App\Support\RePayments::studentLimits($registration);
+                $fullyPaid = $limits['max'] !== null && $limits['remaining'] <= 0;
+                $canPay = in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'], true)
+                    && !$hasPending && !$fullyPaid;
+                $verifiedTotal = $registration->reRegistrationPaid();
+            @endphp
+
+            @if($canPay)
                 {{-- Info rekening daftar ulang --}}
                 <div class="bg-amber-50 border border-amber-300 rounded-xl p-5 mb-6">
                     <div class="text-[13px] font-bold text-amber-900 mb-3 flex items-center gap-1.5">
@@ -66,10 +76,10 @@
                 <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-200/60">
                     <h2 class="text-[15px] font-bold text-neutral-900 mb-4">Upload Bukti Pembayaran</h2>
                     
-                    @if(($registration->programTerms()?->re_registration_minimum_payment ?? 0) > 0)
+                    @if($rePayments->whereIn('status', ['menunggu_verifikasi', 'terverifikasi'])->isEmpty() && ($registration->programTerms()?->re_registration_minimum_payment ?? 0) > 0)
                     <div class="bg-amber-50 border border-amber-300 rounded-lg p-3.5 mb-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
-                            <span class="text-xs font-bold text-amber-900">Minimal Pembayaran Awal (DP)</span>
+                            <span class="text-xs font-bold text-amber-900">Minimal Pembayaran Awal</span>
                             <span class="text-lg font-bold text-orange-700">Rp {{ number_format($registration->programTerms()->re_registration_minimum_payment, 0, ',', '.') }}</span>
                         </div>
                         <p class="text-[11px] text-amber-900/70 mt-1.5 leading-relaxed">
@@ -80,6 +90,17 @@
 
                     <form method="POST" action="{{ route('registration.upload-re-registration-proof') }}" enctype="multipart/form-data">
                         @csrf
+                        <div class="mb-4">
+                            <label for="amount" class="block text-xs font-semibold text-neutral-700 mb-1.5">Nominal yang Dibayarkan (Rp)</label>
+                            <input type="text" inputmode="numeric" id="amount" name="amount" value="{{ old('amount') }}" placeholder="Contoh: 5.000.000" autocomplete="off"
+                                   class="w-full h-[46px] rounded-xl border px-3.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-primary-600 {{ $errors->has('amount') ? 'border-red-500' : 'border-neutral-300' }}">
+                            @error('amount')
+                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                            <p class="text-[11px] text-neutral-400 mt-1">
+                                Minimal Rp {{ number_format($limits['min'], 0, ',', '.') }}@if($limits['max'] !== null), maksimal sisa tagihan Rp {{ number_format($limits['max'], 0, ',', '.') }}@endif.
+                            </p>
+                        </div>
                         <div class="flex flex-col sm:flex-row items-start gap-3">
                             <div class="w-full sm:flex-1">
                                 <label class="flex items-center gap-2.5 border border-neutral-300 bg-white rounded-xl py-2.5 px-3.5 cursor-pointer transition-colors hover:bg-neutral-50 w-full">
@@ -90,12 +111,17 @@
                             </div>
                             <button type="submit" class="btn-primary w-full sm:w-auto h-[46px] px-6 text-sm shrink-0">Kirim Bukti Pembayaran</button>
                         </div>
+                        @error('re_registration_payment_proof')
+                            <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
+                        @enderror
                         <div class="text-[11px] mt-2.5 leading-relaxed text-neutral-400">
                             <div>Format file: JPG, PNG, PDF. Maksimal ukuran 2MB.</div>
                         </div>
                     </form>
                 </div>
-            @elseif(in_array($registration->status, ['menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']) && $registration->re_registration_payment_proof)
+            @endif
+
+            @if(in_array($registration->status, ['menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai']) && $registration->re_registration_payment_proof)
                 <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-200/60 mb-6">
                     <div class="flex items-start sm:items-center flex-col sm:flex-row gap-4 sm:gap-6">
                         <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
@@ -124,6 +150,31 @@
                             </a>
                         </div>
                     </div>
+                </div>
+            @endif
+
+            @if($rePayments->isNotEmpty())
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-200/60">
+                    <h2 class="text-[15px] font-bold text-neutral-900 mb-1">Riwayat Pembayaran</h2>
+                    <p class="text-xs text-neutral-500 mb-4">
+                        Terverifikasi Rp {{ number_format($verifiedTotal, 0, ',', '.') }}@if($limits['max'] !== null) dari tagihan Rp {{ number_format((int) ($registration->programTerms()?->re_registration_fee ?? 0), 0, ',', '.') }}@endif.
+                    </p>
+                    <ul class="divide-y divide-neutral-100">
+                        @foreach($rePayments as $payment)
+                            <li class="py-3 flex items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-neutral-900 whitespace-nowrap">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-neutral-400 whitespace-nowrap">{{ $payment->created_at->translatedFormat('d M Y, H:i') }}</div>
+                                    @if($payment->status === 'ditolak' && $payment->note)
+                                        <div class="text-xs text-red-600 mt-0.5">{{ $payment->note }}</div>
+                                    @endif
+                                </div>
+                                <span class="status-badge flex-shrink-0 whitespace-nowrap">
+                                    {{ ['menunggu_verifikasi' => 'Menunggu verifikasi', 'terverifikasi' => 'Terverifikasi', 'ditolak' => 'Ditolak'][$payment->status] ?? $payment->status }}
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 

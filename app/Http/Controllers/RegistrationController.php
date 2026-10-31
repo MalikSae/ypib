@@ -219,17 +219,12 @@ class RegistrationController extends Controller
 
     public function uploadReRegistrationProof(Request $request)
     {
-        $request->validate([
-            're_registration_payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ], [
-            're_registration_payment_proof.required' => 'File bukti bayar daftar ulang wajib diupload.',
-            're_registration_payment_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
-            're_registration_payment_proof.max'      => 'Ukuran file maksimal 2MB.',
-        ]);
+        // Nominal diketik dengan titik/spasi ("5.000.000"): ambil angkanya saja.
+        $request->merge(['amount' => preg_replace('/\D/', '', (string) $request->input('amount'))]);
 
         $registration = $this->ownRegistration();
 
-        if ($registration->status !== 'diterima' && $registration->status !== 'menunggu_konfirmasi_daftar_ulang') {
+        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'], true)) {
             return redirect()->route('registration.status')->with('error', 'Status pendaftaran belum memenuhi syarat untuk daftar ulang.');
         }
 
@@ -237,20 +232,46 @@ class RegistrationController extends Controller
             return redirect()->route('registration.status')->with('error', $denied);
         }
 
-        // Hapus file lama jika ada
-        \App\Support\PrivateFile::delete($registration->re_registration_payment_proof);
+        if ($registration->payments()->reRegistration()->pending()->exists()) {
+            return redirect()->route('registration.re-registration')->with('error', 'Pembayaran sebelumnya masih menunggu verifikasi admin.');
+        }
+
+        $limits = \App\Support\RePayments::studentLimits($registration);
+
+        if ($limits['max'] !== null && $limits['remaining'] <= 0) {
+            return redirect()->route('registration.re-registration')->with('error', 'Tagihan daftar ulang Anda sudah lunas.');
+        }
+
+        $rules = ['required', 'integer', 'min:' . $limits['min']];
+        if ($limits['max'] !== null) {
+            $rules[] = 'max:' . $limits['max'];
+        }
+
+        $request->validate([
+            'amount'                        => $rules,
+            're_registration_payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ], [
+            'amount.required'                       => 'Nominal pembayaran wajib diisi.',
+            'amount.integer'                        => 'Nominal pembayaran harus berupa angka.',
+            'amount.min'                            => 'Nominal pembayaran minimal Rp ' . number_format($limits['min'], 0, ',', '.') . '.',
+            'amount.max'                            => 'Nominal pembayaran tidak boleh melebihi sisa tagihan Rp ' . number_format((int) $limits['max'], 0, ',', '.') . '.',
+            're_registration_payment_proof.required' => 'File bukti bayar daftar ulang wajib diupload.',
+            're_registration_payment_proof.mimes'    => 'File harus berformat JPG, PNG, atau PDF.',
+            're_registration_payment_proof.max'      => 'Ukuran file maksimal 2MB.',
+        ]);
 
         $path = \App\Support\PrivateFile::store($request->file('re_registration_payment_proof'), 'bukti-bayar-daftar-ulang');
 
-        $registration->update([
-            're_registration_payment_proof' => $path,
-            'status'                        => 'menunggu_konfirmasi_daftar_ulang',
-        ]);
+        \App\Support\RePayments::submitClaim($registration, (int) $request->input('amount'), $path);
+
+        // Pendaftar yang sudah selesai daftar ulang hanya menambah pembayaran susulan.
+        if ($registration->status !== 'daftar_ulang_selesai') {
+            $registration->update(['status' => 'menunggu_konfirmasi_daftar_ulang']);
+        }
 
         return redirect()->route('registration.status')
             ->with('success', 'Bukti transfer daftar ulang berhasil dikirim! Admin akan segera mengkonfirmasi pembayaran Anda.');
     }
-
     public function reRegistration()
     {
         $registration = $this->ownRegistration(['firstChoiceProgram', 'period']);

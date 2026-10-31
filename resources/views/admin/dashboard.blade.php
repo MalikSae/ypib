@@ -113,6 +113,62 @@
 
 </div>
 
+{{-- Rekap Pembayaran Terverifikasi --}}
+<div class="mb-8">
+    <div class="mb-3">
+        <h2 class="text-sm font-bold text-neutral-900">Rekap Pembayaran Terverifikasi</h2>
+        <p class="text-xs text-neutral-400 mt-0.5">Biaya pendaftaran dan daftar ulang yang sudah dikonfirmasi admin.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Biaya Pendaftaran</div>
+            <div class="text-2xl font-extrabold text-neutral-900 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['registration_fee'], 0, ',', '.') }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Daftar Ulang</div>
+            <div class="text-2xl font-extrabold text-primary-600 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['re_registration'], 0, ',', '.') }}</div>
+        </div>
+        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+            <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Sisa Tagihan Daftar Ulang</div>
+            <div class="text-2xl font-extrabold text-neutral-900 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['outstanding'], 0, ',', '.') }}</div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full whitespace-nowrap">
+                <thead class="bg-neutral-50 border-b border-neutral-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya Pendaftaran</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Daftar Ulang</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-neutral-400 uppercase tracking-wider">Sisa Tagihan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-100">
+                    @forelse($finance['rows'] as $row)
+                        <tr>
+                            <td class="px-5 py-3 text-sm font-medium text-neutral-900">{{ $row['name'] }}</td>
+                            <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['registration_fee'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['re_registration'], 0, ',', '.') }}</td>
+                            <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['outstanding'], 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="px-5 py-8 text-center text-sm text-neutral-400">Belum ada pembayaran terverifikasi.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if($finance['unrecorded'] > 0)
+        <p class="text-xs text-neutral-400 mt-2">
+            {{ $finance['unrecorded'] }} pendaftar sudah selesai daftar ulang tetapi nominalnya belum tercatat, jadi belum masuk angka di atas. Lengkapi lewat "Catat Pembayaran" di detail pendaftar.
+        </p>
+    @endif
+</div>
+
 {{-- Pendaftar Terbaru --}}
 <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
     <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">

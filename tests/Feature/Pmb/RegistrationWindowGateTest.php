@@ -62,7 +62,7 @@ class RegistrationWindowGateTest extends TestCase
 
     private function upload(Registration $registration, string $url, string $field)
     {
-        return $this->actingAs($registration->user)->post($url, [$field => UploadedFile::fake()->image('b.png')]);
+        return $this->actingAs($registration->user)->post($url, [$field => UploadedFile::fake()->image('b.png'), 'amount' => '5.000.000']);
     }
 
     // ── Bukti bayar pertama ──────────────────────────────────────────────

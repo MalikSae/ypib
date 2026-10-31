@@ -126,7 +126,10 @@ class RegistrationController extends Controller
         // Klaim atomik: cegah konfirmasi ganda (double-click / request paralel)
         $claimed = Registration::where('id', $registration->id)
             ->whereIn('status', $payableStatuses)
-            ->update(['status' => 'terdaftar']);
+            ->update([
+                'status'                => 'terdaftar',
+                'registration_fee_paid' => $registration->programTerms()?->registration_fee,
+            ]);
 
         if (!$claimed) {
             return redirect()->back()->with('error', 'Pendaftar ini sudah dikonfirmasi sebelumnya.');
@@ -440,19 +443,39 @@ class RegistrationController extends Controller
     {
         $registration = Registration::with(['period', 'firstChoiceProgram'])->findOrFail($id);
 
-        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang'])) {
+        if (!in_array($registration->status, ['diterima', 'menunggu_konfirmasi_daftar_ulang', 'daftar_ulang_selesai'])) {
             return redirect()->back()->with('error', 'Status pendaftar belum memenuhi syarat untuk daftar ulang.');
+        }
+
+        $isDone = $registration->status === 'daftar_ulang_selesai';
+
+        $request->merge(['amount' => preg_replace('/\D/', '', (string) $request->input('amount')) ?: null]);
+        $request->validate([
+            'amount' => 'nullable|integer|min:1|max:2000000000',
+        ], [
+            'amount.integer' => 'Nominal pembayaran harus berupa angka.',
+            'amount.min'     => 'Nominal pembayaran harus lebih dari 0.',
+        ]);
+
+        $amount  = $request->filled('amount') ? (int) $request->input('amount') : null;
+        $pending = $registration->payments()->reRegistration()->pending()->first();
+
+        // Pendaftar yang sudah selesai daftar ulang hanya boleh ditambah pembayaran susulan.
+        if ($isDone && $amount === null && !$pending) {
+            return redirect()->back()->with('error', 'Isi nominal pembayaran yang dicatat.');
         }
 
         // NIM dibentuk dari Kode Prodi. Tanpa itu generateNim() mengembalikan null dan
         // pendaftar akan "selesai" tanpa NIM (e-KTM tidak bisa diunduh), jadi tahan dulu.
-        if (empty($registration->nim) && empty($registration->firstChoiceProgram?->kode_prodi)) {
+        if (!$isDone && empty($registration->nim) && empty($registration->firstChoiceProgram?->kode_prodi)) {
             return redirect()->back()->with('error',
                 'NIM belum bisa dibuat: Kode Prodi untuk "' . ($registration->firstChoiceProgram?->name ?? 'prodi pilihan') . '" belum diisi. '
                 . 'Isi Kode Prodi di menu Kelola Program Studi, lalu konfirmasi daftar ulang lagi.');
         }
 
-        if (!$registration->re_registration_payment_proof) {
+        $proofPath = null;
+
+        if (!$isDone && !$registration->re_registration_payment_proof) {
             $request->validate([
                 'bukti_daftar_ulang' => 'required_without:note|file|mimes:jpg,jpeg,png,pdf|max:2048',
                 'note'               => 'required_without:bukti_daftar_ulang|string|max:1000',
@@ -464,11 +487,41 @@ class RegistrationController extends Controller
             ]);
 
             if ($request->hasFile('bukti_daftar_ulang')) {
-                $path = \App\Support\PrivateFile::store($request->file('bukti_daftar_ulang'), 'bukti-daftar-ulang');
-                $registration->re_registration_payment_proof = $path;
+                $proofPath = \App\Support\PrivateFile::store($request->file('bukti_daftar_ulang'), 'bukti-daftar-ulang');
+                $registration->re_registration_payment_proof = $proofPath;
             }
+        } elseif ($request->hasFile('bukti_daftar_ulang')) {
+            $request->validate(['bukti_daftar_ulang' => 'file|mimes:jpg,jpeg,png,pdf|max:2048']);
+            $proofPath = \App\Support\PrivateFile::store($request->file('bukti_daftar_ulang'), 'bukti-daftar-ulang');
         }
 
+        // Catat atau verifikasi nominal; tanpa nominal dan tanpa pengajuan pendaftar (data lama)
+        // alurnya tetap seperti dulu: langsung menyelesaikan daftar ulang.
+        if ($amount !== null || $pending) {
+            $admin = Auth::user();
+
+            \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $pending, $amount, $proofPath, $request, $admin) {
+                if ($pending) {
+                    \App\Support\RePayments::verify($pending, $amount ?? $pending->amount, $admin, $request->input('note'));
+                } else {
+                    \App\Support\RePayments::record($registration, $amount, $proofPath, $request->input('note'), $admin);
+                }
+            });
+
+            $registration->refresh();
+            $paid = $registration->reRegistrationPaid();
+
+            if ($isDone) {
+                return redirect()->back()->with('success', 'Pembayaran dicatat. Total terverifikasi Rp ' . number_format($paid, 0, ',', '.') . '.');
+            }
+
+            if (!\App\Support\RePayments::minimumReached($registration)) {
+                return redirect()->back()->with('success',
+                    'Pembayaran terverifikasi. Total Rp ' . number_format($paid, 0, ',', '.')
+                    . ' belum mencapai minimal Rp ' . number_format(\App\Support\RePayments::minimum($registration), 0, ',', '.')
+                    . ', daftar ulang belum diselesaikan.');
+            }
+        }
         try {
         \Illuminate\Support\Facades\DB::transaction(function () use ($registration, $request) {
             $registration->status = 'daftar_ulang_selesai';
@@ -530,6 +583,27 @@ class RegistrationController extends Controller
         return redirect()->back()->with('success', 'Pembayaran daftar ulang berhasil dikonfirmasi.');
     }
 
+    public function rejectRePayment(Request $request, int $id, int $paymentId)
+    {
+        $request->validate([
+            'note' => 'required|string|max:1000',
+        ], [
+            'note.required' => 'Alasan penolakan wajib diisi.',
+        ]);
+
+        $registration = Registration::findOrFail($id);
+        $payment = $registration->payments()->reRegistration()->pending()->findOrFail($paymentId);
+
+        \App\Support\RePayments::reject($payment, Auth::user(), $request->input('note'));
+
+        // Tidak ada lagi pengajuan yang menunggu: kembali ke tahap bayar agar pendaftar bisa mengirim ulang.
+        if ($registration->status === 'menunggu_konfirmasi_daftar_ulang'
+            && !$registration->payments()->reRegistration()->pending()->exists()) {
+            $registration->update(['status' => 'diterima']);
+        }
+
+        return redirect()->back()->with('success', 'Pembayaran ditolak. Pendaftar dapat mengirim ulang.');
+    }
     public function reviewDocument(Request $request, $documentId)
     {
         $request->validate([

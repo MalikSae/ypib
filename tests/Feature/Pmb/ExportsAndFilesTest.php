@@ -229,21 +229,24 @@ class ExportsAndFilesTest extends TestCase
         Storage::disk('public')->assertMissing($document->file_path);
     }
 
-    public function test_re_registration_proof_is_private_and_old_one_is_removed(): void
+    public function test_re_registration_proof_is_private_and_kept_per_payment(): void
     {
         Storage::fake('local');
         Storage::fake('public');
         [$user, $registration] = $this->student('diterima');
 
-        $this->actingAs($user)->post('/pendaftaran/upload-daftar-ulang-bukti', ['re_registration_payment_proof' => UploadedFile::fake()->image('d.png')])
+        $this->actingAs($user)->post('/pendaftaran/upload-daftar-ulang-bukti', ['re_registration_payment_proof' => UploadedFile::fake()->image('d.png'), 'amount' => '5000000'])
             ->assertSessionHas('success');
         $first = $registration->fresh()->re_registration_payment_proof;
         Storage::disk('local')->assertExists($first);
         Storage::disk('public')->assertMissing($first);
         $this->assertSame('menunggu_konfirmasi_daftar_ulang', $registration->fresh()->status);
 
-        $this->actingAs($user)->post('/pendaftaran/upload-daftar-ulang-bukti', ['re_registration_payment_proof' => UploadedFile::fake()->image('e.png')]);
-        Storage::disk('local')->assertMissing($first);
+        // selama pengajuan menunggu verifikasi, pengajuan kedua ditolak dan bukti pertama tetap ada
+        $this->actingAs($user)->post('/pendaftaran/upload-daftar-ulang-bukti', ['re_registration_payment_proof' => UploadedFile::fake()->image('e.png'), 'amount' => '1000'])
+            ->assertSessionHas('error');
+        Storage::disk('local')->assertExists($first);
+        $this->assertSame(1, $registration->payments()->count());
     }
 
     public function test_legacy_public_files_are_served_and_privatize_command_moves_them(): void

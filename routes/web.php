@@ -71,6 +71,8 @@ Route::middleware('auth')->prefix('berkas')->name('files.')->group(function () {
         ->whereNumber('id')->name('registration');
     Route::get('/dokumen/{id}', [\App\Http\Controllers\FileController::class, 'document'])
         ->whereNumber('id')->name('document');
+    Route::get('/pembayaran/{id}', [\App\Http\Controllers\FileController::class, 'payment'])
+        ->whereNumber('id')->name('payment');
 });
 
 // ── Referrer Area (Afiliasi) ────────────────────────────────────────────────
@@ -165,6 +167,7 @@ Route::prefix('admin')
             Route::post('/{id}/restore', [AdminRegistrationController::class, 'restore'])->name('restore');
             Route::post('/{id}/konfirmasi-bayar', [AdminRegistrationController::class, 'confirmPayment'])->name('confirm-payment');
             Route::post('/{id}/konfirmasi-daftar-ulang', [AdminRegistrationController::class, 'confirmReRegistration'])->name('confirm-re-registration');
+            Route::post('/{id}/pembayaran/{payment}/tolak', [AdminRegistrationController::class, 'rejectRePayment'])->name('reject-re-payment');
             Route::post('/{id}/override-status', [AdminRegistrationController::class, 'overrideStatus'])->name('override-status');
             Route::post('/{id}/upload-bukti', [AdminRegistrationController::class, 'uploadBukti'])->name('upload-bukti');
             Route::post('/{id}/catatan', [AdminRegistrationController::class, 'addNote'])->name('add-note');

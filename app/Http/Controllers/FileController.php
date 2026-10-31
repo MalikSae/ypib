@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Registration;
 use App\Models\RegistrationDocument;
+use App\Models\RegistrationPayment;
 use App\Support\PrivateFile;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +29,16 @@ class FileController extends Controller
         $this->authorizeAccess($registration, allowPanitia: false);
 
         return $this->serve($registration->{$field});
+    }
+
+    /** Bukti satu pembayaran daftar ulang: pemilik, admin, operator. */
+    public function payment(int $id)
+    {
+        $payment = RegistrationPayment::findOrFail($id);
+        $registration = Registration::withTrashed()->findOrFail($payment->registration_id);
+        $this->authorizeAccess($registration, allowPanitia: false);
+
+        return $this->serve($payment->proof_path);
     }
 
     /** Dokumen pendaftaran: pemilik, admin, operator, panitia. */
