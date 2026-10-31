@@ -138,7 +138,7 @@ class StudentFlowTest extends TestCase
         $this->actingAs($user)->post('/pendaftaran/detail/update', $diri + ['nik' => 'abcdefghijklmnop'])->assertSessionHasErrors('nik');
         $this->actingAs($user)->post('/pendaftaran/detail/update', $diri + ['nik' => '3210000000000009'])->assertSessionHas('success');
 
-        $sekolah = ['section' => 'data_sekolah', 'school_name' => 'S', 'school_major' => 'IPA', 'graduation_year' => '2024', 'certificate_number' => 'C1'];
+        $sekolah = ['section' => 'data_sekolah', 'education_level' => 'sma_smk_ma', 'nisn' => '1234567890', 'school_name' => 'S', 'school_major' => 'IPA', 'graduation_year' => '2024', 'certificate_number' => 'C1'];
         foreach (['1000000', '100.01', '-1', 'abc'] as $bad) {
             $resp = $this->actingAs($user)->post('/pendaftaran/detail/update', $sekolah + ['school_grade' => $bad]);
             $this->assertLessThan(500, $resp->getStatusCode());

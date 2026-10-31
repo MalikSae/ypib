@@ -86,6 +86,7 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
             'Nama Referrer',
             'Status',
             'Tanggal Daftar',
+            'Pendidikan Terakhir',
         ];
     }
 
@@ -106,6 +107,7 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
             $registration->referrer?->user?->name,
             $registration->status,
             $registration->created_at->format('d/m/Y H:i'),
+            \App\Models\Registration::educationConfig($registration->education_level)['label'],
         ];
     }
 }

@@ -129,7 +129,7 @@ class ExportsAndFilesTest extends TestCase
         $this->assertCount(121, $rows);
         $this->assertSame('No. Registrasi', $rows[0][0]);
         foreach ($rows as $row) {
-            $this->assertCount(14, $row);
+            $this->assertCount(15, $row);
         }
         $this->assertSame('MS-119', $rows[1][0], 'urutan harus menurun berdasarkan id');
         $this->assertSame('MS-0', $rows[120][0]);

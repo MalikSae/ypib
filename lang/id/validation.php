@@ -190,6 +190,7 @@ return [
         'gender' => 'Jenis kelamin',
         'religion' => 'Agama',
         'address' => 'Alamat',
+        'education_level' => 'Pendidikan terakhir',
         'school_name' => 'Nama sekolah',
         'school_major' => 'Jurusan sekolah',
         'school_grade' => 'Nilai rata-rata',

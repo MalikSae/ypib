@@ -35,6 +35,7 @@ class Registration extends Model
         'graduation_year',
         'school_grade',
         'nisn',
+        'education_level',
         'religion',
         'school_major',
         'certificate_number',
@@ -53,6 +54,59 @@ class Registration extends Model
     protected $casts = [
         'birth_date' => 'date',
     ];
+
+    const DEFAULT_EDUCATION_LEVEL = 'sma_smk_ma';
+
+    /** Pendidikan terakhir pendaftar: label field, wajib NISN, dan skala nilai per jenjang. */
+    const EDUCATION_LEVELS = [
+        'sma_smk_ma' => [
+            'label'       => 'SMA/SMK/MA/Sederajat',
+            'institution' => 'Nama Sekolah',
+            'placeholder' => 'SMA/SMK/MA Negeri/Swasta ...',
+            'major'       => 'Jurusan',
+            'grade'       => 'Nilai Rata-rata Ijazah',
+            'grade_max'   => 100,
+            'nisn_required' => true,
+        ],
+        'd3' => [
+            'label'       => 'D3',
+            'institution' => 'Nama Perguruan Tinggi',
+            'placeholder' => 'Nama universitas/politeknik',
+            'major'       => 'Program Studi',
+            'grade'       => 'IPK',
+            'grade_max'   => 4,
+            'nisn_required' => false,
+        ],
+        's1' => [
+            'label'       => 'S1',
+            'institution' => 'Nama Perguruan Tinggi',
+            'placeholder' => 'Nama universitas/institut',
+            'major'       => 'Program Studi',
+            'grade'       => 'IPK',
+            'grade_max'   => 4,
+            'nisn_required' => false,
+        ],
+        'lainnya' => [
+            'label'       => 'Lainnya (Paket C, pesantren, dll.)',
+            'institution' => 'Nama Sekolah / Lembaga',
+            'placeholder' => 'Nama sekolah atau lembaga pendidikan',
+            'major'       => 'Jurusan',
+            'grade'       => 'Nilai Rata-rata',
+            'grade_max'   => 100,
+            'nisn_required' => false,
+        ],
+    ];
+
+    /** Konfigurasi jenjang; nilai kosong/tak dikenal dianggap SMA/SMK/MA (data lama). */
+    public static function educationConfig(?string $level): array
+    {
+        return self::EDUCATION_LEVELS[$level] ?? self::EDUCATION_LEVELS[self::DEFAULT_EDUCATION_LEVEL];
+    }
+
+    public function educationConfigForRegistration(): array
+    {
+        return self::educationConfig($this->education_level);
+    }
 
     const STATUS_LABELS = [
         'menunggu_pembayaran' => ['label' => 'Menunggu Pembayaran', 'color' => 'warning'],
@@ -408,7 +462,7 @@ class Registration extends Model
 
     public function isFormComplete(): bool
     {
-        return !empty($this->nisn)
+        return (!empty($this->nisn) || !$this->educationConfigForRegistration()['nisn_required'])
             && !empty($this->religion)
             && !empty($this->school_major)
             && !empty($this->certificate_number)

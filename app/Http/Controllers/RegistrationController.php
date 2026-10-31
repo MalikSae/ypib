@@ -289,7 +289,6 @@ class RegistrationController extends Controller
         if ($section === 'data_diri') {
             $rules = [
                 'full_name'   => 'required|string|max:255',
-                'nisn'        => 'required|string|digits:10',
                 'nik'         => 'required|digits:16',
                 'birth_place' => 'required|string|max:100',
                 'birth_date'  => 'required|date',
@@ -309,14 +308,17 @@ class RegistrationController extends Controller
             ];
             $sectionName = 'Program Studi & Jalur';
         } elseif ($section === 'data_sekolah') {
+            $level = \App\Models\Registration::educationConfig($request->input('education_level'));
             $rules = [
+                'education_level'    => ['required', \Illuminate\Validation\Rule::in(array_keys(\App\Models\Registration::EDUCATION_LEVELS))],
+                'nisn'               => [$level['nisn_required'] ? 'required' : 'nullable', 'string', 'digits:10'],
                 'school_name'        => 'required|string|max:255',
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
                 'certificate_number' => 'required|string|max:100',
-                'school_grade'       => 'nullable|numeric|between:0,100',
+                'school_grade'       => 'nullable|numeric|between:0,' . $level['grade_max'],
             ];
-            $sectionName = 'Data Sekolah';
+            $sectionName = 'Pendidikan Terakhir';
         } elseif ($section === 'data_ortu') {
             $rules = [
                 'father_name'       => 'required|string|max:255',

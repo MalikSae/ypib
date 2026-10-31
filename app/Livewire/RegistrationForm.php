@@ -26,7 +26,6 @@ class RegistrationForm extends Component
 
     // Step 1 — Data Diri
     public string $full_name   = '';
-    public string $nisn        = '';
     public string $nik         = '';
     public string $birth_place = '';
     public string $birth_date  = '';
@@ -42,7 +41,9 @@ class RegistrationForm extends Component
     public string $first_choice_program_id  = '';
     public string $admission_path = '';
 
-    // Step 3 — Data Sekolah
+    // Step 3 — Pendidikan Terakhir
+    public string $education_level    = Registration::DEFAULT_EDUCATION_LEVEL;
+    public string $nisn               = '';
     public string $school_name        = '';
     public string $school_major       = '';
     public string $graduation_year    = '';
@@ -68,7 +69,6 @@ class RegistrationForm extends Component
         return match ($step ?? $this->step) {
             1 => [
                 'full_name'   => 'required|string|max:255',
-                'nisn'        => 'required|string|digits:10',
                 'nik'         => 'required|digits:16',
                 'birth_place' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::in($this->getValidCities())],
                 'birth_date'  => 'required|date',
@@ -96,11 +96,13 @@ class RegistrationForm extends Component
                 'admission_path'          => 'required|in:umum,prestasi,tahfidz',
             ],
             3 => [
+                'education_level'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Registration::EDUCATION_LEVELS))],
+                'nisn'               => [Registration::educationConfig($this->education_level)['nisn_required'] ? 'required' : 'nullable', 'string', 'digits:10'],
                 'school_name'        => 'required|string|max:255',
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
                 'certificate_number' => 'required|string|max:100',
-                'school_grade'       => 'nullable|numeric|between:0,100',
+                'school_grade'       => 'nullable|numeric|between:0,' . Registration::educationConfig($this->education_level)['grade_max'],
             ],
             4 => [
                 'father_name'       => 'required|string|max:255',
@@ -120,7 +122,9 @@ class RegistrationForm extends Component
             'nik.size'                        => 'NIK harus 16 digit.',
             'nik.digits'                      => 'NIK harus 16 digit angka.',
             'school_grade.numeric'            => 'Nilai rata-rata harus berupa angka.',
-            'school_grade.between'            => 'Nilai rata-rata harus antara 0 dan 100.',
+            'school_grade.between'            => 'Nilai harus antara 0 dan ' . Registration::educationConfig($this->education_level)['grade_max'] . '.',
+            'education_level.required'        => 'Pendidikan terakhir wajib dipilih.',
+            'education_level.in'              => 'Pilihan pendidikan terakhir tidak valid.',
             'birth_place.required'            => 'Tempat lahir wajib diisi.',
             'birth_place.in'                  => 'Tempat lahir tidak valid. Pilih dari daftar kota yang tersedia.',
             'birth_date.required'             => 'Tanggal lahir wajib diisi.',
@@ -358,8 +362,9 @@ class RegistrationForm extends Component
                 'first_choice_program_id'  => (int) $this->first_choice_program_id,
                 'second_choice_program_id' => null, // removed
                 'full_name'                => $this->full_name,
-                'nisn'                     => $this->nisn,
-                'nik'                      => $this->nik,
+                'nisn'                     => $this->nisn ?: null,
+                'education_level'          => $this->education_level,
+                'nik'                     => $this->nik,
                 'birth_place'              => $this->birth_place,
                 'birth_date'               => $this->birth_date,
                 'gender'                   => $this->gender,

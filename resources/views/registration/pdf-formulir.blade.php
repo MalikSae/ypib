@@ -138,11 +138,6 @@
             <td class="value">{{ $registration->full_name }}</td>
         </tr>
         <tr>
-            <td class="label">NISN</td>
-            <td class="colon">:</td>
-            <td class="value">{{ $registration->nisn }}</td>
-        </tr>
-        <tr>
             <td class="label">NIK</td>
             <td class="colon">:</td>
             <td class="value">{{ $registration->nik }}</td>
@@ -179,15 +174,21 @@
         </tr>
     </table>
 
-    <div class="section-title">C. DATA SEKOLAH ASAL</div>
+    @php $edu = $registration->educationConfigForRegistration(); @endphp
+    <div class="section-title">C. PENDIDIKAN TERAKHIR</div>
     <table>
         <tr>
-            <td class="label">Nama Sekolah</td>
+            <td class="label">Jenjang</td>
+            <td class="colon">:</td>
+            <td class="value">{{ $edu['label'] }}</td>
+        </tr>
+        <tr>
+            <td class="label">{{ $edu['institution'] }}</td>
             <td class="colon">:</td>
             <td class="value">{{ $registration->school_name }}</td>
         </tr>
         <tr>
-            <td class="label">Jurusan</td>
+            <td class="label">{{ $edu['major'] }}</td>
             <td class="colon">:</td>
             <td class="value">{{ $registration->school_major }}</td>
         </tr>
@@ -202,9 +203,14 @@
             <td class="value">{{ $registration->certificate_number }}</td>
         </tr>
         <tr>
-            <td class="label">Nilai Rata-rata Rapor</td>
+            <td class="label">{{ $edu['grade'] }}</td>
             <td class="colon">:</td>
             <td class="value">{{ $registration->school_grade ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td class="label">NISN</td>
+            <td class="colon">:</td>
+            <td class="value">{{ $registration->nisn ?: '-' }}</td>
         </tr>
     </table>
 

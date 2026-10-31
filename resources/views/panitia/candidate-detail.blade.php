@@ -105,7 +105,7 @@
                             </div>
                             <div>
                                 <div class="text-xs text-neutral-500 uppercase font-semibold">NISN</div>
-                                <div class="text-neutral-900">{{ $registration->nisn }}</div>
+                                <div class="text-neutral-900">{{ $registration->nisn ?: '-' }}</div>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
@@ -166,17 +166,22 @@
                     <div class="p-4 flex items-center justify-between cursor-pointer select-none hover:bg-neutral-50 transition-colors" @click="open = !open">
                         <h3 class="font-bold text-neutral-900 flex items-center text-sm">
                             <svg class="w-5 h-5 mr-3 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m3-4h1m-1 4h1m-5 8h5"></path></svg>
-                            Data Sekolah
+                            Pendidikan Terakhir
                         </h3>
                         <svg class="w-5 h-5 text-neutral-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
+                    @php $edu = $registration->educationConfigForRegistration(); @endphp
                     <div x-show="open" x-transition class="p-4 pt-0 space-y-3 bg-white">
                         <div>
-                            <div class="text-xs text-neutral-500 uppercase font-semibold">Asal Sekolah</div>
+                            <div class="text-xs text-neutral-500 uppercase font-semibold">Jenjang</div>
+                            <div class="text-neutral-900">{{ $edu['label'] }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-neutral-500 uppercase font-semibold">{{ $edu['institution'] }}</div>
                             <div class="text-neutral-900 font-medium">{{ $registration->school_name }}</div>
                         </div>
                         <div>
-                            <div class="text-xs text-neutral-500 uppercase font-semibold">Jurusan</div>
+                            <div class="text-xs text-neutral-500 uppercase font-semibold">{{ $edu['major'] }}</div>
                             <div class="text-neutral-900">{{ $registration->school_major }}</div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
@@ -185,7 +190,7 @@
                                 <div class="text-neutral-900">{{ $registration->graduation_year }}</div>
                             </div>
                             <div>
-                                <div class="text-xs text-neutral-500 uppercase font-semibold">Nilai Rata-rata</div>
+                                <div class="text-xs text-neutral-500 uppercase font-semibold">{{ $edu['grade'] }}</div>
                                 <div class="text-neutral-900 font-bold">{{ $registration->school_grade ?? '-' }}</div>
                             </div>
                         </div>

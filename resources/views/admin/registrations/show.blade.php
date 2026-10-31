@@ -137,9 +137,9 @@
             </div>
         </div>
 
-        {{-- Card 3: Pilihan Prodi & Asal Sekolah --}}
+        {{-- Card 3: Pilihan Prodi & Pendidikan Terakhir --}}
         <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Pilihan Prodi &amp; Asal Sekolah</div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Pilihan Prodi &amp; Pendidikan Terakhir</div>
             <div class="field-grid">
                 <div>
                     <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Program Studi</div>
@@ -156,8 +156,13 @@
                         </span>
                     </div>
                 </div>
+                @php $edu = $registration->educationConfigForRegistration(); @endphp
                 <div>
-                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Asal Sekolah</div>
+                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Pendidikan Terakhir</div>
+                    <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $edu['label'] }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">{{ $edu['institution'] }}</div>
                     <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->school_name ?? '—' }}</div>
                 </div>
                 <div>
@@ -165,7 +170,7 @@
                     <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->graduation_year ?? '—' }}</div>
                 </div>
                 <div>
-                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">Nilai Rata-rata</div>
+                    <div style="font-size:12px;margin-bottom:4px;" class="text-neutral-400">{{ $edu['grade'] }}</div>
                     <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $registration->school_grade ?? '—' }}</div>
                 </div>
             </div>
@@ -949,7 +954,15 @@ function toggleRegPassword(inputId, iconId) {
             <h3 class="text-sm font-bold text-neutral-900 mb-3 mt-6 border-t pt-4">Data Akademik</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <x-input-label for="edit_school_name" value="Asal Sekolah" required="true" />
+                    <x-input-label for="edit_education_level" value="Pendidikan Terakhir" required="true" />
+                    <x-select id="edit_education_level" name="education_level" class="mt-1 block w-full" required>
+                        @foreach(\App\Models\Registration::EDUCATION_LEVELS as $key => $option)
+                            <option value="{{ $key }}" @selected(old('education_level', $registration->education_level ?? \App\Models\Registration::DEFAULT_EDUCATION_LEVEL) === $key)>{{ $option['label'] }}</option>
+                        @endforeach
+                    </x-select>
+                </div>
+                <div>
+                    <x-input-label for="edit_school_name" value="Asal Sekolah / Perguruan Tinggi" required="true" />
                     <x-text-input id="edit_school_name" name="school_name" type="text" class="mt-1 block w-full" :value="old('school_name', $registration->school_name)" required />
                 </div>
                 <div>
@@ -957,7 +970,7 @@ function toggleRegPassword(inputId, iconId) {
                     <x-text-input id="edit_graduation_year" name="graduation_year" type="number" class="mt-1 block w-full" :value="old('graduation_year', $registration->graduation_year)" required />
                 </div>
                 <div>
-                    <x-input-label for="edit_school_grade" value="Nilai Rata-rata" />
+                    <x-input-label for="edit_school_grade" value="Nilai (IPK 0-4 untuk D3/S1, rata-rata 0-100 lainnya)" />
                     <x-text-input id="edit_school_grade" name="school_grade" type="text" class="mt-1 block w-full" :value="old('school_grade', $registration->school_grade)" />
                 </div>
                 <div>

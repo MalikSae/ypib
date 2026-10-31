@@ -8,7 +8,7 @@
             <!-- Active Connecting Line -->
             <div class="absolute top-4 left-0 h-0.5 transition-all" style="width: {{ ($step - 1) * 25 }}%; background-color:#082e8f; transform: translateY(-50%); z-index: 0;"></div>
             
-            @foreach(['Data Diri', 'Prodi & Jalur', 'Asal Sekolah', 'Data Orang Tua', 'Konfirmasi'] as $i => $label)
+            @foreach(['Data Diri', 'Prodi & Jalur', 'Pendidikan Terakhir', 'Data Orang Tua', 'Konfirmasi'] as $i => $label)
                 @php $num = $i + 1; @endphp
                 <div class="flex flex-col items-center flex-1 relative" style="z-index: 10;">
                     <div class="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs md:text-sm font-bold border-2 transition-all
@@ -26,7 +26,7 @@
         </div>
         <!-- Mobile Step Indicator Title -->
         <div class="md:hidden mt-4 text-center">
-            @php $labels = ['Data Diri', 'Program Studi & Jalur', 'Asal Sekolah', 'Data Orang Tua / Wali', 'Konfirmasi']; @endphp
+            @php $labels = ['Data Diri', 'Program Studi & Jalur', 'Pendidikan Terakhir', 'Data Orang Tua / Wali', 'Konfirmasi']; @endphp
             <div class="inline-block px-3 py-1 rounded-full bg-blue-50 border border-blue-100">
                 <span class="text-xs font-bold" style="color:#082e8f;">Langkah {{ $step }} dari 5:</span>
                 <span class="text-xs font-medium text-gray-700 ml-1">{{ $labels[$step-1] }}</span>
@@ -67,10 +67,6 @@
                 <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Sesuai KTP/Ijazah">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NISN (10 digit) <span class="text-red-500">*</span></label>
-                    <input wire:model="nisn" type="text" maxlength="10" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="00xxxxxxxx">
-                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">NIK (16 digit) <span class="text-red-500">*</span></label>
                     <input wire:model="nik" type="text" maxlength="16" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="3201xxxxxxxx">
@@ -346,39 +342,52 @@
     </div>
     @endif
 
-    {{-- STEP 3 — ASAL SEKOLAH --}}
+    {{-- STEP 3 — PENDIDIKAN TERAKHIR --}}
     @if($step === 3)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
             </svg>
-            Asal Sekolah
+            Pendidikan Terakhir
         </h2>
+        @php $edu = \App\Models\Registration::educationConfig($education_level); @endphp
         <div class="space-y-5">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah <span class="text-red-500">*</span></label>
-                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="SMA/SMK/MA Negeri/Swasta ...">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Pendidikan Terakhir <span class="text-red-500">*</span></label>
+                <select wire:model.live="education_level" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
+                    @foreach(\App\Models\Registration::EDUCATION_LEVELS as $key => $level)
+                        <option value="{{ $key }}">{{ $level['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['institution'] }} <span class="text-red-500">*</span></label>
+                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="{{ $edu['placeholder'] }}">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jurusan <span class="text-red-500">*</span></label>
-                    <input wire:model="school_major" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="IPA, IPS, Teknik Komputer ...">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['major'] }} <span class="text-red-500">*</span></label>
+                    <input wire:model="school_major" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">No. Ijazah / SKL <span class="text-red-500">*</span></label>
-                    <input wire:model="certificate_number" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="DN-XX/XX/XXXXXXX">
+                    <input wire:model="certificate_number" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Lulus <span class="text-red-500">*</span></label>
-                    <input wire:model="graduation_year" type="number" min="2000" max="2030" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="2024">
+                    <input wire:model="graduation_year" type="number" min="1980" max="{{ now()->year + 1 }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Rata-rata Ijazah <span class="text-gray-400 text-xs">(opsional)</span></label>
-                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="85.50">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['grade'] }} <span class="text-gray-400 text-xs">(opsional)</span></label>
+                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="{{ $edu['grade_max'] }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="{{ $edu['grade_max'] == 4 ? 'Contoh: 3.45' : 'Contoh: 85.50' }}">
                 </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">NISN (10 digit) @if($edu['nisn_required'])<span class="text-red-500">*</span>@else<span class="text-gray-400 text-xs">(opsional)</span>@endif</label>
+                <input wire:model="nisn" type="text" maxlength="10" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="00xxxxxxxx">
             </div>
         </div>
     </div>
@@ -434,7 +443,6 @@
                 <h3 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Data Diri</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 text-sm">
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Nama Lengkap</span><span class="font-medium">{{ $full_name }}</span></div>
-                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">NISN</span><span class="font-medium">{{ $nisn }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">NIK</span><span class="font-medium">{{ $nik }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Tempat, Tgl Lahir</span><span class="font-medium">{{ $birth_place }}, {{ $birth_date ? \Carbon\Carbon::parse($birth_date)->isoFormat('D MMMM Y') : '-' }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Jenis Kelamin</span><span class="font-medium">{{ $gender === 'male' ? 'Laki-laki' : ($gender === 'female' ? 'Perempuan' : '-') }}</span></div>
@@ -458,15 +466,18 @@
                 </div>
             </div>
 
-            {{-- Asal Sekolah --}}
+            {{-- Pendidikan Terakhir --}}
+            @php $edu = \App\Models\Registration::educationConfig($education_level); @endphp
             <div class="bg-gray-50 rounded-xl p-5">
-                <h3 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Asal Sekolah</h3>
+                <h3 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Pendidikan Terakhir</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 text-sm">
-                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Nama Sekolah</span><span class="font-medium">{{ $school_name }}</span></div>
-                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Jurusan</span><span class="font-medium">{{ $school_major }}</span></div>
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Jenjang</span><span class="font-medium">{{ $edu['label'] }}</span></div>
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['institution'] }}</span><span class="font-medium">{{ $school_name }}</span></div>
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['major'] }}</span><span class="font-medium">{{ $school_major }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">No. Ijazah / SKL</span><span class="font-medium">{{ $certificate_number }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Tahun Lulus</span><span class="font-medium">{{ $graduation_year }}</span></div>
-                    <div class="flex flex-col md:contents"><span class="text-gray-500 text-xs md:text-sm">Nilai Rata-rata</span><span class="font-medium">{{ $school_grade ?: '-' }}</span></div>
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['grade'] }}</span><span class="font-medium">{{ $school_grade ?: '-' }}</span></div>
+                    <div class="flex flex-col md:contents"><span class="text-gray-500 text-xs md:text-sm">NISN</span><span class="font-medium">{{ $nisn ?: '-' }}</span></div>
                 </div>
             </div>
 

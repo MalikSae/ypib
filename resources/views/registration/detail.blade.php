@@ -18,7 +18,7 @@
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
             <h1 class="text-xl font-semibold text-neutral-900 mb-1">Formulir Pendaftaran Saya</h1>
-            <p class="text-sm text-neutral-500">Data diri, program studi, asal sekolah, dan orang tua</p>
+            <p class="text-sm text-neutral-500">Data diri, program studi, pendidikan terakhir, dan orang tua</p>
         </div>
         <div class="flex-shrink-0 w-full sm:w-auto">
             <a href="{{ route('registration.pdf') }}" target="_blank" class="btn-secondary w-full sm:w-auto justify-center">
@@ -80,7 +80,7 @@
 
     <div class="space-y-6">
         {{-- Card: Data Diri --}}
-        @php $dataDiriErrors = $errors->hasAny(['full_name', 'nisn', 'nik', 'birth_place', 'birth_date', 'gender', 'religion', 'address', 'phone']); @endphp
+        @php $dataDiriErrors = $errors->hasAny(['full_name', 'nik', 'birth_place', 'birth_date', 'gender', 'religion', 'address', 'phone']); @endphp
         <div id="data-diri" class="bg-white border border-neutral-200 rounded-xl shadow-sm" x-data="{ editing: {{ $dataDiriErrors ? 'true' : 'false' }} }">
             <div class="p-6 flex items-start justify-between gap-3 border-b border-neutral-200">
                 <h3 class="text-sm font-semibold text-neutral-900 flex-1">Data Diri</h3>
@@ -98,10 +98,6 @@
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Nama Lengkap</dt>
                         <dd class="mt-1 text-sm text-neutral-900">{{ $registration->full_name }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-sm font-medium text-neutral-500">NISN</dt>
-                        <dd class="mt-1 text-sm text-neutral-900">{{ $registration->nisn }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">NIK</dt>
@@ -140,11 +136,6 @@
                                 <label class="block text-sm font-medium text-neutral-700">Nama Lengkap</label>
                                 <input type="text" name="full_name" value="{{ old('full_name', $registration->full_name) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('full_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-neutral-700">NISN</label>
-                                <input type="text" name="nisn" value="{{ old('nisn', $registration->nisn) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                @error('nisn') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700">NIK</label>
@@ -272,10 +263,11 @@
         </div>
 
         {{-- Card: Data Sekolah --}}
-        @php $sekolahErrors = $errors->hasAny(['school_name', 'school_major', 'graduation_year', 'certificate_number', 'school_grade']); @endphp
+        @php $sekolahErrors = $errors->hasAny(['education_level', 'nisn', 'school_name', 'school_major', 'graduation_year', 'certificate_number', 'school_grade']); @endphp
+        @php $edu = $registration->educationConfigForRegistration(); @endphp
         <div id="data-sekolah" class="bg-white border border-neutral-200 rounded-xl shadow-sm" x-data="{ editing: {{ $sekolahErrors ? 'true' : 'false' }} }">
             <div class="p-6 flex items-start justify-between gap-3 border-b border-neutral-200">
-                <h3 class="text-sm font-semibold text-neutral-900 flex-1">Data Sekolah Asal</h3>
+                <h3 class="text-sm font-semibold text-neutral-900 flex-1">Pendidikan Terakhir</h3>
                 @if($canEdit)
                 <button @click="editing = !editing" type="button" class="text-sm text-primary-600 hover:text-primary-500 font-medium">
                     <span x-show="!editing">Edit</span>
@@ -287,11 +279,15 @@
             <div class="p-6">
                 <div x-show="!editing" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <dt class="text-sm font-medium text-neutral-500">Nama Sekolah</dt>
+                        <dt class="text-sm font-medium text-neutral-500">Jenjang</dt>
+                        <dd class="mt-1 text-sm text-neutral-900">{{ $edu['label'] }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-neutral-500">{{ $edu['institution'] }}</dt>
                         <dd class="mt-1 text-sm text-neutral-900">{{ $registration->school_name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-neutral-500">Jurusan</dt>
+                        <dt class="text-sm font-medium text-neutral-500">{{ $edu['major'] }}</dt>
                         <dd class="mt-1 text-sm text-neutral-900">{{ $registration->school_major }}</dd>
                     </div>
                     <div>
@@ -303,8 +299,12 @@
                         <dd class="mt-1 text-sm text-neutral-900">{{ $registration->certificate_number }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-neutral-500">Nilai Rata-rata Rapor (Opsional)</dt>
+                        <dt class="text-sm font-medium text-neutral-500">{{ $edu['grade'] }} (Opsional)</dt>
                         <dd class="mt-1 text-sm text-neutral-900">{{ $registration->school_grade ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-neutral-500">NISN</dt>
+                        <dd class="mt-1 text-sm text-neutral-900">{{ $registration->nisn ?: '-' }}</dd>
                     </div>
                 </div>
 
@@ -313,14 +313,23 @@
                         @csrf
                         <input type="hidden" name="section" value="data_sekolah">
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ level: '{{ old('education_level', $registration->education_level ?? \App\Models\Registration::DEFAULT_EDUCATION_LEVEL) }}', cfg: @js(\App\Models\Registration::EDUCATION_LEVELS) }">
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-medium text-neutral-700">Pendidikan Terakhir</label>
+                                <select name="education_level" x-model="level" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    @foreach(\App\Models\Registration::EDUCATION_LEVELS as $key => $option)
+                                        <option value="{{ $key }}">{{ $option['label'] }}</option>
+                                    @endforeach
+                                </select>
+                                @error('education_level') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700">Nama Sekolah</label>
+                                <label class="block text-sm font-medium text-neutral-700" x-text="cfg[level].institution">Nama Sekolah</label>
                                 <input type="text" name="school_name" value="{{ old('school_name', $registration->school_name) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('school_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700">Jurusan</label>
+                                <label class="block text-sm font-medium text-neutral-700" x-text="cfg[level].major">Jurusan</label>
                                 <input type="text" name="school_major" value="{{ old('school_major', $registration->school_major) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('school_major') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
@@ -335,9 +344,14 @@
                                 @error('certificate_number') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700">Nilai Rata-rata Rapor (Opsional)</label>
-                                <input type="number" step="0.01" name="school_grade" value="{{ old('school_grade', $registration->school_grade) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                <label class="block text-sm font-medium text-neutral-700" x-text="cfg[level].grade + ' (Opsional)'">Nilai Rata-rata (Opsional)</label>
+                                <input type="number" step="0.01" min="0" :max="cfg[level].grade_max" name="school_grade" value="{{ old('school_grade', $registration->school_grade) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('school_grade') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700">NISN <span class="text-neutral-400 text-xs" x-text="cfg[level].nisn_required ? '(wajib, 10 digit)' : '(opsional)'"></span></label>
+                                <input type="text" name="nisn" maxlength="10" value="{{ old('nisn', $registration->nisn) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                @error('nisn') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
                         <div class="mt-4 flex justify-end">
