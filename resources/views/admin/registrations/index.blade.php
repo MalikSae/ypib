@@ -84,58 +84,73 @@ $activeStatus = request('status', '');
 {{-- ============================================================ --}}
 <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-0">
 
-    {{-- Search Bar Row --}}
-    <div class="px-5 pt-5 pb-4 border-b border-neutral-100 flex flex-col md:flex-row justify-between gap-4">
-        <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex gap-3 flex-1">
+    {{-- Search & Filter Row: pencarian, prodi, export, arsip. Status difilter lewat tab di bawah. --}}
+    <div class="px-5 pt-5 pb-4 border-b border-neutral-100 flex flex-wrap items-center gap-3">
+        <form method="GET" action="{{ route('admin.registrations.index') }}" class="flex-1 min-w-[260px]">
             @if($activeStatus)
                 <input type="hidden" name="status" value="{{ $activeStatus }}">
             @endif
-            <div class="flex-1 relative max-w-md">
+            @if(request('prodi'))
+                <input type="hidden" name="prodi" value="{{ request('prodi') }}">
+            @endif
+            <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                     <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
                 </div>
                 <x-text-input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari nama, nomor pendaftaran..." class="pl-10" />
+                       placeholder="Cari nama, nomor pendaftaran..." class="pl-10 pr-28" />
+                <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    @if(request('search'))
+                        <a href="{{ route('admin.registrations.index', array_filter(['status' => $activeStatus, 'prodi' => request('prodi')])) }}"
+                           class="w-8 h-8 inline-flex items-center justify-center rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100" title="Hapus pencarian" aria-label="Hapus pencarian">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </a>
+                    @endif
+                    <x-button type="submit" size="sm">Cari</x-button>
+                </div>
             </div>
-            <x-button type="submit" color="primary">Cari</x-button>
-            @if(request('search'))
-                <a href="{{ route('admin.registrations.index', array_filter(['status' => $activeStatus])) }}" class="decoration-none">
-                    <x-button type="button" variant="outline" color="neutral">Reset</x-button>
-                </a>
-            @endif
         </form>
 
-        <form method="GET" action="{{ route('admin.registrations.export') }}" class="flex gap-2 shrink-0 overflow-x-auto">
-            <x-select name="prodi" style="width:auto;min-width:140px;" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
-                <option value="">Semua Program Studi</option>
-                @foreach($programs as $program)
-                    <option value="{{ $program->id }}" {{ request('prodi') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
-                @endforeach
-            </x-select>
-            <x-select name="status" style="width:auto;min-width:140px;">
-                <option value="">Semua Status</option>
-                @foreach($statusConfig as $key => $cfg)
-                    @if($key !== '')
-                        <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>{{ $cfg['label'] }}</option>
-                    @endif
-                @endforeach
-            </x-select>
-            <x-button type="submit" color="neutral" variant="outline">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Export Excel
-            </x-button>
-            <x-button type="submit" name="format" value="csv" color="neutral" variant="outline" title="Untuk data besar (ribuan baris)">
-                Export CSV
-            </x-button>
-            <a href="{{ route('admin.registrations.trash') }}" class="decoration-none"><x-button type="button" color="neutral" variant="outline">
+        <x-select name="prodi" style="width:220px;" aria-label="Filter program studi" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
+            <option value="">Semua Program Studi</option>
+            @foreach($programs as $program)
+                <option value="{{ $program->id }}" {{ request('prodi') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
+            @endforeach
+        </x-select>
+
+        {{-- Export memakai filter yang sedang aktif (prodi, status/tab, pencarian) --}}
+        <form method="GET" action="{{ route('admin.registrations.export') }}">
+            @foreach(['prodi', 'status', 'search'] as $filter)
+                @if(request($filter))
+                    <input type="hidden" name="{{ $filter }}" value="{{ request($filter) }}">
+                @endif
+            @endforeach
+            <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape.window="open = false">
+                <x-button type="button" color="neutral" variant="outline" x-on:click="open = !open" aria-haspopup="true">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </x-button>
+                <div x-show="open" x-cloak class="absolute left-0 sm:left-auto sm:right-0 mt-2 w-60 bg-white border border-neutral-200 rounded-xl shadow-lg z-20 py-1">
+                    <div class="px-4 pt-2 pb-1 text-xs text-neutral-400">Sesuai filter yang sedang aktif</div>
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50">Excel (.xlsx)</button>
+                    <button type="submit" name="format" value="csv" class="w-full text-left px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50">
+                        CSV <span class="block text-xs text-neutral-400">Untuk data besar (ribuan baris)</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <a href="{{ route('admin.registrations.trash') }}" class="decoration-none" title="Lihat pendaftar yang diarsipkan" aria-label="Lihat Arsip">
+            <x-button type="button" color="neutral" variant="outline">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Lihat Arsip
-            </x-button></a>
-        </form>
+                Arsip
+            </x-button>
+        </a>
     </div>
 
     {{-- Status Tab Pills --}}
@@ -171,7 +186,7 @@ $activeStatus = request('status', '');
     {{-- TABLE --}}
     {{-- ============================================================ --}}
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
@@ -219,7 +234,7 @@ $activeStatus = request('status', '');
 
                         {{-- Pilihan Prodi --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm text-neutral-600 max-w-[160px]">
+                            <div class="text-sm text-neutral-600">
                                 {{ $reg->firstChoiceProgram?->name ?? '—' }}
                             </div>
                         </td>

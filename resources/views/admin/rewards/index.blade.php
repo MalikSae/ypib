@@ -71,7 +71,7 @@
             <span class="text-sm text-neutral-500">{{ count($recapByReferrer) }} afiliasi dengan komisi siap cair</span>
             
             <div class="flex items-center gap-3">
-                <x-button type="submit" id="btn-mass-disburse-referrers" disabled formaction="{{ route('admin.rewards.referrers.mass-disburse') }}" onclick="return confirm('Cairkan semua reward untuk afiliasi yang dipilih? Pastikan transfer manual sudah dilakukan.')" color="primary">
+                <x-button type="submit" id="btn-mass-disburse-referrers" disabled formaction="{{ route('admin.rewards.referrers.mass-disburse') }}" data-confirm="Cairkan semua reward untuk afiliasi yang dipilih? Pastikan transfer manual sudah dilakukan." color="primary">
                     Cairkan Terpilih
                 </x-button>
                 <x-button type="submit" formaction="{{ route('admin.rewards.referrers.export') }}" 
@@ -82,7 +82,7 @@
         </div>
         
         <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <table class="min-w-full whitespace-nowrap">
                 <thead class="bg-neutral-50 border-b border-neutral-100">
                     <tr>
                         <th class="px-5 py-3 w-10">
@@ -126,7 +126,7 @@
                                 </x-button>
                                 <x-button type="submit"
                                         formaction="{{ route('admin.rewards.disburse.referrer', $referrerId) }}"
-                                        onclick="return confirm('Apakah Anda yakin sudah mentransfer Rp {{ number_format($recap['total_amount'], 0, ',', '.') }} ke afiliasi ini dan ingin mengubah statusnya menjadi Cair?')"
+                                        data-confirm="Apakah Anda yakin sudah mentransfer Rp {{ number_format($recap['total_amount'], 0, ',', '.') }} ke afiliasi ini dan ingin mengubah statusnya menjadi Cair?"
                                         color="primary">
                                     Cairkan Semua
                                 </x-button>
@@ -154,7 +154,7 @@
         <span class="text-sm text-neutral-500">{{ count($historyByReferrer) }} afiliasi yang telah menerima pencairan komisi</span>
     </div>
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Afiliasi</th>
@@ -256,7 +256,7 @@
     <form id="mass_action_form" method="POST" action="">
         @csrf
         <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <table class="min-w-full whitespace-nowrap">
                 <thead class="bg-neutral-50 border-b border-neutral-100">
                     <tr>
                         <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Afiliasi</th>
@@ -383,7 +383,7 @@
             async submitSelected() {
                 if (this.selectedIds.length === 0) return;
                 
-                if (!confirm(`Cairkan ${this.totalSelectedCount} komisi dengan total ${this.formatCurrency(this.totalSelectedAmount)}?`)) {
+                if (!(await window.adminConfirm(`Cairkan ${this.totalSelectedCount} komisi dengan total ${this.formatCurrency(this.totalSelectedAmount)}?`))) {
                     return;
                 }
 
@@ -454,7 +454,7 @@
 
                                 <template x-if="!isLoading && rewards.length > 0">
                                     <div class="overflow-x-auto max-h-96 overflow-y-auto rounded-xl border border-neutral-200">
-                                        <table class="min-w-full">
+                                        <table class="min-w-full whitespace-nowrap">
                                             <thead class="bg-neutral-50 sticky top-0 border-b border-neutral-100">
                                                 <tr>
                                                     <th class="px-4 py-3 w-10">

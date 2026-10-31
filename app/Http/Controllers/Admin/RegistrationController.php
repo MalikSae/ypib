@@ -863,7 +863,8 @@ class RegistrationController extends Controller
         $export = new \App\Exports\RegistrationExport(
             $request->query('prodi'),
             $request->query('status'),
-            \App\Support\AdminPeriod::id()
+            \App\Support\AdminPeriod::id(),
+            $request->query('search')
         );
         $stamp = date('Ymd_His');
 
@@ -890,7 +891,7 @@ class RegistrationController extends Controller
         if ($total > \App\Exports\RegistrationExport::XLSX_MAX_ROWS) {
             return redirect()->back()->with('error',
                 "Data terlalu banyak untuk Excel ({$total} baris; batas " . \App\Exports\RegistrationExport::XLSX_MAX_ROWS . '). '
-                . 'Gunakan tombol Export CSV, atau persempit filter program studi/status.');
+                . 'Gunakan tombol Export CSV, atau persempit filter program studi, status, atau pencarian.');
         }
 
         return Excel::download($export, "Data_Pendaftar_{$stamp}.xlsx");

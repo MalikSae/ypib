@@ -338,8 +338,8 @@
         }
     });
 
-    function deleteGallery(id) {
-        if(confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+    async function deleteGallery(id) {
+        if(await window.adminConfirm('Apakah Anda yakin ingin menghapus foto ini?')) {
             $.ajax({
                 url: '/admin/programs/gallery/' + id,
                 type: 'DELETE',

@@ -47,7 +47,7 @@
     {{-- TABLE --}}
     {{-- ============================================================ --}}
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">No. Registrasi / Nama</th>
@@ -80,7 +80,7 @@
 
                         {{-- Aksi --}}
                         <td class="px-5 py-4 text-right">
-                            <form method="POST" action="{{ route('admin.registrations.restore', $reg->id) }}" onsubmit="return confirm('Yakin ingin memulihkan pendaftar ini? Reward komisi tidak akan dipulihkan secara otomatis.')">
+                            <form method="POST" action="{{ route('admin.registrations.restore', $reg->id) }}" data-confirm="Yakin ingin memulihkan pendaftar ini? Reward komisi tidak akan dipulihkan secara otomatis.">
                                 @csrf
                                 <x-button type="submit" size="sm">
                                     Pulihkan

@@ -19,12 +19,14 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
     protected $prodiId;
     protected $status;
     protected $periodId;
+    protected $search;
 
-    public function __construct($prodiId = null, $status = null, $periodId = null)
+    public function __construct($prodiId = null, $status = null, $periodId = null, $search = null)
     {
         $this->prodiId = $prodiId;
         $this->status = $status;
         $this->periodId = $periodId;
+        $this->search = $search;
     }
 
     /** Query terfilter tanpa urutan; dipakai collection() dan ekspor CSV streaming. */
@@ -40,6 +42,14 @@ class RegistrationExport extends SafeValueBinder implements FromCollection, With
         }
         if ($this->status) {
             $query->where('status', $this->status);
+        }
+        if ($this->search) {
+            // Sama dengan pencarian di daftar pendaftar: nama atau nomor pendaftaran.
+            $search = $this->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('registration_number', 'like', "%{$search}%")
+                  ->orWhere('full_name', 'like', "%{$search}%");
+            });
         }
 
         return $query;

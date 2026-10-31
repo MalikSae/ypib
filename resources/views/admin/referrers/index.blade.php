@@ -116,7 +116,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50/50">
                 @php
                     $sort = request('sort');

@@ -23,7 +23,7 @@
 {{-- TABLE WRAPPER --}}
 <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Nama Fakultas</th>

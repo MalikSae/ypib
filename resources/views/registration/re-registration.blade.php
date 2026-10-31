@@ -48,7 +48,7 @@
                     @if($registration->firstChoiceProgram && !empty($registration->programTerms()->re_registration_fee_details) && count($registration->programTerms()->re_registration_fee_details) > 0)
                     <div class="mt-4 border-t border-dashed border-amber-300 pt-3">
                         <div class="text-xs font-bold text-amber-900 mb-2">Rincian Tagihan:</div>
-                        <table class="w-full border-collapse text-xs">
+                        <table class="w-full border-collapse text-xs whitespace-nowrap">
                             <tbody>
                                 @foreach($registration->programTerms()->re_registration_fee_details as $detail)
                                 <tr>

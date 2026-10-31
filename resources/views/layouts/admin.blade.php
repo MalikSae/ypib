@@ -546,7 +546,7 @@
 
     {{-- Topbar --}}
     <header id="admin-topbar">
-        <div class="topbar-left">
+        <div class="topbar-left" style="min-width:0;">
             {{-- Hamburger button (mobile only) --}}
             <button id="btn-hamburger" onclick="openSidebar()" aria-label="Buka menu">
                 <svg style="width:22px;height:22px;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -559,9 +559,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
-            <h1 class="topbar-page-title text-neutral-900" style="font-size:20px;font-weight:700;margin:0;">@yield('page-title', 'Dashboard')</h1>
+            <h1 class="topbar-page-title text-neutral-900" style="font-size:20px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">@yield('page-title', 'Dashboard')</h1>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             @php
                 $adminPeriodOptions = \App\Support\AdminPeriod::options();
                 $adminPeriodId = \App\Support\AdminPeriod::id();
@@ -624,7 +624,7 @@
                 </form>
             @endif
             <span class="topbar-username text-neutral-600" style="font-size:14px;font-weight:500;">{{ auth()->user()->name }}</span>
-            <span style="background:#F2F5FD;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;" class="text-primary-600">{{ ucfirst(auth()->user()->role) }}</span>
+            <span class="topbar-username text-primary-600" style="background:#F2F5FD;font-size:12px;font-weight:700;border-radius:9999px;padding:4px 12px;white-space:nowrap;">{{ ucfirst(auth()->user()->role) }}</span>
         </div>
     </header>
 
@@ -743,6 +743,57 @@
 
             sidebar.addEventListener('scroll', hide, true);
             window.addEventListener('resize', hide);
+        })();
+    </script>
+
+    {{-- Dialog konfirmasi global: pengganti confirm() bawaan browser (bisa diblokir/tidak muncul). --}}
+    {{-- Pakai atribut data-confirm="pesan" pada tombol atau form; JS dapat memanggil await window.adminConfirm('pesan'). --}}
+    <div x-data="{ open: false, message: '', resolve: null,
+            init() { window.adminConfirm = (message) => new Promise((resolve) => { this.message = message; this.resolve = resolve; this.open = true; }); },
+            answer(value) { this.open = false; if (this.resolve) { this.resolve(value); this.resolve = null; } } }"
+         x-show="open" x-cloak style="display:none;"
+         x-on:keydown.escape.window="if (open) answer(false)"
+         class="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-neutral-900/50" x-on:click="answer(false)"></div>
+        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold text-neutral-900">Konfirmasi</h3>
+            <p class="mt-2 text-sm text-neutral-600 whitespace-pre-line" x-text="message"></p>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button type="button" color="neutral" variant="ghost" x-on:click="answer(false)">Batal</x-button>
+                <x-button type="button" x-on:click="answer(true)">Ya, Lanjutkan</x-button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // Klik pada elemen ber-data-confirm: tahan, minta konfirmasi, lalu ulangi klik yang sama.
+            document.addEventListener('click', async function (e) {
+                var el = e.target.closest('[data-confirm]');
+                if (!el || el.tagName === 'FORM' || el.hasAttribute('disabled')) return;
+                if (el.dataset.confirmed) { delete el.dataset.confirmed; return; }
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if (await window.adminConfirm(el.dataset.confirm)) {
+                    el.dataset.confirmed = '1';
+                    el.click();
+                }
+            }, true);
+
+            // Submit form di dalam elemen ber-data-confirm (form itu sendiri atau pembungkusnya).
+            document.addEventListener('submit', async function (e) {
+                var form = e.target;
+                if (form.dataset.confirmed) { delete form.dataset.confirmed; return; }
+                var host = form.closest('[data-confirm]');
+                if (!host) return;
+                // Tombol submit ber-data-confirm sudah ditangani di handler klik.
+                if (e.submitter && e.submitter.hasAttribute('data-confirm')) return;
+                e.preventDefault();
+                if (await window.adminConfirm(host.dataset.confirm)) {
+                    form.dataset.confirmed = '1';
+                    form.requestSubmit(e.submitter || undefined);
+                }
+            }, true);
         })();
     </script>
 </body>

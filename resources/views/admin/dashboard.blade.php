@@ -122,7 +122,7 @@
             Lihat semua →
         </a>
     </div>
-    <table class="min-w-full">
+    <table class="min-w-full whitespace-nowrap">
         <thead class="bg-neutral-50 border-b border-neutral-100">
             <tr>
                 <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>

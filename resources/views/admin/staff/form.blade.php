@@ -93,7 +93,7 @@
     @if($staff->exists)
         <x-card id="reset-password" class="p-6 md:p-8 mt-6">
             <form action="{{ route('admin.staff.reset-password', $staff->id) }}" method="POST"
-                  onsubmit="return confirm('Reset password akun ini? Sesi login akun ini akan diakhiri.')">
+                  data-confirm="Reset password akun ini? Sesi login akun ini akan diakhiri.">
                 @csrf
                 <div class="text-sm font-bold text-neutral-900">Reset Password</div>
                 <p class="mt-0.5 mb-5 text-xs text-neutral-400">Password lama diganti dan semua sesi login akun ini diakhiri.</p>

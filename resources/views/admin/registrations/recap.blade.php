@@ -68,7 +68,7 @@
 {{-- ============================================================ --}}
 <x-card class="overflow-hidden p-0">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-neutral-100">
+        <table class="min-w-full whitespace-nowrap whitespace-nowrap divide-y divide-neutral-100">
             <thead class="bg-neutral-50">
                 <tr>
                     <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400 w-10">No.</th>

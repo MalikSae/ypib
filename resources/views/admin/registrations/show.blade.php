@@ -183,23 +183,66 @@
             </div>
 
             @if($registration->payment_proof)
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;min-width:0;">
                     <a href="{{ route('files.registration', [$registration->id, 'payment_proof']) }}" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                       style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
                        onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                         Lihat Bukti Bayar
                     </a>
-                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->payment_proof) }}</span>
+                    <span style="font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="text-neutral-400" title="{{ basename($registration->payment_proof) }}">{{ basename($registration->payment_proof) }}</span>
                 </div>
             @else
                 <p style="font-size:14px;margin:0 0 16px 0;" class="text-neutral-400">Belum ada bukti bayar diupload.</p>
             @endif
 
-            {{-- Form upload admin --}}
-            @if(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
+            {{-- Konfirmasi pembayaran: unggah bukti / catatan tunai dan konfirmasi dalam satu langkah --}}
+            @if(in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi']))
+                <form id="confirm-payment-form" method="POST"
+                      action="{{ route('admin.registrations.confirm-payment', $registration->id) }}"
+                      enctype="multipart/form-data"
+                      style="border-top:1px solid #DEE3E9;padding-top:16px;margin-top:4px;">
+                    @csrf
+                    <div style="font-size:14px;font-weight:700;margin-bottom:4px;" class="text-neutral-900">Konfirmasi Pembayaran</div>
+                    <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">
+                        @if($registration->payment_proof)
+                            Bukti sudah ada. Periksa bukti di atas, lalu konfirmasi untuk menerbitkan nomor pendaftaran.
+                        @else
+                            Pendaftar bayar tunai atau di kantor? Unggah foto kuitansi atau isi catatan, lalu konfirmasi. Nomor pendaftaran diterbitkan otomatis.
+                        @endif
+                    </p>
+
+                    @if ($errors->any())
+                        <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+                            <ul style="margin:0;padding-left:20px;">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if(!$registration->payment_proof)
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Bukti pembayaran (opsional jika ada catatan)</label>
+                            <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
+                                   style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                            <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika tidak ada bukti)</label>
+                            <x-textarea name="note" rows="2" placeholder="Misal: Dibayar tunai di kantor, diterima oleh ...">{{ old('note') }}</x-textarea>
+                        </div>
+                    @endif
+
+                    <x-button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-payment-modal')" class="w-full">
+                        Konfirmasi Pembayaran
+                    </x-button>
+                </form>
+            {{-- Form upload admin (status lain): hanya mengganti bukti --}}
+            @elseif(!in_array($registration->status, ['terdaftar','diterima','ditolak']))
                 <form method="POST"
                       action="{{ route('admin.registrations.upload-bukti', $registration->id) }}"
                       enctype="multipart/form-data"
@@ -330,7 +373,7 @@
                                     <div style="display:flex;gap:8px;align-items:center;">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
                                                style="flex:1;font-size:11px;">
-                                        <x-button type="submit" onclick="return confirm('Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui.')" size="sm">
+                                        <x-button type="submit" data-confirm="Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui." size="sm">
                                             Ganti
                                         </x-button>
                                     </div>
@@ -364,7 +407,7 @@
                                     <div style="display:flex;gap:8px;align-items:center;">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
                                                style="flex:1;font-size:11px;">
-                                        <x-button type="submit" onclick="return confirm('Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui.')" size="sm">
+                                        <x-button type="submit" data-confirm="Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui." size="sm">
                                             Upload
                                         </x-button>
                                     </div>
@@ -398,11 +441,11 @@
                             <label style="display:block;font-size:11px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (wajib jika revisi)</label>
                             <x-text-input type="text" name="bulk_note" placeholder="Catatan untuk dokumen terpilih..." />
                         </div>
-                        <x-button type="submit" name="bulk_status" value="disetujui" @click="if (!confirm('Setujui ' + selected.length + ' dokumen terpilih?')) $event.preventDefault()" color="success" size="sm">
+                        <x-button type="submit" name="bulk_status" value="disetujui" x-bind:data-confirm="'Setujui ' + selected.length + ' dokumen terpilih?'" color="success" size="sm">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                             Setujui Terpilih
                         </x-button>
-                        <x-button type="submit" name="bulk_status" value="perlu_revisi" @click="if (!confirm('Minta revisi ' + selected.length + ' dokumen terpilih?')) $event.preventDefault()" color="warning" size="sm">
+                        <x-button type="submit" name="bulk_status" value="perlu_revisi" x-bind:data-confirm="'Minta revisi ' + selected.length + ' dokumen terpilih?'" color="warning" size="sm">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                             Minta Revisi
                         </x-button>
@@ -446,7 +489,7 @@
                         </div>
                         
                         <div>
-                            <form action="{{ route('admin.registrations.reset-exam', $registration->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mereset sesi tes tulis peserta ini? Seluruh jawaban akan dihapus dan peserta harus mengerjakan ulang.')" style="margin:0;">
+                            <form action="{{ route('admin.registrations.reset-exam', $registration->id) }}" method="POST" data-confirm="Apakah Anda yakin ingin mereset sesi tes tulis peserta ini? Seluruh jawaban akan dihapus dan peserta harus mengerjakan ulang." style="margin:0;">
                                 @csrf
                                 <x-button type="submit" color="danger" variant="outline" size="sm">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -510,16 +553,16 @@
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Bukti Daftar Ulang</div>
 
             @if($registration->re_registration_payment_proof)
-                <div style="display:flex;align-items:center;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0;">
                     <a href="{{ route('files.registration', [$registration->id, 're_registration_payment_proof']) }}" target="_blank"
-                       style="display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
+                       style="flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;background:#e6edfc;color:#082e8f;font-size:14px;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;border:1px solid #DEE3E9;transition:background 0.12s;"
                        onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#e6edfc'">
                         <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                         Lihat Bukti Daftar Ulang
                     </a>
-                    <span style="font-size:12px;" class="text-neutral-400">{{ basename($registration->re_registration_payment_proof) }}</span>
+                    <span style="font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="text-neutral-400">{{ basename($registration->re_registration_payment_proof) }}</span>
                 </div>
             @else
                 <p style="font-size:14px;margin:0;" class="text-neutral-400">Belum ada bukti daftar ulang diupload.</p>
@@ -582,51 +625,6 @@
     {{-- ══════ KOLOM KANAN ══════ --}}
     <div class="detail-sidebar-col" style="position:sticky;top:88px;display:flex;flex-direction:column;gap:16px;">
 
-        {{-- Card Aksi 1: Konfirmasi Pembayaran --}}
-        @if(in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi']))
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">
-                Konfirmasi Pembayaran
-            </h3>
-            <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">
-                Konfirmasi pembayaran dan generate nomor pendaftaran.
-            </p>
-
-            @if ($errors->any())
-                <div style="background:#FEE2E2;border:1px solid #F87171;color:#B91C1C;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;">
-                    <ul style="margin:0;padding-left:20px;">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST"
-                  action="{{ route('admin.registrations.confirm-payment', $registration->id) }}" enctype="multipart/form-data">
-                @csrf
-                
-                @if(!$registration->payment_proof)
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Upload Bukti (Opsional jika ada catatan)</label>
-                        <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf" style="width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
-                    </div>
-                @endif
-                
-                @if(!$registration->payment_proof)
-                    <div style="margin-bottom: 16px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Catatan (Wajib jika tidak upload bukti)</label>
-                        <x-textarea name="note" rows="2" placeholder="Misal: Diverifikasi manual...">{{ old('note') }}</x-textarea>
-                    </div>
-                @endif
-
-                <x-button type="submit" onclick="return confirm('Konfirmasi pembayaran dan generate nomor pendaftaran?')" class="w-full">
-                    Konfirmasi Pembayaran
-                </x-button>
-            </form>
-        </div>
-        @endif
-
         {{-- Card Aksi: Override Status Kelulusan --}}
         @if(in_array($registration->status, ['menunggu_interview', 'diterima', 'ditolak', 'menunggu_konfirmasi_daftar_ulang']))
         <x-card class="p-6 mb-6">
@@ -642,7 +640,7 @@
                 @endif
             </p>
 
-            <form action="{{ route('admin.registrations.override-status', $registration->id) }}" method="POST" onsubmit="return confirm('Yakin ubah status pendaftar ini?')">
+            <form action="{{ route('admin.registrations.override-status', $registration->id) }}" method="POST" data-confirm="Yakin ubah status pendaftar ini?">
                 @csrf
                 
                 <div class="grid {{ in_array($registration->status, ['diterima', 'ditolak']) ? 'grid-cols-1' : 'grid-cols-2' }} gap-3 mb-4">
@@ -713,7 +711,7 @@
                     </div>
                 @endif
 
-                <x-button type="submit" onclick="return confirm('Konfirmasi pembayaran daftar ulang?')" class="w-full">
+                <x-button type="submit" data-confirm="Konfirmasi pembayaran daftar ulang?" class="w-full">
                     Konfirmasi Daftar Ulang
                 </x-button>
             </form>
@@ -737,10 +735,48 @@
             </form>
         </div>
 
-        {{-- Card Aksi 4: Reset Password --}}
+        {{-- Reward Info --}}
+        @if($registration->rewards && $registration->rewards->count() > 0)
+        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200 mb-6">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Reward Referral</div>
+            
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                @foreach($registration->rewards as $reward)
+                <div style="border-radius:8px;padding:12px;" class="border-neutral-200 bg-neutral-50">
+                    <div style="font-size:12px;margin-bottom:4px;font-weight:600;" class="text-neutral-400">
+                        {{ $reward->reward_type === 'registration' ? 'Komisi Pendaftaran' : 'Komisi Daftar Ulang' }}
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:13px;" class="text-neutral-500">Jumlah</span>
+                        <span style="font-size:14px;font-weight:700;" class="text-neutral-900">Rp {{ number_format($reward->amount, 0, ',', '.') }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:13px;" class="text-neutral-500">Status</span>
+                        <x-reward-status-badge :status="$reward->status" />
+                    </div>
+                    @if($reward->notes)
+                    <div style="font-size:11px;margin-top:8px;font-style:italic;" class="text-neutral-400">
+                        {{ $reward->notes }}
+                    </div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Pengelolaan lanjutan: aksi jarang dipakai, dilipat agar kolom kanan tidak penuh --}}
+        <div style="border-radius:16px;" class="bg-white border-neutral-200"
+             x-data="{ open: {{ $errors->hasAny(['password','password_confirmation']) ? "'password'" : 'null' }} }">
+            <div style="padding:20px 24px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Pengelolaan Lanjutan</div>
         @if($registration->user_id)
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Reset Password</h3>
+        <div style="border-top:1px solid #DEE3E9;">
+            <button type="button" x-on:click="open = open === 'password' ? null : 'password'" :aria-expanded="open === 'password'"
+                    style="display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;background:none;border:none;cursor:pointer;text-align:left;" class="text-neutral-900">
+                <span style="font-size:14px;font-weight:600;">Reset Password</span>
+                <svg style="width:16px;height:16px;flex-shrink:0;transition:transform .15s;" :style="{ transform: open === 'password' ? 'rotate(180deg)' : 'none' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open === 'password'" x-cloak style="padding:0 24px 20px;">
             <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Atur ulang password pengguna jika lupa atau kesulitan login.</p>
             
             @if ($errors->has('password') || $errors->has('password_confirmation'))
@@ -752,7 +788,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.users.reset-password', $registration->user_id) }}" onsubmit="return confirm('Anda yakin ingin mereset password akun ini?')">
+            <form method="POST" action="{{ route('admin.users.reset-password', $registration->user_id) }}" data-confirm="Anda yakin ingin mereset password akun ini?">
                 @csrf
                 <div style="margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -791,15 +827,19 @@
                     Simpan Password Baru
                 </x-button>
             </form>
+            </div>
         </div>
         @endif
-
-        {{-- Card Aksi 5: Ubah Afiliator --}}
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-neutral-900">Ubah Afiliator</h3>
+        <div style="border-top:1px solid #DEE3E9;">
+            <button type="button" x-on:click="open = open === 'afiliator' ? null : 'afiliator'" :aria-expanded="open === 'afiliator'"
+                    style="display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;background:none;border:none;cursor:pointer;text-align:left;" class="text-neutral-900">
+                <span style="font-size:14px;font-weight:600;">Ubah Afiliator</span>
+                <svg style="width:16px;height:16px;flex-shrink:0;transition:transform .15s;" :style="{ transform: open === 'afiliator' ? 'rotate(180deg)' : 'none' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open === 'afiliator'" x-cloak style="padding:0 24px 20px;">
             <p style="font-size:13px;margin:0 0 16px 0;" class="text-neutral-500">Ubah atau hapus afiliator untuk pendaftar ini.</p>
             
-            <form method="POST" action="{{ route('admin.registrations.update-referral', $registration->id) }}" onsubmit="return confirm('Anda yakin ingin mengubah afiliator pendaftar ini?')">
+            <form method="POST" action="{{ route('admin.registrations.update-referral', $registration->id) }}" data-confirm="Anda yakin ingin mengubah afiliator pendaftar ini?">
                 @csrf
                 <x-select name="referrer_id" style="margin-bottom:12px;">
                     <option value="">— Tidak Ada (Langsung) —</option>
@@ -813,52 +853,27 @@
                     Simpan Afiliator
                 </x-button>
             </form>
-        </div>
-
-        {{-- Reward Info --}}
-        @if($registration->rewards && $registration->rewards->count() > 0)
-        <div style="border-radius:16px;padding:24px;" class="bg-white border-neutral-200 mb-6">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;" class="text-neutral-400">Reward Referral</div>
-            
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                @foreach($registration->rewards as $reward)
-                <div style="border-radius:8px;padding:12px;" class="border-neutral-200 bg-neutral-50">
-                    <div style="font-size:12px;margin-bottom:4px;font-weight:600;" class="text-neutral-400">
-                        {{ $reward->reward_type === 'registration' ? 'Komisi Pendaftaran' : 'Komisi Daftar Ulang' }}
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                        <span style="font-size:13px;" class="text-neutral-500">Jumlah</span>
-                        <span style="font-size:14px;font-weight:700;" class="text-neutral-900">Rp {{ number_format($reward->amount, 0, ',', '.') }}</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:13px;" class="text-neutral-500">Status</span>
-                        <x-reward-status-badge :status="$reward->status" />
-                    </div>
-                    @if($reward->notes)
-                    <div style="font-size:11px;margin-top:8px;font-style:italic;" class="text-neutral-400">
-                        {{ $reward->notes }}
-                    </div>
-                    @endif
-                </div>
-                @endforeach
             </div>
         </div>
-        @endif
-
-        {{-- Card Aksi 6: Hapus Pendaftar --}}
-        <div style="border-radius:16px;padding:24px;border:1px solid #FCA5A5;" class="bg-error-50">
-            <h3 style="font-size:16px;font-weight:700;margin:0 0 6px 0;" class="text-error-700">Hapus Pendaftar</h3>
+        <div style="border-top:1px solid #DEE3E9;">
+            <button type="button" x-on:click="open = open === 'hapus' ? null : 'hapus'" :aria-expanded="open === 'hapus'"
+                    style="display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;background:none;border:none;cursor:pointer;text-align:left;" class="text-error-700">
+                <span style="font-size:14px;font-weight:600;">Hapus Pendaftar</span>
+                <svg style="width:16px;height:16px;flex-shrink:0;transition:transform .15s;" :style="{ transform: open === 'hapus' ? 'rotate(180deg)' : 'none' }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open === 'hapus'" x-cloak style="padding:0 24px 20px;">
             <p style="font-size:13px;margin:0 0 16px 0;" class="text-error-600">Arsipkan data pendaftar ini. Komisi terkait akan otomatis dibatalkan dan nilai konversi afiliasi disesuaikan.</p>
             
-            <form method="POST" action="{{ route('admin.registrations.destroy', $registration->id) }}" onsubmit="return confirm('Yakin ingin menghapus pendaftar ini? Data akan diarsipkan dan komisi terkait akan disesuaikan otomatis.')">
+            <form method="POST" action="{{ route('admin.registrations.destroy', $registration->id) }}" data-confirm="Yakin ingin menghapus pendaftar ini? Data akan diarsipkan dan komisi terkait akan disesuaikan otomatis.">
                 @csrf
                 @method('DELETE')
                 <x-button type="submit" color="danger" class="w-full">
                     Hapus Pendaftar
                 </x-button>
             </form>
+            </div>
         </div>
-
+        </div>
     </div>{{-- end kolom kanan --}}
 
 </div>{{-- end 2-column grid --}}
@@ -998,6 +1013,21 @@ function toggleRegPassword(inputId, iconId) {
             </div>
         </form>
     </x-modal>
+
+    @if(in_array($registration->status, ['menunggu_pembayaran', 'menunggu_konfirmasi']))
+    <x-modal name="confirm-payment-modal" maxWidth="md">
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-neutral-900">Konfirmasi pembayaran?</h3>
+            <p class="mt-2 text-sm text-neutral-500">
+                Nomor pendaftaran akan diterbitkan untuk <strong class="text-neutral-900">{{ $registration->full_name }}</strong> dan status berubah menjadi Terdaftar.
+            </p>
+            <div class="mt-6 flex justify-end gap-3">
+                <x-button type="button" color="neutral" variant="ghost" x-on:click="$dispatch('close-modal', 'confirm-payment-modal')">Batal</x-button>
+                <x-button type="submit" form="confirm-payment-form">Ya, Konfirmasi</x-button>
+            </div>
+        </div>
+    </x-modal>
+    @endif
 
 @push('scripts')
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">

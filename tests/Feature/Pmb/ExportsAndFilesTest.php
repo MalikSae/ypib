@@ -182,8 +182,25 @@ class ExportsAndFilesTest extends TestCase
         $this->actingAs($admin)->get('/admin/pendaftar/export?format=pdf')->assertSessionHasErrors('format');
 
         $html = $this->actingAs($admin)->get('/admin/pendaftar')->assertOk()->getContent();
-        $this->assertStringContainsString('Export Excel', $html);
+        $this->assertStringContainsString('Excel (.xlsx)', $html);
         $this->assertStringContainsString('name="format" value="csv"', $html);
+    }
+
+    public function test_export_follows_the_search_term_like_the_list(): void
+    {
+        $admin = $this->makeUser('admin');
+        $this->student('terdaftar', ['full_name' => 'Zulaikha Pencari', 'registration_number' => 'PMB-CARI-1']);
+        $this->student('terdaftar', ['full_name' => 'Orang Lain', 'registration_number' => 'PMB-LAIN-2']);
+
+        $byName = $this->parseCsv($this->actingAs($admin)->get('/admin/pendaftar/export?format=csv&search=Zulaikha')->streamedContent());
+        array_shift($byName);
+        $this->assertCount(1, $byName);
+        $this->assertSame('PMB-CARI-1', $byName[0][0]);
+
+        $byNumber = $this->parseCsv($this->actingAs($admin)->get('/admin/pendaftar/export?format=csv&search=LAIN-2')->streamedContent());
+        array_shift($byNumber);
+        $this->assertCount(1, $byNumber);
+        $this->assertSame('Orang Lain', $byNumber[0][1]);
     }
 
     // ── Berkas privat ─────────────────────────────────────────────────

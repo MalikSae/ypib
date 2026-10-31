@@ -30,7 +30,7 @@
                 </p>
             @else
                 <div class="overflow-x-auto border border-neutral-100 rounded-xl">
-                    <table class="min-w-full divide-y divide-neutral-100">
+                    <table class="min-w-full whitespace-nowrap divide-y divide-neutral-100">
                         <thead class="bg-neutral-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Nama</th>
@@ -78,7 +78,7 @@
                 </p>
             @else
                 <div class="overflow-x-auto border border-neutral-100 rounded-xl">
-                    <table class="min-w-full divide-y divide-neutral-100">
+                    <table class="min-w-full whitespace-nowrap divide-y divide-neutral-100">
                         <thead class="bg-neutral-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
@@ -121,7 +121,7 @@
                 </p>
             @else
                 <div class="overflow-x-auto border border-neutral-100 rounded-xl">
-                    <table class="min-w-full divide-y divide-neutral-100">
+                    <table class="min-w-full whitespace-nowrap divide-y divide-neutral-100">
                         <thead class="bg-neutral-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-40">Tanggal</th>
@@ -298,7 +298,7 @@
             <div class="flex flex-col gap-3">
                 <form method="POST" action="{{ route('admin.referrers.toggle', $referrer->id) }}" class="m-0">
                     @csrf
-                    <x-button type="submit" onclick="return confirm('Toggle status afiliasi ini?')" :color="$referrer->status === 'active' ? 'danger' : 'success'" variant="outline" class="w-full">
+                    <x-button type="submit" data-confirm="Toggle status afiliasi ini?" :color="$referrer->status === 'active' ? 'danger' : 'success'" variant="outline" class="w-full">
                         {{ $referrer->status === 'active' ? 'Nonaktifkan Akun Afiliasi' : 'Aktifkan Akun Afiliasi' }}
                     </x-button>
                 </form>

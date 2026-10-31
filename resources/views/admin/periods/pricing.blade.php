@@ -56,7 +56,7 @@
     <div class="mb-6 bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
         <form action="{{ route('admin.periods.pricing.copy', $period->id) }}" method="POST"
               class="flex flex-col sm:flex-row gap-3 sm:items-end"
-              onsubmit="return confirm('Nilai yang ada pada periode ini akan ditimpa oleh nilai dari periode yang dipilih. Lanjutkan?')">
+              data-confirm="Nilai yang ada pada periode ini akan ditimpa oleh nilai dari periode yang dipilih. Lanjutkan?">
             @csrf
             <div class="flex-1">
                 <x-input-label for="source_period_id" value="Salin biaya dan kuota dari periode" />

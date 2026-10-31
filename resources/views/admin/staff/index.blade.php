@@ -43,7 +43,7 @@
 {{-- TABLE WRAPPER --}}
 <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
     <div class="overflow-x-auto">
-        <table class="min-w-full">
+        <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Nama</th>
@@ -78,7 +78,7 @@
                             <x-badge-status :active="$account->is_active" />
                         @elseif($account->is_active)
                             {{-- Menonaktifkan memutus sesi akun seketika: minta konfirmasi (event submit naik ke pembungkus) --}}
-                            <div onsubmit="return confirm({{ \Illuminate\Support\Js::from('Nonaktifkan akun ' . $account->name . '? Sesi login akun ini akan diakhiri.') }})">
+                            <div data-confirm="{{ 'Nonaktifkan akun ' . $account->name . '? Sesi login akun ini akan diakhiri.' }}">
                                 <x-badge-status :active="true" :toggle-action="route('admin.staff.toggle', $account->id)" />
                             </div>
                         @else

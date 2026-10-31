@@ -34,9 +34,9 @@ class CampusReviewFixesTest extends TestCase
         $activeBlock = $this->blockAround($html, route('admin.staff.toggle', $active->id));
         $inactiveBlock = $this->blockAround($html, route('admin.staff.toggle', $inactive->id));
 
-        $this->assertStringContainsString('onsubmit="return confirm(', $activeBlock);
+        $this->assertStringContainsString('data-confirm="', $activeBlock);
         $this->assertStringContainsString('Operator Aktif', $activeBlock);
-        $this->assertStringNotContainsString('onsubmit=', $inactiveBlock);
+        $this->assertStringNotContainsString('data-confirm=', $inactiveBlock);
     }
 
     /** Potongan HTML 400 karakter sebelum action tombol, cukup untuk melihat pembungkus form-nya. */
