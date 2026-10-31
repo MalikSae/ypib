@@ -39,20 +39,18 @@ class EducationLevelTest extends TestCase
         return Livewire::actingAs($this->makeUser())->test(RegistrationForm::class);
     }
 
-    public function test_nisn_is_required_only_for_sma_smk_ma(): void
+    public function test_nisn_and_certificate_number_are_optional_for_every_level(): void
     {
         $program = $this->program();
 
-        $this->fill($this->openForm(), $program->id, ['nisn' => ''])->call('submit')->assertHasErrors(['nisn']);
-        $this->assertSame(0, Registration::count());
-
-        foreach (['d3', 's1', 'lainnya'] as $level) {
+        foreach (array_keys(Registration::EDUCATION_LEVELS) as $level) {
             Registration::query()->forceDelete();
-            $this->fill($this->openForm(), $program->id, ['education_level' => $level, 'nisn' => ''])->call('submit')->assertHasNoErrors();
+            $this->fill($this->openForm(), $program->id, ['education_level' => $level, 'nisn' => '', 'certificate_number' => ''])->call('submit')->assertHasNoErrors();
 
             $registration = Registration::first();
             $this->assertSame($level, $registration->education_level);
             $this->assertNull($registration->nisn);
+            $this->assertNull($registration->certificate_number);
         }
     }
 
@@ -95,15 +93,15 @@ class EducationLevelTest extends TestCase
         $this->assertSame(0, Registration::count());
     }
 
-    public function test_form_completeness_follows_level_nisn_rule(): void
+    public function test_form_completeness_does_not_need_nisn_or_certificate_number(): void
     {
-        [, $sma] = $this->student('terdaftar', ['education_level' => 'sma_smk_ma', 'nisn' => null]);
-        [, $legacy] = $this->student('terdaftar', ['education_level' => null, 'nisn' => null]);
-        [, $s1] = $this->student('terdaftar', ['education_level' => 's1', 'nisn' => null]);
+        foreach (['sma_smk_ma', null, 's1'] as $level) {
+            [, $registration] = $this->student('terdaftar', ['education_level' => $level, 'nisn' => null, 'certificate_number' => null]);
+            $this->assertTrue($registration->isFormComplete(), 'jenjang ' . ($level ?? 'kosong'));
+        }
 
-        $this->assertFalse($sma->isFormComplete());
-        $this->assertFalse($legacy->isFormComplete(), 'data lama tanpa jenjang dianggap SMA/SMK/MA');
-        $this->assertTrue($s1->isFormComplete());
+        [, $noMajor] = $this->student('terdaftar', ['school_major' => null]);
+        $this->assertFalse($noMajor->isFormComplete());
     }
 
     public function test_labels_follow_level_and_fall_back_to_sma_for_legacy_rows(): void
@@ -131,7 +129,7 @@ class EducationLevelTest extends TestCase
         $this->actingAs($user)->post(route('registration.detail.update'), array_merge($payload, ['school_grade' => '85']))
             ->assertSessionHasErrors(['school_grade']);
 
-        $this->actingAs($user)->post(route('registration.detail.update'), array_merge($payload, ['education_level' => 'sma_smk_ma']))
-            ->assertSessionHasErrors(['nisn']);
+        $this->actingAs($user)->post(route('registration.detail.update'), array_merge($payload, ['education_level' => 'sma_smk_ma', 'certificate_number' => '']))
+            ->assertSessionHasNoErrors();
     }
 }

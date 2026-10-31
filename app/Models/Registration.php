@@ -57,7 +57,7 @@ class Registration extends Model
 
     const DEFAULT_EDUCATION_LEVEL = 'sma_smk_ma';
 
-    /** Pendidikan terakhir pendaftar: label field, wajib NISN, dan skala nilai per jenjang. */
+    /** Pendidikan terakhir pendaftar: label field dan skala nilai per jenjang. */
     const EDUCATION_LEVELS = [
         'sma_smk_ma' => [
             'label'       => 'SMA/SMK/MA/Sederajat',
@@ -66,7 +66,6 @@ class Registration extends Model
             'major'       => 'Jurusan',
             'grade'       => 'Nilai Rata-rata Ijazah',
             'grade_max'   => 100,
-            'nisn_required' => true,
         ],
         'd3' => [
             'label'       => 'D3',
@@ -75,7 +74,6 @@ class Registration extends Model
             'major'       => 'Program Studi',
             'grade'       => 'IPK',
             'grade_max'   => 4,
-            'nisn_required' => false,
         ],
         's1' => [
             'label'       => 'S1',
@@ -84,16 +82,14 @@ class Registration extends Model
             'major'       => 'Program Studi',
             'grade'       => 'IPK',
             'grade_max'   => 4,
-            'nisn_required' => false,
         ],
         'lainnya' => [
-            'label'       => 'Lainnya (Paket C, pesantren, dll.)',
+            'label'       => 'Lainnya',
             'institution' => 'Nama Sekolah / Lembaga',
             'placeholder' => 'Nama sekolah atau lembaga pendidikan',
             'major'       => 'Jurusan',
             'grade'       => 'Nilai Rata-rata',
             'grade_max'   => 100,
-            'nisn_required' => false,
         ],
     ];
 
@@ -462,10 +458,8 @@ class Registration extends Model
 
     public function isFormComplete(): bool
     {
-        return (!empty($this->nisn) || !$this->educationConfigForRegistration()['nisn_required'])
-            && !empty($this->religion)
+        return !empty($this->religion)
             && !empty($this->school_major)
-            && !empty($this->certificate_number)
             && !empty($this->father_name)
             && !empty($this->mother_name)
             && !empty($this->father_occupation)

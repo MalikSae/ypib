@@ -200,7 +200,7 @@
         <tr>
             <td class="label">No. Ijazah / SKL</td>
             <td class="colon">:</td>
-            <td class="value">{{ $registration->certificate_number }}</td>
+            <td class="value">{{ $registration->certificate_number ?: '-' }}</td>
         </tr>
         <tr>
             <td class="label">{{ $edu['grade'] }}</td>

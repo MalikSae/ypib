@@ -311,11 +311,11 @@ class RegistrationController extends Controller
             $level = \App\Models\Registration::educationConfig($request->input('education_level'));
             $rules = [
                 'education_level'    => ['required', \Illuminate\Validation\Rule::in(array_keys(\App\Models\Registration::EDUCATION_LEVELS))],
-                'nisn'               => [$level['nisn_required'] ? 'required' : 'nullable', 'string', 'digits:10'],
+                'nisn'               => 'nullable|string|digits:10',
                 'school_name'        => 'required|string|max:255',
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
-                'certificate_number' => 'required|string|max:100',
+                'certificate_number' => 'nullable|string|max:100',
                 'school_grade'       => 'nullable|numeric|between:0,' . $level['grade_max'],
             ];
             $sectionName = 'Pendidikan Terakhir';

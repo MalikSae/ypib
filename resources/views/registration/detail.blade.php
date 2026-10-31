@@ -296,7 +296,7 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">Nomor Ijazah / SKL</dt>
-                        <dd class="mt-1 text-sm text-neutral-900">{{ $registration->certificate_number }}</dd>
+                        <dd class="mt-1 text-sm text-neutral-900">{{ $registration->certificate_number ?: '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-neutral-500">{{ $edu['grade'] }} (Opsional)</dt>
@@ -339,7 +339,7 @@
                                 @error('graduation_year') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700">Nomor Ijazah / SKL</label>
+                                <label class="block text-sm font-medium text-neutral-700">Nomor Ijazah / SKL <span class="text-neutral-400 text-xs">(opsional)</span></label>
                                 <input type="text" name="certificate_number" value="{{ old('certificate_number', $registration->certificate_number) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('certificate_number') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
@@ -349,7 +349,7 @@
                                 @error('school_grade') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-700">NISN <span class="text-neutral-400 text-xs" x-text="cfg[level].nisn_required ? '(wajib, 10 digit)' : '(opsional)'"></span></label>
+                                <label class="block text-sm font-medium text-neutral-700">NISN <span class="text-neutral-400 text-xs">(opsional, 10 digit)</span></label>
                                 <input type="text" name="nisn" maxlength="10" value="{{ old('nisn', $registration->nisn) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('nisn') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>

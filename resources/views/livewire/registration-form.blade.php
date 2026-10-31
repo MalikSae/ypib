@@ -62,11 +62,11 @@
             Data Diri
         </h2>
         <div class="space-y-5">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Sesuai KTP/Ijazah">
-            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Sesuai KTP/Ijazah">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">NIK (16 digit) <span class="text-red-500">*</span></label>
                     <input wire:model="nik" type="text" maxlength="16" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="3201xxxxxxxx">
@@ -167,11 +167,11 @@
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-                <textarea wire:model="address" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Jl. Contoh No. 1, Desa, Kecamatan, Kabupaten"></textarea>
+                <textarea wire:model="address" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Jl. Contoh No. 1, Desa, Kecamatan, Kabupaten"></textarea>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP / WhatsApp <span class="text-red-500">*</span></label>
-                <input wire:model="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="08xxxxxxxxxx">
+                <input wire:model="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="08xxxxxxxxxx">
             </div>
         </div>
     </div>
@@ -355,7 +355,7 @@
         <div class="space-y-5">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Pendidikan Terakhir <span class="text-red-500">*</span></label>
-                <select wire:model.live="education_level" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
+                <select wire:model.live="education_level" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
                     @foreach(\App\Models\Registration::EDUCATION_LEVELS as $key => $level)
                         <option value="{{ $key }}">{{ $level['label'] }}</option>
                     @endforeach
@@ -363,30 +363,30 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['institution'] }} <span class="text-red-500">*</span></label>
-                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="{{ $edu['placeholder'] }}">
+                <input wire:model="school_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="{{ $edu['placeholder'] }}">
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['major'] }} <span class="text-red-500">*</span></label>
-                    <input wire:model="school_major" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
+                    <input wire:model="school_major" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. Ijazah / SKL <span class="text-red-500">*</span></label>
-                    <input wire:model="certificate_number" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">No. Ijazah / SKL <span class="text-gray-400 text-xs">(opsional)</span></label>
+                    <input wire:model="certificate_number" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Lulus <span class="text-red-500">*</span></label>
-                    <input wire:model="graduation_year" type="number" min="1980" max="{{ now()->year + 1 }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600">
+                    <input wire:model="graduation_year" type="number" min="1980" max="{{ now()->year + 1 }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['grade'] }} <span class="text-gray-400 text-xs">(opsional)</span></label>
-                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="{{ $edu['grade_max'] }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="{{ $edu['grade_max'] == 4 ? 'Contoh: 3.45' : 'Contoh: 85.50' }}">
+                    <input wire:model="school_grade" type="number" step="0.01" min="0" max="{{ $edu['grade_max'] }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="{{ $edu['grade_max'] == 4 ? 'Contoh: 3.45' : 'Contoh: 85.50' }}">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">NISN (10 digit) @if($edu['nisn_required'])<span class="text-red-500">*</span>@else<span class="text-gray-400 text-xs">(opsional)</span>@endif</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">NISN (10 digit) <span class="text-gray-400 text-xs">(opsional)</span></label>
                 <input wire:model="nisn" type="text" maxlength="10" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="00xxxxxxxx">
             </div>
         </div>
@@ -406,21 +406,21 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ayah <span class="text-red-500">*</span></label>
-                    <input wire:model="father_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Nama lengkap Ayah">
+                    <input wire:model="father_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Nama lengkap Ayah">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Ibu <span class="text-red-500">*</span></label>
-                    <input wire:model="mother_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Nama lengkap Ibu">
+                    <input wire:model="mother_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Nama lengkap Ibu">
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pekerjaan Ayah <span class="text-red-500">*</span></label>
-                    <input wire:model="father_occupation" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Wiraswasta, PNS, Petani ...">
+                    <input wire:model="father_occupation" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Wiraswasta, PNS, Petani ...">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pekerjaan Ibu <span class="text-red-500">*</span></label>
-                    <input wire:model="mother_occupation" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none border-primary-600 text-primary-600" placeholder="Ibu Rumah Tangga, PNS ...">
+                    <input wire:model="mother_occupation" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Ibu Rumah Tangga, PNS ...">
                 </div>
             </div>
         </div>
@@ -474,7 +474,7 @@
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Jenjang</span><span class="font-medium">{{ $edu['label'] }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['institution'] }}</span><span class="font-medium">{{ $school_name }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['major'] }}</span><span class="font-medium">{{ $school_major }}</span></div>
-                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">No. Ijazah / SKL</span><span class="font-medium">{{ $certificate_number }}</span></div>
+                    <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">No. Ijazah / SKL</span><span class="font-medium">{{ $certificate_number ?: '-' }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">Tahun Lulus</span><span class="font-medium">{{ $graduation_year }}</span></div>
                     <div class="flex flex-col mb-3 md:mb-0 md:contents"><span class="text-gray-500 text-xs md:text-sm">{{ $edu['grade'] }}</span><span class="font-medium">{{ $school_grade ?: '-' }}</span></div>
                     <div class="flex flex-col md:contents"><span class="text-gray-500 text-xs md:text-sm">NISN</span><span class="font-medium">{{ $nisn ?: '-' }}</span></div>

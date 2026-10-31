@@ -39,7 +39,7 @@ class RegistrationForm extends Component
     public $campuses;
     public string $campus_id = '';
     public string $first_choice_program_id  = '';
-    public string $admission_path = '';
+    public string $admission_path = 'umum';
 
     // Step 3 — Pendidikan Terakhir
     public string $education_level    = Registration::DEFAULT_EDUCATION_LEVEL;
@@ -97,11 +97,11 @@ class RegistrationForm extends Component
             ],
             3 => [
                 'education_level'    => ['required', \Illuminate\Validation\Rule::in(array_keys(Registration::EDUCATION_LEVELS))],
-                'nisn'               => [Registration::educationConfig($this->education_level)['nisn_required'] ? 'required' : 'nullable', 'string', 'digits:10'],
+                'nisn'               => 'nullable|string|digits:10',
                 'school_name'        => 'required|string|max:255',
                 'school_major'       => 'required|string|max:255',
                 'graduation_year'    => 'required|digits:4',
-                'certificate_number' => 'required|string|max:100',
+                'certificate_number' => 'nullable|string|max:100',
                 'school_grade'       => 'nullable|numeric|between:0,' . Registration::educationConfig($this->education_level)['grade_max'],
             ],
             4 => [
@@ -144,7 +144,6 @@ class RegistrationForm extends Component
             'religion.required'               => 'Agama wajib dipilih.',
             'religion.in'                     => 'Pilihan agama tidak valid.',
             'school_major.required'           => 'Jurusan sekolah wajib diisi.',
-            'certificate_number.required'     => 'Nomor Ijazah/SKL wajib diisi.',
             'father_name.required'            => 'Nama Ayah wajib diisi.',
             'mother_name.required'            => 'Nama Ibu wajib diisi.',
             'father_occupation.required'      => 'Pekerjaan Ayah wajib diisi.',
@@ -374,7 +373,7 @@ class RegistrationForm extends Component
                 'school_name'              => $this->school_name,
                 'school_major'             => $this->school_major,
                 'graduation_year'          => (int) $this->graduation_year,
-                'certificate_number'       => $this->certificate_number,
+                'certificate_number'       => $this->certificate_number ?: null,
                 'school_grade'             => $this->school_grade ?: null,
                 'father_name'              => $this->father_name,
                 'mother_name'              => $this->mother_name,

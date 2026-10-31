@@ -66,7 +66,7 @@ class StudentFlowTest extends TestCase
             $this->assertSame(0, $registration->documents()->count());
         }
 
-        [$user, $registration] = $this->student('terdaftar', ['nisn' => null]);   // formulir belum lengkap
+        [$user, $registration] = $this->student('terdaftar', ['father_name' => null]);   // formulir belum lengkap
         $this->actingAs($user)->post('/pendaftaran/dokumen/upload', ['document_type' => 'foto', 'file' => UploadedFile::fake()->image('a.png')])
             ->assertRedirect(route('registration.detail'));
         $this->assertSame(0, $registration->documents()->count());
