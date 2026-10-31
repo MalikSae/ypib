@@ -289,7 +289,7 @@
                         <i class="ti ti-clipboard-list text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-bold mb-2 text-gray-900">Jalur Reguler</h3>
-                    <p class="text-xs font-medium leading-relaxed text-gray-500 mb-4 flex-grow">Jalur masuk reguler dengan sistem seleksi melalui tes tertulis (CBT). Tersedia untuk seluruh lulusan SMA/SMK/MA.</p>
+                    <p class="text-xs font-medium leading-relaxed text-gray-500 mb-4 flex-grow">Jalur masuk reguler dengan sistem seleksi melalui tes tertulis (CBT). Tersedia untuk lulusan SMA/SMK/MA, D3, maupun S1.</p>
                     <div class="radio-check-text mt-auto flex items-center gap-2 text-sm font-semibold text-gray-400 transition-colors">
                         <div class="radio-check-circle w-5 h-5 rounded-full border-2 flex items-center justify-center border-gray-300 transition-colors">
                             <i class="radio-check-icon ti ti-check text-white text-xs opacity-0 transition-opacity"></i>

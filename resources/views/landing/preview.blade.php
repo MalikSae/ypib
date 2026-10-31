@@ -325,7 +325,7 @@
                     </div>
                     <div class="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 w-max" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.55);">Terbuka untuk semua</div>
                     <h3 class="text-2xl font-black mb-3" style="color: #fff;">Jalur Reguler</h3>
-                    <p class="text-sm font-medium leading-relaxed flex-grow" style="color: rgba(255,255,255,0.5);">Jalur masuk reguler dengan sistem seleksi melalui tes tertulis (CBT). Tersedia untuk seluruh lulusan SMA/SMK/MA.</p>
+                    <p class="text-sm font-medium leading-relaxed flex-grow" style="color: rgba(255,255,255,0.5);">Jalur masuk reguler dengan sistem seleksi melalui tes tertulis (CBT). Tersedia untuk lulusan SMA/SMK/MA, D3, maupun S1.</p>
                     <a href="#program-studi" class="mt-8 flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-sm" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8);">
                         Pilih Jalur Ini <i class="ti ti-arrow-right"></i>
                     </a>
