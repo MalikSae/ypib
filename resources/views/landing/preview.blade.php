@@ -1,10 +1,10 @@
 @extends('layouts.landing')
 @php
     $isCampusPage = isset($campus) && $campus;
-    // Foto hero khusus kampus: public/images/mahasiswa-{slug}.png; tanpa berkas itu memakai foto bawaan.
-    $heroImage = $isCampusPage && file_exists(public_path('images/mahasiswa-' . $campus->slug . '.png'))
-        ? 'images/mahasiswa-' . $campus->slug . '.png'
-        : 'images/mahasiswa.png';
+    // Foto hero khusus kampus: public/images/mahasiswa-{slug}.webp; tanpa berkas itu memakai foto bawaan.
+    $heroImage = $isCampusPage && file_exists(public_path('images/mahasiswa-' . $campus->slug . '.webp'))
+        ? 'images/mahasiswa-' . $campus->slug . '.webp'
+        : 'images/mahasiswa.webp';
 @endphp
 @section('title', $isCampusPage ? 'PMB ' . $campus->name . ' — Universitas YPIB Majalengka' : 'PMB Universitas YPIB Majalengka')
 @if($isCampusPage)
@@ -127,12 +127,12 @@
                     
                     <!-- Main Image (Solid Cutout, sits at bottom) -->
                     <div class="relative z-20 flex justify-center pb-0">
-                        <img src="{{ asset($heroImage) }}?v={{ filemtime(public_path($heroImage)) }}" fetchpriority="high" loading="eager" alt="Mahasiswa YPIB" class="w-[110%] -ml-[5%] max-w-[500px] lg:max-w-none lg:w-[135%] lg:-ml-[15%] h-auto object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.3)]">
+                        <img src="{{ asset($heroImage) }}?v={{ filemtime(public_path($heroImage)) }}" width="800" height="667" fetchpriority="high" decoding="async" alt="Mahasiswa YPIB" class="w-[110%] -ml-[5%] max-w-[500px] lg:max-w-none lg:w-[135%] lg:-ml-[15%] h-auto object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.3)]">
                     </div>
 
                     <!-- Floating Card 1: Badge Unggul -->
                     <div class="absolute -top-6 sm:top-16 right-0 lg:-right-12 z-30 animate-float" style="animation-delay: 0s;">
-                        <img src="{{ asset('images/badge-unggul.png') }}" fetchpriority="high" loading="eager" alt="Akreditasi Unggul" class="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-cover rounded-2xl shadow-[0_20px_50px_-12px_rgba(11,65,203,0.4)] border-2 border-white/80">
+                        <img src="{{ asset('images/badge-unggul.webp') }}" width="224" height="206" decoding="async" alt="Akreditasi Unggul" class="w-16 h-16 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-cover rounded-2xl shadow-[0_20px_50px_-12px_rgba(11,65,203,0.4)] border-2 border-white/80">
                     </div>
 
                     <!-- Floating Card 2: Job available style (Beasiswa) -->
