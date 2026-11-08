@@ -368,10 +368,10 @@
                                 <form method="POST" action="{{ route('admin.registrations.upload-document', $registration->id) }}" enctype="multipart/form-data" class="mt-3 pt-3" style="border-top:1px dashed #E5E7EB;">
                                     @csrf
                                     <input type="hidden" name="document_type" value="{{ $doc->document_type }}">
-                                    <div style="display:flex;gap:8px;align-items:center;">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
-                                               style="flex:1;font-size:11px;">
-                                        <x-button type="submit" data-confirm="Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui." size="sm">
+                                               class="w-full min-w-0 text-xs text-neutral-600">
+                                        <x-button type="submit" data-confirm="Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui." size="sm" class="w-full sm:w-auto shrink-0">
                                             Ganti
                                         </x-button>
                                     </div>
@@ -402,10 +402,10 @@
                                 <form method="POST" action="{{ route('admin.registrations.upload-document', $registration->id) }}" enctype="multipart/form-data" class="mt-3 pt-3" style="border-top:1px dashed #E5E7EB;">
                                     @csrf
                                     <input type="hidden" name="document_type" value="{{ $item->type }}">
-                                    <div style="display:flex;gap:8px;align-items:center;">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                                         <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
-                                               style="flex:1;font-size:11px;">
-                                        <x-button type="submit" data-confirm="Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui." size="sm">
+                                               class="w-full min-w-0 text-xs text-neutral-600">
+                                        <x-button type="submit" data-confirm="Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui." size="sm" class="w-full sm:w-auto shrink-0">
                                             Upload
                                         </x-button>
                                     </div>
