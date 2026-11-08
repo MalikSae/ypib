@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProspectController;
-use App\Http\Controllers\ProspectReferrerController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\ReferrerController;
 use App\Http\Controllers\RegistrationController;
@@ -105,8 +104,6 @@ Route::prefix('afiliasi')->name('referrer.')->group(function () {
         Route::post('/aktifkan', [ReferrerController::class, 'store'])->name('store');
         Route::get('/dashboard', [ReferrerController::class, 'dashboard'])->name('dashboard');
         Route::post('/bank', [ReferrerController::class, 'updateBank'])->name('bank.update');
-        Route::post('/prospek/{prospect}/catatan', [ProspectReferrerController::class, 'note'])->name('prospect.note');
-        Route::post('/prospek/{prospect}/dihubungi', [ProspectReferrerController::class, 'contacted'])->name('prospect.contacted');
     });
 });
 

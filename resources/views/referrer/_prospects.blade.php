@@ -44,7 +44,6 @@
                         <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;" class="text-neutral-400">WhatsApp</th>
                         <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;" class="text-neutral-400">Prodi</th>
                         <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;" class="text-neutral-400">Status</th>
-                        <th style="padding:12px 20px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;" class="text-neutral-400">Catatan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,26 +58,9 @@
                             {{ $p->isRegistered() ? $p->phone_normalized : $p->maskedPhone() }}
                         </td>
                         <td style="padding:14px 20px;font-size:13px;" class="text-neutral-500">{{ $p->program?->name ?? 'Belum menentukan' }}</td>
-                        <td style="padding:14px 20px;font-size:13px;" class="text-neutral-900">
-                            <span class="font-semibold">{{ $p->statusLabel() }}</span>
-                            @if(!$p->isRegistered())
-                                <form method="POST" action="{{ route('referrer.prospect.contacted', $p) }}" style="margin-top:6px;">
-                                    @csrf
-                                    <button type="submit" style="font-size:12px;font-weight:600;color:#082e8f;background:none;border:none;padding:0;cursor:pointer;">Tandai sudah dihubungi</button>
-                                </form>
-                            @endif
-                        </td>
-                        <td style="padding:14px 20px;min-width:220px;">
-                            @if($p->isRegistered())
-                                <span style="font-size:12px;" class="text-neutral-400">—</span>
-                            @else
-                                <form method="POST" action="{{ route('referrer.prospect.note', $p) }}" style="display:flex;gap:6px;">
-                                    @csrf
-                                    <input type="text" name="referrer_notes" value="{{ $p->referrer_notes }}" maxlength="1000" placeholder="Catatan hasil kontak"
-                                           style="flex:1;border:1px solid #CED0D4;border-radius:8px;padding:6px 8px;font-size:12px;">
-                                    <button type="submit" style="font-size:12px;font-weight:600;border:1px solid #CED0D4;border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer;">Simpan</button>
-                                </form>
-                            @endif
+                        {{-- Affiliator hanya melihat. Status dan catatan diurus admin. --}}
+                        <td style="padding:14px 20px;font-size:13px;white-space:nowrap;">
+                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $p->statusBadgeClass() }}">{{ $p->statusLabel() }}</span>
                         </td>
                     </tr>
                     @endforeach

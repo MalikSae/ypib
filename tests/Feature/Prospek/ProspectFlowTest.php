@@ -291,7 +291,7 @@ class ProspectFlowTest extends TestCase
         $this->assertSame(300000, $newLink->discount_amount);
     }
 
-    public function test_affiliate_note_and_contact_are_logged_in_history(): void
+    public function test_affiliate_dashboard_is_read_only_for_prospects(): void
     {
         $event = $this->makeEvent();
         $owner = $this->makeReferrer('AAAAAA');
@@ -302,12 +302,16 @@ class ProspectFlowTest extends TestCase
         ]);
         $prospect = Prospect::where('phone_normalized', '081234567890')->firstOrFail();
 
-        $this->actingAs($owner->user)->post(route('referrer.prospect.note', $prospect), ['referrer_notes' => 'Catatan satu']);
-        $this->actingAs($owner->user)->post(route('referrer.prospect.note', $prospect), ['referrer_notes' => 'Catatan dua']);
-        $this->actingAs($owner->user)->post(route('referrer.prospect.contacted', $prospect));
+        $this->actingAs($owner->user)->get(route('referrer.dashboard'))
+            ->assertOk()
+            ->assertSee('Siswa Uji')
+            ->assertSee('Baru')
+            ->assertDontSee('Tandai sudah dihubungi')
+            ->assertDontSee('Catatan hasil kontak');
 
-        $this->assertSame(['catatan', 'catatan', 'kontak'], $prospect->activities()->reorder('id')->pluck('type')->all());
-        $this->assertSame(Prospect::STATUS_DIHUBUNGI, $prospect->fresh()->status);
+        // Tidak ada endpoint bagi affiliator untuk mengubah prospek.
+        $this->actingAs($owner->user)->post('/afiliasi/prospek/' . $prospect->id . '/dihubungi')->assertNotFound();
+        $this->assertSame(Prospect::STATUS_BARU, $prospect->fresh()->status);
     }
 
     public function test_closed_event_refuses_interest_form(): void

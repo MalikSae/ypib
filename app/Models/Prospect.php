@@ -41,7 +41,6 @@ class Prospect extends Model
         'referrer_id',
         'status',
         'internal_notes',
-        'referrer_notes',
         'last_contacted_at',
         'wa_clicked_at',
         'fraud_flag',
