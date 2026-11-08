@@ -1,12 +1,11 @@
 {{-- FORM MINAT: link form minat dan daftar prospek dari link affiliator ini --}}
 <div class="pub-card" style="margin-bottom:16px;">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" class="text-neutral-400">Form Minat Calon Mahasiswa</div>
-    <p style="font-size:13px;margin:0 0 14px 0;" class="text-neutral-500">Bagikan ke media sosial. Calon yang isi lewat linkmu jadi prospekmu.</p>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;" class="text-neutral-400">Form Minat Calon Mahasiswa</div>
 
     @forelse($interestLinks as $link)
         <div x-data="{ copied: false }" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #EEF1F5;">
             <div style="font-size:14px;font-weight:700;" class="text-neutral-900">{{ $link['label'] }}</div>
-            <p style="font-size:12px;margin:2px 0 8px 0;" class="text-neutral-400">Potongan Rp {{ number_format($link['discount'], 0, ',', '.') }}</p>
+            <p style="font-size:12px;margin:2px 0 8px 0;" class="text-neutral-400">{{ $link['campus'] ? $link['campus'] . ' · ' : '' }}Potongan Rp {{ number_format($link['discount'], 0, ',', '.') }}</p>
             <div style="border-radius:10px;padding:10px 12px;font-family:monospace;font-size:12px;word-break:break-all;" class="bg-neutral-100 border-neutral-200 text-neutral-900">{{ $link['url'] }}</div>
             <div class="ref-action-grid">
                 <button

@@ -256,6 +256,15 @@ class RegistrationForm extends Component
         $this->loadPrograms();
     }
 
+    /** "Bukan kamu?": lepas link form minat dari sesi, lalu muat ulang form tanpa data terkunci. */
+    public function releaseProspect(): void
+    {
+        session()->forget(ProspectService::SESSION_KEY);
+        session()->flash('success', 'Data form minat tidak dipakai. Silakan isi data kamu sendiri.');
+
+        $this->redirect(route('registration.create'));
+    }
+
     protected function lockToProspect(ProspectLink $link): void
     {
         $prospect = $link->prospect;

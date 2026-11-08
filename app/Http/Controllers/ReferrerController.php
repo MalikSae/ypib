@@ -167,7 +167,8 @@ class ReferrerController extends Controller
             ->get()
             ->filter(fn ($event) => $event->acceptsInterest())
             ->map(fn ($event) => [
-                'label'    => $event->name . ' — ' . $event->campus?->name,
+                'label'    => $event->name,
+                'campus'   => $event->campus?->name,
                 'url'      => route('prospect.show', $event->slug) . '?ref=' . $referrer->code,
                 'discount' => $event->discount_amount,
             ])

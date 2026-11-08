@@ -57,10 +57,8 @@
         <div class="rounded-xl border border-neutral-200 bg-neutral-100 p-4 mb-6 text-sm text-neutral-700">
             Kamu mendaftar dari form minat sebagai <strong class="text-neutral-900">{{ $full_name }}</strong> ({{ $phone }}).
             Nama dan WhatsApp mengikuti data itu.
-            <form method="POST" action="{{ route('prospect.release') }}" class="inline">
-                @csrf
-                <button type="submit" class="font-semibold text-primary-600 hover:underline">Bukan kamu? Daftar tanpa data ini</button>
-            </form>
+            {{-- Bukan <form>: komponen ini sudah dibungkus <form wire:submit>, form bersarang merusak DOM. --}}
+            <button type="button" wire:click="releaseProspect" class="font-semibold text-primary-600 hover:underline">Bukan kamu? Daftar tanpa data ini</button>
         </div>
     @endif
 
