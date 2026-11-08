@@ -13,6 +13,16 @@
 return [
     [
         'date'    => '2026-11-08',
+        'title'   => 'Halaman changelog',
+        'commit'  => null,
+        'sections' => [
+            'Fitur baru' => [
+                'Menu Changelog di dashboard admin (bagian Pengaturan) berisi catatan update dan perbaikan di setiap deploy.',
+            ],
+        ],
+    ],
+    [
+        'date'    => '2026-11-08',
         'title'   => 'Form minat, kelola prospek, dan penyeragaman tampilan admin',
         'commit'  => '121e1be',
         'sections' => [
