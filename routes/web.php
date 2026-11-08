@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProspectController as AdminProspectController;
+use App\Http\Controllers\Admin\ProspectEventController as AdminProspectEventController;
 use App\Http\Controllers\Admin\RegistrationController as AdminRegistrationController;
 use App\Http\Controllers\Admin\ReferrerController as AdminReferrerController;
 use App\Http\Controllers\Admin\RewardController as AdminRewardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProspectController;
+use App\Http\Controllers\ProspectReferrerController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\ReferrerController;
 use App\Http\Controllers\RegistrationController;
@@ -20,6 +24,21 @@ Route::get('/prodi/{slug}', [LandingController::class, 'prodi'])->name('prodi.sh
 Route::get('/ref/{code}', [ReferralController::class, 'track'])
     ->middleware('throttle:60,1')
     ->name('referral.track');
+
+// ── Form Minat Prospek (publik, tanpa auth) ────────────────────────────────
+// Rute tetap ('selesai', 'wa', 'daftar') didaftarkan sebelum {eventSlug}.
+Route::get('/minat/selesai', [ProspectController::class, 'thanks'])->name('prospect.thanks');
+Route::post('/minat/wa', [ProspectController::class, 'whatsapp'])
+    ->middleware('throttle:30,1')
+    ->name('prospect.whatsapp');
+Route::post('/minat/lepas', [ProspectController::class, 'release'])->name('prospect.release');
+Route::get('/minat/daftar/{token}', [ProspectController::class, 'openLink'])
+    ->middleware('throttle:60,1')
+    ->name('prospect.link');
+Route::get('/minat/{eventSlug}', [ProspectController::class, 'show'])->name('prospect.show');
+Route::post('/minat/{eventSlug}', [ProspectController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('prospect.store');
 
 // ── Breeze Dashboard (keep for compatibility) ───────────────────────────────
 Route::get('/dashboard', function () {
@@ -86,6 +105,8 @@ Route::prefix('afiliasi')->name('referrer.')->group(function () {
         Route::post('/aktifkan', [ReferrerController::class, 'store'])->name('store');
         Route::get('/dashboard', [ReferrerController::class, 'dashboard'])->name('dashboard');
         Route::post('/bank', [ReferrerController::class, 'updateBank'])->name('bank.update');
+        Route::post('/prospek/{prospect}/catatan', [ProspectReferrerController::class, 'note'])->name('prospect.note');
+        Route::post('/prospek/{prospect}/dihubungi', [ProspectReferrerController::class, 'contacted'])->name('prospect.contacted');
     });
 });
 
@@ -175,6 +196,18 @@ Route::prefix('admin')
             Route::post('/document/{documentId}/review', [AdminRegistrationController::class, 'reviewDocument'])->name('review-document');
             Route::post('/{id}/documents/bulk-review', [AdminRegistrationController::class, 'bulkReviewDocuments'])->name('bulk-review-documents');
             Route::post('/{id}/document/upload', [AdminRegistrationController::class, 'uploadDocument'])->name('upload-document');
+        });
+
+        // Form minat prospek: daftar prospek, status, kirim ulang link, dan event (potongan daftar ulang)
+        Route::prefix('prospek')->name('prospects.')->group(function () {
+            Route::get('/', [AdminProspectController::class, 'index'])->name('index');
+            Route::get('/cari-affiliator', [AdminProspectController::class, 'searchAffiliators'])->name('affiliator-search');
+            Route::get('/{prospect}', [AdminProspectController::class, 'show'])->whereNumber('prospect')->name('show');
+            Route::post('/{prospect}/status', [AdminProspectController::class, 'updateStatus'])->whereNumber('prospect')->name('update-status');
+            Route::post('/{prospect}/catatan', [AdminProspectController::class, 'contact'])->whereNumber('prospect')->name('contact');
+            Route::post('/{prospect}/kirim-link', [AdminProspectController::class, 'resendLink'])->whereNumber('prospect')->name('resend-link');
+            Route::get('event/{event}/qr', [AdminProspectEventController::class, 'qr'])->whereNumber('event')->name('events.qr');
+            Route::resource('event', AdminProspectEventController::class)->except(['show'])->names('events');
         });
 
         // Referrer management

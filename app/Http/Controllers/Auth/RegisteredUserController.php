@@ -22,7 +22,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Datang dari link form minat: nama dan WA akun mengikuti data prospek.
+        return view('auth.register', [
+            'prospect' => \App\Support\ProspectService::sessionLink()?->prospect,
+        ]);
     }
 
     /**
@@ -32,6 +35,14 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Link form minat aktif: nama dan WA dikunci ke data prospek, bukan dari input klien.
+        if ($prospect = \App\Support\ProspectService::sessionLink()?->prospect) {
+            $request->merge([
+                'name'  => $prospect->full_name,
+                'phone' => $prospect->phone_normalized,
+            ]);
+        }
+
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'lowercase', 'email', 'regex:/^.+@.+\..+$/i', 'max:255', 'unique:'.User::class],

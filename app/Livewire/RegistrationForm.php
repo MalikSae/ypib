@@ -5,9 +5,12 @@ namespace App\Livewire;
 use App\Models\Campus;
 use App\Models\PmbPeriod;
 use App\Models\Program;
+use App\Models\Prospect;
+use App\Models\ProspectLink;
 use App\Models\ReferralClick;
 use App\Models\Referrer;
 use App\Models\Registration;
+use App\Models\Scopes\CampusScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Livewire\Attributes\Locked;
@@ -63,6 +66,12 @@ class RegistrationForm extends Component
     public ?int $referrer_id = null;
     #[Locked]
     public string $referrer_code = '';
+
+    // Link daftar dari form minat: nama dan WA tidak bisa diubah.
+    #[Locked]
+    public bool $prospectLocked = false;
+    #[Locked]
+    public string $prospectEventName = '';
 
     protected function rulesForStep(?int $step = null): array
     {
@@ -182,9 +191,14 @@ class RegistrationForm extends Component
             ->filter(fn (Campus $campus) => Program::offeredIn($this->period, $campus)->exists())
             ->values();
 
+        // Link daftar dari form minat: kampus mengikuti event prospek.
+        $prospectLink = $this->activeProspectLink();
+
         // ?kampus=slug memilih kampus; satu-satunya kampus dipilih otomatis.
         $slug = \App\Support\QueryInput::string(request(), 'kampus');
-        $chosen = $slug ? $this->campuses->firstWhere('slug', $slug) : null;
+        $chosen = $prospectLink
+            ? $this->campuses->firstWhere('id', $prospectLink->event?->campus_id)
+            : ($slug ? $this->campuses->firstWhere('slug', $slug) : null);
         $chosen ??= $this->campuses->count() === 1 ? $this->campuses->first() : null;
 
         // Prodi dari URL (?prodi=) tanpa kampus eksplisit: pakai kampus pertama yang menawarkannya.
@@ -201,6 +215,11 @@ class RegistrationForm extends Component
         // Pre-fill phone from logged-in user
         if ($user = Auth::user()) {
             $this->phone = $user->phone ?? '';
+        }
+
+        // Link prospek: nama dan WA dikunci ke data form minat (ditegakkan ulang di submit()).
+        if ($prospectLink) {
+            $this->lockToProspect($prospectLink);
         }
 
         if ($referrer = $this->resolveReferrer()) {
@@ -234,6 +253,40 @@ class RegistrationForm extends Component
         $this->first_choice_program_id = '';
         $this->resetErrorBag(['campus_id', 'first_choice_program_id']);
         $this->loadPrograms();
+    }
+
+    /**
+     * Link daftar prospek dari sesi, bila masih bisa dipakai. Link yang sudah tidak berlaku
+     * dibuang dari sesi.
+     */
+    protected function activeProspectLink(): ?ProspectLink
+    {
+        return \App\Support\ProspectService::sessionLink();
+    }
+
+    protected function lockToProspect(ProspectLink $link): void
+    {
+        $prospect = $link->prospect;
+
+        $this->full_name = $prospect->full_name;
+        $this->phone = $prospect->phone;
+        $this->prospectLocked = true;
+
+        // Pendidikan dan sekolah dari form minat dipakai sebagai isian awal (tetap bisa diubah).
+        if ($prospect->education_level) {
+            $this->education_level = $prospect->education_level;
+        }
+        if ($prospect->school_name) {
+            $this->school_name = $prospect->school_name;
+        }
+        $this->prospectEventName = $link->event?->name ?? '';
+
+        if ($prospect->program_id && $this->campus_id !== '') {
+            $offered = Program::offeredIn($this->period, (int) $this->campus_id)->whereKey($prospect->program_id)->exists();
+            if ($offered) {
+                $this->first_choice_program_id = (string) $prospect->program_id;
+            }
+        }
     }
 
     /**
@@ -308,6 +361,14 @@ class RegistrationForm extends Component
             return;
         }
 
+        // Link prospek: nama, WA, dan kampus dipaksa dari data prospek, bukan dari input klien.
+        $prospectLink = $this->activeProspectLink();
+        if ($prospectLink) {
+            $this->full_name = $prospectLink->prospect->full_name;
+            $this->phone = $prospectLink->prospect->phone;
+            $this->campus_id = (string) $prospectLink->event->campus_id;
+        }
+
         // Cek user belum punya registrasi di periode ini
         $existing = Registration::where('user_id', $user->id)
             ->where('period_id', $period->id)
@@ -351,11 +412,38 @@ class RegistrationForm extends Component
                 return;
             }
 
-            Registration::create([
+            // Link sekali pakai: kunci baris link agar tidak dipakai dua kali bersamaan.
+            $lockedLink = null;
+            if ($prospectLink) {
+                $lockedLink = ProspectLink::whereKey($prospectLink->id)->lockForUpdate()->first();
+                if (!$lockedLink || !$lockedLink->isUsable()) {
+                    \Illuminate\Support\Facades\DB::rollBack();
+                    session()->forget('prospect_token');
+                    session()->flash('error', 'Link pendaftaran ini sudah dipakai atau tidak berlaku.');
+
+                    return;
+                }
+            }
+
+            // Prospek terkait: dari link terkunci, atau nomor WA yang cocok dengan prospek.
+            $prospect = $lockedLink
+                ? $prospectLink->prospect
+                : Prospect::withoutGlobalScope(CampusScope::class)
+                    ->where('phone_normalized', Prospect::normalizePhone($this->phone))
+                    ->lockForUpdate()
+                    ->first();
+            // Affiliator pemilik prospek mengalahkan cookie ref (first-touch).
+            $referrerId = $prospect?->referrer_id ?? $this->resolveReferrer()?->id;
+            // Potongan daftar ulang hanya dari link form minat.
+            $discount = $lockedLink ? (int) ($prospectLink->event->discount_amount ?? 0) : 0;
+
+            $registration = Registration::create([
                 'period_id'                => $period->id,
                 'campus_id'                => (int) $this->campus_id,
                 'user_id'                  => $user->id,
-                'referrer_id'              => $this->resolveReferrer()?->id,
+                'referrer_id'              => $referrerId,
+                'prospect_id'              => $prospect?->id,
+                'event_discount_amount'    => $discount,
                 'registration_number'      => null, // digenerate admin saat konfirmasi bayar
                 'admission_path'           => $this->admission_path,
                 'first_choice_program_id'  => (int) $this->first_choice_program_id,
@@ -381,6 +469,17 @@ class RegistrationForm extends Component
                 'mother_occupation'        => $this->mother_occupation,
                 'status'                   => 'menunggu_pembayaran',
             ]);
+
+            if ($prospect) {
+                $prospect->forceFill([
+                    'status'          => Prospect::STATUS_SUDAH_DAFTAR,
+                    'registration_id' => $registration->id,
+                ])->save();
+            }
+            if ($lockedLink) {
+                $lockedLink->forceFill(['used_at' => now()])->save();
+                session()->forget('prospect_token');
+            }
 
             \Illuminate\Support\Facades\DB::commit();
 

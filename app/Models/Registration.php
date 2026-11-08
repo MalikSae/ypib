@@ -19,6 +19,8 @@ class Registration extends Model
         'campus_id',
         'user_id',
         'referrer_id',
+        'prospect_id',
+        'event_discount_amount',
         'registration_number',
         'registration_type',
         'admission_path',
@@ -250,12 +252,21 @@ class Registration extends Model
         return (int) $this->payments()->reRegistration()->verified()->sum('amount');
     }
 
-    /** Sisa tagihan daftar ulang (0 bila tarif belum diatur atau sudah lunas). */
+    /**
+     * Sisa tagihan daftar ulang (0 bila tarif belum diatur atau sudah lunas). Potongan dari
+     * link form minat (event_discount_amount) mengurangi tarif daftar ulang.
+     */
     public function reRegistrationRemaining(): int
     {
         $fee = (int) ($this->programTerms()?->re_registration_fee ?? 0);
+        $fee = max($fee - (int) $this->event_discount_amount, 0);
 
         return max($fee - $this->reRegistrationPaid(), 0);
+    }
+
+    public function prospect()
+    {
+        return $this->belongsTo(Prospect::class);
     }
 
     public function getTimelineStages()

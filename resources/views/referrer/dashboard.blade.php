@@ -209,6 +209,9 @@
     </div>
     @endif
 
+    {{-- FORM MINAT (prospek) --}}
+    @include('referrer._prospects')
+
     {{-- RIWAYAT PENDAFTAR --}}
     <div style="border-radius:16px;overflow:hidden;" class="bg-white border-neutral-200">
         <div style="padding:16px 24px;display:flex;align-items:center;gap:8px;" class="border-b-neutral-200">

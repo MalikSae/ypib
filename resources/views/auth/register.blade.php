@@ -6,11 +6,27 @@
     </a>
     <h1 style="font-size:22px;font-weight:700;margin:0 0 4px 0;" class="text-neutral-900">Buat Akun Baru</h1>
     <p style="font-size:14px;margin:0 0 28px 0;" class="text-neutral-500">Isi data di bawah untuk mendaftar ke PMB YPIB</p>
+
+    @if($prospect ?? null)
+        <div style="border-radius:10px;padding:12px 14px;margin:0 0 20px 0;font-size:13px;line-height:1.5;" class="bg-neutral-100 border border-neutral-200 text-neutral-700">
+            Kamu mendaftar dari form minat sebagai <strong class="text-neutral-900">{{ $prospect->full_name }}</strong>.
+            Nama dan nomor WhatsApp mengikuti data itu.
+            <form method="POST" action="{{ route('prospect.release') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="auth-link" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;">Bukan kamu? Daftar tanpa data ini</button>
+            </form>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
         <div class="auth-group">
             <label for="name" class="auth-label">Nama Lengkap</label>
-            <input id="name" type="text" name="name" class="auth-input {{ $errors->has('name') ? 'auth-input-error' : '' }}" value="{{ old('name') }}" required autofocus placeholder="Nama sesuai KTP">
+            @if($prospect ?? null)
+                <input id="name" type="text" name="name" class="auth-input" value="{{ $prospect->full_name }}" readonly style="background:#F1F4F7;">
+            @else
+                <input id="name" type="text" name="name" class="auth-input {{ $errors->has('name') ? 'auth-input-error' : '' }}" value="{{ old('name') }}" required autofocus placeholder="Nama sesuai KTP">
+            @endif
             @error('name')<p class="auth-error-msg">{{ $message }}</p>@enderror
         </div>
         <div class="auth-group">
@@ -20,7 +36,11 @@
         </div>
         <div class="auth-group">
             <label for="phone" class="auth-label">Nomor HP (WhatsApp)</label>
-            <input id="phone" type="number" name="phone" class="auth-input {{ $errors->has('phone') ? 'auth-input-error' : '' }}" value="{{ old('phone') }}" required placeholder="08xxxxxxxxxx">
+            @if($prospect ?? null)
+                <input id="phone" type="text" name="phone" class="auth-input" value="{{ $prospect->phone_normalized }}" readonly style="background:#F1F4F7;">
+            @else
+                <input id="phone" type="number" name="phone" class="auth-input {{ $errors->has('phone') ? 'auth-input-error' : '' }}" value="{{ old('phone') }}" required placeholder="08xxxxxxxxxx">
+            @endif
             @error('phone')<p class="auth-error-msg">{{ $message }}</p>@enderror
         </div>
         <div class="auth-group">

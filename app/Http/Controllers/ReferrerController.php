@@ -151,7 +151,29 @@ class ReferrerController extends Controller
                 'share' => 'Daftar kuliah di YPIB lewat link ini: ',
             ]);
 
-        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'linkTargets'));
+        // Prospek form minat dari link affiliator ini (WA disamarkan sampai mendaftar di view).
+        $prospects = \App\Models\Prospect::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)
+            ->where('referrer_id', $referrer->id)
+            ->with(['program', 'sources.event'])
+            ->latest('id')
+            ->get();
+
+        // Kampanye online yang aktif (bukan event kampus), lengkap dengan tautan berisi kode referral.
+        $interestLinks = \App\Models\ProspectEvent::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)
+            ->with(['campus', 'period'])
+            ->online()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->filter(fn ($event) => $event->acceptsInterest())
+            ->map(fn ($event) => [
+                'label'    => $event->name . ' — ' . $event->campus?->name,
+                'url'      => route('prospect.show', $event->slug) . '?ref=' . $referrer->code,
+                'discount' => $event->discount_amount,
+            ])
+            ->values();
+
+        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'linkTargets', 'prospects', 'interestLinks'));
     }
 
     public function updateBank(Request $request)

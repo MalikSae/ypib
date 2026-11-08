@@ -111,7 +111,7 @@ class DashboardController extends Controller
                     ->on('pp.program_id', '=', 'registrations.first_choice_program_id')
                     ->whereRaw('pp.campus_id <=> registrations.campus_id');
             })
-            ->selectRaw('registrations.first_choice_program_id as program_id, sum(p.paid) as paid, sum(greatest(coalesce(pp.re_registration_fee, 0) - p.paid, 0)) as outstanding')
+            ->selectRaw('registrations.first_choice_program_id as program_id, sum(p.paid) as paid, sum(greatest(coalesce(pp.re_registration_fee, 0) - registrations.event_discount_amount - p.paid, 0)) as outstanding')
             ->groupBy('registrations.first_choice_program_id')
             ->get()
             ->keyBy('program_id');

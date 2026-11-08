@@ -463,6 +463,8 @@
                     ['Data Pendaftar', 'admin.registrations.index', 'people',
                         request()->routeIs('admin.registrations.*') && !request()->routeIs('admin.registrations.recap*')],
                     ['Rekap Pendaftaran', 'admin.registrations.recap', 'chart', request()->routeIs('admin.registrations.recap*')],
+                    ['Kelola Prospek', 'admin.prospects.index', 'people', request()->routeIs('admin.prospects.index') || request()->routeIs('admin.prospects.update-status') || request()->routeIs('admin.prospects.resend-link')],
+                    ['Event dan Kampanye', 'admin.prospects.events.index', 'calendar', request()->routeIs('admin.prospects.events.*')],
                 ]],
                 ['label' => 'SELEKSI', 'items' => [
                     ['Bank Soal', 'admin.bank-soal.index', 'book', request()->routeIs('admin.bank-soal.*'), 'global' => true],

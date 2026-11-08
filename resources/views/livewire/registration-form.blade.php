@@ -52,6 +52,18 @@
         </div>
     @endif
 
+    {{-- Link form minat: tunjukkan identitas yang dikunci dan jalan keluar bila bukan orangnya --}}
+    @if($prospectLocked)
+        <div class="rounded-xl border border-neutral-200 bg-neutral-100 p-4 mb-6 text-sm text-neutral-700">
+            Kamu mendaftar dari form minat sebagai <strong class="text-neutral-900">{{ $full_name }}</strong> ({{ $phone }}).
+            Nama dan WhatsApp mengikuti data itu.
+            <form method="POST" action="{{ route('prospect.release') }}" class="inline">
+                @csrf
+                <button type="submit" class="font-semibold text-primary-600 hover:underline">Bukan kamu? Daftar tanpa data ini</button>
+            </form>
+        </div>
+    @endif
+
     {{-- STEP 1 — DATA DIRI --}}
     @if($step === 1)
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
@@ -65,7 +77,10 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                    <input wire:model="full_name" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="Sesuai KTP/Ijazah">
+                    <input wire:model="full_name" type="text" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-gray-100 text-gray-600' : '' }}" placeholder="Sesuai KTP/Ijazah">
+                    @if($prospectLocked)
+                        <p class="text-xs text-gray-500 mt-1">Terisi dari form minat{{ $prospectEventName ? ' ' . $prospectEventName : '' }}. Tidak bisa diubah.</p>
+                    @endif
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">NIK (16 digit) <span class="text-red-500">*</span></label>
@@ -171,7 +186,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP / WhatsApp <span class="text-red-500">*</span></label>
-                <input wire:model="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none" placeholder="08xxxxxxxxxx">
+                <input wire:model="phone" type="tel" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-gray-100 text-gray-600' : '' }}" placeholder="08xxxxxxxxxx">
             </div>
         </div>
     </div>
