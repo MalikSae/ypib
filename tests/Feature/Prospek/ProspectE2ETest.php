@@ -209,6 +209,31 @@ class ProspectE2ETest extends TestCase
         $this->assertSame(self::RE_REG_REWARD, (int) $reReward->amount);
     }
 
+    public function test_graduation_year_must_be_a_plausible_four_digit_year(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'mahasiswa']));
+
+        foreach (['20266777777' => 'digits', '1900' => 'between', (string) (now()->year + 2) => 'between'] as $value => $rule) {
+            Livewire::test(RegistrationForm::class)
+                ->set('step', 3)
+                ->set('education_level', 'sma_smk_ma')
+                ->set('school_name', 'SMA Ujung')
+                ->set('school_major', 'IPA')
+                ->set('graduation_year', $value)
+                ->call('nextStep')
+                ->assertHasErrors(['graduation_year' => $rule]);
+        }
+
+        Livewire::test(RegistrationForm::class)
+            ->set('step', 3)
+            ->set('education_level', 'sma_smk_ma')
+            ->set('school_name', 'SMA Ujung')
+            ->set('school_major', 'IPA')
+            ->set('graduation_year', '2026')
+            ->call('nextStep')
+            ->assertHasNoErrors('graduation_year');
+    }
+
     public function test_campus_event_link_ignores_referral_cookie_and_pays_no_commission(): void
     {
         $event = $this->makeEvent(ProspectEvent::KIND_EVENT);

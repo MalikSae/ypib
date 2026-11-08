@@ -118,6 +118,12 @@ class Registration extends Model
         'daftar_ulang_selesai' => ['label' => 'Daftar Ulang Selesai', 'color' => 'primary'],
     ];
 
+    /** Tahun lulus: 4 digit, antara 1950 dan tahun depan. Dipakai semua form yang mengisi kolom ini. */
+    public static function graduationYearRules(): array
+    {
+        return ['required', 'digits:4', 'integer', 'between:1950,' . (now()->year + 1)];
+    }
+
     public function getStatusLabel(): string
     {
         return self::STATUS_LABELS[$this->status]['label']

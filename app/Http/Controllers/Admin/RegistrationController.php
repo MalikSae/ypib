@@ -244,7 +244,7 @@ class RegistrationController extends Controller
             'address' => 'required|string',
             'education_level' => ['sometimes', 'required', \Illuminate\Validation\Rule::in(array_keys(Registration::EDUCATION_LEVELS))],
             'school_name' => 'required|string',
-            'graduation_year' => 'required|digits:4',
+            'graduation_year' => Registration::graduationYearRules(),
             'school_grade' => 'nullable|numeric|between:0,' . Registration::educationConfig($request->input('education_level', $registration->education_level))['grade_max'],
             'admission_path' => 'required|in:umum,prestasi,tahfidz',
             'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($registration->user_id)],

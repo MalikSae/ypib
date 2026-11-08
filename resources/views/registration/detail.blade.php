@@ -335,7 +335,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-neutral-700">Tahun Lulus</label>
-                                <input type="text" name="graduation_year" value="{{ old('graduation_year', $registration->graduation_year) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                <input type="text" name="graduation_year" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)" value="{{ old('graduation_year', $registration->graduation_year) }}" class="mt-1 block w-full border-neutral-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                 @error('graduation_year') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>

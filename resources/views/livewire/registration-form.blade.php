@@ -391,7 +391,9 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Lulus <span class="text-red-500">*</span></label>
-                    <input wire:model="graduation_year" type="number" min="1980" max="{{ now()->year + 1 }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
+                    <input wire:model="graduation_year" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="{{ now()->year }}"
+                           oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">{{ $edu['grade'] }} <span class="text-gray-400 text-xs">(opsional)</span></label>

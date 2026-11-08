@@ -335,7 +335,7 @@ class RegistrationController extends Controller
                 'nisn'               => 'nullable|string|digits:10',
                 'school_name'        => 'required|string|max:255',
                 'school_major'       => 'required|string|max:255',
-                'graduation_year'    => 'required|digits:4',
+                'graduation_year'    => Registration::graduationYearRules(),
                 'certificate_number' => 'nullable|string|max:100',
                 'school_grade'       => 'nullable|numeric|between:0,' . $level['grade_max'],
             ];

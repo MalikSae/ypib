@@ -1024,7 +1024,9 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_graduation_year" value="Tahun Lulus" required="true" />
-                    <x-text-input id="edit_graduation_year" name="graduation_year" type="number" class="mt-1 block w-full" :value="old('graduation_year', $registration->graduation_year)" required />
+                    <x-text-input id="edit_graduation_year" name="graduation_year" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}"
+                                  oninput="this.value = this.value.replace(/\D/g, '').slice(0, 4)"
+                                  class="mt-1 block w-full" :value="old('graduation_year', $registration->graduation_year)" required />
                 </div>
                 <div>
                     <x-input-label for="edit_school_grade" value="Nilai (IPK 0-4 untuk D3/S1, rata-rata 0-100 lainnya)" />
