@@ -144,7 +144,8 @@ class ReferrerController extends Controller
                 'url'   => $base . '?kampus=' . $campus->slug,
                 'share' => 'Daftar kuliah di YPIB ' . $campus->name . ' lewat link ini: ',
             ])
-            ->push([
+            // Link Umum selalu di urutan pertama (dibuka otomatis di dashboard).
+            ->prepend([
                 'label' => 'Link Umum',
                 'hint'  => 'Untuk semua kampus: langsung ke form pendaftaran, kampus dipilih sendiri oleh pendaftar.',
                 'url'   => $base,
@@ -167,14 +168,21 @@ class ReferrerController extends Controller
             ->get()
             ->filter(fn ($event) => $event->acceptsInterest())
             ->map(fn ($event) => [
-                'label'    => $event->name,
-                'campus'   => $event->campus?->name,
-                'url'      => route('prospect.show', $event->slug) . '?ref=' . $referrer->code,
-                'discount' => $event->discount_amount,
-            ])
+                'label' => $event->name,
+                'tag'   => 'Form minat',
+                'hint'  => ($event->campus ? $event->campus->name . ' · ' : '')
+                    . 'Potongan daftar ulang Rp ' . number_format($event->discount_amount, 0, ',', '.'),
+                'url'   => route('prospect.show', $event->slug) . '?ref=' . $referrer->code,
+                'share' => 'Isi form minat kuliah di YPIB lewat link ini: ',
+            ]);
+
+        // Semua link affiliator dalam satu daftar (ditampilkan sebagai accordion).
+        $shareLinks = $linkTargets
+            ->map(fn ($target) => $target + ['tag' => 'Pendaftaran'])
+            ->concat($interestLinks)
             ->values();
 
-        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'linkTargets', 'prospects', 'interestLinks'));
+        return view('referrer.dashboard', compact('referrer', 'stats', 'registrations', 'baseUrl', 'shareLinks', 'prospects'));
     }
 
     public function updateBank(Request $request)

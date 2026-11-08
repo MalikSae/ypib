@@ -1,29 +1,4 @@
-{{-- FORM MINAT: link form minat dan daftar prospek dari link affiliator ini --}}
-<div class="pub-card" style="margin-bottom:16px;">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;" class="text-neutral-400">Form Minat Calon Mahasiswa</div>
-
-    @forelse($interestLinks as $link)
-        <div x-data="{ copied: false }" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #EEF1F5;">
-            <div style="font-size:14px;font-weight:700;" class="text-neutral-900">{{ $link['label'] }}</div>
-            <p style="font-size:12px;margin:2px 0 8px 0;" class="text-neutral-400">{{ $link['campus'] ? $link['campus'] . ' · ' : '' }}Potongan Rp {{ number_format($link['discount'], 0, ',', '.') }}</p>
-            <div style="border-radius:10px;padding:10px 12px;font-family:monospace;font-size:12px;word-break:break-all;" class="bg-neutral-100 border-neutral-200 text-neutral-900">{{ $link['url'] }}</div>
-            <div class="ref-action-grid">
-                <button
-                    x-on:click="navigator.clipboard.writeText({{ \Illuminate\Support\Js::from($link['url']) }});copied=true;setTimeout(()=>copied=false,2500);"
-                    class="ref-action-btn ref-btn-copy"
-                    :class="copied ? 'ref-btn-copied' : ''">
-                    <span x-show="!copied">Salin Link</span>
-                    <span x-show="copied">Tersalin!</span>
-                </button>
-                <a href="https://wa.me/?text={{ urlencode('Ikuti form minat kuliah di YPIB ' . $link['label'] . ': ' . $link['url']) }}"
-                   target="_blank" rel="noopener" class="ref-action-btn ref-btn-wa">Bagikan WA</a>
-            </div>
-        </div>
-    @empty
-        <p style="font-size:13px;margin:0;" class="text-neutral-400">Belum ada kegiatan form minat yang aktif.</p>
-    @endforelse
-</div>
-
+{{-- Prospek form minat dari link affiliator ini (hanya lihat). Link form minat ada di accordion Link Referral. --}}
 <div style="border-radius:16px;overflow:hidden;margin-bottom:24px;" class="bg-white border-neutral-200">
     <div style="padding:16px 24px;" class="border-b-neutral-200">
         <span style="font-size:15px;font-weight:700;" class="text-neutral-900">Prospek dari Form Minat</span>

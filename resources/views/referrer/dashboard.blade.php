@@ -156,57 +156,71 @@
         @endforeach
     </div>
 
-    {{-- LINK REFERRAL --}}
-    <div class="pub-card" style="margin-bottom:16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;" class="text-neutral-400">Link Referral Unikmu</div>
-        <p style="font-size:13px;margin:0 0 14px 0;" class="text-neutral-500">Bagikan link ini. Setiap klik dan pendaftaran berhasil tercatat otomatis.</p>
-
-        <div>
-            @foreach($linkTargets as $target)
-            @php $refUrl = $target['url']; @endphp
-            <div x-data="{ copied: false }" style="{{ $loop->last ? '' : 'margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #EEF1F5;' }}">
-                <div style="font-size:14px;font-weight:700;" class="text-neutral-900">{{ $target['label'] }}</div>
-                <p style="font-size:12px;margin:2px 0 10px 0;" class="text-neutral-400">{{ $target['hint'] }}</p>
-
-                {{-- Full URL Display --}}
-                <div style="border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;" class="bg-neutral-100 border-neutral-200">
-                    <svg style="width:16px;height:16px;flex-shrink:0;margin-top:1px;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-primary-600">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
-                </svg>
-                    <span style="font-size:13px;font-family:monospace;word-break:break-all;line-height:1.6;user-select:all;" class="text-neutral-900">{{ $refUrl }}</span>
-                </div>
-
-                {{-- Action Buttons --}}
-                <div class="ref-action-grid">
-                    <button
-                        x-on:click="navigator.clipboard.writeText({{ \Illuminate\Support\Js::from($refUrl) }});copied=true;setTimeout(()=>copied=false,2500);"
-                        class="ref-action-btn ref-btn-copy"
-                        :class="copied ? 'ref-btn-copied' : ''">
-                        <svg x-show="!copied" style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"/>
-                    </svg>
-                        <svg x-show="copied" style="width:16px;height:16px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                    </svg>
-                        <span x-show="!copied">Salin Link</span>
-                        <span x-show="copied">Tersalin!</span>
-                    </button>
-
-                    <a href="https://wa.me/?text={{ urlencode($target['share'] . $refUrl) }}"
-                       target="_blank" rel="noopener" class="ref-action-btn ref-btn-wa">
-                        <svg style="width:16px;height:16px;flex-shrink:0;" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.554 4.122 1.523 5.857L0 24l6.303-1.504A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.034-1.388l-.361-.214-3.741.892.932-3.648-.235-.374A9.818 9.818 0 0 1 2.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
-                        Bagikan WA
-                    </a>
-                </div>
-            </div>
-            @endforeach
-            {{-- Status only (kode dihapus) --}}
-            <div style="margin-top:10px;display:flex;align-items:center;gap:6px;">
-                <span style="width:7px;height:7px;border-radius:50%;background:{{ $referrer->status === 'active' ? '#2E7D32' : '#C62828' }};display:inline-block;"></span>
-                <span style="font-size:12px;" class="text-neutral-400">Status: <strong style="color:{{ $referrer->status === 'active' ? '#2E7D32' : '#C62828' }};">{{ $referrer->status === 'active' ? 'Aktif' : 'Nonaktif' }}</strong></span>
+    {{-- LINK REFERRAL: semua link (pendaftaran per kampus, link umum, form minat) dalam accordion --}}
+    <div class="pub-card" style="margin-bottom:16px;padding:0;overflow:hidden;" x-data="{ open: 0 }">
+        <div style="padding:16px 20px 12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;" class="text-neutral-400">Link Referral</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="width:7px;height:7px;border-radius:50%;background:{{ $referrer->isActive() ? '#2E7D32' : '#C62828' }};display:inline-block;"></span>
+                <span style="font-size:12px;" class="text-neutral-400">{{ $referrer->isActive() ? 'Aktif' : 'Nonaktif' }}</span>
             </div>
         </div>
+
+        @foreach($shareLinks as $i => $link)
+        <div style="border-top:1px solid #EEF1F5;" x-data="{ copied: false }">
+            <button type="button" x-on:click="open = (open === {{ $i }} ? null : {{ $i }})"
+                    :aria-expanded="(open === {{ $i }}).toString()" aria-controls="ref-link-{{ $i }}"
+                    style="width:100%;display:flex;align-items:center;gap:12px;padding:14px 20px;background:none;border:none;cursor:pointer;text-align:left;">
+                {{-- Badge selalu di baris sendiri di atas judul, supaya posisinya sama walau judul panjang. --}}
+                <span style="flex:1;min-width:0;">
+                    <span style="display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;margin-bottom:4px;"
+                          class="{{ $link['tag'] === 'Form minat' ? 'bg-primary-50 text-primary-700' : 'bg-neutral-100 text-neutral-600' }}">{{ $link['tag'] }}</span>
+                    <span style="display:block;font-size:14px;font-weight:700;" class="text-neutral-900">{{ $link['label'] }}</span>
+                    <span style="display:block;font-size:12px;margin-top:2px;" class="text-neutral-400">{{ $link['hint'] }}</span>
+                </span>
+                {{-- Ukuran lewat class, rotasi lewat :class. :style akan menimpa style bawaan (termasuk ukuran). --}}
+                <svg class="w-5 h-5 shrink-0 text-neutral-400 transition-transform duration-150 motion-reduce:transition-none"
+                     :class="open === {{ $i }} ? 'rotate-180' : ''"
+                     fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                </svg>
+            </button>
+
+            <div id="ref-link-{{ $i }}" x-show="open === {{ $i }}" x-cloak style="padding:0 20px 16px 20px;">
+                <div style="border-radius:10px;padding:10px 12px;font-size:13px;font-family:monospace;word-break:break-all;line-height:1.6;user-select:all;"
+                     class="bg-neutral-100 text-neutral-900">{{ $link['url'] }}</div>
+                <div class="ref-action-grid">
+                    <button type="button"
+                        x-on:click="refCopy({{ \Illuminate\Support\Js::from($link['url']) }}).then(() => { copied = true; setTimeout(() => copied = false, 2500); })"
+                        class="ref-action-btn ref-btn-copy" :class="copied ? 'ref-btn-copied' : ''">
+                        <span x-show="!copied">Salin Link</span>
+                        <span x-show="copied" x-cloak>Tersalin!</span>
+                    </button>
+                    <a href="https://wa.me/?text={{ urlencode($link['share'] . $link['url']) }}" target="_blank" rel="noopener" class="ref-action-btn ref-btn-wa">Bagikan WA</a>
+                </div>
+            </div>
+        </div>
+        @endforeach
     </div>
+
+    <script>
+        // Salin ke clipboard. Clipboard API hanya tersedia di HTTPS; di HTTP pakai cara lama.
+        window.refCopy = window.refCopy || function (text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.opacity = '0';
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+            return Promise.resolve();
+        };
+    </script>
     @endif
 
     {{-- FORM MINAT (prospek) --}}

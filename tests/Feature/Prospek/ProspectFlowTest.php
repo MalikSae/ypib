@@ -296,6 +296,8 @@ class ProspectFlowTest extends TestCase
         $event = $this->makeEvent();
         $owner = $this->makeReferrer('AAAAAA');
         $owner->user->forceFill(['is_referrer' => true])->save();
+        // Link referral baru tampil setelah rekening pencairan diisi.
+        $owner->update(['bank_name' => 'BCA', 'bank_account_number' => '123', 'bank_account_name' => 'Uji']);
 
         $this->post(route('prospect.store', [$event->slug, 'ref' => $owner->code]), [
             'full_name' => 'Siswa Uji', 'school_name' => 'SMA Uji', 'education_level' => 'sma_smk_ma', 'phone' => '081234567890',
@@ -306,6 +308,9 @@ class ProspectFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Siswa Uji')
             ->assertSee('Baru')
+            // Link kampanye online ada di accordion Link Referral, dengan kode affiliator.
+            ->assertSee('Link Referral')
+            ->assertSee(route('prospect.show', $event->slug) . '?ref=' . $owner->code)
             ->assertDontSee('Tandai sudah dihubungi')
             ->assertDontSee('Catatan hasil kontak');
 
