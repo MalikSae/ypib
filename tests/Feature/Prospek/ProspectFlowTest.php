@@ -250,6 +250,66 @@ class ProspectFlowTest extends TestCase
         $this->get(route('register'))->assertOk()->assertDontSee('Bukan kamu?');
     }
 
+    public function test_ownerless_prospect_is_not_claimed_by_later_affiliate(): void
+    {
+        $campusEvent = $this->makeEvent(['kind' => ProspectEvent::KIND_EVENT]);
+        $online = ProspectEvent::create([
+            'campus_id' => $campusEvent->campus_id, 'period_id' => $campusEvent->period_id, 'kind' => ProspectEvent::KIND_ONLINE,
+            'name' => 'Kampanye', 'slug' => 'kampanye-' . uniqid(), 'discount_amount' => 200000, 'is_active' => true,
+        ]);
+        $affiliate = $this->makeReferrer('AAAAAA');
+        $data = ['full_name' => 'Siswa Uji', 'school_name' => 'SMA Uji', 'education_level' => 'sma_smk_ma', 'phone' => '081234567890'];
+
+        $this->post(route('prospect.store', [$campusEvent->slug]), $data);
+        $this->post(route('prospect.store', [$online->slug, 'ref' => $affiliate->code]), $data);
+
+        $this->assertNull(Prospect::where('phone_normalized', '081234567890')->firstOrFail()->referrer_id);
+    }
+
+    public function test_link_snapshots_discount_and_new_event_replaces_old_link(): void
+    {
+        $first = $this->makeEvent(['discount_amount' => 500000]);
+        $second = ProspectEvent::create([
+            'campus_id' => $first->campus_id, 'period_id' => $first->period_id, 'kind' => ProspectEvent::KIND_EVENT,
+            'name' => 'Event Kedua', 'slug' => 'event-kedua-' . uniqid(), 'discount_amount' => 300000, 'is_active' => true,
+        ]);
+        $data = ['full_name' => 'Siswa Uji', 'school_name' => 'SMA Uji', 'education_level' => 'sma_smk_ma', 'phone' => '081234567890'];
+
+        $this->post(route('prospect.store', [$first->slug]), $data);
+        $firstLink = ProspectLink::firstOrFail();
+        $this->assertSame(500000, $firstLink->discount_amount);
+
+        // Potongan event diubah setelah link dibuat: link lama tetap memakai snapshot.
+        $first->update(['discount_amount' => 100000]);
+        $this->assertSame(500000, $firstLink->fresh()->discount_amount);
+
+        // Form minat dari event lain: link lama ditutup, link baru memakai potongan event kedua.
+        $this->post(route('prospect.store', [$second->slug]), $data);
+        $this->assertFalse($firstLink->fresh()->isUsable());
+        $newLink = ProspectLink::where('id', '!=', $firstLink->id)->firstOrFail();
+        $this->assertTrue($newLink->isUsable());
+        $this->assertSame(300000, $newLink->discount_amount);
+    }
+
+    public function test_affiliate_note_and_contact_are_logged_in_history(): void
+    {
+        $event = $this->makeEvent();
+        $owner = $this->makeReferrer('AAAAAA');
+        $owner->user->forceFill(['is_referrer' => true])->save();
+
+        $this->post(route('prospect.store', [$event->slug, 'ref' => $owner->code]), [
+            'full_name' => 'Siswa Uji', 'school_name' => 'SMA Uji', 'education_level' => 'sma_smk_ma', 'phone' => '081234567890',
+        ]);
+        $prospect = Prospect::where('phone_normalized', '081234567890')->firstOrFail();
+
+        $this->actingAs($owner->user)->post(route('referrer.prospect.note', $prospect), ['referrer_notes' => 'Catatan satu']);
+        $this->actingAs($owner->user)->post(route('referrer.prospect.note', $prospect), ['referrer_notes' => 'Catatan dua']);
+        $this->actingAs($owner->user)->post(route('referrer.prospect.contacted', $prospect));
+
+        $this->assertSame(['catatan', 'catatan', 'kontak'], $prospect->activities()->reorder('id')->pluck('type')->all());
+        $this->assertSame(Prospect::STATUS_DIHUBUNGI, $prospect->fresh()->status);
+    }
+
     public function test_closed_event_refuses_interest_form(): void
     {
         $event = $this->makeEvent(['is_active' => false]);

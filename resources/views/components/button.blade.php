@@ -2,7 +2,8 @@
     'type' => 'button',
     'color' => 'primary',
     'size' => 'md',
-    'variant' => 'solid'
+    'variant' => 'solid',
+    'href' => null,
 ])
 
 @php
@@ -50,6 +51,13 @@
     $colorClasses = $colorVariants[$color][$variant] ?? $colorVariants['primary']['solid'];
 @endphp
 
+{{-- Dengan href: dirender sebagai tautan bergaya tombol (navigasi, buka tab baru, unduh). --}}
+@if($href)
+<a href="{{ $href }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses"]) }}>
+    {{ $slot }}
+</a>
+@else
 <button type="{{ $type }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses"]) }}>
     {{ $slot }}
 </button>
+@endif

@@ -153,13 +153,16 @@ class RegistrationController extends Controller
 
         // Referral reward
         if ($registration->referrer_id) {
-            ReferralClick::where('referrer_id', $registration->referrer_id)
-                ->where('converted', false)
-                ->latest()
-                ->first()?->update([
-                    'converted'    => true,
-                    'converted_at' => now(),
-                ]);
+            // Registrasi dari form minat dicatat di tabel prospek, bukan sebagai konversi klik referral.
+            if (!$registration->prospect_id) {
+                ReferralClick::where('referrer_id', $registration->referrer_id)
+                    ->where('converted', false)
+                    ->latest()
+                    ->first()?->update([
+                        'converted'    => true,
+                        'converted_at' => now(),
+                    ]);
+            }
 
             // Satu komisi pendaftaran per orang (NIK) seumur hidup (K8): berlaku lintas periode
             // dan lintas prodi. Reward berstatus cancelled tidak dihitung.

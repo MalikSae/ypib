@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prospect;
+use App\Models\ProspectActivity;
 use App\Models\Referrer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-/** Aksi affiliator atas prospek miliknya: catatan internal dan tandai sudah dihubungi. */
+/**
+ * Aksi affiliator atas prospek miliknya: catatan dan tandai sudah dihubungi. Keduanya tercatat
+ * di riwayat prospek (sama dengan riwayat admin). Status akhir tetap diatur admin.
+ */
 class ProspectReferrerController extends Controller
 {
     public function note(Request $request, Prospect $prospect)
@@ -18,12 +22,13 @@ class ProspectReferrerController extends Controller
             'referrer_notes' => ['required', 'string', 'max:1000'],
         ]);
 
+        // referrer_notes menyimpan catatan terakhir untuk tampilan cepat; riwayat lengkap di activities.
         $prospect->update(['referrer_notes' => $data['referrer_notes']]);
+        $this->log($prospect, ProspectActivity::TYPE_CATATAN, $data['referrer_notes']);
 
         return back()->with('success', 'Catatan disimpan.');
     }
 
-    /** Affiliator hanya menandai sudah dihubungi; status akhir tetap dari admin. */
     public function contacted(Prospect $prospect)
     {
         $this->ownProspect($prospect);
@@ -32,12 +37,8 @@ class ProspectReferrerController extends Controller
             return back()->with('error', 'Prospek ini sudah mendaftar.');
         }
 
-        $prospect->forceFill([
-            'last_contacted_at' => now(),
-            'status'            => $prospect->status === Prospect::STATUS_BARU
-                ? Prospect::STATUS_DIHUBUNGI
-                : $prospect->status,
-        ])->save();
+        $prospect->markContacted();
+        $this->log($prospect, ProspectActivity::TYPE_KONTAK, 'Dihubungi oleh affiliator.');
 
         return back()->with('success', 'Prospek ditandai sudah dihubungi.');
     }
@@ -45,8 +46,18 @@ class ProspectReferrerController extends Controller
     private function ownProspect(Prospect $prospect): Referrer
     {
         $referrer = Referrer::where('user_id', Auth::id())->firstOrFail();
-        abort_unless($prospect->referrer_id === $referrer->id, 404);
+        abort_unless((int) $prospect->referrer_id === (int) $referrer->id, 404);
 
         return $referrer;
+    }
+
+    private function log(Prospect $prospect, string $type, ?string $note): void
+    {
+        ProspectActivity::create([
+            'prospect_id' => $prospect->id,
+            'user_id'     => Auth::id(),
+            'type'        => $type,
+            'note'        => $note,
+        ]);
     }
 }

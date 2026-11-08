@@ -11,12 +11,16 @@ use App\Models\ProspectSource;
 use App\Models\Referrer;
 use Illuminate\Support\Facades\DB;
 
-/** Logika bersama form minat prospek: simpan prospek, link daftar, dan tautan WA admin. */
+/** Logika bersama form minat prospek: simpan prospek, link daftar, dan tautan WA. */
 class ProspectService
 {
+    /** Kunci sesi untuk token link daftar prospek yang sedang dibawa pengunjung. */
+    public const SESSION_KEY = 'prospect_token';
+
     /**
      * Simpan atau perbarui prospek dari form minat. Satu baris per nomor WA. Pemilik (referrer)
-     * ditetapkan saat pertama kali; prospek yang sudah punya pemilik tidak berpindah.
+     * hanya ditetapkan saat prospek pertama kali dibuat (first-touch): prospek yang lahir tanpa
+     * affiliator tetap tanpa pemilik, dan pemilik tidak pernah berpindah.
      */
     public static function capture(ProspectEvent $event, array $data, ?Referrer $referrer): Prospect
     {
@@ -39,10 +43,6 @@ class ProspectService
                     'fraud_flag'       => self::isReferrerOwnPhone($referrer, $phone),
                 ]);
             } else {
-                if (!$prospect->referrer_id && $referrer) {
-                    $prospect->referrer_id = $referrer->id;
-                    $prospect->fraud_flag = self::isReferrerOwnPhone($referrer, $phone);
-                }
                 if (!$prospect->education_level && !empty($data['education_level'])) {
                     $prospect->education_level = $data['education_level'];
                 }
@@ -62,28 +62,35 @@ class ProspectService
     }
 
     /**
+     * Link masih boleh dipakai untuk mendaftar: belum dipakai, belum kedaluwarsa, prospek belum
+     * mendaftar, event masih ada, dan affiliator pemilik (bila ada) masih aktif.
+     */
+    public static function isLinkOpen(?ProspectLink $link): bool
+    {
+        if (!$link || !$link->isUsable() || !$link->prospect || !$link->event || $link->prospect->isRegistered()) {
+            return false;
+        }
+
+        $owner = $link->prospect->referrer;
+
+        return $owner === null || $owner->isActive();
+    }
+
+    /**
      * Link daftar prospek yang sedang dibawa sesi (setelah membuka /minat/daftar/{token}), bila
      * masih berlaku. Link yang tidak berlaku dibuang dari sesi.
      */
     public static function sessionLink(): ?ProspectLink
     {
-        $token = session('prospect_token');
+        $token = session(self::SESSION_KEY);
         if (!$token) {
             return null;
         }
 
-        $link = ProspectLink::where('token', $token)->with(['prospect', 'event'])->first();
-        $owner = $link?->prospect?->referrer_id ? Referrer::find($link->prospect->referrer_id) : null;
+        $link = ProspectLink::where('token', $token)->with(['prospect.referrer', 'event'])->first();
 
-        $valid = $link
-            && $link->isUsable()
-            && $link->prospect
-            && $link->event
-            && !$link->prospect->isRegistered()
-            && !($owner && $owner->status !== 'active');
-
-        if (!$valid) {
-            session()->forget('prospect_token');
+        if (!self::isLinkOpen($link)) {
+            session()->forget(self::SESSION_KEY);
 
             return null;
         }
@@ -91,34 +98,40 @@ class ProspectService
         return $link;
     }
 
-    /** Link daftar yang masih bisa dipakai, atau buat baru. Sekali pakai, kedaluwarsa mengikuti periode. */
+    /**
+     * Link daftar untuk prospek. Link yang masih berlaku untuk event yang sama dipakai ulang.
+     * Bila prospek mengisi form dari event lain, link lama ditutup dan dibuat link baru untuk
+     * event itu, sehingga potongan selalu mengikuti form minat terakhir. Potongan disimpan
+     * (snapshot) saat link dibuat.
+     */
     public static function linkFor(Prospect $prospect, ?ProspectEvent $event): ProspectLink
     {
-        $usable = $prospect->links()->get()->first(fn (ProspectLink $link) => $link->isUsable());
+        $usable = $prospect->links()->get()->filter(fn (ProspectLink $link) => $link->isUsable());
 
-        if ($usable) {
-            return $usable;
+        $same = $usable->first(fn (ProspectLink $link) => $event === null || (int) $link->prospect_event_id === (int) $event->id);
+        if ($same) {
+            return $same;
         }
+
+        // Tutup link lama yang belum dipakai (event berbeda).
+        $usable->each(fn (ProspectLink $link) => $link->forceFill(['expires_at' => now()])->save());
 
         return ProspectLink::create([
             'prospect_id'       => $prospect->id,
             'prospect_event_id' => $event?->id,
+            'discount_amount'   => (int) ($event?->discount_amount ?? 0),
             'token'             => ProspectLink::newToken(),
             'expires_at'        => self::expiry($event),
         ]);
     }
 
-    /** Tautan WA admin kampus dengan pesan prefilled. Null bila nomor admin belum diatur. */
+    /** Tautan WA admin kampus dengan pesan prefilled (siswa yang mengirim). Null bila nomor admin belum diatur. */
     public static function whatsappUrl(Prospect $prospect, ?Campus $campus, ?string $linkUrl): ?string
     {
-        $raw = $campus?->admin_whatsapp ?: PmbPeriod::displayPeriod()?->admin_whatsapp;
-        $digits = preg_replace('/\D+/', '', (string) $raw);
+        $digits = Prospect::toWhatsappDigits($campus?->admin_whatsapp ?: PmbPeriod::displayPeriod()?->admin_whatsapp);
 
         if ($digits === '') {
             return null;
-        }
-        if (str_starts_with($digits, '0')) {
-            $digits = '62' . substr($digits, 1);
         }
 
         $lines = [
@@ -132,39 +145,30 @@ class ProspectService
         return 'https://wa.me/' . $digits . '?text=' . urlencode(implode("\n", $lines));
     }
 
-    /** Chat WA biasa ke nomor prospek, tanpa link. Untuk follow-up admin. */
+    /** Chat WA biasa ke nomor prospek (admin yang mengirim), tanpa link. Untuk follow-up. */
     public static function prospectChatUrl(Prospect $prospect, ?Campus $campus): string
     {
-        $digits = preg_replace('/\D+/', '', (string) $prospect->phone_normalized);
-        if (str_starts_with($digits, '0')) {
-            $digits = '62' . substr($digits, 1);
-        }
-
         $text = 'Halo ' . $prospect->full_name . ', ini dari admin'
             . ($campus ? ' YPIB ' . $campus->name : ' YPIB') . '. Ada yang bisa kami bantu soal pendaftaran?';
 
-        return 'https://wa.me/' . $digits . '?text=' . urlencode($text);
+        return 'https://wa.me/' . $prospect->whatsappDigits() . '?text=' . urlencode($text);
     }
 
     /** WA ke nomor prospek (admin yang mengirim): berisi link pendaftaran. */
     public static function prospectWhatsappUrl(Prospect $prospect, ?Campus $campus, string $linkUrl): string
     {
-        $digits = preg_replace('/\D+/', '', (string) $prospect->phone_normalized);
-        if (str_starts_with($digits, '0')) {
-            $digits = '62' . substr($digits, 1);
-        }
-
         $text = 'Halo ' . $prospect->full_name . ', terima kasih sudah mengisi form minat'
             . ($campus ? ' YPIB ' . $campus->name : ' YPIB') . '.'
             . "\n" . 'Ini link pendaftaran kamu: ' . $linkUrl;
 
-        return 'https://wa.me/' . $digits . '?text=' . urlencode($text);
+        return 'https://wa.me/' . $prospect->whatsappDigits() . '?text=' . urlencode($text);
     }
 
     private static function expiry(?ProspectEvent $event): \Carbon\CarbonInterface
     {
         $close = ($event?->period ?? PmbPeriod::displayPeriod())?->close_date;
 
+        // Tanpa tanggal tutup periode, link berlaku 30 hari.
         return $close ? $close->copy()->endOfDay() : now()->addDays(30);
     }
 

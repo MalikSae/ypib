@@ -5,6 +5,18 @@
 @section('content')
 @php $isEdit = $event->exists; @endphp
 
+<div class="max-w-2xl">
+<div class="flex items-center gap-3 mb-6">
+    <a href="{{ route('admin.prospects.events.index') }}" aria-label="Kembali ke daftar event dan kampanye"
+       class="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-primary-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    </a>
+    <div>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">{{ $isEdit ? 'Edit Event / Kampanye' : 'Tambah Event / Kampanye' }}</h1>
+        <p class="text-sm text-neutral-500">Potongan disimpan ke link saat siswa mengisi form minat.</p>
+    </div>
+</div>
+
 <form method="POST" x-data="{ kind: '{{ old('kind', $event->kind ?? 'event') }}' }"
       action="{{ $isEdit ? route('admin.prospects.events.update', $event) : route('admin.prospects.events.store') }}">
     @csrf
@@ -88,4 +100,5 @@
         </div>
     </x-card>
 </form>
+</div>
 @endsection

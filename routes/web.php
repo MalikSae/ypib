@@ -207,7 +207,8 @@ Route::prefix('admin')
             Route::post('/{prospect}/catatan', [AdminProspectController::class, 'contact'])->whereNumber('prospect')->name('contact');
             Route::post('/{prospect}/kirim-link', [AdminProspectController::class, 'resendLink'])->whereNumber('prospect')->name('resend-link');
             Route::get('event/{event}/qr', [AdminProspectEventController::class, 'qr'])->whereNumber('event')->name('events.qr');
-            Route::resource('event', AdminProspectEventController::class)->except(['show'])->names('events');
+            // Event dinonaktifkan, tidak dihapus (prospek merujuk ke event lewat riwayat sumber).
+            Route::resource('event', AdminProspectEventController::class)->except(['show', 'destroy'])->names('events');
         });
 
         // Referrer management

@@ -9,10 +9,8 @@
         <p class="text-sm text-neutral-400">Form minat per event atau kampanye.</p>
     </div>
     <div class="flex flex-col sm:flex-row gap-2">
-        <a href="{{ route('admin.prospects.index') }}"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-neutral-300 px-4 h-11 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-primary-500">Daftar Prospek</a>
-        <a href="{{ route('admin.prospects.events.create') }}"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary-600 px-4 h-11 text-sm font-semibold text-white hover:bg-primary-700 focus-visible:ring-2 focus-visible:ring-primary-500">Tambah Event / Kampanye</a>
+        <x-button :href="route('admin.prospects.index')" color="neutral" variant="outline" class="whitespace-nowrap">Daftar Prospek</x-button>
+        <x-button :href="route('admin.prospects.events.create')" color="primary" class="whitespace-nowrap">Tambah Event / Kampanye</x-button>
     </div>
 </div>
 
@@ -37,10 +35,8 @@
                     <span x-show="!copied">Salin</span>
                     <span x-show="copied" x-cloak>Tersalin</span>
                 </x-button>
-                <x-button type="button" color="neutral" variant="outline" class="h-11"
-                          onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.events.qr', $event)) }}">QR</x-button>
-                <x-button type="button" color="neutral" variant="outline" class="h-11"
-                          onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.events.edit', $event)) }}">Edit</x-button>
+                <x-button :href="route('admin.prospects.events.qr', $event)" color="neutral" variant="outline" class="h-11">QR</x-button>
+                <x-button :href="route('admin.prospects.events.edit', $event)" color="neutral" variant="outline" class="h-11">Edit</x-button>
             </div>
         </div>
     @empty
@@ -82,10 +78,8 @@
                                 <span x-show="!copied">Salin</span>
                                 <span x-show="copied" x-cloak>Tersalin</span>
                             </x-button>
-                            <x-button type="button" color="neutral" variant="outline" size="sm"
-                                      onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.events.qr', $event)) }}">QR</x-button>
-                            <x-button type="button" color="neutral" variant="outline" size="sm"
-                                      onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.events.edit', $event)) }}">Edit</x-button>
+                            <x-button :href="route('admin.prospects.events.qr', $event)" color="neutral" variant="outline" size="sm">QR</x-button>
+                            <x-button :href="route('admin.prospects.events.edit', $event)" color="neutral" variant="outline" size="sm">Edit</x-button>
                         </div>
                     </td>
                 </tr>

@@ -12,11 +12,12 @@ class ProspectLink extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['prospect_id', 'prospect_event_id', 'token', 'expires_at', 'used_at'];
+    protected $fillable = ['prospect_id', 'prospect_event_id', 'discount_amount', 'token', 'expires_at', 'used_at'];
 
     protected $casts = [
-        'expires_at' => 'datetime',
-        'used_at'    => 'datetime',
+        'expires_at'      => 'datetime',
+        'used_at'         => 'datetime',
+        'discount_amount' => 'integer',
     ];
 
     public function isUsable(): bool

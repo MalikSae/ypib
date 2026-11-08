@@ -64,17 +64,6 @@ class ProspectEventController extends Controller
         ]);
     }
 
-    public function destroy(ProspectEvent $event)
-    {
-        if ($event->sources()->exists()) {
-            return back()->with('error', 'Event sudah punya prospek. Nonaktifkan saja, jangan dihapus.');
-        }
-
-        $event->delete();
-
-        return redirect()->route('admin.prospects.events.index')->with('success', 'Event dihapus.');
-    }
-
     private function validated(Request $request): array
     {
         $data = $request->validate([
@@ -107,7 +96,6 @@ class ProspectEventController extends Controller
             'kinds'     => ProspectEvent::KIND_LABELS,
             'campuses'  => Campus::active()->orderByDesc('is_default')->orderBy('name')->get(),
             'periods'   => PmbPeriod::active()->orderByDesc('open_date')->get(),
-            'defaultPeriodId' => PmbPeriod::displayPeriod()?->id,
         ];
     }
 }

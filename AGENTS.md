@@ -45,6 +45,8 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
 - `<x-select :error="$errors->has('field')">...</x-select>` — untuk dropdown, JANGAN tulis `<select>` manual dengan class Tailwind sendiri
 - `<x-textarea :error="$errors->has('field')" />` — untuk textarea, JANGAN tulis manual
 - `<x-table-action-edit :href="..." />`, `<x-table-action-delete :action="..." />`, `<x-table-action-detail :href="..." />` — untuk tombol aksi kecil (ikon) di baris tabel. JANGAN tulis SVG ikon manual sendiri untuk aksi edit/hapus/detail di tabel — pakai komponen ini supaya ikon dan style konsisten di semua halaman.
+  Bila baris tabel punya lebih dari satu aksi yang perlu label teks (misal Chat, Link, Detail di Kelola Prospek), boleh pakai `<x-button size="sm" color="neutral" variant="outline">` dengan teks. Jangan campur ikon dan teks dalam satu baris.
+- `<x-button :href="...">` — tombol yang berpindah halaman, membuka tab baru, atau mengunduh dirender sebagai `<a>`. JANGAN pakai `onclick="location.href=..."` atau `window.open` untuk navigasi, dan JANGAN tulis `<a>` dengan class tombol manual.
 - `<x-badge-status :active="$item->is_active" :toggle-action="route(...)" />` — untuk badge status Aktif/Nonaktif yang bisa diklik untuk toggle. Pakai ini untuk field boolean status di tabel manapun.
 - `<x-modal>` — untuk dialog konfirmasi (misal konfirmasi hapus), berbasis Alpine.js, sudah ada state show/toggle bawaan.
 

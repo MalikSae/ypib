@@ -98,9 +98,46 @@ class Prospect extends Model
         return self::STATUS_LABELS[$this->status]['color'] ?? 'neutral';
     }
 
+    /**
+     * Kelas badge status: pill pastel dengan border tipis, gaya sama dengan <x-badge-status>.
+     * Satu sumber untuk semua tampilan (daftar, kartu mobile, detail).
+     */
+    public function statusBadgeClass(): string
+    {
+        return [
+            'info'    => 'bg-info-50 text-info-700 border-info-200',
+            'warning' => 'bg-warning-50 text-warning-700 border-warning-200',
+            'primary' => 'bg-primary-50 text-primary-700 border-primary-200',
+            'success' => 'bg-success-50 text-success-700 border-success-200',
+            'neutral' => 'bg-neutral-100 text-neutral-600 border-neutral-200',
+        ][$this->statusColor()] ?? 'bg-neutral-100 text-neutral-600 border-neutral-200';
+    }
+
     public function isRegistered(): bool
     {
         return $this->status === self::STATUS_SUDAH_DAFTAR;
+    }
+
+    /** Catat kontak: waktu kontak diperbarui, status "baru" naik jadi "sudah dihubungi". */
+    public function markContacted(): void
+    {
+        $this->forceFill([
+            'last_contacted_at' => now(),
+            'status'            => $this->status === self::STATUS_BARU ? self::STATUS_DIHUBUNGI : $this->status,
+        ])->save();
+    }
+
+    /** Nomor WA dalam format internasional (62…) untuk tautan wa.me. */
+    public function whatsappDigits(): string
+    {
+        return self::toWhatsappDigits($this->phone_normalized);
+    }
+
+    public static function toWhatsappDigits(?string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone);
+
+        return str_starts_with($digits, '0') ? '62' . substr($digits, 1) : $digits;
     }
 
     public function campus(): BelongsTo

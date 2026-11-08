@@ -111,6 +111,8 @@ class DashboardController extends Controller
                     ->on('pp.program_id', '=', 'registrations.first_choice_program_id')
                     ->whereRaw('pp.campus_id <=> registrations.campus_id');
             })
+            // Rumus sisa tagihan sama dengan Registration::reRegistrationRemaining() (tarif - potongan
+            // form minat - terbayar), ditulis ulang di SQL karena dihitung agregat per prodi.
             ->selectRaw('registrations.first_choice_program_id as program_id, sum(p.paid) as paid, sum(greatest(coalesce(pp.re_registration_fee, 0) - registrations.event_discount_amount - p.paid, 0)) as outstanding')
             ->groupBy('registrations.first_choice_program_id')
             ->get()

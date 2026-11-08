@@ -77,9 +77,9 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                    <input wire:model="full_name" type="text" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-gray-100 text-gray-600' : '' }}" placeholder="Sesuai KTP/Ijazah">
+                    <input wire:model="full_name" type="text" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-neutral-100 text-neutral-600' : '' }}" placeholder="Sesuai KTP/Ijazah">
                     @if($prospectLocked)
-                        <p class="text-xs text-gray-500 mt-1">Terisi dari form minat{{ $prospectEventName ? ' ' . $prospectEventName : '' }}. Tidak bisa diubah.</p>
+                        <p class="text-xs text-neutral-500 mt-1">Terisi dari form minat{{ $prospectEventName ? ' ' . $prospectEventName : '' }}. Tidak bisa diubah.</p>
                     @endif
                 </div>
                 <div>
@@ -186,7 +186,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP / WhatsApp <span class="text-red-500">*</span></label>
-                <input wire:model="phone" type="tel" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-gray-100 text-gray-600' : '' }}" placeholder="08xxxxxxxxxx">
+                <input wire:model="phone" type="tel" @if($prospectLocked) readonly @endif class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none {{ $prospectLocked ? 'bg-neutral-100 text-neutral-600' : '' }}" placeholder="08xxxxxxxxxx">
             </div>
         </div>
     </div>

@@ -63,7 +63,6 @@ class ProspectController extends Controller
             'events'    => ProspectEvent::orderByDesc('id')->get(),
             'selectedAffiliator' => $selectedAffiliator,
             'statuses'  => Prospect::STATUS_LABELS,
-            'adminStatuses' => self::ADMIN_STATUSES,
         ]);
     }
 
@@ -98,15 +97,12 @@ class ProspectController extends Controller
             return back()->with('error', 'Prospek yang sudah mendaftar tidak bisa diubah statusnya di sini.');
         }
 
+        // Catatan admin dicatat di riwayat (form catatan di detail), bukan lewat form status.
         $data = $request->validate([
-            'status'         => ['required', 'in:' . implode(',', self::ADMIN_STATUSES)],
-            'internal_notes' => ['nullable', 'string', 'max:1000'],
+            'status' => ['required', 'in:' . implode(',', self::ADMIN_STATUSES)],
         ]);
 
         $changes = ['status' => $data['status']];
-        if ($request->has('internal_notes')) {
-            $changes['internal_notes'] = $data['internal_notes'];
-        }
         if ($data['status'] !== Prospect::STATUS_BARU && !$prospect->last_contacted_at) {
             $changes['last_contacted_at'] = now();
         }
@@ -156,10 +152,7 @@ class ProspectController extends Controller
         }
 
         if ($contacted) {
-            $prospect->forceFill([
-                'last_contacted_at' => now(),
-                'status'            => $prospect->status === Prospect::STATUS_BARU ? Prospect::STATUS_DIHUBUNGI : $prospect->status,
-            ])->save();
+            $prospect->markContacted();
 
             $this->logActivity($prospect, ProspectActivity::TYPE_KONTAK, $note);
 

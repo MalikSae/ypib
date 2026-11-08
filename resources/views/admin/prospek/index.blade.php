@@ -16,8 +16,7 @@
         <div class="text-sm font-semibold text-neutral-900 mb-1">Link daftar untuk {{ $pl['name'] }}</div>
         <div class="rounded-lg bg-neutral-100 border border-neutral-200 px-3.5 py-2.5 font-mono text-xs break-all text-neutral-900 select-all">{{ $pl['url'] }}</div>
         @if($pl['wa'])
-            <x-button type="button" color="primary" class="mt-3 h-11 md:h-9"
-                      onclick="window.open({{ \Illuminate\Support\Js::from($pl['wa']) }}, '_blank', 'noopener')">Kirim lewat WhatsApp</x-button>
+            <x-button :href="$pl['wa']" target="_blank" rel="noopener" color="primary" class="mt-3 h-11 md:h-9">Kirim lewat WhatsApp</x-button>
         @endif
     </x-card>
 @endif
@@ -33,7 +32,7 @@
 <div class="hidden md:grid md:grid-cols-5 gap-3 mb-4">
     @foreach($statuses as $key => $meta)
         <x-card class="p-3 md:p-4">
-            <div class="text-xs text-neutral-400 uppercase">{{ $meta['label'] }}</div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-neutral-500">{{ $meta['label'] }}</div>
             <div class="text-xl font-bold text-neutral-900">{{ $counts[$key] ?? 0 }}</div>
         </x-card>
     @endforeach
@@ -109,17 +108,11 @@
                     <a href="{{ route('admin.prospects.show', $p) }}" class="rounded-sm font-medium text-neutral-900 hover:text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none">{{ $p->full_name }}</a>
                     <div class="text-xs text-neutral-400">{{ $p->school_name ?: '—' }}</div>
                 </div>
-                @php
-                    $cardBadge = [
-                        'info'    => 'bg-info-50 text-info-700 border-info-200',
-                        'warning' => 'bg-warning-50 text-warning-700 border-warning-200',
-                        'primary' => 'bg-primary-50 text-primary-700 border-primary-200',
-                        'success' => 'bg-success-50 text-success-700 border-success-200',
-                        'neutral' => 'bg-neutral-100 text-neutral-600 border-neutral-200',
-                    ][$p->statusColor()] ?? 'bg-neutral-100 text-neutral-600 border-neutral-200';
-                @endphp
-                <span class="shrink-0 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $cardBadge }}">{{ $p->statusLabel() }}</span>
+                <span class="shrink-0 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $p->statusBadgeClass() }}">{{ $p->statusLabel() }}</span>
             </div>
+            @if($p->fraud_flag)
+                <p class="mt-2 text-xs font-semibold text-error-600">Dicurigai: WA sama dengan akun affiliator</p>
+            @endif
             <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div><dt class="text-xs text-neutral-400">WhatsApp</dt><dd class="font-mono text-xs text-neutral-700">{{ $p->phone_normalized }}</dd></div>
                 <div><dt class="text-xs text-neutral-400">Prodi</dt><dd class="text-neutral-600">{{ $p->program?->name ?? 'Belum menentukan' }}</dd></div>
@@ -127,8 +120,8 @@
                 <div><dt class="text-xs text-neutral-400">Affiliator</dt><dd class="text-neutral-600">{{ $p->referrer?->user?->name ?? '—' }}</dd></div>
             </dl>
             <div class="mt-4 grid grid-cols-3 gap-2">
-                <x-button type="button" color="success" class="h-11"
-                          onclick="window.open({{ \Illuminate\Support\Js::from(\App\Support\ProspectService::prospectChatUrl($p, $p->campus)) }}, '_blank', 'noopener')">Chat</x-button>
+                <x-button :href="\App\Support\ProspectService::prospectChatUrl($p, $p->campus)" target="_blank" rel="noopener"
+                          color="neutral" variant="outline" class="h-11">Chat</x-button>
                 @if(! $p->isRegistered())
                     <form method="POST" action="{{ route('admin.prospects.resend-link', $p) }}" class="contents">
                         @csrf
@@ -137,8 +130,7 @@
                 @else
                     <span></span>
                 @endif
-                <x-button type="button" color="neutral" variant="outline" class="h-11"
-                          onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.show', $p)) }}">Detail</x-button>
+                <x-button :href="route('admin.prospects.show', $p)" color="neutral" variant="outline" class="h-11">Detail</x-button>
             </div>
         </div>
     @empty
@@ -168,7 +160,7 @@
                         <a href="{{ route('admin.prospects.show', $p) }}" class="rounded-sm font-medium text-neutral-900 hover:text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none">{{ $p->full_name }}</a>
                         <div class="text-xs text-neutral-400">{{ $p->school_name ?: '—' }}</div>
                         @if($p->fraud_flag)
-                            <span class="inline-block mt-1 text-[11px] font-semibold text-error-600">Dicurigai: WA sama dengan akun affiliator</span>
+                            <span class="inline-block mt-1 text-xs font-semibold text-error-600">Dicurigai: WA sama dengan akun affiliator</span>
                         @endif
                     </td>
                     <td class="px-4 py-3 font-mono text-xs text-neutral-700 whitespace-nowrap">{{ $p->phone_normalized }}</td>
@@ -176,30 +168,19 @@
                     <td class="px-4 py-3 text-neutral-600 whitespace-nowrap">{{ $p->sources->first()?->event?->name ?? '—' }}</td>
                     <td class="px-4 py-3 text-neutral-600">{{ $p->referrer?->user?->name ?? '—' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
-                        @php
-                            // Gaya sama dengan <x-badge-status>: pill pastel dengan border tipis.
-                            $badgeClass = [
-                                'info'    => 'bg-info-50 text-info-700 border-info-200',
-                                'warning' => 'bg-warning-50 text-warning-700 border-warning-200',
-                                'primary' => 'bg-primary-50 text-primary-700 border-primary-200',
-                                'success' => 'bg-success-50 text-success-700 border-success-200',
-                                'neutral' => 'bg-neutral-100 text-neutral-600 border-neutral-200',
-                            ][$p->statusColor()] ?? 'bg-neutral-100 text-neutral-600 border-neutral-200';
-                        @endphp
-                        <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $badgeClass }}">{{ $p->statusLabel() }}</span>
+                        <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $p->statusBadgeClass() }}">{{ $p->statusLabel() }}</span>
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-2 whitespace-nowrap">
-                            <x-button type="button" color="neutral" variant="outline" size="sm"
-                                      onclick="window.open({{ \Illuminate\Support\Js::from(\App\Support\ProspectService::prospectChatUrl($p, $p->campus)) }}, '_blank', 'noopener')">Chat</x-button>
+                            <x-button :href="\App\Support\ProspectService::prospectChatUrl($p, $p->campus)" target="_blank" rel="noopener"
+                                      color="neutral" variant="outline" size="sm">Chat</x-button>
                             @unless($p->isRegistered())
                                 <form method="POST" action="{{ route('admin.prospects.resend-link', $p) }}">
                                     @csrf
                                     <x-button type="submit" color="primary" size="sm">Link</x-button>
                                 </form>
                             @endunless
-                            <x-button type="button" color="neutral" variant="outline" size="sm"
-                                      onclick="location.href = {{ \Illuminate\Support\Js::from(route('admin.prospects.show', $p)) }}">Detail</x-button>
+                            <x-button :href="route('admin.prospects.show', $p)" color="neutral" variant="outline" size="sm">Detail</x-button>
                         </div>
                     </td>
                 </tr>

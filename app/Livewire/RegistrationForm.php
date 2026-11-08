@@ -11,6 +11,7 @@ use App\Models\ReferralClick;
 use App\Models\Referrer;
 use App\Models\Registration;
 use App\Models\Scopes\CampusScope;
+use App\Support\ProspectService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Livewire\Attributes\Locked;
@@ -192,7 +193,7 @@ class RegistrationForm extends Component
             ->values();
 
         // Link daftar dari form minat: kampus mengikuti event prospek.
-        $prospectLink = $this->activeProspectLink();
+        $prospectLink = ProspectService::sessionLink();
 
         // ?kampus=slug memilih kampus; satu-satunya kampus dipilih otomatis.
         $slug = \App\Support\QueryInput::string(request(), 'kampus');
@@ -255,21 +256,12 @@ class RegistrationForm extends Component
         $this->loadPrograms();
     }
 
-    /**
-     * Link daftar prospek dari sesi, bila masih bisa dipakai. Link yang sudah tidak berlaku
-     * dibuang dari sesi.
-     */
-    protected function activeProspectLink(): ?ProspectLink
-    {
-        return \App\Support\ProspectService::sessionLink();
-    }
-
     protected function lockToProspect(ProspectLink $link): void
     {
         $prospect = $link->prospect;
 
         $this->full_name = $prospect->full_name;
-        $this->phone = $prospect->phone;
+        $this->phone = $prospect->phone_normalized;
         $this->prospectLocked = true;
 
         // Pendidikan dan sekolah dari form minat dipakai sebagai isian awal (tetap bisa diubah).
@@ -362,10 +354,10 @@ class RegistrationForm extends Component
         }
 
         // Link prospek: nama, WA, dan kampus dipaksa dari data prospek, bukan dari input klien.
-        $prospectLink = $this->activeProspectLink();
+        $prospectLink = ProspectService::sessionLink();
         if ($prospectLink) {
             $this->full_name = $prospectLink->prospect->full_name;
-            $this->phone = $prospectLink->prospect->phone;
+            $this->phone = $prospectLink->prospect->phone_normalized;
             $this->campus_id = (string) $prospectLink->event->campus_id;
         }
 
@@ -418,24 +410,31 @@ class RegistrationForm extends Component
                 $lockedLink = ProspectLink::whereKey($prospectLink->id)->lockForUpdate()->first();
                 if (!$lockedLink || !$lockedLink->isUsable()) {
                     \Illuminate\Support\Facades\DB::rollBack();
-                    session()->forget('prospect_token');
+                    session()->forget(ProspectService::SESSION_KEY);
                     session()->flash('error', 'Link pendaftaran ini sudah dipakai atau tidak berlaku.');
 
                     return;
                 }
             }
 
-            // Prospek terkait: dari link terkunci, atau nomor WA yang cocok dengan prospek.
+            // Prospek terkait: dari link terkunci, atau nomor WA yang cocok dengan prospek yang
+            // belum mendaftar (prospek yang sudah terhubung ke registrasi lain tidak diambil alih).
             $prospect = $lockedLink
                 ? $prospectLink->prospect
                 : Prospect::withoutGlobalScope(CampusScope::class)
                     ->where('phone_normalized', Prospect::normalizePhone($this->phone))
+                    ->where('status', '!=', Prospect::STATUS_SUDAH_DAFTAR)
                     ->lockForUpdate()
                     ->first();
-            // Affiliator pemilik prospek mengalahkan cookie ref (first-touch).
-            $referrerId = $prospect?->referrer_id ?? $this->resolveReferrer()?->id;
-            // Potongan daftar ulang hanya dari link form minat.
-            $discount = $lockedLink ? (int) ($prospectLink->event->discount_amount ?? 0) : 0;
+
+            // Lewat link: referrer selalu pemilik prospek, cookie diabaikan (prospek event kampus
+            // tanpa pemilik = tanpa referrer). Tanpa link: pemilik prospek mengalahkan cookie.
+            $referrerId = $lockedLink
+                ? $prospect->referrer_id
+                : ($prospect?->referrer_id ?? $this->resolveReferrer()?->id);
+
+            // Potongan daftar ulang hanya dari link form minat, memakai snapshot saat link dibuat.
+            $discount = $lockedLink ? (int) $lockedLink->discount_amount : 0;
 
             $registration = Registration::create([
                 'period_id'                => $period->id,
@@ -478,7 +477,7 @@ class RegistrationForm extends Component
             }
             if ($lockedLink) {
                 $lockedLink->forceFill(['used_at' => now()])->save();
-                session()->forget('prospect_token');
+                session()->forget(ProspectService::SESSION_KEY);
             }
 
             \Illuminate\Support\Facades\DB::commit();

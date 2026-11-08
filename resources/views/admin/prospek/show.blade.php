@@ -3,8 +3,15 @@
 @section('page-title', 'Detail Prospek')
 
 @section('content')
-<div class="mb-4">
-    <a href="{{ route('admin.prospects.index') }}" class="text-sm font-semibold text-primary-600 hover:underline">← Kembali ke daftar</a>
+<div class="flex items-center gap-3 mb-6">
+    <a href="{{ route('admin.prospects.index') }}" aria-label="Kembali ke daftar prospek"
+       class="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-primary-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    </a>
+    <div>
+        <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Detail Prospek</h1>
+        <p class="text-sm text-neutral-500">Riwayat kontak dan status calon mahasiswa.</p>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -13,12 +20,15 @@
         <x-card class="p-4 md:p-6">
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-bold text-neutral-900">{{ $prospect->full_name }}</h1>
+                    <h2 class="text-lg font-bold text-neutral-900">{{ $prospect->full_name }}</h2>
                     <p class="text-sm text-neutral-500">{{ $prospect->school_name ?: '—' }}</p>
                     <p class="font-mono text-sm text-neutral-700 mt-1">{{ $prospect->phone_normalized }}</p>
+                    @if($prospect->fraud_flag)
+                        <p class="mt-2 text-xs font-semibold text-error-600">Dicurigai: WA sama dengan akun affiliator</p>
+                    @endif
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <x-button type="button" color="neutral" variant="outline" onclick="window.open({{ \Illuminate\Support\Js::from($chatUrl) }}, '_blank', 'noopener')">Chat WA</x-button>
+                    <x-button :href="$chatUrl" target="_blank" rel="noopener" color="neutral" variant="outline">Chat WA</x-button>
                     @unless($prospect->isRegistered())
                         <form method="POST" action="{{ route('admin.prospects.resend-link', $prospect) }}">
                             @csrf
@@ -30,27 +40,27 @@
 
             <dl class="grid grid-cols-2 gap-4 mt-6 text-sm">
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Pendidikan</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Pendidikan</dt>
                     <dd class="text-neutral-900">{{ \App\Models\Registration::EDUCATION_LEVELS[$prospect->education_level]['label'] ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Prodi</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Prodi</dt>
                     <dd class="text-neutral-900">{{ $prospect->program?->name ?? 'Belum menentukan' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Event</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Event</dt>
                     <dd class="text-neutral-900">{{ $prospect->sources->map(fn ($s) => $s->event?->name)->filter()->implode(', ') ?: '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Affiliator</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Affiliator</dt>
                     <dd class="text-neutral-900">{{ $prospect->referrer?->user?->name ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Klik WA</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Klik WA</dt>
                     <dd class="text-neutral-900">{{ $prospect->wa_clicked_at?->format('d/m/Y H:i') ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs text-neutral-400 uppercase">Terakhir dihubungi</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Terakhir dihubungi</dt>
                     <dd class="text-neutral-900">{{ $prospect->last_contacted_at?->format('d/m/Y H:i') ?? '—' }}</dd>
                 </div>
             </dl>

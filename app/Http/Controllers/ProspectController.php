@@ -19,7 +19,6 @@ use Illuminate\Validation\Rule;
 class ProspectController extends Controller
 {
     private const SESSION_THANKS = 'prospect_thanks';
-    private const SESSION_LINK = 'prospect_token';
 
     public function show(Request $request, string $eventSlug)
     {
@@ -110,8 +109,7 @@ class ProspectController extends Controller
 
     public function thanks()
     {
-        $data = session(self::SESSION_THANKS);
-        $prospect = $data ? Prospect::withoutGlobalScope(CampusScope::class)->with('campus')->find($data['prospect_id']) : null;
+        [$prospect, $data] = $this->thanksContext();
 
         if (!$prospect) {
             return redirect()->route('landing');
@@ -130,8 +128,7 @@ class ProspectController extends Controller
     /** Klik tombol WA: catat waktu klik, lalu teruskan ke WA admin kampus. */
     public function whatsapp()
     {
-        $data = session(self::SESSION_THANKS);
-        $prospect = $data ? Prospect::withoutGlobalScope(CampusScope::class)->with('campus')->find($data['prospect_id']) : null;
+        [$prospect, $data] = $this->thanksContext();
 
         if (!$prospect) {
             return redirect()->route('landing');
@@ -151,19 +148,14 @@ class ProspectController extends Controller
     /** Link daftar terkunci: validasi, simpan token di sesi, lalu arahkan ke form pendaftaran. */
     public function openLink(string $token)
     {
-        $link = ProspectLink::where('token', $token)->with('prospect')->first();
+        $link = ProspectLink::where('token', $token)->with(['prospect.referrer', 'event'])->first();
 
-        if (!$link || !$link->isUsable() || !$link->prospect || $link->prospect->isRegistered()) {
+        // Link prospek ikut mati bila sudah dipakai, kedaluwarsa, atau affiliator pemiliknya nonaktif.
+        if (!ProspectService::isLinkOpen($link)) {
             return redirect()->route('landing')->with('error', 'Link pendaftaran ini sudah tidak berlaku. Hubungi admin kampus.');
         }
 
-        // Link prospek ikut mati bila affiliator pemiliknya nonaktif.
-        $owner = $link->prospect->referrer_id ? Referrer::find($link->prospect->referrer_id) : null;
-        if ($owner && $owner->status !== 'active') {
-            return redirect()->route('landing')->with('error', 'Link pendaftaran ini sudah tidak berlaku. Hubungi admin kampus.');
-        }
-
-        session()->put(self::SESSION_LINK, $token);
+        session()->put(ProspectService::SESSION_KEY, $token);
 
         // Tamu harus login atau daftar akun dulu; setelahnya kembali ke form pendaftaran.
         session()->put('url.intended', route('registration.create'));
@@ -177,9 +169,20 @@ class ProspectController extends Controller
      */
     public function release()
     {
-        session()->forget(self::SESSION_LINK);
+        session()->forget(ProspectService::SESSION_KEY);
 
         return back()->with('success', 'Data form minat tidak dipakai. Silakan isi data kamu sendiri.');
+    }
+
+    /** Prospek dan data sesi halaman terima kasih, atau [null, null]. */
+    private function thanksContext(): array
+    {
+        $data = session(self::SESSION_THANKS);
+        $prospect = $data
+            ? Prospect::withoutGlobalScope(CampusScope::class)->with('campus')->find($data['prospect_id'])
+            : null;
+
+        return [$prospect, $data];
     }
 
     /** Event aktif yang masih menerima form minat, atau null. */

@@ -20,6 +20,11 @@ class Referrer extends Model
         'bank_account_name',
     ];
 
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
