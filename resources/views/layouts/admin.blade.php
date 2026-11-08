@@ -484,6 +484,7 @@
                     ['Periode PMB', 'admin.periods.index', 'calendar', request()->routeIs('admin.periods.*'), 'global' => true],
                     ['Akun Staf', 'admin.staff.index', 'people', request()->routeIs('admin.staff.*'), 'super' => true],
                     ['Integrasi Email', 'admin.settings.mail', 'mail', request()->routeIs('admin.settings.mail'), 'global' => true],
+                    ['Changelog', 'admin.changelog', 'book', request()->routeIs('admin.changelog')],
                 ]],
             ];
 

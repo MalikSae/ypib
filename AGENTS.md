@@ -150,6 +150,7 @@ Kolom `role` di tabel `users` (enum): `admin`, `operator`, `referrer`, `mahasisw
 
 - Commit terpisah per fitur JIKA file tidak saling tumpang tindih. Jika overlap terlalu rumit untuk dipisah rapi tanpa risiko salah potong, gabung jadi satu commit utuh — LAPORKAN dulu ke user sebelum memutuskan mana yang dipilih.
 - Jangan pernah force push atau merge otomatis jika push gagal.
+- Setiap deploy produksi: tambahkan entri baru PALING ATAS di `resources/data/changelog.php` (tanggal, judul, commit, daftar update per kelompok). Isi ditampilkan di `/admin/changelog`. Tulis dari sudut pandang pengguna, bukan istilah teknis.
 
 ---
 
