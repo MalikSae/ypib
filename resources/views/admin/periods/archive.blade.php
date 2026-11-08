@@ -10,7 +10,7 @@
         <p class="mt-0.5 text-sm text-neutral-400">Periode arsip hanya baca bagi pendaftar: tidak ada unggahan atau perubahan baru. Unduhan tetap bisa dipakai.</p>
     </div>
 
-    <x-card class="p-6 md:p-8">
+    <x-card class="p-4 md:p-8">
         <dl class="grid grid-cols-3 gap-4 mb-6">
             <div class="p-4 rounded-xl bg-neutral-50 border border-neutral-200">
                 <dt class="text-xs font-semibold text-neutral-400 uppercase">Total pendaftar</dt>

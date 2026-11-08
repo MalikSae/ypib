@@ -10,17 +10,17 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <div class="max-w-4xl">
-    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
+    <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.programs.index') }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors shrink-0 decoration-none">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900 mb-1">{{ isset($program) ? 'Edit Program Studi' : 'Tambah Program Studi' }}</h1>
+            <h1 class="text-xl font-bold text-neutral-900 tracking-tight">{{ isset($program) ? 'Edit Program Studi' : 'Tambah Program Studi' }}</h1>
             <p class="text-sm text-neutral-500">Lengkapi form di bawah ini.</p>
         </div>
     </div>
 
-    <x-card class="p-6 md:p-8">
+    <x-card class="p-4 md:p-8">
         <form action="{{ isset($program) ? route('admin.programs.update', $program->id) : route('admin.programs.store') }}" method="POST" enctype="multipart/form-data" x-data="{ submitting: false, selectedIcon: '{{ old('icon', $program->icon ?? '') }}' }" @submit="submitting = true">
             @csrf
             @if(isset($program)) @method('PUT') @endif
@@ -30,7 +30,7 @@
             {{-- ═══════════════════════════════════════════════ --}}
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Informasi Dasar</label>
-                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
 
                     {{-- Baris 1: Nama | Fakultas --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -183,11 +183,11 @@
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Dibuka di Kampus Mana?</label>
 
                 @if(!$offers['period'])
-                    <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 text-sm text-neutral-500">
+                    <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 text-sm text-neutral-500">
                         Belum ada periode PMB. Buat periode dulu di menu Periode PMB, lalu atur kampus untuk prodi ini.
                     </div>
                 @else
-                    <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-4">
+                    <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-neutral-600">
                             <div>Periode: <strong class="text-neutral-900">{{ $offers['period']->name }}</strong>
                                 <span class="text-xs text-neutral-400">(ikut pemilih periode di pojok atas)</span></div>
@@ -258,7 +258,7 @@
                 <x-button type="submit" color="primary" ::disabled="submitting">
                     <span x-show="!submitting">Simpan</span>
                     <span x-show="submitting" style="display:none;" class="flex items-center gap-2">
-                        <i class="ti ti-loader animate-spin"></i> Menyimpan...
+                        <svg class="w-4 h-4 animate-spin motion-reduce:animate-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Menyimpan...
                     </span>
                 </x-button>
             </div>

@@ -6,7 +6,7 @@
 @section('content')
 
 <div class="max-w-4xl">
-    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
+    <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.periods.index') }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors shrink-0 decoration-none">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </a>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <x-card class="p-6 md:p-8">
+    <x-card class="p-4 md:p-8">
         <form action="{{ $isEdit ? route('admin.periods.update', $period->id) : route('admin.periods.store') }}"
               method="POST" x-data="{ submitting: false }" @submit="submitting = true">
             @csrf
@@ -30,7 +30,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Informasi Periode</label>
-                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="name" value="Nama Periode" required="true" />
@@ -93,7 +93,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Rekening Pembayaran Kampus</label>
-                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="university_bank_name" value="Nama Bank" />
@@ -122,7 +122,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Kontak WhatsApp Admin</label>
-                <div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">
                     <x-input-label for="admin_whatsapp" value="Nomor WhatsApp" />
                     <x-text-input type="text" id="admin_whatsapp" name="admin_whatsapp" class="font-mono md:w-1/2"
                                   :value="old('admin_whatsapp', $period->admin_whatsapp)" placeholder="Cth: 081234567890"

@@ -59,10 +59,52 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
 Pagination pakai bawaan Laravel (`{{ $items->links() }}`), tidak ada component khusus.
 
 **Pola halaman List/Index** (acuan: `admin/facilities/index.blade.php`):
-Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900` + deskripsi `text-sm text-neutral-400`, tombol aksi kanan `rounded-xl bg-primary-600`). Tabel: `bg-white rounded-2xl border border-neutral-200`, header `bg-neutral-50 text-xs uppercase text-neutral-400`, body `divide-y divide-neutral-100`.
+Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900` + deskripsi `text-sm text-neutral-400`, tombol aksi kanan `rounded-md bg-primary-600`). Tabel: `bg-white rounded-lg border border-neutral-200`, header `bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500`, body `divide-y divide-neutral-100`.
+
+**Aturan UI (berlaku untuk seluruh halaman admin, mengacu ke skill ui-craft)**
+
+- **Tulisan**: sentence case untuk judul, tombol, dan label. Uppercase HANYA untuk label kategori kecil (≤13px) dengan `tracking-wide`, misal header tabel. Judul dan tombol tidak boleh uppercase.
+- **Radius per elemen** (jangan seragam):
+  - Input, select, textarea, dan tombol: `rounded-md` (6px).
+  - Card, tabel, dan panel: `rounded-lg` (8px).
+  - Modal: `rounded-xl` (12px).
+  - Pill (`rounded-full`) hanya untuk badge status.
+- **Satu aksen**: `primary` adalah satu-satunya warna aksi.
+  - Maksimal 3–5 tombol `primary` per layar, dan satu per baris tabel.
+  - Aksi di baris tabel memakai `outline` atau `ghost` (`neutral`). JANGAN pakai `success` atau warna lain sebagai tombol aksi.
+  - `success` hanya untuk status positif (badge atau teks).
+- **Status**: field boolean pakai `<x-badge-status>`. Field status bertingkat (enum) memakai pill pastel dengan border tipis, gaya yang sama dengan `<x-badge-status>`: `bg-{warna}-50 text-{warna}-700 border-{warna}-200`. Angka tren atau persentase cukup teks biasa, tanpa pill.
+- **Ikon**: satu library saja, yaitu Heroicons (outline, `stroke-width` 1.5–2). JANGAN campur dengan library lain. JANGAN pakai emoji sebagai ikon.
+- **Gradient teks** dan **glow** tidak dipakai di halaman admin.
+- **Aksesibilitas**:
+  - Setiap elemen interaktif punya focus ring yang terlihat (`focus-visible:ring-2`). `<x-button>` sudah memilikinya.
+  - Semua aksi bisa dijalankan dengan keyboard.
+  - Animasi menghormati `prefers-reduced-motion` (`motion-reduce:`).
+- **Teks tombol** harus spesifik: "Simpan perubahan", "Kirim link daftar". JANGAN "Klik di sini" atau "Selengkapnya" sendirian.
 
 **Pola halaman Form** (acuan: `admin/programs/form.blade.php`):
-Bungkus `<x-card class="p-6 md:p-8">`. Kelompokkan field terkait dalam `<div class="p-6 bg-neutral-50 rounded-xl border border-neutral-200 space-y-5">`. Tiap field: x-input-label → x-text-input → x-input-error berurutan. Footer: `flex justify-end gap-3 pt-6 border-t border-neutral-200`, tombol Batal (variant ghost) + Simpan (color primary).
+Header form: tombol kembali (ikon panah Heroicons, `w-10 h-10`) dan judul dalam SATU baris di semua ukuran layar (`flex items-center gap-3`, bukan `flex-col`). Judul `text-xl font-bold text-neutral-900 tracking-tight`, deskripsi `text-sm text-neutral-500`.
+Bungkus `<x-card class="p-4 md:p-8">`. Kelompokkan field terkait dalam `<div class="space-y-5 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">`. Di mobile kotak dalam tidak punya bg, border, atau padding, sehingga hanya ada satu lapis card. Jangan menumpuk card, kotak abu-abu, dan padding di mobile. Tiap field: x-input-label → x-text-input → x-input-error berurutan. Footer: `flex justify-end gap-3 pt-6 border-t border-neutral-200`, tombol Batal (variant ghost) + Simpan (color primary).
+
+**Responsif — halaman admin** (mengacu ke skill ui-craft, `responsive.md`):
+
+- **Breakpoint**: pakai `md` (768px) sebagai satu-satunya titik pindah. Di bawah `md` = mobile, di atas = desktop. Jangan tambah breakpoint lain tanpa alasan konten.
+- **Mobile**:
+  - Satu kolom, komponen full-width.
+  - Filter disembunyikan di balik tombol "Filter" yang bisa dibuka-tutup.
+  - Ringkasan angka (KPI) jadi daftar, bukan grid kartu.
+  - Tabel dengan lebih dari 4 kolom ditampilkan sebagai daftar kartu (`md:hidden` untuk kartu, `hidden md:block` untuk tabel). JANGAN biarkan tabel scroll horizontal tanpa indikator.
+  - Input dan select `text-base` (16px) untuk mencegah zoom di iOS. Di desktop boleh `md:text-sm`.
+  - Zona sentuh minimal 44×44px. `<x-button size="sm">` (h-9, 36px) hanya boleh di desktop. Di mobile pakai `size="md"` atau lebih besar untuk aksi di baris tabel.
+  - Aksi destruktif (hapus, nonaktifkan) diletakkan jauh dari jangkauan jempol dan dikonfirmasi dengan `<x-modal>`.
+  - Jangan sembunyikan fitur di mobile. Kalau terlalu kompleks, susun ulang layoutnya.
+  - Elemen fixed atau sticky wajib memakai `padding-bottom: env(safe-area-inset-bottom)`.
+  - Tinggi layar penuh (modal, drawer) pakai `dvh`, bukan `vh` atau `h-screen`.
+- **Desktop**:
+  - Tabel boleh banyak kolom. Gunakan `max-w` untuk konten yang terlalu lebar.
+  - Hover state wajib untuk aksi tambahan. Shortcut keyboard boleh.
+  - Form utama dibatasi lebar 640px (`max-w-2xl`) agar mudah dibaca.
+- **Tidak boleh**: swipe sebagai satu-satunya cara aksi, scroll horizontal tanpa indikator, dan teks di bawah 16px untuk input di mobile.
 
 ### 2. Halaman Publik Pendaftar (prefix `/pendaftaran`, layout `layouts.landing`)
 
