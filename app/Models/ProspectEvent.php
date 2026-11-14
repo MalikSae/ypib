@@ -65,6 +65,57 @@ class ProspectEvent extends Model
         return $query->where('kind', self::KIND_ONLINE);
     }
 
+    /**
+     * Event yang mendapat kredit pendaftaran seorang prospek (alias tabel prospek: p): event pada
+     * link daftar yang terpakai, atau event pertama yang diikuti bila mendaftar tanpa link.
+     */
+    private const ATTRIBUTED_EVENT_SQL = 'coalesce('
+        . '(select pl.prospect_event_id from prospect_links pl where pl.prospect_id = p.id'
+        . ' and pl.used_at is not null and pl.prospect_event_id is not null order by pl.used_at desc, pl.id desc limit 1), '
+        . '(select ps.prospect_event_id from prospect_sources ps where ps.prospect_id = p.id'
+        . ' order by ps.created_at asc, ps.id asc limit 1))';
+
+    /**
+     * Corong per event: prospects_count (semua prospek yang ikut event), registered_count (bayar
+     * pendaftaran terkonfirmasi), dan reregistered_count (daftar ulang selesai). Prospek bertanda
+     * fraud tidak dihitung. Satu pendaftaran hanya dikreditkan ke satu event.
+     */
+    public function scopeWithFunnel($query)
+    {
+        $unpaid = ['menunggu_pembayaran', 'menunggu_konfirmasi'];
+        $paid = array_values(array_diff(array_keys(Registration::STATUS_LABELS), $unpaid));
+
+        $converted = fn (array $statuses) => \Illuminate\Support\Facades\DB::table('prospects as p')
+            ->join('registrations as r', 'r.id', '=', 'p.registration_id')
+            ->where('p.fraud_flag', false)
+            ->whereNull('r.deleted_at')
+            ->whereIn('r.status', $statuses)
+            ->whereRaw(self::ATTRIBUTED_EVENT_SQL . ' = prospect_events.id')
+            ->selectRaw('count(*)');
+
+        if ($query->getQuery()->columns === null) {
+            $query->select('prospect_events.*');
+        }
+
+        return $query
+            ->selectSub(
+                \Illuminate\Support\Facades\DB::table('prospect_sources as s')
+                    ->join('prospects as sp', 'sp.id', '=', 's.prospect_id')
+                    ->where('sp.fraud_flag', false)
+                    ->whereColumn('s.prospect_event_id', 'prospect_events.id')
+                    ->selectRaw('count(*)'),
+                'prospects_count'
+            )
+            ->selectSub($converted($paid), 'registered_count')
+            ->selectSub($converted(['daftar_ulang_selesai']), 'reregistered_count');
+    }
+
+    /** Persen terhadap jumlah prospek event ini; null bila belum ada prospek. */
+    public function funnelPercent(int $count): ?int
+    {
+        return $this->prospects_count > 0 ? (int) round($count / $this->prospects_count * 100) : null;
+    }
+
     /** Form minat masih menerima pengisian: event aktif dan periode (bila ada) belum tutup. */
     public function acceptsInterest(): bool
     {
