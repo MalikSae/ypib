@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\ExamQuestion;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,16 +11,14 @@ use Livewire\WithPagination;
 /** Bank soal. Cari pertanyaan langsung menyaring dan tersimpan di URL. */
 class ExamQuestionList extends Component
 {
-    use WithPagination;
+    use AuthorizesAccess, WithPagination;
 
     #[Url(except: '')]
     public string $search = '';
 
-    /** Sama dengan middleware global.admin: admin atau operator tanpa batasan kampus. */
     public function boot(): void
     {
-        $user = auth()->user();
-        abort_unless(in_array($user?->role, ['admin', 'operator'], true) && ! $user->campus_id, 403);
+        $this->authorizeGlobalStaff();
     }
 
     public function updatedSearch(): void

@@ -9,6 +9,13 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    /** Peran akun staf yang dikelola di menu Akun Staf: kode => label. */
+    public const STAFF_ROLES = [
+        'admin'    => 'Admin',
+        'operator' => 'Operator',
+        'panitia'  => 'Panitia',
+    ];
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 

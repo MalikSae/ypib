@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Campus;
 use App\Models\PmbPeriod;
 use App\Models\Program;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,7 +13,7 @@ use Livewire\WithPagination;
 /** Daftar program studi. Cari, kampus, dan jumlah per halaman langsung berlaku dan tersimpan di URL. */
 class ProgramList extends Component
 {
-    use WithPagination;
+    use AuthorizesAccess, WithPagination;
 
     private const PER_PAGE = [5, 10, 25, 50, 100];
 
@@ -25,11 +26,9 @@ class ProgramList extends Component
     #[Url(as: 'per_page', except: 10)]
     public int $perPage = 10;
 
-    /** Sama dengan middleware global.admin: admin atau operator tanpa batasan kampus. */
     public function boot(): void
     {
-        $user = auth()->user();
-        abort_unless(in_array($user?->role, ['admin', 'operator'], true) && ! $user->campus_id, 403);
+        $this->authorizeGlobalStaff();
     }
 
     public function updated(string $property): void
@@ -37,6 +36,13 @@ class ProgramList extends Component
         if (in_array($property, ['search', 'campus', 'perPage'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->campus = '';
+        $this->resetPage();
     }
 
     public function render()
@@ -73,7 +79,8 @@ class ProgramList extends Component
             'displayPeriod'  => $displayPeriod,
             'campusOptions'  => $campuses->pluck('name', 'id')->all(),
             'termsCampus'    => $termsCampus,
-            'perPageOptions' => array_combine(self::PER_PAGE, array_map('strval', self::PER_PAGE)),
+            'perPageOptions' => $this->perPageOptions(self::PER_PAGE),
+            'hasFilters'     => $term !== '' || $this->campus !== '',
         ]);
     }
 }

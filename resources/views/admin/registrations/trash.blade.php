@@ -12,9 +12,7 @@
         <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Arsip Pendaftar Terhapus</h1>
         <p class="mt-0.5 text-sm text-neutral-400">Daftar pendaftar yang telah dihapus (soft delete). Komisi afiliasi untuk mereka sudah disesuaikan otomatis.</p>
     </div>
-    <a href="{{ route('admin.registrations.index') }}" class="decoration-none"><x-button type="button" color="neutral" variant="outline">
-        &larr; Kembali ke Data Utama
-    </x-button></a>
+    <x-button :href="route('admin.registrations.index')" color="neutral" variant="outline">Kembali ke data pendaftar</x-button>
 </div>
 
 {{-- ============================================================ --}}

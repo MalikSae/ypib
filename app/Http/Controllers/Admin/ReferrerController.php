@@ -96,6 +96,7 @@ class ReferrerController extends Controller
         $periodId = $request->query('period_id');
         $status   = $request->query('status');
         $filename = 'Data_Referrer_' . date('Ymd_His') . '.xlsx';
-        return Excel::download(new \App\Exports\ReferrerExport($periodId, $status), $filename);
+        $search   = \App\Support\QueryInput::string($request, 'search');
+        return Excel::download(new \App\Exports\ReferrerExport($periodId, $status, $search), $filename);
     }
 }

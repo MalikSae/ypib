@@ -6,6 +6,7 @@ use App\Models\Prospect;
 use App\Models\ProspectEvent;
 use App\Models\Referrer;
 use Illuminate\Database\Eloquent\Builder;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,9 +17,7 @@ use Livewire\WithPagination;
  */
 class ProspectList extends Component
 {
-    use WithPagination;
-
-    private const STAFF_ROLES = ['admin', 'operator'];
+    use AuthorizesAccess, WithPagination;
 
     /** Status yang tidak perlu dihubungi lagi: ditaruh di bawah daftar. */
     private const CLOSED_STATUSES = [Prospect::STATUS_TIDAK_TERTARIK, Prospect::STATUS_SUDAH_DAFTAR];
@@ -36,10 +35,9 @@ class ProspectList extends Component
     #[Url(except: '')]
     public string $referrer = '';
 
-    /** Request pembaruan Livewire tidak melewati middleware rute admin, jadi akses dicek di sini. */
     public function boot(): void
     {
-        abort_unless(in_array(auth()->user()?->role, self::STAFF_ROLES, true), 403);
+        $this->authorizeStaff();
     }
 
     public function updated(string $property): void

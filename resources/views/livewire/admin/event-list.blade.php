@@ -23,7 +23,7 @@
             </div>
             <div class="md:col-span-2">
                 @if($hasFilters)
-                    <x-button color="neutral" variant="ghost" class="w-full md:w-auto" wire:click="clearFilters" wire:loading.attr="disabled" wire:target="clearFilters">Hapus filter</x-button>
+                    <x-button color="neutral" variant="ghost" size="sm" wire:click="clearFilters" wire:loading.attr="disabled" wire:target="clearFilters">Hapus filter</x-button>
                 @endif
             </div>
         </div>

@@ -12,11 +12,13 @@ class ReferrerExport extends SafeValueBinder implements FromCollection, WithHead
 {
     protected $periodId;
     protected $status;
+    protected string $search;
 
-    public function __construct($periodId = null, $status = null)
+    public function __construct($periodId = null, $status = null, ?string $search = null)
     {
         $this->periodId = $periodId;
         $this->status = $status;
+        $this->search = trim((string) $search);
     }
 
     public function collection()
@@ -28,6 +30,13 @@ class ReferrerExport extends SafeValueBinder implements FromCollection, WithHead
         
         if ($this->status) {
             $query->where('status', $this->status);
+        }
+
+        // Kata kunci yang sama dengan pencarian di halaman Data Afiliasi.
+        if ($this->search !== '') {
+            $term = $this->search;
+            $query->where(fn ($w) => $w->where('code', 'like', "%{$term}%")
+                ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%")));
         }
         
         if ($this->periodId) {

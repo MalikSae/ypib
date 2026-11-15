@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Referrer;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,10 +11,7 @@ use Livewire\WithPagination;
 /** Daftar affiliator. Cari, jumlah per halaman, dan urutan kolom langsung berlaku dan tersimpan di URL. */
 class ReferrerList extends Component
 {
-    use WithPagination;
-
-    /** Data Afiliasi hanya untuk admin tanpa batasan kampus (sama dengan middleware global.admin). */
-    private const STAFF_ROLES = ['admin', 'operator'];
+    use AuthorizesAccess, WithPagination;
 
     private const SORT_COLUMNS = ['prospek', 'klik', 'konversi', 'rate', 'reward'];
 
@@ -33,8 +31,7 @@ class ReferrerList extends Component
 
     public function boot(): void
     {
-        $user = auth()->user();
-        abort_unless(in_array($user?->role, self::STAFF_ROLES, true) && ! $user->campus_id, 403);
+        $this->authorizeGlobalStaff();
     }
 
     public function updated(string $property): void
@@ -42,6 +39,12 @@ class ReferrerList extends Component
         if (in_array($property, ['search', 'perPage'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->resetPage();
     }
 
     /** Klik header: urut turun dulu, klik lagi untuk naik. */
@@ -57,7 +60,7 @@ class ReferrerList extends Component
 
     public function render()
     {
-        $query = Referrer::with(['user', 'rewards'])
+        $query = Referrer::with('user')
             ->withCount('prospects')
             ->withSum(['rewards as total_reward' => fn ($q) => $q->whereIn('status', ['approved', 'disbursed'])], 'amount');
 
@@ -84,7 +87,7 @@ class ReferrerList extends Component
 
         return view('livewire.admin.referrer-list', [
             'referrers' => $query->paginate($perPage),
-            'perPageOptions' => array_combine(self::PER_PAGE, array_map('strval', self::PER_PAGE)),
+            'perPageOptions' => $this->perPageOptions(self::PER_PAGE),
         ]);
     }
 }

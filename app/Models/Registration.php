@@ -135,6 +135,30 @@ class Registration extends Model
         return self::STATUS_LABELS[$this->status]['color'] ?? 'neutral';
     }
 
+    /** Kelas pill status di admin: pastel dengan border tipis, gaya sama dengan <x-badge-status>. */
+    public function statusBadgeClass(): string
+    {
+        return [
+            'warning' => 'bg-warning-50 text-warning-700 border-warning-200',
+            'info'    => 'bg-info-50 text-info-700 border-info-200',
+            'success' => 'bg-success-50 text-success-700 border-success-200',
+            'error'   => 'bg-error-50 text-error-700 border-error-200',
+            'primary' => 'bg-primary-50 text-primary-700 border-primary-200',
+        ][$this->getStatusColor()] ?? 'bg-neutral-100 text-neutral-600 border-neutral-200';
+    }
+
+    /** Jalur pendaftaran: kode => label. Satu sumber untuk semua tampilan admin. */
+    public const ADMISSION_PATH_LABELS = [
+        'umum'     => 'Reguler',
+        'prestasi' => 'Prestasi',
+        'tahfidz'  => 'Tahfidz',
+    ];
+
+    public function admissionPathLabel(): string
+    {
+        return self::ADMISSION_PATH_LABELS[$this->admission_path] ?? ($this->admission_path ?: '—');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

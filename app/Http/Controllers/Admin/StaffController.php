@@ -20,11 +20,7 @@ use Illuminate\Validation\Rules\Password;
  */
 class StaffController extends Controller
 {
-    public const ROLES = [
-        'admin'    => 'Admin',
-        'operator' => 'Operator',
-        'panitia'  => 'Panitia',
-    ];
+    public const ROLES = User::STAFF_ROLES;
 
     /** Daftar, cari, dan filter ditangani komponen Livewire App\Livewire\Admin\StaffList. */
     public function index()

@@ -10,7 +10,7 @@
 @if($toggleAction)
     <form action="{{ $toggleAction }}" method="POST" class="m-0 inline-block">
         @csrf @method('PATCH')
-        <button type="submit" aria-label="Toggle Status" class="bg-transparent border-none cursor-pointer p-0 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full">
+        <button type="submit" aria-label="Ubah status ({{ $text }})" class="inline-flex items-center min-h-11 md:min-h-0 bg-transparent border-none cursor-pointer p-0 hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-full">
             <span class="{{ $badgeClass }}">{{ $text }}</span>
         </button>
     </form>

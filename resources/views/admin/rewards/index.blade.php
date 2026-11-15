@@ -219,7 +219,7 @@
 {{-- ============================================================ --}}
 {{-- TAB 3: DETAIL TRANSAKSI --}}
 {{-- ============================================================ --}}
-<div id="tab-detail" class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8" style="display:none;">
+<div id="tab-detail" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:none;">
     <livewire:admin.reward-detail-list />
 </div>
 

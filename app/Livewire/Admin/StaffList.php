@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use App\Http\Controllers\Admin\StaffController;
 use App\Models\Campus;
 use App\Models\User;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 /** Daftar akun staf. Cari, peran, dan kampus langsung menyaring dan tersimpan di URL. */
 class StaffList extends Component
 {
-    use WithPagination;
+    use AuthorizesAccess, WithPagination;
 
     #[Url(except: '')]
     public string $search = '';
@@ -24,11 +24,9 @@ class StaffList extends Component
     #[Url(except: '')]
     public string $campus = '';
 
-    /** Sama dengan middleware super.admin: hanya admin tanpa batasan kampus. */
     public function boot(): void
     {
-        $user = auth()->user();
-        abort_unless($user?->role === 'admin' && ! $user->campus_id, 403);
+        $this->authorizeSuperAdmin();
     }
 
     public function updated(string $property): void
@@ -48,7 +46,7 @@ class StaffList extends Component
 
     public function render()
     {
-        $roles = StaffController::ROLES;
+        $roles = User::STAFF_ROLES;
         $search = trim($this->search);
 
         $staff = User::with('campus')

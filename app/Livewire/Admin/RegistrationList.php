@@ -7,6 +7,7 @@ use App\Models\Registration;
 use App\Models\Scopes\CampusScope;
 use App\Support\AdminPeriod;
 use Illuminate\Support\Facades\DB;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,7 +15,7 @@ use Livewire\WithPagination;
 /** Data pendaftar. Cari, status, dan prodi (dropdown) langsung menyaring dan tersimpan di URL. */
 class RegistrationList extends Component
 {
-    use WithPagination;
+    use AuthorizesAccess, WithPagination;
 
     #[Url(except: '')]
     public string $search = '';
@@ -25,10 +26,9 @@ class RegistrationList extends Component
     #[Url(except: '')]
     public string $prodi = '';
 
-    /** Request pembaruan Livewire tidak melewati middleware rute admin, jadi akses dicek di sini. */
     public function boot(): void
     {
-        abort_unless(in_array(auth()->user()?->role, ['admin', 'operator'], true), 403);
+        $this->authorizeStaff();
     }
 
     public function updated(string $property): void

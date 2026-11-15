@@ -1,12 +1,17 @@
 <div>
 <x-card class="mt-6 p-0 overflow-hidden">
-    <div class="p-5 border-b border-neutral-100 flex items-center justify-between">
-        <h3 class="font-bold text-neutral-800">Riwayat Interview Saya</h3>
+    <div class="p-5 border-b border-neutral-100">
+        <h3 class="text-sm font-semibold text-neutral-900">Riwayat interview saya</h3>
     </div>
-    
-    <div class="p-5 bg-neutral-50 border-b border-neutral-100">
-        <label for="history_search" class="sr-only">Cari riwayat interview</label>
+
+    <div class="p-5 bg-neutral-50 border-b border-neutral-100 flex flex-col gap-3">
+        <x-input-label for="history_search" value="Cari riwayat interview" class="sr-only" />
         <x-text-input type="search" id="history_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama atau nomor pendaftaran" />
+        @if(trim($search) !== '')
+            <div>
+                <x-button color="neutral" variant="ghost" size="sm" wire:click="$set('search', '')" wire:loading.attr="disabled" wire:target="search">Hapus filter</x-button>
+            </div>
+        @endif
     </div>
 
     <div class="p-5 bg-white transition-opacity motion-reduce:transition-none" wire:loading.class="opacity-60">
@@ -19,35 +24,19 @@
                 @endif
             </div>
         @else
-            <div class="space-y-4">
+            <div class="space-y-3">
                 @foreach($riwayatInterview as $log)
-                    <div class="p-4 bg-white border border-neutral-200 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3" wire:key="log-{{ $log->id }}">
-                        <div>
-                            <div class="text-xs font-mono font-bold text-neutral-500 mb-1">{{ $log->registration?->registration_number ?? 'Data tidak tersedia' }}</div>
-                            <div class="font-bold text-neutral-900">{{ $log->registration?->full_name ?? 'Data tidak tersedia' }}</div>
-                            <div class="text-xs font-medium text-primary-600 mt-1">{{ $log->registration?->firstChoiceProgram?->name ?? 'Data tidak tersedia' }}</div>
-                            <div class="text-[10px] text-neutral-400 mt-2 flex items-center">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                {{ $log->created_at->translatedFormat('d M Y, H:i') }}
-                            </div>
+                    @php $reg = $log->registration; @endphp
+                    <div class="p-4 bg-white border border-neutral-200 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3" wire:key="log-{{ $log->id }}">
+                        <div class="min-w-0">
+                            <div class="font-mono text-xs text-neutral-500">{{ $reg?->registration_number ?? 'Data tidak tersedia' }}</div>
+                            <x-truncate :value="$reg?->full_name ?? 'Data tidak tersedia'" class="text-sm font-medium text-neutral-900 mt-1" max="max-w-full" />
+                            <div class="text-xs text-neutral-500 mt-1">{{ $reg?->firstChoiceProgram?->name ?? 'Data tidak tersedia' }} · {{ $log->created_at->translatedFormat('d M Y, H:i') }}</div>
                         </div>
-                        <div>
-                            @if($log->registration?->status === 'diterima' || $log->registration?->status === 'menunggu_konfirmasi_daftar_ulang' || $log->registration?->status === 'daftar_ulang_selesai')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-success-50 text-success-700 border border-success-200">
-                                    <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    Lulus
-                                </span>
-                            @elseif($log->registration?->status === 'ditolak')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-error-50 text-error-700 border border-error-200">
-                                    <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    Tidak Lulus
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                    {{ ucfirst(str_replace('_', ' ', $log->registration?->status ?? 'Data tidak tersedia')) }}
-                                </span>
-                            @endif
-                        </div>
+                        @if($reg)
+                            {{-- Label dan warna dari Registration::STATUS_LABELS, sama dengan halaman admin. --}}
+                            <span class="shrink-0 self-start md:self-auto inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap {{ $reg->statusBadgeClass() }}">{{ $reg->getStatusLabel() }}</span>
+                        @endif
                     </div>
                 @endforeach
             </div>

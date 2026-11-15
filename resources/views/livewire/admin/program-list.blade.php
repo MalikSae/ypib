@@ -1,123 +1,135 @@
 <div>
-{{-- FILTER SECTION --}}
-<div class="mb-6 bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
-    <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-            <x-select-menu id="per_page" class="w-24" wire:model.live="perPage" :value="$perPage" :options="$perPageOptions" />
-        </div>
-
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            <label for="campus" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Kampus:</label>
-            <x-select-menu id="campus" class="w-full sm:w-56" wire:model.live="campus" :value="$campus" :options="['' => 'Semua kampus'] + $campusOptions" />
-        </div>
-        
-        <div class="relative w-full sm:w-72">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    {{-- Cari selalu tampil. Kampus dan jumlah per halaman: di mobile di balik tombol Filter. Semua langsung menyaring. --}}
+    <div class="mb-4 bg-white p-4 rounded-lg border border-neutral-200"
+         x-data="{ open: window.matchMedia('(min-width: 768px)').matches || {{ $campus !== '' ? 'true' : 'false' }} }"
+         x-on:resize.window="if (window.innerWidth >= 768) open = true">
+        <div class="flex flex-col md:flex-row md:items-end gap-3">
+            <div class="relative flex-1">
+                <x-input-label for="program_search" value="Cari program studi" class="sr-only" />
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                    <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                </div>
+                <x-text-input type="search" id="program_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari program studi atau fakultas" class="pl-10" />
             </div>
-            <label for="program_search" class="sr-only">Cari program studi</label>
-            <x-text-input type="search" id="program_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari program studi atau fakultas" class="pl-10" />
+            <x-button type="button" color="neutral" variant="outline" class="md:hidden justify-between"
+                      x-on:click="open = !open" x-bind:aria-expanded="open.toString()" aria-controls="program-filters">
+                <span>Filter</span>
+                <span x-text="open ? 'Tutup' : 'Buka'" class="text-xs text-neutral-500"></span>
+            </x-button>
+            <div id="program-filters" x-show="open" x-cloak class="flex flex-col md:flex-row md:items-end gap-3">
+                <div>
+                    <x-input-label for="campus" value="Kampus" />
+                    <x-select-menu id="campus" class="w-full md:w-56" wire:model.live="campus" :value="$campus" :options="['' => 'Semua kampus'] + $campusOptions" />
+                </div>
+                <div>
+                    <x-input-label for="per_page" value="Per halaman" />
+                    <x-select-menu id="per_page" class="w-full md:w-24" wire:model.live="perPage" :value="$perPage" :options="$perPageOptions" />
+                </div>
+            </div>
         </div>
+        @if($hasFilters)
+            <div class="mt-3">
+                <x-button color="neutral" variant="ghost" size="sm" wire:click="clearFilters" wire:loading.attr="disabled" wire:target="clearFilters">Hapus filter</x-button>
+            </div>
+        @endif
     </div>
-</div>
 
-{{-- TABLE WRAPPER --}}
-<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8 transition-opacity motion-reduce:transition-none" wire:loading.class="opacity-60">
-    <div class="overflow-x-auto">
-        <table class="min-w-full whitespace-nowrap">
-            <thead class="bg-neutral-50 border-b border-neutral-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Program Studi</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Prodi</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Tipe</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Fakultas</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kampus</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kuota <span class="normal-case font-normal">(periode berjalan, {{ $termsCampus->name }})</span></th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Biaya</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider w-32">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-neutral-100">
-                @forelse($programs as $program)
-                <tr class="hover:bg-neutral-50 transition-colors duration-100 group" wire:key="program-{{ $program->id }}">
-                    <td class="px-6 py-4">
-                        <x-truncate :value="$program->name" class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors" fallback="" />
-                        <div class="text-xs text-neutral-500">Akreditasi: {{ $program->accreditation ?? '-' }}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        @if($program->kode_prodi)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-mono font-bold border border-neutral-200">{{ $program->kode_prodi }}</span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-400 text-xs font-medium border border-neutral-200 border-dashed">Belum diisi</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4">
-                        @if($program->registration_track === 'non_reguler')
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-200">Non-Reguler</span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold border border-primary-200">Reguler</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4">
-                        <x-truncate :value="$program->faculty->name" class="text-sm text-neutral-700" max="max-w-[14rem]" fallback="" />
-                    </td>
-                    <td class="px-6 py-4">
-                        @php $offering = collect($program->offeringCampuses ?? []); @endphp
-                        <div class="flex items-center gap-1.5 whitespace-nowrap" title="{{ $offering->map(fn ($c) => $c->city ?: $c->name)->implode(', ') }}">
-                            @forelse($offering->take(2) as $offeringCampus)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
-                            @empty
-                                <span class="text-xs text-neutral-500">Belum ditawarkan</span>
-                            @endforelse
-                            @if($offering->count() > 2)
-                                <span class="text-xs text-neutral-500">+{{ $offering->count() - 2 }}</span>
-                            @endif
+    <div class="transition-opacity motion-reduce:transition-none" wire:loading.class="opacity-60">
+        <p class="mb-3 text-xs text-neutral-500">Kuota dan biaya: periode berjalan, {{ $termsCampus->name }}.</p>
+
+        {{-- Mobile: daftar kartu --}}
+        <div class="md:hidden space-y-3">
+            @forelse($programs as $program)
+                @php $terms = $program->termsFor($displayPeriod, $termsCampus); @endphp
+                <div class="bg-white rounded-lg border border-neutral-200 p-4" wire:key="program-card-{{ $program->id }}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <x-truncate :value="$program->name" class="text-sm font-medium text-neutral-900" max="max-w-full" fallback="" />
+                            <x-truncate :value="$program->faculty->name" class="text-xs text-neutral-500 mt-1" max="max-w-full" fallback="" />
                         </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200">
-                            {{ $program->termsFor($displayPeriod, $termsCampus)->quota }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="text-sm font-bold text-neutral-900">Rp {{ number_format($program->termsFor($displayPeriod, $termsCampus)->registration_fee, 0, ',', '.') }}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        {{-- Toggle Status --}}
-                        <form action="{{ route('admin.programs.destroy', $program->id) }}" method="POST" class="m-0 inline-block">
-                            {{-- We don't have a toggle endpoint yet for programs, but if there's one, it goes here. For now, just display status --}}
-                            @if($program->is_active)
-                                <span class="inline-flex items-center px-2.5 py-1 bg-neutral-900 text-white rounded-full text-xs font-semibold">Aktif</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-1 bg-neutral-100 text-neutral-500 border border-neutral-200 rounded-full text-xs font-semibold">Nonaktif</span>
-                            @endif
-                        </form>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <x-table-action-edit :href="route('admin.programs.edit', $program->id)" />
-                            
-                            <x-table-action-delete :action="route('admin.programs.destroy', $program->id)" text="Apakah Anda yakin ingin menghapus prodi ini?" />
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="9" class="px-6 py-16 text-center text-sm text-neutral-400">
-                        Belum ada program studi terdaftar.
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    
-    @if($programs->hasPages())
-        <div class="px-6 py-4 border-t border-neutral-100">
-            {{ $programs->links('livewire.admin.pagination') }}
+                        <x-badge-status :active="$program->is_active" />
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div><dt class="text-xs text-neutral-500">Kode prodi</dt><dd class="text-neutral-700">{{ $program->kode_prodi ?: 'Belum diisi' }}</dd></div>
+                        <div><dt class="text-xs text-neutral-500">Tipe</dt><dd class="text-neutral-700">{{ $program->registration_track === 'non_reguler' ? 'Non-reguler' : 'Reguler' }}</dd></div>
+                        <div><dt class="text-xs text-neutral-500">Kuota</dt><dd class="text-neutral-700">{{ $terms->quota }}</dd></div>
+                        <div><dt class="text-xs text-neutral-500">Biaya</dt><dd class="font-medium text-neutral-900">Rp {{ number_format($terms->registration_fee, 0, ',', '.') }}</dd></div>
+                    </dl>
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <x-button :href="route('admin.programs.edit', $program->id)" color="neutral" variant="outline">Edit prodi</x-button>
+                        <div class="flex justify-end items-center"><x-table-action-delete :action="route('admin.programs.destroy', $program->id)" text="Apakah Anda yakin ingin menghapus prodi ini?" /></div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">{{ $hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.' }}</div>
+            @endforelse
         </div>
+
+        {{-- Desktop: tabel (sembilan kolom; bergeser dengan scrollbar terlihat bila layar sempit) --}}
+        <div class="hidden md:block relative bg-white rounded-lg border border-neutral-200 overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <tr>
+                        <th class="px-4 py-3 text-left whitespace-nowrap">Program studi</th>
+                        <th class="px-4 py-3 text-left whitespace-nowrap">Kode prodi</th>
+                        <th class="px-4 py-3 text-left">Tipe</th>
+                        <th class="px-4 py-3 text-left">Fakultas</th>
+                        <th class="px-4 py-3 text-left">Kampus</th>
+                        <th class="px-4 py-3 text-left">Kuota</th>
+                        <th class="px-4 py-3 text-left">Biaya</th>
+                        <th class="px-4 py-3 text-left">Status</th>
+                        <th class="px-4 py-3 text-left">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-100 text-sm">
+                    @forelse($programs as $program)
+                        @php $terms = $program->termsFor($displayPeriod, $termsCampus); @endphp
+                        <tr class="align-middle hover:bg-neutral-50" wire:key="program-{{ $program->id }}">
+                            <td class="px-4 py-3">
+                                <x-truncate :value="$program->name" class="font-medium text-neutral-900" max="max-w-[16rem]" fallback="" />
+                                <div class="text-xs text-neutral-500 whitespace-nowrap">Akreditasi: {{ $program->accreditation ?? '—' }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                @if($program->kode_prodi)
+                                    <span class="font-mono text-xs text-neutral-700">{{ $program->kode_prodi }}</span>
+                                @else
+                                    <span class="text-xs text-neutral-500">Belum diisi</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-neutral-700">{{ $program->registration_track === 'non_reguler' ? 'Non-reguler' : 'Reguler' }}</td>
+                            <td class="px-4 py-3"><x-truncate :value="$program->faculty->name" class="text-neutral-700" max="max-w-[14rem]" fallback="" /></td>
+                            <td class="px-4 py-3">
+                                @php $offering = collect($program->offeringCampuses ?? []); @endphp
+                                <div class="flex items-center gap-1.5 whitespace-nowrap" title="{{ $offering->map(fn ($c) => $c->city ?: $c->name)->implode(', ') }}">
+                                    @forelse($offering->take(2) as $offeringCampus)
+                                        <span class="text-neutral-700">{{ $offeringCampus->city ?: $offeringCampus->name }}{{ ! $loop->last ? ',' : '' }}</span>
+                                    @empty
+                                        <span class="text-xs text-neutral-500">Belum ditawarkan</span>
+                                    @endforelse
+                                    @if($offering->count() > 2)
+                                        <span class="text-xs text-neutral-500">+{{ $offering->count() - 2 }}</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-neutral-700">{{ $terms->quota }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap font-medium text-neutral-900">Rp {{ number_format($terms->registration_fee, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap"><x-badge-status :active="$program->is_active" /></td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <x-table-action-edit :href="route('admin.programs.edit', $program->id)" title="Edit prodi" />
+                                    <x-table-action-delete :action="route('admin.programs.destroy', $program->id)" text="Apakah Anda yakin ingin menghapus prodi ini?" />
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="9" class="px-4 py-16 text-center text-sm text-neutral-500">{{ $hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.' }}</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if($programs->hasPages())
+        <div class="mt-4">{{ $programs->links('livewire.admin.pagination') }}</div>
     @endif
-</div>
 </div>

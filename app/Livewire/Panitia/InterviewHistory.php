@@ -4,6 +4,7 @@ namespace App\Livewire\Panitia;
 
 use App\Models\PaymentLog;
 use Illuminate\Support\Facades\Auth;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -11,15 +12,14 @@ use Livewire\WithPagination;
 /** Riwayat interview milik panitia yang login. Cari langsung menyaring dan tersimpan di URL. */
 class InterviewHistory extends Component
 {
-    use WithPagination;
+    use AuthorizesAccess, WithPagination;
 
     #[Url(except: '')]
     public string $search = '';
 
-    /** Request pembaruan Livewire tidak melewati middleware role:panitia, jadi dicek di sini. */
     public function boot(): void
     {
-        abort_unless(Auth::user()?->role === 'panitia', 403);
+        $this->authorizePanitia();
     }
 
     public function updatedSearch(): void

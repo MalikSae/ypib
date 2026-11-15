@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\PmbPeriod;
 use App\Models\ProspectEvent;
+use App\Livewire\Concerns\AuthorizesAccess;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -11,9 +12,7 @@ use Livewire\WithPagination;
 /** Daftar event dan kampanye beserta corongnya. Filter langsung menyaring dan tersimpan di URL. */
 class EventList extends Component
 {
-    use WithPagination;
-
-    private const STAFF_ROLES = ['admin', 'operator'];
+    use AuthorizesAccess, WithPagination;
 
     /** Pilihan urutan: kunci URL => [label, kolom]. */
     private const SORTS = [
@@ -32,10 +31,9 @@ class EventList extends Component
     #[Url(except: 'terbaru')]
     public string $urut = 'terbaru';
 
-    /** Request pembaruan Livewire tidak melewati middleware rute admin, jadi akses dicek di sini. */
     public function boot(): void
     {
-        abort_unless(in_array(auth()->user()?->role, self::STAFF_ROLES, true), 403);
+        $this->authorizeStaff();
     }
 
     public function updated(string $property): void
