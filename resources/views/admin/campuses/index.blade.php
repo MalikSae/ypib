@@ -45,7 +45,7 @@
                         </div>
                         <div class="text-xs text-neutral-500">{{ $campus->code }}</div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-neutral-700"><span class="block truncate max-w-xs" title="{{ $campus->address }}">{{ $campus->address ?: '—' }}</span></td>
+                    <td class="px-6 py-4 text-sm text-neutral-700"><x-truncate :value="$campus->address" /></td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200 whitespace-nowrap">
                             {{ $campus->registrations_count }} pendaftar

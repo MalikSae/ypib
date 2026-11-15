@@ -156,7 +156,7 @@
                                     {{ $log->actedBy?->name ?? 'Sistem' }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-neutral-700">
-                                    <span class="block truncate max-w-xs" title="{{ $log->note }}">{{ $log->note }}</span>
+                                    <x-truncate :value="$log->note" fallback="" />
                                 </td>
                             </tr>
                             @endforeach

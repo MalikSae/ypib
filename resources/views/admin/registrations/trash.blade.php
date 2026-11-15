@@ -61,13 +61,13 @@
                     <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                         {{-- Pendaftar (Nama + No. Daftar) --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $reg->full_name }}">{{ $reg->full_name }}</div>
+                            <x-truncate :value="$reg->full_name" class="text-sm font-medium text-neutral-900" fallback="" />
                             <div class="text-xs text-neutral-500 font-mono mt-0.5">{{ $reg->registration_number ?? 'Belum ada nomor' }}</div>
                         </td>
 
                         {{-- Pilihan Prodi --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm text-neutral-700 truncate max-w-[14rem]" title="{{ $reg->firstChoiceProgram?->name }}">{{ $reg->firstChoiceProgram?->name ?? '—' }}</div>
+                            <x-truncate :value="$reg->firstChoiceProgram?->name" class="text-sm text-neutral-700" max="max-w-[14rem]" />
                         </td>
 
                         {{-- Tanggal Dihapus --}}

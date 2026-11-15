@@ -49,7 +49,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $partner->name }}">{{ $partner->name }}</div>
+                        <x-truncate :value="$partner->name" class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors" fallback="" />
                     </td>
                     <td class="px-6 py-4">
                         <x-badge-status :active="$partner->is_active" :toggle-action="route('admin.partners.toggle', $partner->id)" />

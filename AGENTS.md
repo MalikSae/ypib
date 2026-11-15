@@ -46,6 +46,8 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
   - Form biasa: `<x-select-menu id="jenis" name="jenis" :options="['' => 'Semua jenis'] + $kinds" :value="old('jenis', $x->jenis)" :error="$errors->has('jenis')" />`. Nilai dikirim lewat input tersembunyi bernama `name`.
   - Livewire: `<x-select-menu id="event" wire:model.live="event" :value="$event" :options="..." />`. Tersambung dua arah, termasuk saat server mereset nilainya.
   - `options` berupa array `nilai => label`. Label kosong tidak dipakai; isi pilihan "Semua ..." dengan nilai `''`.
+  - Selalu beri `id` tetap. `required` ditahan browser seperti `<select required>`.
+  - Daftar pilihan dirender di `<body>` (x-teleport, posisi fixed selebar tombol), jadi aman di dalam card, modal, atau wadah ber-`overflow`.
   - JANGAN pakai `<select>` bawaan browser (termasuk `<x-select>`) di halaman baru. `<x-select>` lama dipertahankan sampai halamannya dikerjakan, lalu diganti `<x-select-menu>`.
 - `<x-textarea :error="$errors->has('field')" />` — untuk textarea, JANGAN tulis manual
 - `<x-table-action-edit :href="..." />`, `<x-table-action-delete :action="..." />`, `<x-table-action-detail :href="..." />` — untuk tombol aksi kecil (ikon) di baris tabel. Detail dan edit bergaris netral, hapus bergaris merah. JANGAN tulis SVG ikon manual sendiri untuk aksi edit/hapus/detail di tabel — pakai komponen ini supaya ikon dan style konsisten di semua halaman.
@@ -130,7 +132,7 @@ Font: Plus Jakarta Sans (`font-sans`, sudah diatur di `tailwind.config.js`). Han
 - Ukuran di luar skala (`text-[10px]`, `text-[11px]`, `text-base` untuk isi) TIDAK dipakai. Pengecualian: input dan select `text-base md:text-sm` (aturan iOS, bawaan komponen).
 - **Data tabel maksimal dua baris per sel, tanpa pengecualian** (berlaku untuk semua tabel di project, termasuk dashboard affiliator dan halaman pendaftar):
   - Baris utama `text-sm`, baris keterangan `text-xs`. Tidak ada baris ketiga.
-  - Teks panjang tidak boleh membungkus jadi baris ketiga. Potong dengan `truncate` (beri lebar maksimal, misal `max-w-xs`) dan isi `title` dengan teks lengkap.
+  - Teks panjang tidak boleh membungkus jadi baris ketiga. Pakai `<x-truncate :value="$x->nama" class="text-sm font-medium text-neutral-900" />`: dipotong dengan elipsis, teks lengkap di `title`, bawaan `max="max-w-xs"` dan `fallback="—"`. JANGAN tulis ulang pola `truncate` + `title` manual.
   - Peringatan (misal tanda fraud) tampil sebagai badge di kolom status, bukan baris tambahan.
   - Data yang tidak muat pindah ke kolom lain atau ke halaman detail.
   - Dokumen cetak (PDF formulir, SKL) tidak termasuk aturan ini.

@@ -85,13 +85,19 @@ class ProspectEvent extends Model
         $unpaid = ['menunggu_pembayaran', 'menunggu_konfirmasi'];
         $paid = array_values(array_diff(array_keys(Registration::STATUS_LABELS), $unpaid));
 
-        $converted = fn (array $statuses) => \Illuminate\Support\Facades\DB::table('prospects as p')
+        // Atribusi dihitung sekali per pendaftar (bukan per event per kolom), lalu dijumlah per event.
+        $attributed = \Illuminate\Support\Facades\DB::table('prospects as p')
             ->join('registrations as r', 'r.id', '=', 'p.registration_id')
             ->where('p.fraud_flag', false)
             ->whereNull('r.deleted_at')
-            ->whereIn('r.status', $statuses)
-            ->whereRaw(self::ATTRIBUTED_EVENT_SQL . ' = prospect_events.id')
-            ->selectRaw('count(*)');
+            ->whereIn('r.status', $paid)
+            ->selectRaw(self::ATTRIBUTED_EVENT_SQL . ' as event_id, r.status');
+
+        $funnel = \Illuminate\Support\Facades\DB::query()
+            ->fromSub($attributed, 'a')
+            ->whereNotNull('a.event_id')
+            ->groupBy('a.event_id')
+            ->selectRaw("a.event_id, count(*) as registered, sum(case when a.status = 'daftar_ulang_selesai' then 1 else 0 end) as reregistered");
 
         if ($query->getQuery()->columns === null) {
             $query->select('prospect_events.*');
@@ -106,8 +112,8 @@ class ProspectEvent extends Model
                     ->selectRaw('count(*)'),
                 'prospects_count'
             )
-            ->selectSub($converted($paid), 'registered_count')
-            ->selectSub($converted(['daftar_ulang_selesai']), 'reregistered_count');
+            ->leftJoinSub($funnel, 'funnel', 'funnel.event_id', '=', 'prospect_events.id')
+            ->selectRaw('coalesce(funnel.registered, 0) as registered_count, coalesce(funnel.reregistered, 0) as reregistered_count');
     }
 
     /** Form minat masih menerima pengisian: event aktif dan periode (bila ada) belum tutup. */

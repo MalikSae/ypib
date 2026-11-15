@@ -67,7 +67,7 @@
                 @forelse($programs as $program)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $program->name }}">{{ $program->name }}</div>
+                        <x-truncate :value="$program->name" class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors" fallback="" />
                         <div class="text-xs text-neutral-500">Akreditasi: {{ $program->accreditation ?? '-' }}</div>
                     </td>
                     <td class="px-6 py-4">
@@ -85,7 +85,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4">
-                        <span class="block text-sm text-neutral-700 truncate max-w-[14rem]" title="{{ $program->faculty->name }}">{{ $program->faculty->name }}</span>
+                        <x-truncate :value="$program->faculty->name" class="text-sm text-neutral-700" max="max-w-[14rem]" fallback="" />
                     </td>
                     <td class="px-6 py-4">
                         @php $offering = collect($program->offeringCampuses ?? []); @endphp

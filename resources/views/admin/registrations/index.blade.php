@@ -219,7 +219,7 @@ $activeStatus = request('status', '');
                                     <span title="NIK ini dipakai lebih dari satu pendaftaran" class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-warning-50 text-warning-700 border border-warning-200 whitespace-nowrap">NIK ganda</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $reg->user?->email }}">{{ $reg->user?->email }}</div>
+                            <x-truncate :value="$reg->user?->email" class="text-xs text-neutral-500" fallback="" />
                         </td>
 
                         {{-- No. Daftar --}}
@@ -233,7 +233,7 @@ $activeStatus = request('status', '');
 
                         {{-- Pilihan Prodi --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm text-neutral-700 truncate max-w-[14rem]" title="{{ $reg->firstChoiceProgram?->name }}">{{ $reg->firstChoiceProgram?->name ?? '—' }}</div>
+                            <x-truncate :value="$reg->firstChoiceProgram?->name" class="text-sm text-neutral-700" max="max-w-[14rem]" />
                         </td>
 
                         {{-- Jalur Pendaftaran --}}

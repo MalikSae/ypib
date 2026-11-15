@@ -35,7 +35,7 @@
                 @forelse($faculties as $faculty)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $faculty->name }}">{{ $faculty->name }}</div>
+                        <x-truncate :value="$faculty->name" class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors" fallback="" />
                         <div class="text-xs text-neutral-500 truncate max-w-xs">{{ $faculty->slug }}</div>
                     </td>
                     <td class="px-6 py-4">

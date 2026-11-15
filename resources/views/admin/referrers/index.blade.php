@@ -163,7 +163,7 @@
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
                         <a href="{{ route('admin.referrers.show', $referrer->id) }}" title="{{ $referrer->user?->name }}" class="block text-sm font-medium text-neutral-900 hover:text-primary-600 transition-colors truncate max-w-xs">{{ $referrer->user?->name ?? '—' }}</a>
-                        <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $referrer->user?->email }}">{{ $referrer->user?->email }}</div>
+                        <x-truncate :value="$referrer->user?->email" class="text-xs text-neutral-500" fallback="" />
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-mono font-bold border border-primary-100">
@@ -195,18 +195,11 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        @if($referrer->status === 'active')
-                            <span class="inline-flex items-center justify-center px-2.5 py-1 bg-neutral-900 text-white rounded-full text-xs font-bold">Aktif</span>
-                        @else
-                            <span class="inline-flex items-center justify-center px-2.5 py-1 bg-neutral-100 text-neutral-400 border border-neutral-200 rounded-full text-xs font-bold">Nonaktif</span>
-                        @endif
+                        <x-badge-status :active="$referrer->status === 'active'" />
                     </td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <a href="{{ route('admin.referrers.show', $referrer->id) }}" 
-                               class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 border border-neutral-200 bg-white text-primary-600 hover:bg-primary-50 hover:border-primary-200">
-                                Detail
-                            </a>
+                            <x-table-action-detail :href="route('admin.referrers.show', $referrer->id)" title="Detail afiliasi" />
                         </div>
                     </td>
                 </tr>

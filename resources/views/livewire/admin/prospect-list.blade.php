@@ -109,7 +109,7 @@
                         <tr class="align-middle hover:bg-neutral-50" wire:key="row-{{ $p->id }}">
                             <td class="px-4 py-3">
                                 <a href="{{ route('admin.prospects.show', $p) }}" title="{{ $p->full_name }}" class="block truncate max-w-xs rounded-sm font-medium text-neutral-900 hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{{ $p->full_name }}</a>
-                                <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $p->school_name }}">{{ $p->school_name ?: '—' }}</div>
+                                <x-truncate :value="$p->school_name" class="text-xs text-neutral-500" />
                             </td>
                             <td class="px-4 py-3 text-neutral-700">{{ $p->program?->name ?? 'Belum menentukan' }}</td>
                             <td class="px-4 py-3 whitespace-nowrap">@include('livewire.admin.partials.prospect-contact', ['p' => $p])</td>

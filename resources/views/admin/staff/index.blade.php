@@ -54,7 +54,7 @@
                                 <span class="shrink-0 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-semibold whitespace-nowrap">Anda</span>
                             @endif
                         </div>
-                        <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $account->email }}">{{ $account->email }}</div>
+                        <x-truncate :value="$account->email" class="text-xs text-neutral-500" fallback="" />
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200 whitespace-nowrap">

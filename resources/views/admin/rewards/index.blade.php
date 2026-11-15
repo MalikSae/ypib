@@ -102,7 +102,7 @@
                             <input type="checkbox" name="referrer_ids[]" value="{{ $referrerId }}" class="referrer-checkbox rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $recap['referrer']?->user?->name }}">{{ $recap['referrer']?->user?->name ?? '—' }}</div>
+                            <x-truncate :value="$recap['referrer']?->user?->name" class="text-sm font-medium text-neutral-900" />
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $recap['referrer']?->code }}</div>
                         </td>
                         <td class="px-5 py-4">
@@ -113,21 +113,21 @@
                             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 text-sm font-bold">{{ $recap['total_registrations'] }}</span>
                         </td>
                         <td class="px-5 py-4">
-                            <span class="text-base font-bold text-neutral-900">Rp {{ number_format($recap['total_amount'], 0, ',', '.') }}</span>
+                            <span class="text-sm font-semibold text-neutral-900 whitespace-nowrap">Rp {{ number_format($recap['total_amount'], 0, ',', '.') }}</span>
                         </td>
                         <td class="px-5 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <x-button type="button"
                                         x-data
                                         x-on:click="$dispatch('open-partial-modal', { referrerId: {{ $referrerId }}, referrerName: '{{ addslashes($recap['referrer']?->user?->name ?? '—') }}' })"
-                                        color="neutral" variant="outline">
-                                    Lihat Rincian
+                                        color="neutral" variant="outline" size="sm">
+                                    Lihat rincian
                                 </x-button>
                                 <x-button type="submit"
                                         formaction="{{ route('admin.rewards.disburse.referrer', $referrerId) }}"
                                         data-confirm="Apakah Anda yakin sudah mentransfer Rp {{ number_format($recap['total_amount'], 0, ',', '.') }} ke afiliasi ini dan ingin mengubah statusnya menjadi Cair?"
-                                        color="primary">
-                                    Cairkan Semua
+                                        color="primary" size="sm">
+                                    Cairkan semua
                                 </x-button>
                             </div>
                         </td>
@@ -167,7 +167,7 @@
                 @forelse($historyByReferrer as $referrerId => $history)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100">
                     <td class="px-5 py-4">
-                        <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $history['referrer']?->user?->name }}">{{ $history['referrer']?->user?->name ?? '—' }}</div>
+                        <x-truncate :value="$history['referrer']?->user?->name" class="text-sm font-medium text-neutral-900" />
                         <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $history['referrer']?->code }}</div>
                     </td>
                     <td class="px-5 py-4">
@@ -178,7 +178,7 @@
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 text-sm font-bold">{{ $history['total_registrations'] }}</span>
                     </td>
                     <td class="px-5 py-4">
-                        <span class="text-base font-bold text-primary-700">Rp {{ number_format($history['total_amount'], 0, ',', '.') }}</span>
+                        <span class="text-sm font-semibold text-neutral-900 whitespace-nowrap">Rp {{ number_format($history['total_amount'], 0, ',', '.') }}</span>
                     </td>
                     <td class="px-5 py-4 text-sm text-neutral-500">
                         {{ $history['last_disbursed_at'] ? $history['last_disbursed_at']->format('d M Y, H:i') : '—' }}
@@ -266,7 +266,7 @@
                     @forelse($rewards as $reward)
                     <tr class="hover:bg-neutral-50 transition-colors duration-100">
                         <td class="px-5 py-4">
-                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $reward->referrer?->user?->name }}">{{ $reward->referrer?->user?->name ?? '—' }}</div>
+                            <x-truncate :value="$reward->referrer?->user?->name" class="text-sm font-medium text-neutral-900" />
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $reward->referrer?->code }}</div>
                         </td>
                         <td class="px-5 py-4">
@@ -274,7 +274,7 @@
                             <div class="text-xs text-neutral-500 truncate max-w-xs" title="a.n {{ $reward->referrer?->bank_account_name ?? '—' }}">a.n {{ $reward->referrer?->bank_account_name ?? '—' }}</div>
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $reward->registration?->full_name }}">{{ $reward->registration?->full_name ?? '—' }}</div>
+                            <x-truncate :value="$reward->registration?->full_name" class="text-sm font-medium text-neutral-900" />
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $reward->registration?->registration_number }}</div>
                         </td>
                         <td class="px-5 py-4">

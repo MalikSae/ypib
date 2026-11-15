@@ -72,7 +72,11 @@ class ProspectList extends Component
 
     public function render()
     {
-        $selectedAffiliator = (int) $this->referrer ? Referrer::with('user')->find((int) $this->referrer) : null;
+        // Hanya affiliator yang punya prospek di kampus pengguna (relasi prospects ikut CampusScope),
+        // supaya ?referrer= tidak membocorkan nama dan kode affiliator kampus lain.
+        $selectedAffiliator = (int) $this->referrer
+            ? Referrer::with('user')->whereHas('prospects')->find((int) $this->referrer)
+            : null;
 
         // Angka tab mengikuti Cari, Event, dan Affiliator, tetapi tidak mengikuti tab status itu sendiri.
         $counts = $this->filtered($selectedAffiliator)
