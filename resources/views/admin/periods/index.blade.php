@@ -30,7 +30,7 @@
                 default                => 'bg-neutral-100 text-neutral-600 border-neutral-200',
             };
         @endphp
-        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <div class="bg-white rounded-lg border border-neutral-200 p-5">
             <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
@@ -115,9 +115,7 @@
             </div>
         </div>
     @empty
-        <div class="bg-white rounded-2xl border border-neutral-200 px-6 py-12 text-center text-sm text-neutral-400">
-            Belum ada periode. Tambahkan periode pertama.
-        </div>
+        <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state title="Belum ada periode. Tambahkan periode pertama." /></div>
     @endforelse
 </div>
 

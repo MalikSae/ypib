@@ -2,7 +2,7 @@
     {{-- Filter status langsung menyaring. --}}
     <div class="px-4 md:px-5 pt-4 md:pt-5 pb-4 border-b border-neutral-100">
         <div class="flex flex-col md:flex-row md:items-center gap-3">
-            <x-select-menu id="reward_status" class="w-full md:w-56" aria-label="Status komisi"
+            <x-select-menu filter id="reward_status" class="w-full md:w-56" aria-label="Status komisi"
                            wire:model.live="status" :value="$status"
                            :options="['' => 'Semua status', 'pending' => 'Pending', 'approved' => 'Disetujui / siap cair', 'disbursed' => 'Dicairkan']" />
 
@@ -46,7 +46,7 @@
                     </dl>
                 </div>
             @empty
-                <div class="px-4 py-12 text-center text-sm text-neutral-500">{{ $status !== '' ? 'Tidak ada komisi dengan status ini.' : 'Belum ada data komisi.' }}</div>
+                <x-empty-state :title="$status !== '' ? 'Tidak ada komisi dengan status ini.' : 'Belum ada data komisi.'" :description="$status !== '' ? 'Pilih status lain untuk melihat komisi lainnya.' : null" />
             @endforelse
         </div>
 
@@ -86,7 +86,7 @@
                             <td class="px-5 py-3 whitespace-nowrap text-neutral-700">{{ $reward->created_at->format('d/m/Y') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-5 py-16 text-center text-sm text-neutral-500">{{ $status !== '' ? 'Tidak ada komisi dengan status ini.' : 'Belum ada data komisi.' }}</td></tr>
+                        <tr><td colspan="6" class="px-4"><x-empty-state :title="$status !== '' ? 'Tidak ada komisi dengan status ini.' : 'Belum ada data komisi.'" :description="$status !== '' ? 'Pilih status lain untuk melihat komisi lainnya.' : null" /></td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -35,7 +35,7 @@
                 <div class="flex items-start gap-4">
                     <div class="pt-2">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="correct_option" value="{{ $opt }}" class="w-5 h-5 accent-primary-600" required {{ old('correct_option', $question->correct_option ?? '') == $opt ? 'checked' : '' }}>
+                            <x-radio name="correct_option" value="{{ $opt }}" required :checked="(bool) (old('correct_option', $question->correct_option ?? '') == $opt)" />
                             <span class="font-bold uppercase text-neutral-700 w-4">{{ $opt }}</span>
                         </label>
                     </div>
@@ -53,7 +53,7 @@
                 <x-input-label for="is_active" value="Status" />
                 <div class="flex items-center h-12">
                     <label class="flex items-center cursor-pointer gap-2">
-                        <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $question->is_active ?? true) ? 'checked' : '' }} class="w-5 h-5 accent-primary-600 cursor-pointer">
+                        <x-checkbox id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $question->is_active ?? true))" />
                         <span class="text-sm font-medium text-neutral-600">Soal Aktif (Tampil di Tes)</span>
                     </label>
                 </div>

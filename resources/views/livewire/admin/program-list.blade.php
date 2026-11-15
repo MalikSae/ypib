@@ -9,7 +9,7 @@
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                     <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
                 </div>
-                <x-text-input type="search" id="program_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari program studi atau fakultas" class="pl-10" />
+                <x-text-input type="search" :active="trim($search) !== ''" id="program_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari program studi atau fakultas" class="pl-10" />
             </div>
             <x-button type="button" color="neutral" variant="outline" class="md:hidden justify-between"
                       x-on:click="open = !open" x-bind:aria-expanded="open.toString()" aria-controls="program-filters">
@@ -19,7 +19,7 @@
             <div id="program-filters" x-show="open" x-cloak class="flex flex-col md:flex-row md:items-end gap-3">
                 <div>
                     <x-input-label for="campus" value="Kampus" />
-                    <x-select-menu id="campus" class="w-full md:w-56" wire:model.live="campus" :value="$campus" :options="['' => 'Semua kampus'] + $campusOptions" />
+                    <x-select-menu filter id="campus" class="w-full md:w-56" wire:model.live="campus" :value="$campus" :options="['' => 'Semua kampus'] + $campusOptions" />
                 </div>
                 <div>
                     <x-input-label for="per_page" value="Per halaman" />
@@ -61,7 +61,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">{{ $hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.' }}</div>
+                <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state :title="$hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.'" :description="$hasFilters ? 'Ubah kata kunci atau hapus filter.' : null" /></div>
             @endforelse
         </div>
 
@@ -122,7 +122,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-4 py-16 text-center text-sm text-neutral-500">{{ $hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.' }}</td></tr>
+                        <tr><td colspan="9" class="px-4"><x-empty-state :title="$hasFilters ? 'Tidak ada program studi yang cocok.' : 'Belum ada program studi terdaftar.'" :description="$hasFilters ? 'Ubah kata kunci atau hapus filter.' : null" /></td></tr>
                     @endforelse
                 </tbody>
             </table>

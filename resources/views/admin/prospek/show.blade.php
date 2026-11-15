@@ -86,7 +86,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     @unless($prospect->isRegistered())
                         <label class="inline-flex items-center gap-2 text-sm text-neutral-700">
-                            <input type="checkbox" name="dihubungi" value="1" class="rounded border-neutral-300 text-primary-600" @checked(old('dihubungi'))>
+                            <x-checkbox name="dihubungi" value="1" :checked="(bool) (old('dihubungi'))" />
                             Sudah dihubungi
                         </label>
                     @endunless

@@ -17,7 +17,7 @@
 
 {{-- Peringatan NIK: pendaftaran lain dengan NIK yang sama --}}
 @if($nikMatches->isNotEmpty())
-    <div class="mb-5 p-4 rounded-xl border border-warning-200 bg-warning-50">
+    <div class="mb-5 p-4 rounded-lg border border-warning-200 bg-warning-50">
         <div class="text-sm font-bold text-neutral-900">
             NIK ganda: {{ $nikMatches->count() }} pendaftaran lain memakai NIK yang sama
         </div>
@@ -80,7 +80,7 @@
 
         {{-- Penanda izin daftar lagi (hanya pendaftaran ber-NIM) --}}
         @if($registration->nim || $registration->status === 'daftar_ulang_selesai')
-            <div class="p-4 rounded-xl border border-neutral-200 bg-white">
+            <div class="p-4 rounded-lg border border-neutral-200 bg-white">
                 <div class="text-sm font-bold text-neutral-900">Izin daftar lagi pada prodi yang sama</div>
                 @if($registration->reapply_allowed)
                     <p class="mt-1 text-sm text-neutral-600">Diizinkan. Alasan: {{ $registration->reapply_note }}</p>
@@ -225,8 +225,7 @@
                     @if(!$registration->payment_proof)
                         <div style="margin-bottom:12px;">
                             <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Bukti pembayaran (opsional jika ada catatan)</label>
-                            <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
-                                   style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                            <x-file-input name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf" />
                             <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
                         </div>
                         <div style="margin-bottom:16px;">
@@ -249,8 +248,7 @@
                     <div style="font-size:12px;font-weight:700;margin-bottom:10px;" class="text-neutral-500">Upload Bukti Bayar (Admin)</div>
                     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
                         <div style="flex:1;min-width:200px;">
-                            <input type="file" name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf"
-                                   style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                            <x-file-input name="bukti_bayar" accept=".jpg,.jpeg,.png,.pdf" />
                             <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
                         </div>
                         <x-button type="submit" class="shrink-0">
@@ -312,8 +310,7 @@
             {{-- Select All header (only when status allows review AND there are uploaded docs) --}}
             @if($registration->status === 'terdaftar' && $uploadedDocs->count() > 0)
             <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F1F4F7;border-radius:8px;margin-bottom:12px;">
-                <input type="checkbox" :checked="allSelected" :indeterminate="someSelected" @click="toggleAll()"
-                       class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 cursor-pointer">
+                <x-checkbox x-bind:checked="allSelected" x-bind:indeterminate="someSelected" x-on:click="toggleAll()" />
                 <span style="font-size:12px;font-weight:600;" class="text-neutral-600">
                     Pilih Semua Dokumen Upload
                 </span>
@@ -332,8 +329,7 @@
                              :class="selected.includes({{ $doc->id }}) ? 'border-primary-600 bg-primary-50' : 'border-neutral-200 bg-white'">
                             <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
                                 @if($registration->status === 'terdaftar')
-                                <input type="checkbox" :checked="selected.includes({{ $doc->id }})" @click="toggle({{ $doc->id }})"
-                                       class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500 cursor-pointer shrink-0 mt-0.5">
+                                <x-checkbox x-bind:checked="selected.includes({{ $doc->id }})" x-on:click="toggle({{ $doc->id }})" class="shrink-0 mt-0.5" />
                                 @endif
                                 <div style="font-size:14px;font-weight:700;flex:1;" class="text-neutral-900">
                                     {{ $doc->document_type === 'lainnya' ? $doc->label : strtoupper(str_replace('_', ' ', $doc->document_type)) }}
@@ -369,8 +365,7 @@
                                     @csrf
                                     <input type="hidden" name="document_type" value="{{ $doc->document_type }}">
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
-                                               class="w-full min-w-0 text-xs text-neutral-600">
+                                        <x-file-input name="file" accept=".jpg,.jpeg,.png,.pdf" required />
                                         <x-button type="submit" data-confirm="Ganti dokumen ini? File lama akan dihapus dan status otomatis jadi Disetujui." size="sm" class="w-full sm:w-auto shrink-0">
                                             Ganti
                                         </x-button>
@@ -383,7 +378,7 @@
                         <div class="p-4 rounded-xl border border-dashed border-neutral-300 bg-neutral-50/70">
                             <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
                                 @if($registration->status === 'terdaftar')
-                                <input type="checkbox" disabled class="w-4 h-4 rounded border-neutral-300 bg-neutral-200 cursor-not-allowed shrink-0 mt-0.5 opacity-50">
+                                <x-checkbox disabled class="shrink-0 mt-0.5" />
                                 @endif
                                 <div style="font-size:14px;font-weight:700;flex:1;" class="text-neutral-500">
                                     {{ $item->label }} <span style="color:#ef4444;">*</span>
@@ -403,8 +398,7 @@
                                     @csrf
                                     <input type="hidden" name="document_type" value="{{ $item->type }}">
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required
-                                               class="w-full min-w-0 text-xs text-neutral-600">
+                                        <x-file-input name="file" accept=".jpg,.jpeg,.png,.pdf" required />
                                         <x-button type="submit" data-confirm="Upload dokumen ini atas nama pendaftar? Status akan langsung Disetujui." size="sm" class="w-full sm:w-auto shrink-0">
                                             Upload
                                         </x-button>
@@ -639,8 +633,7 @@
                 @if(!$pendingRe && (!$registration->re_registration_payment_proof || $isDoneRe))
                     <div style="margin-bottom:12px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;" class="text-neutral-500">Bukti pembayaran (opsional jika ada catatan)</label>
-                        <input type="file" name="bukti_daftar_ulang" accept=".jpg,.jpeg,.png,.pdf"
-                               style="display:block;width:100%;font-size:13px;border-radius:8px;padding:8px 12px;box-sizing:border-box;font-family:inherit;cursor:pointer;" class="text-neutral-500 border-neutral-300">
+                        <x-file-input name="bukti_daftar_ulang" accept=".jpg,.jpeg,.png,.pdf" />
                         <span style="font-size:12px;margin-top:4px;display:block;" class="text-neutral-400">Format: JPG, PNG, PDF. Maks. 2MB</span>
                     </div>
                 @endif

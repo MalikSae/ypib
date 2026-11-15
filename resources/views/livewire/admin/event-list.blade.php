@@ -11,11 +11,11 @@
              class="bg-white rounded-lg border border-neutral-200 p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
             <div class="md:col-span-3">
                 <x-input-label for="jenis" value="Jenis" />
-                <x-select-menu id="jenis" wire:model.live="jenis" :value="$jenis" :options="['' => 'Semua jenis'] + $kinds" />
+                <x-select-menu filter id="jenis" wire:model.live="jenis" :value="$jenis" :options="['' => 'Semua jenis'] + $kinds" />
             </div>
             <div class="md:col-span-4">
                 <x-input-label for="periode" value="Periode" />
-                <x-select-menu id="periode" wire:model.live="periode" :value="$periode" :options="['' => 'Semua periode'] + $periods" />
+                <x-select-menu filter id="periode" wire:model.live="periode" :value="$periode" :options="['' => 'Semua periode'] + $periods" />
             </div>
             <div class="md:col-span-3">
                 <x-input-label for="urut" value="Urutkan" />
@@ -67,7 +67,7 @@
                 </div>
             </div>
         @empty
-            <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-400">Belum ada event.</div>
+            <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state title="Belum ada event." /></div>
         @endforelse
     </div>
     
@@ -120,7 +120,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-10 text-center text-neutral-400">Belum ada event.</td></tr>
+                    <tr><td colspan="6" class="px-4"><x-empty-state title="Belum ada event." /></td></tr>
                 @endforelse
             </tbody>
         </table>

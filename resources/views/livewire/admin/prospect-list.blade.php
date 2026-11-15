@@ -21,12 +21,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
             </div>
-            <x-text-input type="search" id="q" wire:model.live.debounce.300ms="q" class="pl-10" autocomplete="off"
+            <x-text-input type="search" :active="trim($q) !== ''" id="q" wire:model.live.debounce.300ms="q" class="pl-10" autocomplete="off"
                           placeholder="Cari nama, sekolah, atau nomor WA" />
         </div>
         <div class="md:w-1/3">
             <label for="event" class="sr-only">Event</label>
-            <x-select-menu id="event" wire:model.live="event" :value="$event"
+            <x-select-menu filter id="event" wire:model.live="event" :value="$event"
                            :options="['' => 'Semua event'] + $events->pluck('name', 'id')->all()" />
 
         </div>
@@ -87,9 +87,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">
-                    {{ $hasFilters || $status !== '' ? 'Tidak ada prospek yang cocok.' : 'Belum ada prospek.' }}
-                </div>
+                <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state :title="$hasFilters || $status !== '' ? 'Tidak ada prospek yang cocok.' : 'Belum ada prospek.'" :description="$hasFilters || $status !== '' ? 'Ubah kata kunci, filter, atau tab status.' : null" /></div>
             @endforelse
         </div>
 
@@ -134,9 +132,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-4 py-10 text-center text-neutral-500">
-                            {{ $hasFilters || $status !== '' ? 'Tidak ada prospek yang cocok.' : 'Belum ada prospek.' }}
-                        </td></tr>
+                        <tr><td colspan="5" class="px-4"><x-empty-state :title="$hasFilters || $status !== '' ? 'Tidak ada prospek yang cocok.' : 'Belum ada prospek.'" :description="$hasFilters || $status !== '' ? 'Ubah kata kunci, filter, atau tab status.' : null" /></td></tr>
                     @endforelse
                 </tbody>
             </table>

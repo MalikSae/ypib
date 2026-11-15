@@ -6,7 +6,7 @@
 
     <div class="p-5 bg-neutral-50 border-b border-neutral-100 flex flex-col gap-3">
         <x-input-label for="history_search" value="Cari riwayat interview" class="sr-only" />
-        <x-text-input type="search" id="history_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama atau nomor pendaftaran" />
+        <x-text-input type="search" :active="trim($search) !== ''" id="history_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama atau nomor pendaftaran" />
         @if(trim($search) !== '')
             <div>
                 <x-button color="neutral" variant="ghost" size="sm" wire:click="$set('search', '')" wire:loading.attr="disabled" wire:target="search">Hapus filter</x-button>
@@ -16,13 +16,8 @@
 
     <div class="p-5 bg-white transition-opacity motion-reduce:transition-none" wire:loading.class="opacity-60">
         @if($riwayatInterview->isEmpty())
-            <div class="text-center py-6 text-neutral-500 text-sm">
-                @if(trim($search) !== '')
-                    Tidak ditemukan riwayat yang cocok dengan pencarian Anda.
-                @else
-                    Anda belum memproses interview apapun.
-                @endif
-            </div>
+            <x-empty-state :title="trim($search) !== '' ? 'Tidak ada riwayat yang cocok.' : 'Belum ada interview yang Anda proses.'"
+                           :description="trim($search) !== '' ? 'Ubah kata kunci atau hapus filter.' : 'Hasil interview yang Anda simpan akan muncul di sini.'" />
         @else
             <div class="space-y-3">
                 @foreach($riwayatInterview as $log)

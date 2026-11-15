@@ -12,11 +12,11 @@
 
     <x-card class="p-4 md:p-8">
         <dl class="grid grid-cols-3 gap-4 mb-6">
-            <div class="p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+            <div class="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
                 <dt class="text-xs font-semibold text-neutral-400 uppercase">Total pendaftar</dt>
                 <dd class="mt-1 text-2xl font-bold text-neutral-900">{{ $summary['total'] }}</dd>
             </div>
-            <div class="p-4 rounded-xl bg-neutral-50 border border-neutral-200">
+            <div class="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
                 <dt class="text-xs font-semibold text-neutral-400 uppercase">Masih berjalan</dt>
                 <dd class="mt-1 text-2xl font-bold text-neutral-900">{{ $summary['running'] }}</dd>
             </div>
@@ -30,8 +30,8 @@
             @csrf
 
             @if($summary['awaiting_re_registration'] > 0)
-                <label class="flex items-start gap-3 p-4 rounded-xl bg-warning-50 border border-warning-200 mb-6 cursor-pointer">
-                    <input type="checkbox" name="acknowledge" value="1" class="mt-1 rounded border-neutral-300 text-primary-600 focus:ring-primary-500">
+                <label class="flex items-start gap-3 p-4 rounded-lg bg-warning-50 border border-warning-200 mb-6 cursor-pointer">
+                    <x-checkbox name="acknowledge" value="1" class="mt-1" />
                     <span class="text-sm text-neutral-700">
                         Saya mengerti {{ $summary['awaiting_re_registration'] }} pendaftar masih menunggu konfirmasi daftar ulang
                         dan tidak bisa mengunggah bukti baru setelah periode diarsipkan. Staf tetap dapat memprosesnya.

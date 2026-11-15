@@ -119,11 +119,11 @@ class LivewireListsTest extends TestCase
         $this->actingAs($panitia)->get(route('panitia.dashboard'))
             ->assertOk()
             ->assertSeeLivewire(InterviewHistory::class)
-            ->assertSee('Anda belum memproses interview apapun.');
+            ->assertSee('Belum ada interview yang Anda proses.');
 
         Livewire::actingAs($panitia)->test(InterviewHistory::class)
             ->set('search', 'tidak ada')
-            ->assertSee('Tidak ditemukan riwayat yang cocok');
+            ->assertSee('Tidak ada riwayat yang cocok.');
     }
 
     public function test_access_is_checked_inside_components(): void

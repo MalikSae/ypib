@@ -25,7 +25,7 @@
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Riwayat Pendaftar Bawaan</h3>
             
             @if($referrer->registrations->isEmpty())
-                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-xl border border-neutral-100">
+                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-lg border border-neutral-100">
                     Belum ada pendaftar yang menggunakan kode referral ini.
                 </p>
             @else
@@ -73,7 +73,7 @@
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Riwayat Komisi (Rewards)</h3>
             
             @if($referrer->rewards->isEmpty())
-                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-xl border border-neutral-100">
+                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-lg border border-neutral-100">
                     Belum ada riwayat komisi.
                 </p>
             @else
@@ -116,7 +116,7 @@
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Log Aktivitas</h3>
             
             @if($logs->isEmpty())
-                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-xl border border-neutral-100">
+                <p class="text-sm text-neutral-500 py-4 text-center bg-neutral-50 rounded-lg border border-neutral-100">
                     Belum ada aktivitas tercatat.
                 </p>
             @else
@@ -178,7 +178,7 @@
     <div class="detail-sidebar-col" style="position:sticky;top:88px;display:flex;flex-direction:column;gap:16px;">
 
         {{-- Card: Profil Afiliasi --}}
-        <div class="bg-primary-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+        <div class="bg-primary-600 rounded-lg p-6 text-white relative overflow-hidden">
             <!-- Background Decoration -->
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 blur-2xl pointer-events-none"></div>
             
@@ -226,15 +226,15 @@
         </div>
 
         {{-- Card: Statistik Performa --}}
-        <div class="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div class="bg-white rounded-lg p-6 border border-neutral-200">
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Kinerja Referral</h3>
             
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100">
+                <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100">
                     <div class="text-xs text-neutral-500 mb-1 font-semibold">Total Klik Link</div>
                     <div class="text-2xl font-black text-neutral-900">{{ number_format($referrer->total_clicks, 0, ',', '.') }}</div>
                 </div>
-                <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100">
+                <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100">
                     <div class="text-xs text-neutral-500 mb-1 font-semibold">Pendaftar Sukses</div>
                     <div class="text-2xl font-black text-primary-600">{{ number_format($referrer->total_conversions, 0, ',', '.') }}</div>
                 </div>
@@ -254,7 +254,7 @@
         </div>
 
         {{-- Card: Keuangan & Pencairan --}}
-        <div class="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div class="bg-white rounded-lg p-6 border border-neutral-200">
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Informasi Komisi</h3>
             
             <div class="space-y-4 mb-6">
@@ -274,7 +274,7 @@
                 </div>
             </div>
 
-            <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-100 relative">
+            <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100 relative">
                 <div class="flex justify-between items-start mb-2">
                     <div class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Rekening Pencairan</div>
                     <button type="button" onclick="openEditBankModal()" class="text-xs font-bold text-primary-600 hover:text-primary-800 bg-primary-50 px-2 py-1 rounded-md transition-colors">
@@ -292,7 +292,7 @@
         </div>
 
         {{-- Card: Aksi Lanjutan --}}
-        <div class="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div class="bg-white rounded-lg p-6 border border-neutral-200">
             <h3 class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Aksi Lanjutan</h3>
             
             <div class="flex flex-col gap-3">
@@ -319,7 +319,7 @@
 <!-- Modal Reset Password (Copied from Index) -->
 @if($referrer->user_id)
 <div id="resetPasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full p-6" style="max-width: 450px;">
+    <div class="bg-white rounded-xl shadow-xl w-full p-6" style="max-width: 450px;">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-neutral-900">Reset Password</h3>
             <button onclick="closeResetModal()" class="text-neutral-400 hover:text-neutral-600 text-2xl leading-none">&times;</button>
@@ -367,7 +367,7 @@
 
 <!-- Modal Edit Bank -->
 <div id="editBankModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full p-6" style="max-width: 450px;">
+    <div class="bg-white rounded-xl shadow-xl w-full p-6" style="max-width: 450px;">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold text-neutral-900">Edit Rekening Pencairan</h3>
             <button onclick="closeEditBankModal()" class="text-neutral-400 hover:text-neutral-600 text-2xl leading-none">&times;</button>

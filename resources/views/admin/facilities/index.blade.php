@@ -22,7 +22,7 @@
 
 {{-- ALERT SUCCESS --}}
 @if(session('success'))
-    <div class="bg-primary-50 border border-primary-100 text-primary-700 px-4 py-3 rounded-xl mb-6 text-sm font-medium flex items-center gap-3">
+    <div class="bg-primary-50 border border-primary-100 text-primary-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium flex items-center gap-3">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
@@ -31,7 +31,7 @@
 @endif
 
 {{-- TABLE WRAPPER --}}
-<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
+<div class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8">
     <div class="overflow-x-auto">
         <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
@@ -79,9 +79,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-16 text-center text-sm text-neutral-400">
-                        Belum ada gambar gallery terdaftar.
-                    </td>
+                    <td colspan="5" class="px-4"><x-empty-state title="Belum ada gambar gallery terdaftar." /></td>
                 </tr>
                 @endforelse
             </tbody>

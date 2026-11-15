@@ -25,7 +25,7 @@
                             <img :src="previewUrl" class="h-32 w-48 object-cover rounded-xl border border-neutral-200 shadow-sm" alt="Preview" />
                         </template>
                         <template x-if="!previewUrl">
-                            <div class="h-32 w-48 rounded-xl border border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50 text-neutral-400">
+                            <div class="h-32 w-48 rounded-lg border border-dashed border-neutral-300 flex items-center justify-center bg-neutral-50 text-neutral-400">
                                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
                             </div>
                         </template>
@@ -33,14 +33,7 @@
                     <div class="flex-grow">
                         <label class="block">
                             <span class="sr-only">Pilih gambar</span>
-                            <input type="file" name="image" id="image" accept="image/*" class="block w-full text-sm text-neutral-500
-                                file:mr-4 file:py-2.5 file:px-4
-                                file:rounded-xl file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-primary-50 file:text-primary-700
-                                hover:file:bg-primary-100 cursor-pointer transition-colors"
-                                @change="previewUrl = URL.createObjectURL($event.target.files[0])"
-                            />
+                            <x-file-input name="image" id="image" accept="image/*" x-on:change="previewUrl = URL.createObjectURL($event.target.files[0])" />
                         </label>
                         <p class="text-xs text-neutral-500 mt-2">Format: JPG, PNG, WEBP. Maks 5MB.</p>
                         <x-input-error :messages="$errors->get('image')" />
@@ -71,7 +64,7 @@
                     <x-input-label for="is_active" value="Status Tampil" />
                     <div class="flex items-center h-12">
                         <label class="flex items-center cursor-pointer gap-2">
-                            <input type="checkbox" id="is_active" name="is_active" value="1" checked class="w-5 h-5 accent-primary-600 cursor-pointer">
+                            <x-checkbox id="is_active" name="is_active" value="1" checked />
                             <span class="text-sm font-medium text-neutral-600">Ditampilkan</span>
                         </label>
                     </div>

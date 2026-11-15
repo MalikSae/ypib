@@ -11,6 +11,7 @@
     - required: browser menahan pengiriman form bila nilai kosong, seperti <select required>.
     - Daftar pilihan dipindah ke <body> (x-teleport) dengan posisi fixed selebar tombol, supaya tidak
       terpotong wadah ber-overflow (card, modal, tabel). Membuka ke atas bila ruang di bawah tidak cukup.
+    - filter: dropdown penyaring. Bila nilainya bukan '' (bukan "Semua ..."), tampil aktif: border dan latar primary tipis.
     - Beri id tetap. Bila kosong, id diturunkan dari name/wire:model (id acak merusak label dan ARIA di Livewire).
 --}}
 @props([
@@ -22,6 +23,7 @@
     'error' => false,
     'disabled' => false,
     'required' => false,
+    'filter' => false,
 ])
 
 @php
@@ -45,6 +47,7 @@
         value: @js($current),
         options: @js($items),
         active: -1,
+        filter: @js((bool) $filter && $items->contains('value', '')),
         typed: '',
         typedTimer: null,
         pos: { top: '0px', left: '0px', width: '0px' },
@@ -139,8 +142,9 @@
             :aria-expanded="open.toString()"
             :aria-activedescendant="open && active >= 0 ? '{{ $id }}-option-' + active : null"
             @disabled($disabled)
+            @if($filter && ! $error) :class="filter && String(value ?? '') !== '' ? 'border-primary-300 bg-primary-50 font-medium text-primary-800' : 'border-neutral-300 bg-white text-neutral-900'" @endif
             x-on:click="open ? hide() : show()" x-on:keydown="onKey($event)"
-            class="h-11 w-full flex items-center justify-between gap-2 rounded-md border bg-white pl-3.5 pr-3 text-left text-base md:text-sm text-neutral-900 outline-none transition-colors focus:border-2 focus:border-primary-600 focus-visible:ring-2 focus-visible:ring-primary-500/30 disabled:opacity-50 disabled:bg-neutral-50 disabled:cursor-not-allowed {{ $error ? 'border-error' : 'border-neutral-300' }}">
+            class="h-11 w-full flex items-center justify-between gap-2 rounded-md border pl-3.5 pr-3 text-left text-base md:text-sm outline-none transition-colors focus:ring-2 disabled:opacity-50 disabled:bg-neutral-50 disabled:cursor-not-allowed {{ $error ? 'border-error bg-white text-neutral-900 focus:ring-error-500/20' : 'focus:border-primary-500 focus:ring-primary-500/20 ' . ($filter ? '' : 'border-neutral-300 bg-white text-neutral-900') }}">
         <span class="truncate" x-text="label" :title="label">{{ $currentLabel }}</span>
         <svg class="w-4 h-4 shrink-0 text-neutral-500 transition-transform motion-reduce:transition-none" :class="open ? 'rotate-180' : ''"
              fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">

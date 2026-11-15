@@ -20,7 +20,7 @@
             @csrf
             @if($staff->exists) @method('PUT') @endif
 
-            <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+            <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                 <div>
                     <x-input-label for="name" value="Nama Lengkap" required="true" />
                     <x-text-input type="text" id="name" name="name" :value="old('name', $staff->name)" required autofocus :error="$errors->has('name')" />
@@ -54,7 +54,7 @@
             </div>
 
             @unless($staff->exists)
-                <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+                <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                     <div class="text-sm font-bold text-neutral-900">Password Awal</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>

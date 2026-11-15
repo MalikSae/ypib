@@ -20,7 +20,7 @@
 
 {{-- Notifications / Action Required --}}
 @if($notifications['pending_payment'] > 0 || $notifications['pending_reregistration'] > 0)
-    <div class="mb-8 p-5 bg-orange-50 border border-orange-200 rounded-2xl shadow-sm">
+    <div class="mb-8 p-5 bg-orange-50 border border-orange-200 rounded-lg">
         <div class="flex items-center gap-2 mb-4">
             <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -30,7 +30,7 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @if($notifications['pending_payment'] > 0)
-                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:shadow-md transition-shadow decoration-none">
+                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-lg hover:shadow-md transition-shadow decoration-none">
                     <div>
                         <div class="text-2xl font-extrabold text-neutral-900 mb-1">{{ $notifications['pending_payment'] }}</div>
                         <div class="text-xs font-semibold text-neutral-600">Verifikasi Pembayaran</div>
@@ -44,7 +44,7 @@
             @endif
 
             @if($notifications['pending_reregistration'] > 0)
-                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi_daftar_ulang']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-xl hover:shadow-md transition-shadow decoration-none">
+                <a href="{{ route('admin.registrations.index', ['status' => 'menunggu_konfirmasi_daftar_ulang']) }}" class="flex items-center justify-between p-4 bg-white border border-orange-100 rounded-lg hover:shadow-md transition-shadow decoration-none">
                     <div>
                         <div class="text-2xl font-extrabold text-neutral-900 mb-1">{{ $notifications['pending_reregistration'] }}</div>
                         <div class="text-xs font-semibold text-neutral-600">Verifikasi Daftar Ulang</div>
@@ -63,7 +63,7 @@
 {{-- 4 KPI Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $stats['total'] }}</div>
             <div class="text-xs text-neutral-400 font-medium uppercase tracking-wide">Total Pendaftar</div>
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $stats['pending'] }}</div>
             <div class="text-xs text-neutral-400 font-medium uppercase tracking-wide">Proses Pembayaran</div>
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $stats['terdaftar'] }}</div>
             <div class="text-xs text-neutral-400 font-medium uppercase tracking-wide">Terdaftar</div>
@@ -99,7 +99,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-primary-600 leading-none mb-2">{{ $stats['diterima'] }}</div>
             <div class="text-xs text-neutral-400 font-medium uppercase tracking-wide">Diterima / Selesai</div>
@@ -121,21 +121,21 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <div class="bg-white rounded-lg border border-neutral-200 p-5">
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Biaya Pendaftaran</div>
             <div class="text-2xl font-extrabold text-neutral-900 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['registration_fee'], 0, ',', '.') }}</div>
         </div>
-        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <div class="bg-white rounded-lg border border-neutral-200 p-5">
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Daftar Ulang</div>
             <div class="text-2xl font-extrabold text-primary-600 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['re_registration'], 0, ',', '.') }}</div>
         </div>
-        <div class="bg-white rounded-2xl border border-neutral-200 p-5">
+        <div class="bg-white rounded-lg border border-neutral-200 p-5">
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-2 whitespace-nowrap">Sisa Tagihan Daftar Ulang</div>
             <div class="text-2xl font-extrabold text-neutral-900 leading-none whitespace-nowrap">Rp {{ number_format($finance['totals']['outstanding'], 0, ',', '.') }}</div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full whitespace-nowrap">
                 <thead class="bg-neutral-50 border-b border-neutral-100">
@@ -155,7 +155,7 @@
                             <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['outstanding'], 0, ',', '.') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-5 py-8 text-center text-sm text-neutral-400">Belum ada pembayaran terverifikasi.</td></tr>
+                        <tr><td colspan="4" class="px-4"><x-empty-state title="Belum ada pembayaran terverifikasi." /></td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -170,7 +170,7 @@
 </div>
 
 {{-- Pendaftar Terbaru --}}
-<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+<div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
     <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
         <h2 class="text-sm font-bold text-neutral-900">Pendaftar Terbaru</h2>
         <a href="{{ route('admin.registrations.index') }}"
@@ -233,7 +233,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="px-5 py-16 text-center text-sm text-neutral-400">Belum ada data pendaftar.</td>
+                    <td colspan="6" class="px-4"><x-empty-state title="Belum ada data pendaftar." /></td>
                 </tr>
             @endforelse
         </tbody>

@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+    <div class="bg-white rounded-lg border border-neutral-200 p-6">
         
         <div class="mb-6">
             <h2 class="text-lg font-bold text-neutral-900">Konfigurasi Pengiriman Email</h2>
@@ -28,7 +28,7 @@
                 <p class="text-neutral-500 text-xs mt-2">Dapatkan API Key ini dari dashboard Resend. Kosongkan untuk mempertahankan key yang tersimpan.</p>
                 @if($hasResendKey)
                     <label class="inline-flex items-center gap-2 mt-3 text-xs text-neutral-700">
-                        <input type="checkbox" name="clear_resend_api_key" value="1" class="rounded border-neutral-300 text-primary-600">
+                        <x-checkbox name="clear_resend_api_key" value="1" />
                         Hapus API key tersimpan (kembali ke konfigurasi <code>.env</code>)
                     </label>
                 @endif

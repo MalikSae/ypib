@@ -6,7 +6,7 @@
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                 <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
             </div>
-            <x-text-input type="search" id="trash_search" wire:model.live.debounce.300ms="search" autocomplete="off"
+            <x-text-input type="search" :active="trim($search) !== ''" id="trash_search" wire:model.live.debounce.300ms="search" autocomplete="off"
                           placeholder="Cari nama atau nomor pendaftaran" class="pl-10" />
         </div>
         @if(trim($search) !== '')
@@ -47,9 +47,9 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-5 py-12 text-center">
-                            <p class="text-sm font-medium text-neutral-900">{{ trim($search) !== '' ? 'Tidak ada arsip yang cocok' : 'Tidak ada arsip' }}</p>
-                            <p class="mt-1 text-sm text-neutral-500">Pendaftar yang dihapus akan muncul di sini.</p>
+                        <td colspan="4" class="px-4">
+                            <x-empty-state :title="trim($search) !== '' ? 'Tidak ada arsip yang cocok.' : 'Tidak ada arsip.'"
+                                           :description="trim($search) !== '' ? 'Ubah kata kunci atau hapus filter.' : 'Pendaftar yang dihapus akan muncul di sini.'" />
                         </td>
                     </tr>
                 @endforelse

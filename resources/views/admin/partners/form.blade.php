@@ -36,7 +36,7 @@
                     </div>
                 @endif
                 <div class="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
-                    <input type="file" id="logo" name="logo" accept="image/*" class="text-sm text-neutral-600 w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                    <x-file-input id="logo" name="logo" accept="image/*" />
                     <div class="text-xs text-neutral-500 mt-2">Format yang didukung: JPG, PNG, WEBP, SVG. Maks 2MB.</div>
                 </div>
                 <x-input-error :messages="$errors->get('logo')" />
@@ -45,7 +45,7 @@
             <div class="mb-6">
                 <x-input-label for="is_active" value="Status Aktif" />
                 <label class="inline-flex items-center cursor-pointer gap-2">
-                    <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $partner->is_active ?? true) ? 'checked' : '' }} class="w-5 h-5 accent-primary-600">
+                    <x-checkbox id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $partner->is_active ?? true))" />
                     <span class="text-sm text-neutral-600">Tampilkan di publik</span>
                 </label>
                 <x-input-error :messages="$errors->get('is_active')" />

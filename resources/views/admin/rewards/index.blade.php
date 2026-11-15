@@ -64,7 +64,7 @@
 {{-- ============================================================ --}}
 {{-- TAB 1: REKAP PER AFILIASI --}}
 {{-- ============================================================ --}}
-<div id="tab-recap" class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8" style="display:block;">
+<div id="tab-recap" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:block;">
     <form id="mass_action_referrers_form" method="POST" action="">
         @csrf
         <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between gap-4 flex-wrap">
@@ -86,7 +86,7 @@
                 <thead class="bg-neutral-50 border-b border-neutral-100">
                     <tr>
                         <th class="px-5 py-3 w-10">
-                            <input type="checkbox" id="check-all-referrers" onchange="document.querySelectorAll('.referrer-checkbox').forEach(cb => { cb.checked = this.checked; cb.dispatchEvent(new Event('change')); })" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
+                            <x-checkbox id="check-all-referrers" onchange="document.querySelectorAll('.referrer-checkbox').forEach(cb => { cb.checked = this.checked; cb.dispatchEvent(new Event('change')); })" />
                         </th>
                         <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Afiliasi</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Info Bank</th>
@@ -99,7 +99,7 @@
                     @forelse($recapByReferrer as $referrerId => $recap)
                     <tr class="hover:bg-neutral-50 transition-colors duration-100">
                         <td class="px-5 py-4">
-                            <input type="checkbox" name="referrer_ids[]" value="{{ $referrerId }}" class="referrer-checkbox rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
+                            <x-checkbox name="referrer_ids[]" value="{{ $referrerId }}" class="referrer-checkbox" />
                         </td>
                         <td class="px-5 py-4">
                             <x-truncate :value="$recap['referrer']?->user?->name" class="text-sm font-medium text-neutral-900" />
@@ -134,9 +134,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-5 py-16 text-center text-sm text-neutral-400">
-                            Tidak ada afiliasi yang memiliki komisi dengan status Siap Cair.
-                        </td>
+                        <td colspan="6" class="px-4"><x-empty-state title="Tidak ada afiliasi yang memiliki komisi dengan status Siap Cair." /></td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -148,7 +146,7 @@
 {{-- ============================================================ --}}
 {{-- TAB 2: RIWAYAT PENCAIRAN --}}
 {{-- ============================================================ --}}
-<div id="tab-history" class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8" style="display:none;">
+<div id="tab-history" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:none;">
     <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
         <span class="text-sm text-neutral-500">{{ count($historyByReferrer) }} afiliasi yang telah menerima pencairan komisi</span>
     </div>
@@ -186,9 +184,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-5 py-16 text-center text-sm text-neutral-400">
-                        Belum ada riwayat pencairan komisi.
-                    </td>
+                    <td colspan="5" class="px-4"><x-empty-state title="Belum ada riwayat pencairan komisi." /></td>
                 </tr>
                 @endforelse
             </tbody>
@@ -344,7 +340,7 @@
             <div x-show="isOpen" 
                  x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
                  x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                 class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
                 
                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
@@ -359,7 +355,7 @@
                                 </template>
 
                                 <template x-if="!isLoading && rewards.length === 0">
-                                    <div class="py-8 text-center text-sm text-neutral-500">Tidak ada komisi yang siap dicairkan.</div>
+                                    <x-empty-state title="Tidak ada komisi yang siap dicairkan." />
                                 </template>
 
                                 <template x-if="!isLoading && rewards.length > 0">
@@ -368,7 +364,7 @@
                                             <thead class="bg-neutral-50 sticky top-0 border-b border-neutral-100">
                                                 <tr>
                                                     <th class="px-4 py-3 w-10">
-                                                        <input type="checkbox" x-model="selectAll" @change="toggleSelectAll()" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
+                                                        <x-checkbox x-model="selectAll" x-on:change="toggleSelectAll()" />
                                                     </th>
                                                     <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Pendaftar</th>
                                                     <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Jenis</th>
@@ -380,7 +376,7 @@
                                                 <template x-for="reward in rewards" :key="reward.id">
                                                     <tr class="hover:bg-neutral-50">
                                                         <td class="px-4 py-3">
-                                                            <input type="checkbox" :value="reward.id" x-model.number="selectedIds" @change="updateSelectAll()" class="rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
+                                                            <x-checkbox x-bind:value="reward.id" x-model.number="selectedIds" x-on:change="updateSelectAll()" />
                                                         </td>
                                                         <td class="px-4 py-3 text-sm font-semibold text-neutral-900" x-text="reward.nama_pendaftar"></td>
                                                         <td class="px-4 py-3">

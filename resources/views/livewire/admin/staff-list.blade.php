@@ -5,7 +5,7 @@
         <div class="flex flex-col md:flex-row md:items-center gap-3">
             <div class="flex-1">
                 <x-input-label for="staff_search" value="Cari akun" class="sr-only" />
-                <x-text-input type="search" id="staff_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama atau email" />
+                <x-text-input type="search" :active="trim($search) !== ''" id="staff_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama atau email" />
             </div>
             <x-button type="button" color="neutral" variant="outline" class="md:hidden justify-between"
                       x-on:click="open = !open" x-bind:aria-expanded="open.toString()" aria-controls="staff-filters">
@@ -13,8 +13,8 @@
                 <span x-text="open ? 'Tutup' : 'Buka'" class="text-xs text-neutral-500"></span>
             </x-button>
             <div id="staff-filters" x-show="open" x-cloak class="flex flex-col md:flex-row gap-3">
-                <x-select-menu id="filter_role" class="w-full md:w-48" wire:model.live="role" aria-label="Filter peran" :value="$role" :options="['' => 'Semua peran'] + $roles" />
-                <x-select-menu id="filter_campus" class="w-full md:w-56" wire:model.live="campus" aria-label="Filter kampus" :value="$campus" :options="['' => 'Semua kampus', 'none' => 'Akses semua kampus'] + $campuses" />
+                <x-select-menu filter id="filter_role" class="w-full md:w-48" wire:model.live="role" aria-label="Filter peran" :value="$role" :options="['' => 'Semua peran'] + $roles" />
+                <x-select-menu filter id="filter_campus" class="w-full md:w-56" wire:model.live="campus" aria-label="Filter kampus" :value="$campus" :options="['' => 'Semua kampus', 'none' => 'Akses semua kampus'] + $campuses" />
             </div>
             @if($hasFilters)
                 <x-button color="neutral" variant="ghost" size="sm" wire:click="clearFilters" wire:loading.attr="disabled" wire:target="clearFilters">Hapus filter</x-button>
@@ -49,7 +49,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">Tidak ada akun yang cocok.</div>
+                <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state title="Tidak ada akun yang cocok." /></div>
             @endforelse
         </div>
 
@@ -93,7 +93,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-6 py-16 text-center text-sm text-neutral-500">Tidak ada akun yang cocok.</td></tr>
+                        <tr><td colspan="5" class="px-4"><x-empty-state title="Tidak ada akun yang cocok." /></td></tr>
                     @endforelse
                 </tbody>
             </table>

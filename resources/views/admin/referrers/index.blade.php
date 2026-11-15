@@ -14,7 +14,7 @@
 
 {{-- METRIC SUMMARY CARDS --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between shadow-sm">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ number_format($totalAfiliator, 0, ',', '.') }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Total Afiliator</div>
@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between shadow-sm">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ number_format($totalKlik, 0, ',', '.') }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Total Klik</div>
@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between shadow-sm">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ number_format($totalKonversi, 0, ',', '.') }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Total Konversi</div>
@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between shadow-sm">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-success-600 leading-none mb-2">{{ number_format($persentaseKonversi, 1, ',', '.') }}%</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">% Konversi</div>

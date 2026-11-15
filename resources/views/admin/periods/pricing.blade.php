@@ -41,19 +41,18 @@
     <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 mr-1">Kampus</span>
     @foreach($campuses as $option)
         <a href="{{ route('admin.periods.pricing', ['id' => $period->id, 'campus' => $option->id]) }}"
-           class="decoration-none px-4 py-2 text-sm font-semibold rounded-xl border transition-colors
-                  {{ $option->id === $campus->id ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
+           class="decoration-none px-4 py-2 text-sm font-semibold rounded-xl border transition-colors {{ $option->id === $campus->id ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
             {{ $option->name }}@unless($option->is_active) <span class="opacity-70">(nonaktif)</span>@endunless
         </a>
     @endforeach
 </div>
 
 @if($readOnly)
-    <div class="mb-6 p-4 rounded-xl border border-warning-200 bg-warning-50 text-sm text-neutral-700">
+    <div class="mb-6 p-4 rounded-lg border border-warning-200 bg-warning-50 text-sm text-neutral-700">
         Periode ini diarsipkan sehingga biaya dan kuotanya hanya baca. Buka kembali periodenya bila perlu mengubah.
     </div>
 @else
-    <div class="mb-6 bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
+    <div class="mb-6 bg-white p-4 rounded-lg border border-neutral-200">
         <form action="{{ route('admin.periods.pricing.copy', $period->id) }}" method="POST"
               class="flex flex-col sm:flex-row gap-3 sm:items-end"
               data-confirm="Nilai yang ada pada periode ini akan ditimpa oleh nilai dari periode yang dipilih. Lanjutkan?">
@@ -91,7 +90,7 @@
             @endphp
 
             {{-- div biasa (bukan x-card): @js tidak diproses di dalam atribut komponen Blade --}}
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-neutral-200 p-5"
+            <div class="bg-white overflow-hidden rounded-lg border border-neutral-200 p-5"
                  x-data="{ open: false, items: @js($details), get total() { return this.items.reduce((a, i) => a + (parseInt(i.amount) || 0), 0); } }">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                     <div>
@@ -105,9 +104,7 @@
                     </div>
                     <label class="inline-flex items-center gap-2 cursor-pointer">
                         <input type="hidden" name="programs[{{ $program->id }}][is_offered]" value="0">
-                        <input type="checkbox" name="programs[{{ $program->id }}][is_offered]" value="1"
-                               @checked(old("{$key}.is_offered", $offeredNow ? 1 : 0))
-                               class="w-5 h-5 accent-primary-600">
+                        <x-checkbox name="programs[{{ $program->id }}][is_offered]" value="1" :checked="(bool) (old($key . '.is_offered', $offeredNow ? 1 : 0))" />
                         <span class="text-sm text-neutral-600">Ditawarkan pada periode ini</span>
                     </label>
                 </div>
@@ -158,7 +155,7 @@
                                 <x-text-input type="text" x-model="item.name" :name="'programs[{{ $program->id }}][fee_names][]'" placeholder="Contoh: Dana Pengembangan Pendidikan" class="flex-1" />
                                 <input type="text" inputmode="numeric" autocomplete="off" name="programs[{{ $program->id }}][fee_amounts][]" placeholder="0"
                                        :value="rupiah(item.amount)" @input="item.amount = Number(moneyField($event.target)) || 0"
-                                       class="h-11 w-40 border rounded-lg px-3.5 text-sm text-neutral-900 placeholder-neutral-400 bg-white outline-none focus:border-2 focus:border-primary-600 transition-colors border-neutral-300">
+                                       class="h-11 w-40 border rounded-lg px-3.5 text-sm text-neutral-900 placeholder-neutral-400 bg-white outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-colors border-neutral-300">
                                 <button type="button" @click="items.splice(index, 1)" aria-label="Hapus rincian"
                                         class="h-10 px-2 text-error hover:text-error-700 bg-transparent border-none cursor-pointer">&times;</button>
                             </div>

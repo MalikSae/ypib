@@ -20,7 +20,7 @@
             @csrf
             @if(isset($campus)) @method('PUT') @endif
 
-            <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+            <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                 <div>
                     <x-input-label for="name" value="Nama Kampus" required="true" />
                     <x-text-input type="text" id="name" name="name" :value="old('name', $campus->name ?? '')" required
@@ -72,7 +72,7 @@
                     Kampus bawaan memakai landing utama, jadi tidak memerlukan teks hero khusus.
                 </div>
             @else
-                <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5"
+                <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5"
                      x-data="{
                         h: @js(old('hero_headline', $campus->hero_headline ?? '')),
                         k: @js(old('hero_highlight', $campus->hero_highlight ?? '')),
@@ -127,7 +127,7 @@
                     </div>
                 </div>
             @endif
-            <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+            <div class="mt-6 md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                 <div>
                     <div class="text-sm font-bold text-neutral-900">Rekening Pembayaran</div>
                     <p class="mt-0.5 text-xs text-neutral-400">Kosongkan semua untuk memakai rekening periode.</p>
@@ -154,10 +154,7 @@
             <div class="mt-6">
                 <input type="hidden" name="is_active" value="0">
                 <label class="inline-flex items-center gap-3 text-sm text-neutral-700 {{ isset($campus) && $campus->is_default ? 'opacity-60' : 'cursor-pointer' }}">
-                    <input type="checkbox" name="is_active" value="1"
-                           class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
-                           @checked(old('is_active', $campus->is_active ?? true))
-                           @disabled(isset($campus) && $campus->is_default)>
+                    <x-checkbox name="is_active" value="1" :checked="(bool) (old('is_active', $campus->is_active ?? true))" :disabled="(bool) (isset($campus) && $campus->is_default)" />
                     Kampus aktif (tampil di pilihan pendaftar)
                 </label>
                 @if(isset($campus) && $campus->is_default)

@@ -21,7 +21,7 @@
 </div>
 
 {{-- TABLE WRAPPER --}}
-<div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-8">
+<div class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8">
     <div class="overflow-x-auto">
         <table class="min-w-full whitespace-nowrap">
             <thead class="bg-neutral-50 border-b border-neutral-100">
@@ -53,9 +53,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" class="px-6 py-16 text-center text-sm text-neutral-400">
-                        Belum ada fakultas terdaftar.
-                    </td>
+                    <td colspan="3" class="px-4"><x-empty-state title="Belum ada fakultas terdaftar." /></td>
                 </tr>
                 @endforelse
             </tbody>

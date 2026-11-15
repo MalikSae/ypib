@@ -30,7 +30,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Informasi Periode</label>
-                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="name" value="Nama Periode" required="true" />
@@ -93,7 +93,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Rekening Pembayaran Kampus</label>
-                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="university_bank_name" value="Nama Bank" />
@@ -122,7 +122,7 @@
 
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Kontak WhatsApp Admin</label>
-                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200">
                     <x-input-label for="admin_whatsapp" value="Nomor WhatsApp" />
                     <x-text-input type="text" id="admin_whatsapp" name="admin_whatsapp" class="font-mono md:w-1/2"
                                   :value="old('admin_whatsapp', $period->admin_whatsapp)" placeholder="Cth: 081234567890"

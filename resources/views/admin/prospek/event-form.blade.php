@@ -24,7 +24,7 @@
 
     <x-card class="p-4 md:p-8">
         {{-- Mobile: hanya card. Kotak abu-abu baru muncul di md ke atas supaya tidak bertumpuk. --}}
-        <div class="space-y-5 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">
+        <div class="space-y-5 md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200">
             <div>
                 <x-input-label for="kind" value="Jenis" required="true" />
                 <x-select-menu id="kind" name="kind" required :error="$errors->has('kind')" x-model="kind"
@@ -78,8 +78,7 @@
             </div>
 
             <label class="flex items-center gap-2 text-sm text-neutral-700">
-                <input type="checkbox" name="is_active" value="1" class="rounded border-neutral-300 text-primary-600"
-                       @checked(old('is_active', $event->exists ? $event->is_active : true))>
+                <x-checkbox name="is_active" value="1" :checked="(bool) (old('is_active', $event->exists ? $event->is_active : true))" />
                 Aktif
             </label>
         </div>

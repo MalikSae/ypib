@@ -11,7 +11,7 @@
 </div>
 
 <!-- HEADER RINGKAS KANDIDAT -->
-<x-card class="mb-4 p-4 border-l-4 border-l-primary-600 shadow-sm">
+<x-card class="mb-4 p-4 border-l-4 border-l-primary-600">
     <div class="flex flex-col">
         <span class="text-xs text-neutral-500 uppercase font-bold tracking-wider mb-1">Kandidat</span>
         <span class="text-lg font-black text-neutral-900 leading-tight">{{ $registration->full_name }}</span>
@@ -34,7 +34,7 @@
     }
 @endphp
 @if($notices)
-<div class="mb-4 rounded-xl border border-warning-200 bg-warning-50 p-4 text-sm text-warning-700">
+<div class="mb-4 rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-700">
     <div class="font-semibold mb-1">Perlu diperhatikan</div>
     <ul class="list-disc pl-5 space-y-0.5">
         @foreach($notices as $notice)
@@ -46,7 +46,7 @@
 @endif
 
 <!-- FORM KEPUTUSAN (Selalu Terlihat di Luar Tab) -->
-<x-card class="border-2 border-primary-600 mb-6 p-0 overflow-hidden shadow-sm">
+<x-card class="border-2 border-primary-600 mb-6 p-0 overflow-hidden">
     <div class="p-5 border-b border-neutral-200 bg-white">
         <h2 class="font-bold text-neutral-900 text-lg flex items-center">
             <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
@@ -107,7 +107,7 @@
 
     <!-- KONTEN TAB: RINGKASAN -->
     <div x-show="tab === 'ringkasan'">
-        <x-card class="overflow-hidden p-0 shadow-sm mb-4">
+        <x-card class="overflow-hidden p-0 mb-4">
             <div class="divide-y divide-neutral-100">
                 
                 <!-- DATA DIRI -->
@@ -263,7 +263,7 @@
 
     <!-- KONTEN TAB: DOKUMEN -->
     <div x-show="tab === 'dokumen'" style="display: none;">
-        <x-card class="overflow-hidden p-0 shadow-sm mb-4">
+        <x-card class="overflow-hidden p-0 mb-4">
             <div class="bg-primary-600 p-4">
                 <h3 class="font-bold text-white flex items-center">
                     <svg class="w-5 h-5 mr-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -298,7 +298,7 @@
     <!-- KONTEN TAB: TES TULIS -->
     <div x-show="tab === 'tes_tulis'" style="display: none;">
         @if($registration->examSession)
-        <x-card class="overflow-hidden p-0 mb-4 shadow-sm">
+        <x-card class="overflow-hidden p-0 mb-4">
             <div class="bg-primary-600 p-4">
                 <h3 class="font-bold text-white flex items-center">
                     <svg class="w-5 h-5 mr-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
@@ -310,19 +310,19 @@
                     <div class="text-xs text-primary-600 font-bold uppercase mb-1">Skor Akhir</div>
                     <div class="text-3xl font-black text-primary-900">{{ rtrim(rtrim($registration->examSession->score, '0'), '.') }}</div>
                 </div>
-                <div class="px-4 py-2 bg-white rounded-xl shadow-sm border border-primary-200 font-bold text-primary-700">
+                <div class="px-4 py-2 bg-white rounded-lg border border-primary-200 font-bold text-primary-700">
                     {{ $registration->examSession->result_label === 'sangat_baik' ? 'Sangat Baik' : 'Baik' }}
                 </div>
             </div>
         </x-card>
         
         <div x-data="{ showAnswers: false }" class="mb-6">
-            <button @click="showAnswers = !showAnswers" type="button" class="w-full flex items-center justify-center p-3 text-sm font-semibold text-primary-700 bg-primary-50 rounded-xl border border-primary-200 hover:bg-primary-100 transition shadow-sm">
+            <button @click="showAnswers = !showAnswers" type="button" class="w-full flex items-center justify-center p-3 text-sm font-semibold text-primary-700 bg-primary-50 rounded-lg border border-primary-200 hover:bg-primary-100 transition">
                 <span x-text="showAnswers ? 'Sembunyikan Rincian Jawaban' : 'Lihat Rincian Jawaban ({{ count($registration->examSession->answers) }} soal)'"></span>
                 <svg class="w-4 h-4 ml-1 transition-transform" :class="showAnswers ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             
-            <div x-show="showAnswers" x-transition class="mt-4 bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+            <div x-show="showAnswers" x-transition class="mt-4 bg-white rounded-lg border border-neutral-200 overflow-hidden">
                 <ul class="divide-y divide-neutral-100">
                     @foreach($registration->examSession->answers as $index => $answer)
                         <li class="p-4 text-sm">
@@ -374,7 +374,7 @@
             </div>
         </div>
         @else
-        <x-card class="p-6 text-center text-neutral-500 text-sm shadow-sm">
+        <x-card class="p-6 text-center text-neutral-500 text-sm">
             Kandidat belum mengikuti tes tulis.
         </x-card>
         @endif

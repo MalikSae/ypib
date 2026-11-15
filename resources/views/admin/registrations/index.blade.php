@@ -18,7 +18,7 @@
 {{-- METRIC SUMMARY CARDS --}}
 {{-- ============================================================ --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-neutral-900 leading-none mb-2">{{ $totalRegistrations }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Pendaftar</div>
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             @php
                 $pendaftarLunas = $totalRegistrations - ($statusCounts['menunggu_pembayaran'] ?? 0) - ($statusCounts['menunggu_konfirmasi'] ?? 0);
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             @php
                 $uploadBerkas = ($statusCounts['diterima'] ?? 0) + ($statusCounts['menunggu_konfirmasi_daftar_ulang'] ?? 0) + ($statusCounts['daftar_ulang_selesai'] ?? 0) + ($statusCounts['ditolak'] ?? 0);
@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 p-5 flex items-center justify-between">
         <div>
             <div class="text-3xl font-extrabold text-primary-600 leading-none mb-2">{{ $statusCounts['daftar_ulang_selesai'] ?? 0 }}</div>
             <div class="text-xs font-medium text-neutral-400 uppercase tracking-wide">Daftar Ulang</div>

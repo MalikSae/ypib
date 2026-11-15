@@ -30,7 +30,7 @@
             {{-- ═══════════════════════════════════════════════ --}}
             <div class="mb-8">
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Informasi Dasar</label>
-                <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-5">
+                <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-5">
 
                     {{-- Baris 1: Nama | Fakultas --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -86,7 +86,7 @@
 
             {{-- Biaya, kuota, dan komisi tidak lagi diatur per prodi: berbeda tiap periode. --}}
             <div class="mb-8">
-                <div class="p-5 rounded-xl border border-info-200 bg-info-50 text-sm text-neutral-700">
+                <div class="p-5 rounded-lg border border-info-200 bg-info-50 text-sm text-neutral-700">
                     <strong class="text-neutral-900">Biaya, kuota, dan komisi diatur per periode.</strong>
                     Buka <a href="{{ route('admin.periods.index') }}" class="text-primary-700 font-semibold">Periode PMB</a>
                     lalu pilih <em>Biaya &amp; Kuota</em> pada periode yang dituju. Prodi baru tidak ditawarkan
@@ -100,7 +100,7 @@
             <div class="mb-6">
                 <x-input-label for="is_active" value="Status Aktif" />
                 <label class="inline-flex items-center cursor-pointer gap-2">
-                    <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $program->is_active ?? true) ? 'checked' : '' }} class="w-5 h-5 accent-primary-600">
+                    <x-checkbox id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $program->is_active ?? true))" />
                     <span class="text-sm text-neutral-600">Tampilkan di publik</span>
                 </label>
                 <x-input-error :messages="$errors->get('is_active')" />
@@ -139,7 +139,7 @@
             <div class="mb-6">
                 <label for="gallery-input" class="block text-sm font-semibold text-neutral-900 mb-2">Galeri Foto</label>
                 <div class="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
-                    <input type="file" id="gallery-input" name="gallery[]" multiple accept="image/*" class="text-sm text-neutral-600 w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
+                    <x-file-input id="gallery-input" name="gallery[]" multiple accept="image/*" />
                     <div class="text-xs text-neutral-500 mt-2">Anda bisa memilih banyak foto sekaligus, atau klik "Choose Files" lagi untuk menambah foto lainnya.</div>
                 </div>
                 <x-input-error :messages="$errors->get('gallery')" />
@@ -174,11 +174,11 @@
                 <label class="block text-sm font-semibold text-neutral-900 mb-3">Dibuka di Kampus Mana?</label>
 
                 @if(!$offers['period'])
-                    <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 text-sm text-neutral-500">
+                    <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 text-sm text-neutral-500">
                         Belum ada periode PMB. Buat periode dulu di menu Periode PMB, lalu atur kampus untuk prodi ini.
                     </div>
                 @else
-                    <div class="md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200 space-y-4">
+                    <div class="md:p-6 md:bg-neutral-50 md:rounded-lg md:border md:border-neutral-200 space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-neutral-600">
                             <div>Periode: <strong class="text-neutral-900">{{ $offers['period']->name }}</strong>
                                 <span class="text-xs text-neutral-400">(ikut pemilih periode di pojok atas)</span></div>
@@ -202,9 +202,7 @@
                                  x-data="{ on: @js($on) }">
                                 <div class="flex items-center justify-between gap-3">
                                     <label class="flex items-center gap-3 text-sm font-semibold text-neutral-900 {{ $offers['readOnly'] ? '' : 'cursor-pointer' }}">
-                                        <input type="checkbox" name="offers[{{ $campusId }}][offered]" value="1" x-model="on"
-                                               class="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
-                                               @disabled($offers['readOnly'])>
+                                        <x-checkbox name="offers[{{ $campusId }}][offered]" value="1" x-model="on" :disabled="(bool) ($offers['readOnly'])" />
                                         {{ $row['campus']->name }}
                                         @unless($row['campus']->is_active)
                                             <span class="text-xs font-normal text-neutral-400">(kampus nonaktif)</span>

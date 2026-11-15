@@ -23,7 +23,7 @@
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                     <svg class="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
                 </div>
-                <x-text-input type="search" id="referrer_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama, email, atau kode" class="pl-10" />
+                <x-text-input type="search" :active="trim($search) !== ''" id="referrer_search" wire:model.live.debounce.300ms="search" autocomplete="off" placeholder="Cari nama, email, atau kode" class="pl-10" />
             </div>
 
             <x-button type="button" color="neutral" variant="outline" class="md:hidden justify-between"
@@ -94,7 +94,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white rounded-lg border border-neutral-200 px-4 py-10 text-center text-sm text-neutral-500">{{ trim($search) !== '' ? 'Tidak ada afiliasi yang cocok.' : 'Belum ada afiliasi terdaftar.' }}</div>
+                <div class="bg-white rounded-lg border border-neutral-200 px-4"><x-empty-state :title="trim($search) !== '' ? 'Tidak ada afiliasi yang cocok.' : 'Belum ada afiliasi terdaftar.'" :description="trim($search) !== '' ? 'Ubah kata kunci atau hapus filter.' : null" /></div>
             @endforelse
         </div>
 
@@ -145,7 +145,7 @@
                             <td class="px-4 py-3"><x-table-action-detail :href="route('admin.referrers.show', $referrer->id)" title="Detail afiliasi" /></td>
                         </tr>
                     @empty
-                        <tr><td colspan="9" class="px-4 py-16 text-center text-sm text-neutral-500">{{ trim($search) !== '' ? 'Tidak ada afiliasi yang cocok.' : 'Belum ada afiliasi terdaftar.' }}</td></tr>
+                        <tr><td colspan="9" class="px-4"><x-empty-state :title="trim($search) !== '' ? 'Tidak ada afiliasi yang cocok.' : 'Belum ada afiliasi terdaftar.'" :description="trim($search) !== '' ? 'Ubah kata kunci atau hapus filter.' : null" /></td></tr>
                     @endforelse
                 </tbody>
             </table>

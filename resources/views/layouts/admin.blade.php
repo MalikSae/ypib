@@ -747,7 +747,7 @@
          x-on:keydown.escape.window="if (open) answer(false)"
          class="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-neutral-900/50" x-on:click="answer(false)"></div>
-        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 class="text-lg font-bold text-neutral-900">Konfirmasi</h3>
             <p class="mt-2 text-sm text-neutral-600 whitespace-pre-line" x-text="message"></p>
             <div class="mt-6 flex justify-end gap-3">
