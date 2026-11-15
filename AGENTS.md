@@ -54,7 +54,7 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
   Bila baris tabel punya lebih dari satu aksi yang perlu label teks (misal Chat, Link, Detail di Kelola Prospek), boleh pakai `<x-button size="sm" color="neutral" variant="outline">` dengan teks. Jangan campur ikon dan teks dalam satu baris.
 - `<x-button :href="...">` — tombol yang berpindah halaman, membuka tab baru, atau mengunduh dirender sebagai `<a>`. JANGAN pakai `onclick="location.href=..."` atau `window.open` untuk navigasi, dan JANGAN tulis `<a>` dengan class tombol manual.
 - `<x-badge-status :active="$item->is_active" :toggle-action="route(...)" />` — untuk badge status Aktif/Nonaktif yang bisa diklik untuk toggle. Pakai ini untuk field boolean status di tabel manapun.
-- `<x-filter-tab :active="..." :count="...">` — tab pilihan untuk filter (misal status). Tidak aktif tampil timbul, aktif tampak tertekan. JANGAN tulis tab manual.
+- `<x-filter-tab :active="..." :count="...">` — tab pilihan untuk filter (misal status). Tidak aktif tampil timbul, aktif tampak tertekan. JANGAN tulis tab manual. Hanya untuk pilihan sedikit yang muat satu baris (maksimal sekitar 6, misal status prospek). Bila lebih banyak (misal 10 status pendaftaran), pakai `<x-select-menu>` dengan jumlah di label, contoh "Terdaftar (3)".
 - `<x-modal>` — untuk dialog konfirmasi (misal konfirmasi hapus), berbasis Alpine.js, sudah ada state show/toggle bawaan.
 
 **Belum ada component-nya** (kalau perlu, tulis manual dengan Tailwind mengikuti token warna `neutral-*`/`primary-*`/`error-*` yang sudah ditentukan, JANGAN pakai `gray-*`/`blue-*` Tailwind default):
@@ -75,6 +75,7 @@ Pagination pakai bawaan Laravel (`{{ $items->links() }}`). Di daftar Livewire pa
 - Saat memuat: daftar meredup (`wire:loading.class="opacity-60"`), tombol yang ditekan nonaktif (`wire:loading.attr="disabled" wire:target="..."`). Tanpa ikon berputar.
 - "Hapus filter" pakai `<x-button color="neutral" variant="ghost" size="sm">`, hanya muncul bila ada filter aktif. Tab status tidak ikut direset.
 - Alpine dimuat oleh Livewire (`@livewireScripts` di layout). JANGAN tambah Alpine dari CDN di layout yang memuat Livewire.
+- Sudah memakai pola ini: Kelola Prospek, Event dan Kampanye, Data Afiliasi, Data Pendaftar, Arsip Pendaftar, tab Detail di Komisi, Program Studi, Bank Soal, Akun Staf (komponen di `app/Livewire/Admin/`), dan riwayat interview di dashboard Panitia (`app/Livewire/Panitia/`, layout `layouts.panitia` juga memuat Livewire). Halaman daftar baru WAJIB ikut pola ini.
 
 **Pola halaman List/Index** (acuan: `admin/facilities/index.blade.php`):
 Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900` + deskripsi `text-sm text-neutral-400`, tombol aksi kanan `<x-button>`). Tabel: `bg-white rounded-lg border border-neutral-200`, header `bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500`, body `divide-y divide-neutral-100`.

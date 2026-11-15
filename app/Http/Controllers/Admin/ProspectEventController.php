@@ -6,45 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Campus;
 use App\Models\PmbPeriod;
 use App\Models\ProspectEvent;
-use App\Support\QueryInput;
 use Illuminate\Http\Request;
 
 /** Event sosialisasi dan potongan biaya daftar ulang untuk link form minat. */
 class ProspectEventController extends Controller
 {
-    /** Pilihan urutan daftar event: kunci query string => [label, kolom]. */
-    private const SORTS = [
-        'terbaru' => ['Terbaru', 'prospect_events.id'],
-        'prospek' => ['Prospek terbanyak', 'prospects_count'],
-        'daftar'  => ['Daftar terbanyak', 'registered_count'],
-    ];
-
-    public function index(Request $request)
+    /** Daftar, filter, dan urutan ditangani komponen Livewire App\Livewire\Admin\EventList. */
+    public function index()
     {
-        $query = ProspectEvent::with(['campus', 'period'])->withFunnel();
-
-        $kind = QueryInput::string($request, 'jenis');
-        if (array_key_exists($kind, ProspectEvent::KIND_LABELS)) {
-            $query->where('kind', $kind);
-        }
-
-        // Event tanpa periode hanya tampil di "Semua periode".
-        $periodId = (int) QueryInput::string($request, 'periode');
-        if ($periodId) {
-            $query->where('period_id', $periodId);
-        }
-
-        $sort = QueryInput::string($request, 'urut');
-        $sort = array_key_exists($sort, self::SORTS) ? $sort : 'terbaru';
-        $query->orderByDesc(self::SORTS[$sort][1])->orderByDesc('prospect_events.id');
-
-        return view('admin.prospek.event-index', [
-            'events'  => $query->paginate(20)->withQueryString(),
-            'kinds'   => ProspectEvent::KIND_LABELS,
-            'periods' => PmbPeriod::orderByDesc('open_date')->get(),
-            'sorts'   => array_map(fn ($s) => $s[0], self::SORTS),
-            'sort'    => $sort,
-        ]);
+        return view('admin.prospek.event-index');
     }
 
     public function create()

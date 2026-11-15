@@ -16,46 +16,8 @@ class ReferrerController extends Controller
         $totalKlik = Referrer::sum('total_clicks');
         $totalKonversi = Referrer::sum('total_conversions');
         $persentaseKonversi = $totalKlik > 0 ? ($totalKonversi / $totalKlik) * 100 : 0;
-        $query = Referrer::with(['user', 'rewards', 'clicks'])
-            ->withCount('prospects')
-            ->withSum(['rewards as total_reward' => function($q) {
-                $q->whereIn('status', ['approved', 'disbursed']);
-            }], 'amount');
-
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where('code', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('user', function($q) use ($searchTerm) {
-                      $q->where('name', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
-                  });
-        }
-
-        if ($request->has('sort')) {
-            $sort = $request->sort;
-            $dir = $request->input('dir', 'desc') === 'asc' ? 'asc' : 'desc';
-
-            if ($sort === 'klik') {
-                $query->orderBy('total_clicks', $dir);
-            } elseif ($sort === 'konversi') {
-                $query->orderBy('total_conversions', $dir);
-            } elseif ($sort === 'rate') {
-                $query->orderByRaw('(CASE WHEN total_clicks = 0 THEN 0 ELSE total_conversions / total_clicks END) ' . $dir);
-            } elseif ($sort === 'prospek') {
-                $query->orderBy('prospects_count', $dir);
-            } elseif ($sort === 'reward') {
-                $query->orderBy('total_reward', $dir);
-            } else {
-                $query->latest();
-            }
-        } else {
-            $query->latest();
-        }
-
-        $perPage = $request->input('per_page', 20);
-        $referrers = $query->paginate($perPage)->appends($request->query());
-
-        return view('admin.referrers.index', compact('referrers', 'totalAfiliator', 'totalKlik', 'totalKonversi', 'persentaseKonversi'));
+        // Daftar, cari, urutan, dan jumlah per halaman ditangani komponen Livewire App\Livewire\Admin\ReferrerList.
+        return view('admin.referrers.index', compact('totalAfiliator', 'totalKlik', 'totalKonversi', 'persentaseKonversi'));
     }
 
     public function toggle(int $id)

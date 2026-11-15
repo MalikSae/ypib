@@ -19,44 +19,10 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class ProgramController extends Controller
 {
-    public function index(Request $request)
+    /** Daftar, cari, dan filter ditangani komponen Livewire App\Livewire\Admin\ProgramList. */
+    public function index()
     {
-        $query = Program::with('faculty')->orderBy('name');
-
-        // Kuota dan biaya ditampilkan dari periode berjalan (nilainya diatur per periode).
-        $displayPeriod = \App\Models\PmbPeriod::displayPeriod();
-
-        $campuses = Campus::orderByDesc('is_default')->orderBy('name')->get();
-        $campusFilter = $campuses->firstWhere('id', (int) \App\Support\QueryInput::string($request, 'campus'));
-
-        $searchTerm = \App\Support\QueryInput::string($request, 'search');
-
-        if ($searchTerm !== '') {
-            // Dikelompokkan agar OR tidak lolos dari filter kampus.
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('faculty', function ($f) use ($searchTerm) {
-                      $f->where('name', 'like', '%' . $searchTerm . '%');
-                  });
-            });
-        }
-
-        if ($campusFilter) {
-            $query->inCampus($displayPeriod, $campusFilter);
-        }
-
-        $perPage = (int) \App\Support\QueryInput::string($request, 'per_page', '10');
-        $perPage = in_array($perPage, [5, 10, 25, 50, 100], true) ? $perPage : 10;
-        $programs = $query->paginate($perPage)->appends($request->query());
-
-        // Kolom Kampus, lalu biaya/kuota kampus yang difilter (tanpa filter: kampus bawaan).
-        Program::attachOfferingCampuses($programs->getCollection(), $displayPeriod);
-        $termsCampus = $campusFilter ?? Campus::default();
-        Program::preloadTerms($programs->getCollection(), $displayPeriod, $termsCampus);
-
-        $search = $searchTerm;
-
-        return view('admin.programs.index', compact('programs', 'displayPeriod', 'campuses', 'campusFilter', 'termsCampus', 'search', 'perPage'));
+        return view('admin.programs.index');
     }
 
     public function create()

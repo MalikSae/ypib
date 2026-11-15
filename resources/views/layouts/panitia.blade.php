@@ -10,7 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine dimuat oleh Livewire (@livewireScripts). Jangan tambah Alpine dari CDN: dua Alpine akan bentrok. --}}
+    @livewireStyles
 
     <style>
         [x-cloak] { display: none !important; }
@@ -70,6 +71,7 @@
         @yield('content')
     </main>
 
+    @livewireScripts
     @stack('scripts')
     @include('partials.pwa-register')
     @include('partials.pwa-install-banner', ['section' => 'panitia'])

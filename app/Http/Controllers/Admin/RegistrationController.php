@@ -17,43 +17,17 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RegistrationController extends Controller
 {
-    public function index(Request $request)
+    /** Kartu ringkasan. Daftar, cari, tab status, dan prodi ditangani komponen Livewire App\Livewire\Admin\RegistrationList. */
+    public function index()
     {
-        $periodId = \App\Support\AdminPeriod::id();
-        $query = Registration::forPeriod($periodId)->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
-
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('registration_number', 'like', "%{$search}%")
-                  ->orWhere('full_name', 'like', "%{$search}%");
-            });
-        }
-
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-
-        if ($prodi = $request->get('prodi')) {
-            $query->where('first_choice_program_id', $prodi);
-        }
-
-        $registrations = $query->latest()->paginate(20)->withQueryString();
-
-        // Calculate counts for the tabs
-        $statusCounts = Registration::forPeriod($periodId)->select('status', \DB::raw('count(*) as total'))
+        $statusCounts = Registration::forPeriod(\App\Support\AdminPeriod::id())
+            ->select('status', \DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
         $totalRegistrations = array_sum($statusCounts);
-        
-        $programs = \App\Models\Program::where('is_active', true)->get();
 
-        // NIK yang dipakai lebih dari satu pendaftaran aktif (tanda "NIK ganda", K7).
-        $duplicateNiks = Registration::withoutGlobalScope(\App\Models\Scopes\CampusScope::class)->whereIn('nik', $registrations->pluck('nik')->filter()->unique())
-            ->select('nik')->groupBy('nik')->havingRaw('COUNT(*) > 1')
-            ->pluck('nik')->flip()->all();
-
-        return view('admin.registrations.index', compact('registrations', 'statusCounts', 'totalRegistrations', 'programs', 'duplicateNiks'));
+        return view('admin.registrations.index', compact('statusCounts', 'totalRegistrations'));
     }
 
     public function show(int $id)
@@ -847,22 +821,10 @@ class RegistrationController extends Controller
         return redirect()->route('admin.registrations.index')->with('success', 'Pendaftar berhasil dihapus/diarsipkan.');
     }
 
-    public function trash(Request $request)
+    /** Daftar dan pencarian arsip ditangani komponen Livewire App\Livewire\Admin\RegistrationTrashList. */
+    public function trash()
     {
-        $periodId = \App\Support\AdminPeriod::id();
-        $query = Registration::forPeriod($periodId)->onlyTrashed()->with(['user', 'firstChoiceProgram', 'secondChoiceProgram', 'referrer']);
-
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('registration_number', 'like', "%{$search}%")
-                  ->orWhere('full_name', 'like', "%{$search}%");
-            });
-        }
-
-        $registrations = $query->latest('deleted_at')->paginate(20)->withQueryString();
-        $totalRegistrations = Registration::forPeriod($periodId)->onlyTrashed()->count();
-
-        return view('admin.registrations.trash', compact('registrations', 'totalRegistrations'));
+        return view('admin.registrations.trash');
     }
 
     public function restore(int $id)

@@ -10,25 +10,10 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    /** Riwayat interview dan pencariannya ditangani komponen Livewire App\Livewire\Panitia\InterviewHistory. */
+    public function index()
     {
-        $search = $request->query('search');
-
-        $query = PaymentLog::where('acted_by', Auth::id())
-            ->where('action', 'interview_completed')
-            ->with(['registration' => fn($q) => $q->withTrashed()->with('firstChoiceProgram')])
-            ->latest();
-
-        if ($search) {
-            $query->whereHas('registration', function($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('registration_number', 'like', "%{$search}%");
-            });
-        }
-
-        $riwayatInterview = $query->paginate(10)->withQueryString();
-
-        return view('panitia.dashboard', compact('riwayatInterview', 'search'));
+        return view('panitia.dashboard');
     }
 
     public function show($registrationNumber)

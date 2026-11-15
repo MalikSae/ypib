@@ -204,4 +204,28 @@ class ProspectEventFunnelTest extends TestCase
             ->assertDontSee($big->name)
             ->assertDontSee($noPeriod->name);
     }
+    public function test_event_list_filters_live_without_apply_button(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $event = $this->makeEvent('Sosialisasi Kampus');
+        $online = $this->makeEvent('Kampanye Daring', ['kind' => ProspectEvent::KIND_ONLINE]);
+        $this->makeProspect([$online]);
+
+        $this->actingAs($admin)->get(route('admin.prospects.events.index'))
+            ->assertOk()
+            ->assertSeeLivewire(\App\Livewire\Admin\EventList::class)
+            ->assertDontSee('Terapkan');
+
+        \Livewire\Livewire::actingAs($admin)->test(\App\Livewire\Admin\EventList::class)
+            ->set('jenis', ProspectEvent::KIND_ONLINE)
+            ->assertSee($online->name)->assertDontSee($event->name)
+            ->call('clearFilters')
+            ->assertSet('jenis', '')
+            ->assertSee($event->name)
+            ->set('urut', 'prospek')
+            ->assertSeeInOrder([$online->name, $event->name]);
+
+        \Livewire\Livewire::actingAs(User::factory()->create(['role' => 'mahasiswa']))
+            ->test(\App\Livewire\Admin\EventList::class)->assertForbidden();
+    }
 }

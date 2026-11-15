@@ -11,14 +11,7 @@ class RewardController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Reward::with(['referrer.user', 'registration.user', 'approvedBy']);
-
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-
-        $rewards = $query->latest()->paginate(20)->withQueryString();
-
+        // Tab "Detail transaksi" (daftar dan filter status) ditangani komponen Livewire App\Livewire\Admin\RewardDetailList.
         // Data for Tab 1: Rekap per Afiliasi (Hanya yang Siap Cair / approved)
         $readyToDisburse = Reward::with(['referrer.user'])
             ->where('status', 'approved')
@@ -47,7 +40,7 @@ class RewardController extends Controller
             ];
         });
 
-        return view('admin.rewards.index', compact('rewards', 'recapByReferrer', 'historyByReferrer'));
+        return view('admin.rewards.index', compact('recapByReferrer', 'historyByReferrer') + ['rewardCount' => Reward::count()]);
     }
 
     public function approve(int $id)

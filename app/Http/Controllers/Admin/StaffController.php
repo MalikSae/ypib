@@ -26,34 +26,10 @@ class StaffController extends Controller
         'panitia'  => 'Panitia',
     ];
 
-    public function index(Request $request)
+    /** Daftar, cari, dan filter ditangani komponen Livewire App\Livewire\Admin\StaffList. */
+    public function index()
     {
-        $search = \App\Support\QueryInput::string($request, 'search');
-        $role = \App\Support\QueryInput::string($request, 'role');
-        $campus = \App\Support\QueryInput::string($request, 'campus');
-
-        $staff = User::with('campus')
-            ->whereIn('role', array_keys(self::ROLES))
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
-                });
-            })
-            ->when(array_key_exists($role, self::ROLES), fn ($q) => $q->where('role', $role))
-            ->when($campus === 'none', fn ($q) => $q->whereNull('campus_id'))
-            ->when(ctype_digit($campus), fn ($q) => $q->where('campus_id', (int) $campus))
-            ->orderBy('name')
-            ->paginate(15)
-            ->withQueryString();
-
-        return view('admin.staff.index', [
-            'staff'    => $staff,
-            'roles'    => self::ROLES,
-            'campuses' => $this->campuses(),
-            'search'   => $search,
-            'role'     => $role,
-            'campus'   => $campus,
-        ]);
+        return view('admin.staff.index');
     }
 
     public function create()

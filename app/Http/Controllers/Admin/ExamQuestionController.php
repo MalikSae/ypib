@@ -8,18 +8,10 @@ use Illuminate\Http\Request;
 
 class ExamQuestionController extends Controller
 {
-    public function index(Request $request)
+    /** Daftar dan pencarian ditangani komponen Livewire App\Livewire\Admin\ExamQuestionList. */
+    public function index()
     {
-        $search = $request->query('search');
-        $questions = ExamQuestion::query()
-            ->when($search, function ($query, $search) {
-                $query->where('question_text', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('admin.exam-questions.index', compact('questions', 'search'));
+        return view('admin.exam-questions.index');
     }
 
     public function create()
