@@ -77,10 +77,7 @@
                 <x-input-error :messages="$errors->get('discount_amount')" />
             </div>
 
-            <label class="flex items-center gap-2 text-sm text-neutral-700">
-                <x-checkbox name="is_active" value="1" :checked="(bool) (old('is_active', $event->exists ? $event->is_active : true))" />
-                Aktif
-            </label>
+            <x-toggle name="is_active" value="1" :checked="(bool) (old('is_active', $event->exists ? $event->is_active : true))" label="Aktif" />
         </div>
 
         <div class="flex justify-end gap-3 pt-6 border-t border-neutral-200 mt-6">

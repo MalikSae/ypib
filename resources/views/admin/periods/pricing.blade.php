@@ -102,11 +102,8 @@
                             @endunless
                         </div>
                     </div>
-                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="hidden" name="programs[{{ $program->id }}][is_offered]" value="0">
-                        <x-checkbox name="programs[{{ $program->id }}][is_offered]" value="1" :checked="(bool) (old($key . '.is_offered', $offeredNow ? 1 : 0))" />
-                        <span class="text-sm text-neutral-600">Ditawarkan pada periode ini</span>
-                    </label>
+                    <input type="hidden" name="programs[{{ $program->id }}][is_offered]" value="0">
+                    <x-toggle name="programs[{{ $program->id }}][is_offered]" value="1" :checked="(bool) (old($key . '.is_offered', $offeredNow ? 1 : 0))" label="Ditawarkan pada periode ini" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

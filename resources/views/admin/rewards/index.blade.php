@@ -15,56 +15,19 @@
 </div>
 
 {{-- ============================================================ --}}
-{{-- TABS NAVIGATION --}}
+{{-- TABS NAVIGATION (tab Detail terbuka langsung bila URL membawa filter atau halaman daftar Detail) --}}
 {{-- ============================================================ --}}
-<div class="flex flex-wrap items-center gap-2 mb-6 border-b border-neutral-200 pb-2">
-    <button onclick="switchTab('recap')" id="btn-tab-recap" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 bg-neutral-900 text-white shadow-sm">
-        Rekap Siap Cair
-        <span class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all bg-neutral-700 text-white">{{ count($recapByReferrer) }}</span>
-    </button>
-    <button onclick="switchTab('history')" id="btn-tab-history" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-neutral-600 bg-white hover:bg-neutral-100 border border-neutral-200">
-        Riwayat Pencairan
-        <span class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all bg-neutral-100 text-neutral-500">{{ count($historyByReferrer) }}</span>
-    </button>
-    <button onclick="switchTab('detail')" id="btn-tab-detail" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-neutral-600 bg-white hover:bg-neutral-100 border border-neutral-200">
-        Detail Transaksi
-        <span class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all bg-neutral-100 text-neutral-500">{{ $rewardCount }}</span>
-    </button>
-</div>
-
-<script>
-    function switchTab(tabId) {
-        document.getElementById('tab-recap').style.display = tabId === 'recap' ? 'block' : 'none';
-        document.getElementById('tab-history').style.display = tabId === 'history' ? 'block' : 'none';
-        document.getElementById('tab-detail').style.display = tabId === 'detail' ? 'block' : 'none';
-        
-        const tabs = ['recap', 'history', 'detail'];
-        tabs.forEach(id => {
-            const btn = document.getElementById('btn-tab-' + id);
-            const badge = btn.querySelector('span');
-            
-            if (id === tabId) {
-                btn.className = "inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 bg-neutral-900 text-white shadow-sm";
-                badge.className = "ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all bg-neutral-700 text-white";
-            } else {
-                btn.className = "inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-neutral-600 bg-white hover:bg-neutral-100 border border-neutral-200";
-                badge.className = "ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold transition-all bg-neutral-100 text-neutral-500";
-            }
-        });
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('status') || urlParams.has('page') || urlParams.has('search')) {
-            switchTab('detail');
-        }
-    });
-</script>
+<div x-data="{ tab: @js(request()->hasAny(['status', 'page', 'search']) ? 'detail' : 'recap') }">
+<x-tab-list aria-label="Bagian komisi" class="mb-6">
+    <x-tab name="recap" :count="count($recapByReferrer)">Rekap siap cair</x-tab>
+    <x-tab name="history" :count="count($historyByReferrer)">Riwayat pencairan</x-tab>
+    <x-tab name="detail" :count="$rewardCount">Detail transaksi</x-tab>
+</x-tab-list>
 
 {{-- ============================================================ --}}
 {{-- TAB 1: REKAP PER AFILIASI --}}
 {{-- ============================================================ --}}
-<div id="tab-recap" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:block;">
+<div id="tab-recap" role="tabpanel" aria-labelledby="tab-btn-recap" x-show="tab === 'recap'" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8">
     <form id="mass_action_referrers_form" method="POST" action="">
         @csrf
         <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between gap-4 flex-wrap">
@@ -146,7 +109,7 @@
 {{-- ============================================================ --}}
 {{-- TAB 2: RIWAYAT PENCAIRAN --}}
 {{-- ============================================================ --}}
-<div id="tab-history" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:none;">
+<div id="tab-history" role="tabpanel" aria-labelledby="tab-btn-history" x-show="tab === 'history'" x-cloak class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8">
     <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
         <span class="text-sm text-neutral-500">{{ count($historyByReferrer) }} afiliasi yang telah menerima pencairan komisi</span>
     </div>
@@ -215,8 +178,9 @@
 {{-- ============================================================ --}}
 {{-- TAB 3: DETAIL TRANSAKSI --}}
 {{-- ============================================================ --}}
-<div id="tab-detail" class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8" style="display:none;">
+<div id="tab-detail" role="tabpanel" aria-labelledby="tab-btn-detail" x-show="tab === 'detail'" x-cloak class="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-8">
     <livewire:admin.reward-detail-list />
+</div>
 </div>
 
 <script>

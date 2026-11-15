@@ -52,10 +52,7 @@
             <div class="mb-8">
                 <x-input-label for="is_active" value="Status" />
                 <div class="flex items-center h-12">
-                    <label class="flex items-center cursor-pointer gap-2">
-                        <x-checkbox id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $question->is_active ?? true))" />
-                        <span class="text-sm font-medium text-neutral-600">Soal Aktif (Tampil di Tes)</span>
-                    </label>
+                    <x-toggle id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $question->is_active ?? true))" label="Soal aktif (tampil di tes)" />
                 </div>
             </div>
 

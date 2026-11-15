@@ -51,9 +51,13 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
 - Kartu pilihan (radio `peer sr-only` dengan kotak besar, misal Lulus/Tidak lulus, pemilih ikon) boleh ditulis manual: border 1px `neutral-300`, terpilih `peer-checked:border-primary-500 peer-checked:bg-primary-50`, `rounded-lg`.
 - `<x-file-input>` — WAJIB untuk input berkas. Tombol "Pilih file" tampil seperti tombol sekunder. `<x-file-input id="logo" name="logo" accept="image/*" :error="$errors->has('logo')" />`.
 - `<x-empty-state>` — WAJIB untuk keadaan kosong di tabel, daftar kartu, dan panel. Judul `text-sm font-medium`, keterangan opsional `text-xs`, `py-12`. Di tabel: `<tr><td colspan="5" class="px-4"><x-empty-state title="Belum ada kampus terdaftar." /></td></tr>`. Bila kosong karena filter, beri keterangan cara keluar: `:description="$hasFilters ? 'Ubah kata kunci atau hapus filter.' : null"`.
+- `<x-toggle>` — saklar on/off (`role="switch"`) untuk field status yang berlaku sebagai keadaan: Aktif, Tampilkan di publik, Ditawarkan pada periode ini. `<x-toggle name="is_active" value="1" :checked="(bool) old('is_active', $x->is_active)" label="Tampilkan di publik" />`. Label teks sudah di dalam komponen, JANGAN dibungkus `<label>` lagi. Bila nilai mati harus ikut terkirim, taruh `<input type="hidden" name="is_active" value="0">` sebelumnya.
+  - Kapan toggle, kapan checkbox: toggle untuk satu keadaan on/off milik data itu. Checkbox untuk memilih baris, memilih beberapa item dari daftar (misal kampus yang menawarkan prodi), menyetujui pernyataan, atau tindakan sekali jalan (misal "Hapus API key tersimpan").
+  - Badge status yang bisa diklik di tabel tetap `<x-badge-status>`, bukan toggle.
+- `<x-tab-list>` + `<x-tab>` — tab untuk berpindah tampilan dalam satu halaman (misal Rekap, Riwayat, dan Detail di Komisi). Gaya garis bawah: aktif `border-primary-600 text-primary-700`, tidak aktif netral. Pola ARIA tabs lengkap (panah kiri/kanan, Home, End). Wadah induk memegang state Alpine `tab`; panel ber-`id="tab-{name}"`, `role="tabpanel"`, `x-show`, dan `x-cloak` untuk panel yang awalnya tersembunyi. Contoh lengkap ada di komentar `components/tab-list.blade.php`.
+  - Bedanya dengan `<x-filter-tab>`: filter tab menyaring isi daftar yang sama (tampil timbul/tertekan), view tab mengganti bagian halaman (tampil garis bawah). JANGAN tukar keduanya.
 
 **Belum ada component-nya** (kalau perlu, tulis manual dengan Tailwind mengikuti token warna `neutral-*`/`primary-*`/`error-*` yang sudah ditentukan, JANGAN pakai `gray-*`/`blue-*` Tailwind default):
-- Toggle/switch
 - Alert/toast/notification (di admin, flash message sudah ditangani otomatis oleh `layouts/admin.blade.php` sendiri — cukup pakai session flash biasa dari controller, JANGAN bikin banner manual di tiap halaman)
 
 **JANGAN pakai untuk halaman admin baru** (ini komponen lama Breeze, HANYA untuk halaman auth/login/profile bawaan Laravel, bukan untuk CRUD admin):

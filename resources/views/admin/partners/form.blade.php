@@ -44,10 +44,7 @@
 
             <div class="mb-6">
                 <x-input-label for="is_active" value="Status Aktif" />
-                <label class="inline-flex items-center cursor-pointer gap-2">
-                    <x-checkbox id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $partner->is_active ?? true))" />
-                    <span class="text-sm text-neutral-600">Tampilkan di publik</span>
-                </label>
+                <x-toggle id="is_active" name="is_active" value="1" :checked="(bool) (old('is_active', $partner->is_active ?? true))" label="Tampilkan di publik" />
                 <x-input-error :messages="$errors->get('is_active')" />
             </div>
 

@@ -153,10 +153,7 @@
 
             <div class="mt-6">
                 <input type="hidden" name="is_active" value="0">
-                <label class="inline-flex items-center gap-3 text-sm text-neutral-700 {{ isset($campus) && $campus->is_default ? 'opacity-60' : 'cursor-pointer' }}">
-                    <x-checkbox name="is_active" value="1" :checked="(bool) (old('is_active', $campus->is_active ?? true))" :disabled="(bool) (isset($campus) && $campus->is_default)" />
-                    Kampus aktif (tampil di pilihan pendaftar)
-                </label>
+                <x-toggle name="is_active" value="1" :checked="(bool) (old('is_active', $campus->is_active ?? true))" :disabled="(bool) (isset($campus) && $campus->is_default)" label="Kampus aktif (tampil di pilihan pendaftar)" />
                 @if(isset($campus) && $campus->is_default)
                     <p class="mt-1 text-xs text-neutral-400">Kampus bawaan selalu aktif.</p>
                 @endif

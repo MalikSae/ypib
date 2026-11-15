@@ -63,10 +63,7 @@
                 <div>
                     <x-input-label for="is_active" value="Status Tampil" />
                     <div class="flex items-center h-12">
-                        <label class="flex items-center cursor-pointer gap-2">
-                            <x-checkbox id="is_active" name="is_active" value="1" checked />
-                            <span class="text-sm font-medium text-neutral-600">Ditampilkan</span>
-                        </label>
+                        <x-toggle id="is_active" name="is_active" value="1" checked label="Ditampilkan" />
                     </div>
                 </div>
             </div>
