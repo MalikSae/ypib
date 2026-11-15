@@ -25,6 +25,12 @@ class Referrer extends Model
         return $this->status === 'active';
     }
 
+    /** Prospek form minat milik affiliator ini (pemilik pertama). */
+    public function prospects()
+    {
+        return $this->hasMany(Prospect::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -7,10 +7,12 @@
 ])
 
 @php
-    $baseClasses = 'inline-flex items-center justify-center gap-2 font-semibold rounded-md transition duration-200 ease-in-out motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    // whitespace-nowrap: teks tombol tidak pernah turun ke baris kedua. Bila tidak muat, pendekkan teksnya.
+    $baseClasses = 'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold rounded-md transition duration-200 ease-in-out motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     $sizeClasses = [
-        'sm' => 'px-3 py-2 text-sm h-9',
+        // sm: 44px di mobile (zona sentuh), 36px di desktop.
+        'sm' => 'px-3 py-2 text-sm h-11 md:h-9',
         'md' => 'px-4 py-2.5 text-sm h-11',
         'lg' => 'px-6 py-3 text-base h-12',
     ][$size] ?? 'px-4 py-2.5 text-sm h-11';
@@ -49,15 +51,19 @@
     ];
 
     $colorClasses = $colorVariants[$color][$variant] ?? $colorVariants['primary']['solid'];
+
+    // Solid dan outline tampil timbul. Ghost (aksi tersier) sengaja tetap datar agar terbaca paling ringan.
+    // Outline diberi latar putih: tombol timbul tidak boleh tembus pandang di atas latar abu halaman.
+    $depthClasses = ['solid' => 'x-button-raised', 'outline' => 'x-button-raised bg-white'][$variant] ?? '';
 @endphp
 
 {{-- Dengan href: dirender sebagai tautan bergaya tombol (navigasi, buka tab baru, unduh). --}}
 @if($href)
-<a href="{{ $href }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses"]) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses $depthClasses"]) }}>
     {{ $slot }}
 </a>
 @else
-<button type="{{ $type }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses"]) }}>
+<button type="{{ $type }}" {{ $attributes->merge(['class' => "$baseClasses $sizeClasses $colorClasses $depthClasses"]) }}>
     {{ $slot }}
 </button>
 @endif

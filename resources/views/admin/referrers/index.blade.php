@@ -69,13 +69,8 @@
         <form action="{{ route('admin.referrers.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center w-full lg:w-auto">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-                <x-select name="per_page" id="per_page" onchange="this.form.submit()" style="width:auto;">
-                    <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
-                    <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                    <option value="20" {{ request('per_page', 20) == 20 ? 'selected' : '' }}>20</option>
-                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                </x-select>
+                <x-select-menu id="per_page" name="per_page" class="w-24" onchange="this.closest('form').submit()"
+                               :value="request('per_page', 20)" :options="[5 => '5', 10 => '10', 20 => '20', 50 => '50', 100 => '100']" />
             </div>
             
             <div class="relative w-full sm:w-72">
@@ -88,19 +83,11 @@
         </form>
 
         <form method="GET" action="{{ route('admin.referrers.export') }}" class="flex gap-3 items-center w-full lg:w-auto overflow-x-auto">
-            <x-select name="period_id" style="width:auto;min-width:140px;">
-                <option value="">Semua Periode</option>
-                @foreach(\App\Support\AdminPeriod::options() as $period)
-                    <option value="{{ $period->id }}" @selected(\App\Support\AdminPeriod::id() === $period->id)>
-                        {{ $period->name }} ({{ $period->phaseLabel() }})
-                    </option>
-                @endforeach
-            </x-select>
-            <x-select name="status" style="width:auto;min-width:140px;">
-                <option value="">Semua Status</option>
-                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
-            </x-select>
+            <x-select-menu id="export_period_id" name="period_id" class="w-56" aria-label="Periode ekspor"
+                           :value="\App\Support\AdminPeriod::id()"
+                           :options="['' => 'Semua periode'] + \App\Support\AdminPeriod::options()->mapWithKeys(fn ($p) => [$p->id => $p->name . ' (' . $p->phaseLabel() . ')'])->all()" />
+            <x-select-menu id="export_status" name="status" class="w-40" aria-label="Status ekspor"
+                           :value="request('status')" :options="['' => 'Semua status', 'active' => 'Aktif', 'inactive' => 'Nonaktif']" />
             <x-button type="submit" color="neutral" variant="outline">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export Excel
@@ -143,6 +130,11 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Nama & Email</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">Kode Referral</th>
                     <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                        <a href="{{ $sortUrl('prospek') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 {{ $sort === 'prospek' ? 'text-primary-600' : '' }}">
+                            Prospek {!! $sortIcon('prospek') !!}
+                        </a>
+                    </th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                         <a href="{{ $sortUrl('klik') }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1 {{ $sort === 'klik' ? 'text-primary-600' : '' }}">
                             Klik {!! $sortIcon('klik') !!}
                         </a>
@@ -170,15 +162,21 @@
                 @forelse($referrers as $referrer)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <a href="{{ route('admin.referrers.show', $referrer->id) }}" class="block text-sm font-bold text-primary-600 hover:text-primary-800 transition-colors">
-                            {{ $referrer->user?->name ?? '—' }}
-                        </a>
-                        <div class="text-xs mt-0.5 text-neutral-500">{{ $referrer->user?->email }}</div>
+                        <a href="{{ route('admin.referrers.show', $referrer->id) }}" title="{{ $referrer->user?->name }}" class="block text-sm font-medium text-neutral-900 hover:text-primary-600 transition-colors truncate max-w-xs">{{ $referrer->user?->name ?? '—' }}</a>
+                        <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $referrer->user?->email }}">{{ $referrer->user?->email }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-mono font-bold border border-primary-100">
                             {{ $referrer->code }}
                         </span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        @if($referrer->prospects_count > 0)
+                            <a href="{{ route('admin.prospects.index', ['referrer' => $referrer->id]) }}" title="Lihat prospek affiliator ini"
+                               class="rounded-sm text-sm font-bold text-neutral-900 underline underline-offset-4 hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{{ $referrer->prospects_count }}</a>
+                        @else
+                            <span class="text-sm font-bold text-neutral-400">0</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-center">
                         <span class="text-sm font-bold text-neutral-600">{{ $referrer->total_clicks }}</span>
@@ -214,7 +212,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-16 text-center text-sm text-neutral-400">
+                    <td colspan="9" class="px-6 py-16 text-center text-sm text-neutral-400">
                         Belum ada afiliasi terdaftar.
                     </td>
                 </tr>

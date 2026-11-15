@@ -212,12 +212,13 @@ class PeriodScopedAdminTest extends TestCase
 
         $response = $this->actingAs($admin)->get('/admin/afiliasi')->assertOk();
 
-        $response->assertSee('Semua Periode');
-        $response->assertSee('PMB Berjalan (Pendaftaran dibuka)');
+        // Dropdown kustom (x-select-menu): pilihan ada di data Alpine, label terpilih dirender di tombol.
+        $response->assertSee('Semua periode');
         $response->assertSee('PMB Lama (Diarsipkan)');
         $this->assertMatchesRegularExpression(
-            '/<option value="' . $this->current->id . '"\s+selected[^>]*>/s',
+            '/id="export_period_id".*?<span class="truncate"[^>]*>\s*PMB Berjalan \(Pendaftaran dibuka\)\s*<\/span>/s',
             $response->getContent()
         );
+        $response->assertSee('value: ' . \Illuminate\Support\Js::from((string) $this->current->id), false);
     }
 }

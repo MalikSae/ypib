@@ -17,6 +17,7 @@ class ReferrerController extends Controller
         $totalKonversi = Referrer::sum('total_conversions');
         $persentaseKonversi = $totalKlik > 0 ? ($totalKonversi / $totalKlik) * 100 : 0;
         $query = Referrer::with(['user', 'rewards', 'clicks'])
+            ->withCount('prospects')
             ->withSum(['rewards as total_reward' => function($q) {
                 $q->whereIn('status', ['approved', 'disbursed']);
             }], 'amount');
@@ -40,6 +41,8 @@ class ReferrerController extends Controller
                 $query->orderBy('total_conversions', $dir);
             } elseif ($sort === 'rate') {
                 $query->orderByRaw('(CASE WHEN total_clicks = 0 THEN 0 ELSE total_conversions / total_clicks END) ' . $dir);
+            } elseif ($sort === 'prospek') {
+                $query->orderBy('prospects_count', $dir);
             } elseif ($sort === 'reward') {
                 $query->orderBy('total_reward', $dir);
             } else {

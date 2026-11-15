@@ -25,19 +25,10 @@
     <div class="sm:col-span-2">
         <x-text-input type="text" name="search" :value="$search" placeholder="Cari nama atau email..." />
     </div>
-    <x-select name="role" onchange="this.form.submit()">
-        <option value="">Semua peran</option>
-        @foreach($roles as $value => $label)
-            <option value="{{ $value }}" @selected($role === $value)>{{ $label }}</option>
-        @endforeach
-    </x-select>
-    <x-select name="campus" onchange="this.form.submit()">
-        <option value="">Semua kampus</option>
-        <option value="none" @selected($campus === 'none')>Akses semua kampus</option>
-        @foreach($campuses as $option)
-            <option value="{{ $option->id }}" @selected($campus === (string) $option->id)>{{ $option->name }}</option>
-        @endforeach
-    </x-select>
+    <x-select-menu id="filter_role" name="role" aria-label="Filter peran" onchange="this.closest('form').submit()"
+                   :value="$role" :options="['' => 'Semua peran'] + $roles" />
+    <x-select-menu id="filter_campus" name="campus" aria-label="Filter kampus" onchange="this.closest('form').submit()"
+                   :value="$campus" :options="['' => 'Semua kampus', 'none' => 'Akses semua kampus'] + $campuses->pluck('name', 'id')->all()" />
 </form>
 
 {{-- TABLE WRAPPER --}}
@@ -57,13 +48,13 @@
                 @forelse($staff as $account)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 {{ $account->is_active ? '' : 'opacity-70' }}">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-semibold text-neutral-900">
-                            {{ $account->name }}
+                        <div class="flex items-center gap-2 max-w-xs">
+                            <span class="text-sm font-medium text-neutral-900 truncate" title="{{ $account->name }}">{{ $account->name }}</span>
                             @if($account->id === auth()->id())
-                                <span class="ml-1 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold whitespace-nowrap">Anda</span>
+                                <span class="shrink-0 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-semibold whitespace-nowrap">Anda</span>
                             @endif
                         </div>
-                        <div class="text-xs text-neutral-400 mt-0.5">{{ $account->email }}</div>
+                        <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $account->email }}">{{ $account->email }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200 whitespace-nowrap">

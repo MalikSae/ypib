@@ -60,12 +60,9 @@
             @csrf
             <div class="flex-1">
                 <x-input-label for="source_period_id" value="Salin biaya dan kuota dari periode" />
-                <x-select id="source_period_id" name="source_period_id" required :error="$errors->has('source_period_id')">
-                    <option value="">-- Pilih periode sumber --</option>
-                    @foreach($otherPeriods as $other)
-                        <option value="{{ $other->id }}">{{ $other->name }} ({{ $other->year }})</option>
-                    @endforeach
-                </x-select>
+                <x-select-menu id="source_period_id" name="source_period_id" required :error="$errors->has('source_period_id')"
+                               :value="old('source_period_id')"
+                               :options="['' => 'Pilih periode sumber'] + $otherPeriods->mapWithKeys(fn ($o) => [$o->id => $o->name . ' (' . $o->year . ')'])->all()" />
                 <x-input-error :messages="$errors->get('source_period_id')" />
             </div>
             <x-button type="submit" color="neutral" variant="outline">Salin Nilai</x-button>

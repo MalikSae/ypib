@@ -36,22 +36,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <x-input-label for="role" value="Peran" required="true" />
-                        <x-select id="role" name="role" required :error="$errors->has('role')">
-                            @foreach($roles as $value => $label)
-                                <option value="{{ $value }}" @selected(old('role', $staff->role) === $value)>{{ $label }}</option>
-                            @endforeach
-                        </x-select>
+                        <x-select-menu id="role" name="role" required :error="$errors->has('role')"
+                                       :value="old('role', $staff->role)" :options="$roles" />
                         <x-input-error :messages="$errors->get('role')" />
                     </div>
 
                     <div>
                         <x-input-label for="campus_id" value="Kampus" />
-                        <x-select id="campus_id" name="campus_id" :error="$errors->has('campus_id')">
-                            <option value="">Semua kampus</option>
-                            @foreach($campuses as $campus)
-                                <option value="{{ $campus->id }}" @selected((string) old('campus_id', $staff->campus_id) === (string) $campus->id)>{{ $campus->name }}</option>
-                            @endforeach
-                        </x-select>
+                        <x-select-menu id="campus_id" name="campus_id" :error="$errors->has('campus_id')"
+                                       :value="old('campus_id', $staff->campus_id)"
+                                       :options="['' => 'Semua kampus'] + $campuses->pluck('name', 'id')->all()" />
                         <x-input-error :messages="$errors->get('campus_id')" />
                     </div>
                 </div>

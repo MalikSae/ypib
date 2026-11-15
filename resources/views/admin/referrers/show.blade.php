@@ -155,8 +155,8 @@
                                 <td class="px-4 py-3 text-sm font-medium text-neutral-900 whitespace-nowrap">
                                     {{ $log->actedBy?->name ?? 'Sistem' }}
                                 </td>
-                                <td class="px-4 py-3 text-sm text-neutral-600">
-                                    {{ $log->note }}
+                                <td class="px-4 py-3 text-sm text-neutral-700">
+                                    <span class="block truncate max-w-xs" title="{{ $log->note }}">{{ $log->note }}</span>
                                 </td>
                             </tr>
                             @endforeach

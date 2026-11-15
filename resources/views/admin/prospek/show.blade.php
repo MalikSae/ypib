@@ -53,7 +53,14 @@
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Affiliator</dt>
-                    <dd class="text-neutral-900">{{ $prospect->referrer?->user?->name ?? '—' }}</dd>
+                    <dd class="text-neutral-900">
+                        @if($prospect->referrer)
+                            <a href="{{ route('admin.prospects.index', ['referrer' => $prospect->referrer->id]) }}" title="Lihat semua prospek affiliator ini"
+                               class="rounded-sm underline underline-offset-4 hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500">{{ $prospect->referrer->user?->name ?? 'Tanpa nama' }} ({{ $prospect->referrer->code }})</a>
+                        @else
+                            —
+                        @endif
+                    </dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Klik WA</dt>
@@ -115,11 +122,8 @@
             @else
                 <form method="POST" action="{{ route('admin.prospects.update-status', $prospect) }}" class="space-y-3">
                     @csrf
-                    <x-select name="status" id="status">
-                        @foreach($adminStatuses as $s)
-                            <option value="{{ $s }}" @selected($prospect->status === $s)>{{ $statuses[$s]['label'] }}</option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="status" name="status" aria-label="Status prospek" :value="$prospect->status"
+                                   :options="collect($adminStatuses)->mapWithKeys(fn ($s) => [$s => $statuses[$s]['label']])->all()" />
                     <x-button type="submit" color="primary" class="w-full justify-center">Simpan status</x-button>
                 </form>
             @endif

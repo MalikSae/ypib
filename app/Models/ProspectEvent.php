@@ -110,12 +110,6 @@ class ProspectEvent extends Model
             ->selectSub($converted(['daftar_ulang_selesai']), 'reregistered_count');
     }
 
-    /** Persen terhadap jumlah prospek event ini; null bila belum ada prospek. */
-    public function funnelPercent(int $count): ?int
-    {
-        return $this->prospects_count > 0 ? (int) round($count / $this->prospects_count * 100) : null;
-    }
-
     /** Form minat masih menerima pengisian: event aktif dan periode (bila ada) belum tutup. */
     public function acceptsInterest(): bool
     {

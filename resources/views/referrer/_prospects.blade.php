@@ -26,8 +26,8 @@
                     <tr class="border-b-neutral-200" style="vertical-align:top;">
                         <td style="padding:14px 20px;font-size:13px;white-space:nowrap;" class="text-neutral-400">{{ $p->created_at->format('d/m/Y') }}</td>
                         <td style="padding:14px 20px;">
-                            <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $p->full_name }}</div>
-                            <div style="font-size:12px;" class="text-neutral-400">{{ $p->school_name ?: '—' }}</div>
+                            <div style="font-size:14px;font-weight:500;max-width:20rem;" class="text-neutral-900 truncate" title="{{ $p->full_name }}">{{ $p->full_name }}</div>
+                            <div style="font-size:12px;max-width:20rem;" class="text-neutral-500 truncate" title="{{ $p->school_name }}">{{ $p->school_name ?: '—' }}</div>
                         </td>
                         <td style="padding:14px 20px;font-size:13px;font-family:monospace;" class="text-neutral-600">
                             {{ $p->isRegistered() ? $p->phone_normalized : $p->maskedPhone() }}

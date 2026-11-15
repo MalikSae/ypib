@@ -102,13 +102,12 @@
                             <input type="checkbox" name="referrer_ids[]" value="{{ $referrerId }}" class="referrer-checkbox rounded border-neutral-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $recap['referrer']?->user?->name ?? '—' }}</div>
+                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $recap['referrer']?->user?->name }}">{{ $recap['referrer']?->user?->name ?? '—' }}</div>
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $recap['referrer']?->code }}</div>
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $recap['referrer']?->bank_name ?? '—' }}</div>
-                            <div class="text-xs text-neutral-600 mt-0.5">{{ $recap['referrer']?->bank_account_number ?? '—' }}</div>
-                            <div class="text-xs text-neutral-400">a.n {{ $recap['referrer']?->bank_account_name ?? '—' }}</div>
+                            <div class="text-sm font-medium text-neutral-900 whitespace-nowrap">{{ $recap['referrer']?->bank_name ?? '—' }} · {{ $recap['referrer']?->bank_account_number ?? '—' }}</div>
+                            <div class="text-xs text-neutral-500 truncate max-w-xs" title="a.n {{ $recap['referrer']?->bank_account_name ?? '—' }}">a.n {{ $recap['referrer']?->bank_account_name ?? '—' }}</div>
                         </td>
                         <td class="px-5 py-4 text-center">
                             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 text-sm font-bold">{{ $recap['total_registrations'] }}</span>
@@ -168,13 +167,12 @@
                 @forelse($historyByReferrer as $referrerId => $history)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100">
                     <td class="px-5 py-4">
-                        <div class="text-sm font-semibold text-neutral-900">{{ $history['referrer']?->user?->name ?? '—' }}</div>
+                        <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $history['referrer']?->user?->name }}">{{ $history['referrer']?->user?->name ?? '—' }}</div>
                         <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $history['referrer']?->code }}</div>
                     </td>
                     <td class="px-5 py-4">
-                        <div class="text-sm font-semibold text-neutral-900">{{ $history['referrer']?->bank_name ?? '—' }}</div>
-                        <div class="text-xs text-neutral-600 mt-0.5">{{ $history['referrer']?->bank_account_number ?? '—' }}</div>
-                        <div class="text-xs text-neutral-400">a.n {{ $history['referrer']?->bank_account_name ?? '—' }}</div>
+                        <div class="text-sm font-medium text-neutral-900 whitespace-nowrap">{{ $history['referrer']?->bank_name ?? '—' }} · {{ $history['referrer']?->bank_account_number ?? '—' }}</div>
+                        <div class="text-xs text-neutral-500 truncate max-w-xs" title="a.n {{ $history['referrer']?->bank_account_name ?? '—' }}">a.n {{ $history['referrer']?->bank_account_name ?? '—' }}</div>
                     </td>
                     <td class="px-5 py-4 text-center">
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-neutral-100 text-neutral-700 text-sm font-bold">{{ $history['total_registrations'] }}</span>
@@ -229,12 +227,9 @@
             <input type="hidden" name="tab" value="detail"> {{-- Helps keep the detail tab active on reload if backend supports it --}}
             
             <div class="w-full md:w-auto flex-1 md:flex-none">
-                <x-select name="status" class="md:w-48">
-                    <option value="">Semua Status</option>
-                    @foreach(['pending'=>'Pending','approved'=>'Disetujui / Siap Cair','disbursed'=>'Dicairkan'] as $val => $lbl)
-                        <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
-                    @endforeach
-                </x-select>
+                <x-select-menu id="reward_status" name="status" class="md:w-56" aria-label="Status komisi"
+                               :value="request('status')"
+                               :options="['' => 'Semua status', 'pending' => 'Pending', 'approved' => 'Disetujui / siap cair', 'disbursed' => 'Dicairkan']" />
             </div>
 
             <x-button type="submit" color="primary">Filter</x-button>
@@ -271,21 +266,20 @@
                     @forelse($rewards as $reward)
                     <tr class="hover:bg-neutral-50 transition-colors duration-100">
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $reward->referrer?->user?->name ?? '—' }}</div>
+                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $reward->referrer?->user?->name }}">{{ $reward->referrer?->user?->name ?? '—' }}</div>
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $reward->referrer?->code }}</div>
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $reward->referrer?->bank_name ?? '—' }}</div>
-                            <div class="text-xs text-neutral-600 mt-0.5">{{ $reward->referrer?->bank_account_number ?? '—' }}</div>
-                            <div class="text-xs text-neutral-400">a.n {{ $reward->referrer?->bank_account_name ?? '—' }}</div>
+                            <div class="text-sm font-medium text-neutral-900 whitespace-nowrap">{{ $reward->referrer?->bank_name ?? '—' }} · {{ $reward->referrer?->bank_account_number ?? '—' }}</div>
+                            <div class="text-xs text-neutral-500 truncate max-w-xs" title="a.n {{ $reward->referrer?->bank_account_name ?? '—' }}">a.n {{ $reward->referrer?->bank_account_name ?? '—' }}</div>
                         </td>
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900">{{ $reward->registration?->full_name ?? '—' }}</div>
+                            <div class="text-sm font-medium text-neutral-900 truncate max-w-xs" title="{{ $reward->registration?->full_name }}">{{ $reward->registration?->full_name ?? '—' }}</div>
                             <div class="text-xs font-mono mt-0.5 text-neutral-500">{{ $reward->registration?->registration_number }}</div>
                         </td>
                         <td class="px-5 py-4">
                             <span class="text-sm font-bold text-neutral-900 block">Rp {{ number_format($reward->amount, 0, ',', '.') }}</span>
-                            <span class="text-[10px] font-bold text-neutral-400 uppercase">{{ $reward->reward_type === 'registration' ? 'Pendaftaran' : 'Daftar Ulang' }}</span>
+                            <span class="text-xs text-neutral-500">{{ $reward->reward_type === 'registration' ? 'Pendaftaran' : 'Daftar Ulang' }}</span>
                         </td>
                         <td class="px-5 py-4">
                             <x-reward-status-badge :status="$reward->status" />
@@ -474,7 +468,7 @@
                                                         </td>
                                                         <td class="px-4 py-3 text-sm font-semibold text-neutral-900" x-text="reward.nama_pendaftar"></td>
                                                         <td class="px-4 py-3">
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase" 
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" 
                                                                   :class="reward.reward_type === 'Pendaftaran' ? 'bg-primary-50 text-primary-700' : 'bg-neutral-100 text-neutral-700'"
                                                                   x-text="reward.reward_type"></span>
                                                         </td>

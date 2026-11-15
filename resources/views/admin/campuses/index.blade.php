@@ -37,15 +37,15 @@
                 @forelse($campuses as $campus)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">
-                            {{ $campus->name }}
+                        <div class="flex items-center gap-2 max-w-xs">
+                            <span class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate" title="{{ $campus->name }}">{{ $campus->name }}</span>
                             @if($campus->is_default)
-                                <span class="ml-2 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold whitespace-nowrap">Bawaan</span>
+                                <span class="shrink-0 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-semibold whitespace-nowrap">Bawaan</span>
                             @endif
                         </div>
-                        <div class="text-xs font-mono mt-0.5 text-neutral-400">{{ $campus->code }}</div>
+                        <div class="text-xs text-neutral-500">{{ $campus->code }}</div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-neutral-600 max-w-xs">{{ $campus->address ?: '—' }}</td>
+                    <td class="px-6 py-4 text-sm text-neutral-700"><span class="block truncate max-w-xs" title="{{ $campus->address }}">{{ $campus->address ?: '—' }}</span></td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200 whitespace-nowrap">
                             {{ $campus->registrations_count }} pendaftar

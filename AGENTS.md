@@ -36,18 +36,23 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
 
 **Komponen Blade dasar WAJIB dipakai** (jangan tulis ulang manual dengan Tailwind mentah):
 - `<x-card>` — pembungkus card/section
-- `<x-button color="primary|neutral|success|danger" variant="solid|outline|ghost" size="sm|md|lg">`
+- `<x-button>` — pakai hanya empat bentuk di bagian "Standar tombol" di bawah
 - `<x-input-label for="..." value="..." required="true" />`
 - `<x-text-input type="..." id="..." name="..." :value="..." :error="$errors->has('field')" />`
 - `<x-input-error :messages="$errors->get('field')" />`
 
 **Komponen Blade tambahan (hasil audit lengkap 26 komponen)** — WAJIB dipakai:
-- `<x-select :error="$errors->has('field')">...</x-select>` — untuk dropdown, JANGAN tulis `<select>` manual dengan class Tailwind sendiri
+- `<x-select-menu>` — **WAJIB untuk semua dropdown**. Dropdown kustom berbasis Alpine (pola ARIA select-only combobox): bisa dipakai dengan mouse, sentuh, dan keyboard (panah, Home/End, Enter, Esc, ketik huruf awal).
+  - Form biasa: `<x-select-menu id="jenis" name="jenis" :options="['' => 'Semua jenis'] + $kinds" :value="old('jenis', $x->jenis)" :error="$errors->has('jenis')" />`. Nilai dikirim lewat input tersembunyi bernama `name`.
+  - Livewire: `<x-select-menu id="event" wire:model.live="event" :value="$event" :options="..." />`. Tersambung dua arah, termasuk saat server mereset nilainya.
+  - `options` berupa array `nilai => label`. Label kosong tidak dipakai; isi pilihan "Semua ..." dengan nilai `''`.
+  - JANGAN pakai `<select>` bawaan browser (termasuk `<x-select>`) di halaman baru. `<x-select>` lama dipertahankan sampai halamannya dikerjakan, lalu diganti `<x-select-menu>`.
 - `<x-textarea :error="$errors->has('field')" />` — untuk textarea, JANGAN tulis manual
-- `<x-table-action-edit :href="..." />`, `<x-table-action-delete :action="..." />`, `<x-table-action-detail :href="..." />` — untuk tombol aksi kecil (ikon) di baris tabel. JANGAN tulis SVG ikon manual sendiri untuk aksi edit/hapus/detail di tabel — pakai komponen ini supaya ikon dan style konsisten di semua halaman.
+- `<x-table-action-edit :href="..." />`, `<x-table-action-delete :action="..." />`, `<x-table-action-detail :href="..." />` — untuk tombol aksi kecil (ikon) di baris tabel. Detail dan edit bergaris netral, hapus bergaris merah. JANGAN tulis SVG ikon manual sendiri untuk aksi edit/hapus/detail di tabel — pakai komponen ini supaya ikon dan style konsisten di semua halaman.
   Bila baris tabel punya lebih dari satu aksi yang perlu label teks (misal Chat, Link, Detail di Kelola Prospek), boleh pakai `<x-button size="sm" color="neutral" variant="outline">` dengan teks. Jangan campur ikon dan teks dalam satu baris.
 - `<x-button :href="...">` — tombol yang berpindah halaman, membuka tab baru, atau mengunduh dirender sebagai `<a>`. JANGAN pakai `onclick="location.href=..."` atau `window.open` untuk navigasi, dan JANGAN tulis `<a>` dengan class tombol manual.
 - `<x-badge-status :active="$item->is_active" :toggle-action="route(...)" />` — untuk badge status Aktif/Nonaktif yang bisa diklik untuk toggle. Pakai ini untuk field boolean status di tabel manapun.
+- `<x-filter-tab :active="..." :count="...">` — tab pilihan untuk filter (misal status). Tidak aktif tampil timbul, aktif tampak tertekan. JANGAN tulis tab manual.
 - `<x-modal>` — untuk dialog konfirmasi (misal konfirmasi hapus), berbasis Alpine.js, sudah ada state show/toggle bawaan.
 
 **Belum ada component-nya** (kalau perlu, tulis manual dengan Tailwind mengikuti token warna `neutral-*`/`primary-*`/`error-*` yang sudah ditentukan, JANGAN pakai `gray-*`/`blue-*` Tailwind default):
@@ -58,10 +63,19 @@ JANGAN PERNAH pakai `<x-app-layout>` (itu layout Breeze default untuk user biasa
 - `<x-danger-button>`, `<x-primary-button>`, `<x-secondary-button>` — pakai `<x-button color="...">` sebagai gantinya
 - `<x-page-header>` — sudah digantikan pola page header manual di `@section('content')` (lihat pola List/Index di bawah)
 
-Pagination pakai bawaan Laravel (`{{ $items->links() }}`), tidak ada component khusus.
+Pagination pakai bawaan Laravel (`{{ $items->links() }}`). Di daftar Livewire pakai `{{ $items->links('livewire.admin.pagination') }}`.
+
+**Halaman daftar berfilter memakai Livewire** (acuan: `app/Livewire/Admin/ProspectList.php` + `resources/views/livewire/admin/prospect-list.blade.php`):
+- Komponen di `app/Livewire/Admin/`, disisipkan dari view halaman dengan `<livewire:admin.nama-komponen />`. Controller `index()` hanya mengembalikan view.
+- Semua filter langsung menyaring, TANPA tombol Terapkan: cari pakai `wire:model.live.debounce.300ms`, dropdown pakai `wire:model.live`, tab status pakai `<x-filter-tab wire:click>`.
+- Filter disimpan di URL dengan `#[Url(except: '')]`, supaya tautan dari halaman lain (misal `?event=3`) tetap bekerja dan hasil saringan bisa dibagikan.
+- Request pembaruan Livewire TIDAK melewati middleware rute. Cek peran di `boot()` komponen.
+- Saat memuat: daftar meredup (`wire:loading.class="opacity-60"`), tombol yang ditekan nonaktif (`wire:loading.attr="disabled" wire:target="..."`). Tanpa ikon berputar.
+- "Hapus filter" pakai `<x-button color="neutral" variant="ghost" size="sm">`, hanya muncul bila ada filter aktif. Tab status tidak ikut direset.
+- Alpine dimuat oleh Livewire (`@livewireScripts` di layout). JANGAN tambah Alpine dari CDN di layout yang memuat Livewire.
 
 **Pola halaman List/Index** (acuan: `admin/facilities/index.blade.php`):
-Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900` + deskripsi `text-sm text-neutral-400`, tombol aksi kanan `rounded-md bg-primary-600`). Tabel: `bg-white rounded-lg border border-neutral-200`, header `bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500`, body `divide-y divide-neutral-100`.
+Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900` + deskripsi `text-sm text-neutral-400`, tombol aksi kanan `<x-button>`). Tabel: `bg-white rounded-lg border border-neutral-200`, header `bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500`, body `divide-y divide-neutral-100`.
 
 **Aturan UI (berlaku untuk seluruh halaman admin, mengacu ke skill ui-craft)**
 
@@ -84,6 +98,46 @@ Page header flex justify-between (judul kiri `text-xl font-bold text-neutral-900
   - Animasi menghormati `prefers-reduced-motion` (`motion-reduce:`).
 - **Teks tombol** harus spesifik: "Simpan perubahan", "Kirim link daftar". JANGAN "Klik di sini" atau "Selengkapnya" sendirian.
 
+**Standar tombol (admin dan panitia)**
+
+Tombol dibedakan menurut pentingnya aksi. Hanya empat bentuk ini:
+
+| Kategori | Ditulis | Dipakai untuk |
+|---|---|---|
+| Utama | `<x-button>` | Aksi yang paling diharapkan. Satu per layar atau per baris tabel. |
+| Sekunder | `<x-button color="neutral" variant="outline">` | Aksi lain yang sah tapi bukan tujuan utama. |
+| Tersier | `<x-button color="neutral" variant="ghost">` | Jalan keluar dan aksi ringan (Batal, Hapus filter). |
+| Berbahaya | `<x-button color="danger" variant="outline">` | Menghapus atau tidak bisa dibatalkan. Selalu dengan konfirmasi. |
+
+- Kombinasi lain (`success`, `warning`, `secondary`, `primary outline`, `primary ghost`, `danger solid`) TIDAK dipakai. Merah penuh (`color="danger"` solid) hanya untuk tombol "Ya, hapus" di dalam dialog konfirmasi.
+- Utama, sekunder, dan berbahaya tampil **timbul** (kelas `x-button-raised`, bawaan komponen). Tersier sengaja datar. **Badge selalu datar dan berbentuk pill**: yang timbul bisa ditekan, yang datar hanya keterangan.
+- `size="sm"` untuk baris tabel dan aksi kecil: otomatis 44px di mobile dan 36px di desktop. JANGAN tambal tinggi tombol dengan `class="h-11"` atau `md:h-9`.
+- Tombol ikon saja: tambahkan `class="!px-2 min-w-11 md:min-w-9"` dan `aria-label`.
+- Teks tombol selalu satu baris (`whitespace-nowrap` bawaan komponen). Bila tidak muat, pendekkan teksnya.
+- Tombol manual yang tersisa di halaman lama dirapikan ke `<x-button>` saat halamannya dikerjakan.
+
+**Tipografi (admin dan panitia)**
+
+Font: Plus Jakarta Sans (`font-sans`, sudah diatur di `tailwind.config.js`). Hanya empat tingkat ukuran:
+
+| Tingkat | Kelas | Dipakai untuk |
+|---|---|---|
+| Judul halaman | `text-xl font-bold text-neutral-900` | Satu per halaman |
+| Isi utama | `text-sm`, `font-medium` untuk data kunci | Nama, angka, isi sel tabel, isi form |
+| Keterangan | `text-xs text-neutral-500` | Sekolah, tanggal, persen, teks bantu |
+| Label kategori | `text-xs font-semibold uppercase tracking-wide text-neutral-500` | Header tabel, judul kelompok kecil |
+
+- Ukuran di luar skala (`text-[10px]`, `text-[11px]`, `text-base` untuk isi) TIDAK dipakai. Pengecualian: input dan select `text-base md:text-sm` (aturan iOS, bawaan komponen).
+- **Data tabel maksimal dua baris per sel, tanpa pengecualian** (berlaku untuk semua tabel di project, termasuk dashboard affiliator dan halaman pendaftar):
+  - Baris utama `text-sm`, baris keterangan `text-xs`. Tidak ada baris ketiga.
+  - Teks panjang tidak boleh membungkus jadi baris ketiga. Potong dengan `truncate` (beri lebar maksimal, misal `max-w-xs`) dan isi `title` dengan teks lengkap.
+  - Peringatan (misal tanda fraud) tampil sebagai badge di kolom status, bukan baris tambahan.
+  - Data yang tidak muat pindah ke kolom lain atau ke halaman detail.
+  - Dokumen cetak (PDF formulir, SKL) tidak termasuk aturan ini.
+- Sel tabel rata tengah vertikal (`align-middle`), supaya badge dan tombol sejajar dengan isi dua baris.
+- `font-mono` hanya untuk kode yang disalin (kode referral, URL, token). Nomor WA dan angka biasa memakai font biasa.
+- Ukuran huruf di halaman lama yang menyimpang dirapikan saat halamannya dikerjakan.
+
 **Pola halaman Form** (acuan: `admin/programs/form.blade.php`):
 Header form: tombol kembali (ikon panah Heroicons, `w-10 h-10`) dan judul dalam SATU baris di semua ukuran layar (`flex items-center gap-3`, bukan `flex-col`). Judul `text-xl font-bold text-neutral-900 tracking-tight`, deskripsi `text-sm text-neutral-500`.
 Bungkus `<x-card class="p-4 md:p-8">`. Kelompokkan field terkait dalam `<div class="space-y-5 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">`. Di mobile kotak dalam tidak punya bg, border, atau padding, sehingga hanya ada satu lapis card. Jangan menumpuk card, kotak abu-abu, dan padding di mobile. Tiap field: x-input-label → x-text-input → x-input-error berurutan. Footer: `flex justify-end gap-3 pt-6 border-t border-neutral-200`, tombol Batal (variant ghost) + Simpan (color primary).
@@ -93,11 +147,11 @@ Bungkus `<x-card class="p-4 md:p-8">`. Kelompokkan field terkait dalam `<div cla
 - **Breakpoint**: pakai `md` (768px) sebagai satu-satunya titik pindah. Di bawah `md` = mobile, di atas = desktop. Jangan tambah breakpoint lain tanpa alasan konten.
 - **Mobile**:
   - Satu kolom, komponen full-width.
-  - Filter disembunyikan di balik tombol "Filter" yang bisa dibuka-tutup.
+  - Filter disembunyikan di balik tombol "Filter" yang bisa dibuka-tutup. Pengecualian: bila filter hanya cari plus satu dropdown (misal Kelola Prospek), tampilkan langsung tanpa tombol buka-tutup.
   - Ringkasan angka (KPI) jadi daftar, bukan grid kartu.
   - Tabel dengan lebih dari 4 kolom ditampilkan sebagai daftar kartu (`md:hidden` untuk kartu, `hidden md:block` untuk tabel). JANGAN biarkan tabel scroll horizontal tanpa indikator.
   - Input dan select `text-base` (16px) untuk mencegah zoom di iOS. Di desktop boleh `md:text-sm`.
-  - Zona sentuh minimal 44×44px. `<x-button size="sm">` (h-9, 36px) hanya boleh di desktop. Di mobile pakai `size="md"` atau lebih besar untuk aksi di baris tabel.
+  - Zona sentuh minimal 44×44px. `<x-button size="sm">` sudah otomatis 44px di mobile.
   - Aksi destruktif (hapus, nonaktifkan) diletakkan jauh dari jangkauan jempol dan dikonfirmasi dengan `<x-modal>`.
   - Jangan sembunyikan fitur di mobile. Kalau terlalu kompleks, susun ulang layoutnya.
   - Elemen fixed atau sticky wajib memakai `padding-bottom: env(safe-area-inset-bottom)`.

@@ -90,7 +90,7 @@ Seeder membuat akun admin dan operator (`admin@ypib.ac.id`, `operator@ypib.ac.id
 ## Dokumentasi Lain
 
 - `AGENTS.md` — standar kerja dan sistem desain untuk AI coding agent.
-- `UI_GUIDELINES.md` — komponen Blade dan aturan UI.
+- `AGENTS.md` — komponen Blade, standar tombol, tipografi, dan aturan UI.
 - `DEV_REPORT.md` — laporan kondisi codebase (skema, fitur, alur, catatan penting).
 
 ## Catatan Deploy: Berkas Privat

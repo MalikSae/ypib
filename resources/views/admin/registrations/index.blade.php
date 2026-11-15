@@ -113,12 +113,10 @@ $activeStatus = request('status', '');
             </div>
         </form>
 
-        <x-select name="prodi" style="width:220px;" aria-label="Filter program studi" onchange="window.location.href='{{ route('admin.registrations.index') }}?prodi=' + this.value + '&status={{ request('status') }}&search={{ request('search') }}'">
-            <option value="">Semua Program Studi</option>
-            @foreach($programs as $program)
-                <option value="{{ $program->id }}" {{ request('prodi') == $program->id ? 'selected' : '' }}>{{ $program->name }}</option>
-            @endforeach
-        </x-select>
+        <x-select-menu id="filter_prodi" name="prodi" class="w-full md:w-56" aria-label="Filter program studi"
+                       :value="request('prodi')"
+                       :options="['' => 'Semua program studi'] + $programs->pluck('name', 'id')->all()"
+                       x-on:change="window.location.href = {{ \Illuminate\Support\Js::from(route('admin.registrations.index')) }} + '?' + new URLSearchParams({ prodi: $event.target.value, status: {{ \Illuminate\Support\Js::from((string) request('status')) }}, search: {{ \Illuminate\Support\Js::from((string) request('search')) }} })" />
 
         {{-- Export memakai filter yang sedang aktif (prodi, status/tab, pencarian) --}}
         <form method="GET" action="{{ route('admin.registrations.export') }}">
@@ -215,12 +213,13 @@ $activeStatus = request('status', '');
                     <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                         {{-- Pendaftar (Nama + Email) --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $reg->full_name }}
+                            <div class="flex items-center gap-2 max-w-xs">
+                                <span class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate" title="{{ $reg->full_name }}">{{ $reg->full_name }}</span>
                                 @if(isset($duplicateNiks[$reg->nik]))
-                                    <span title="NIK ini dipakai lebih dari satu pendaftaran" class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning-50 text-warning-700 border border-warning-200 whitespace-nowrap">NIK ganda</span>
+                                    <span title="NIK ini dipakai lebih dari satu pendaftaran" class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-warning-50 text-warning-700 border border-warning-200 whitespace-nowrap">NIK ganda</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-neutral-400 mt-0.5">{{ $reg->user?->email }}</div>
+                            <div class="text-xs text-neutral-500 truncate max-w-xs" title="{{ $reg->user?->email }}">{{ $reg->user?->email }}</div>
                         </td>
 
                         {{-- No. Daftar --}}
@@ -234,9 +233,7 @@ $activeStatus = request('status', '');
 
                         {{-- Pilihan Prodi --}}
                         <td class="px-5 py-4">
-                            <div class="text-sm text-neutral-600">
-                                {{ $reg->firstChoiceProgram?->name ?? '—' }}
-                            </div>
+                            <div class="text-sm text-neutral-700 truncate max-w-[14rem]" title="{{ $reg->firstChoiceProgram?->name }}">{{ $reg->firstChoiceProgram?->name ?? '—' }}</div>
                         </td>
 
                         {{-- Jalur Pendaftaran --}}

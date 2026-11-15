@@ -49,7 +49,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $partner->name }}</div>
+                        <div class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $partner->name }}">{{ $partner->name }}</div>
                     </td>
                     <td class="px-6 py-4">
                         <x-badge-status :active="$partner->is_active" :toggle-action="route('admin.partners.toggle', $partner->id)" />

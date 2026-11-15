@@ -883,14 +883,9 @@
             
             <form method="POST" action="{{ route('admin.registrations.update-referral', $registration->id) }}" data-confirm="Anda yakin ingin mengubah afiliator pendaftar ini?">
                 @csrf
-                <x-select name="referrer_id" style="margin-bottom:12px;">
-                    <option value="">— Tidak Ada (Langsung) —</option>
-                    @foreach($referrers as $ref)
-                        <option value="{{ $ref->id }}" {{ $registration->referrer_id == $ref->id ? 'selected' : '' }}>
-                            {{ $ref->user->name ?? 'User Dihapus' }} ({{ $ref->code }})
-                        </option>
-                    @endforeach
-                </x-select>
+                <x-select-menu id="referrer_id" name="referrer_id" class="mb-3" aria-label="Afiliator"
+                               :value="$registration->referrer_id"
+                               :options="['' => 'Tidak ada (langsung)'] + $referrers->mapWithKeys(fn ($ref) => [$ref->id => ($ref->user->name ?? 'User dihapus') . ' (' . $ref->code . ')'])->all()" />
                 <x-button type="submit" color="neutral" variant="outline" class="w-full">
                     Simpan Afiliator
                 </x-button>
@@ -965,14 +960,9 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_birth_place" value="Tempat Lahir" required="true" />
-                    <x-select id="edit_birth_place" name="birth_place" class="mt-1 block" required>
-                        <option value="">Pilih Kota/Kabupaten</option>
-                        @foreach($cities as $city)
-                            <option value="{{ $city }}" {{ old('birth_place', $registration->birth_place) === $city ? 'selected' : '' }}>
-                                {{ $city }}
-                            </option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="edit_birth_place" name="birth_place" class="mt-1" required
+                                   :value="old('birth_place', $registration->birth_place)"
+                                   :options="['' => 'Pilih kota/kabupaten'] + collect($cities)->mapWithKeys(fn ($c) => [$c => $c])->all()" />
                 </div>
                 <div>
                     <x-input-label for="edit_birth_date" value="Tanggal Lahir" required="true" />
@@ -980,10 +970,8 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_gender" value="Jenis Kelamin" required="true" />
-                    <x-select id="edit_gender" name="gender" class="mt-1 block w-full" required>
-                        <option value="male" {{ old('gender', $registration->gender) === 'male' ? 'selected' : '' }}>Laki-laki</option>
-                        <option value="female" {{ old('gender', $registration->gender) === 'female' ? 'selected' : '' }}>Perempuan</option>
-                    </x-select>
+                    <x-select-menu id="edit_gender" name="gender" class="mt-1" required
+                                   :value="old('gender', $registration->gender)" :options="['male' => 'Laki-laki', 'female' => 'Perempuan']" />
                 </div>
                 <div>
                     <x-input-label for="edit_phone" value="No. HP" required="true" />
@@ -995,11 +983,9 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_admission_path" value="Jalur Pendaftaran" required="true" />
-                    <x-select id="edit_admission_path" name="admission_path" class="mt-1 block w-full" required>
-                        <option value="umum" {{ old('admission_path', $registration->admission_path) === 'umum' ? 'selected' : '' }}>Jalur Reguler</option>
-                        <option value="prestasi" {{ old('admission_path', $registration->admission_path) === 'prestasi' ? 'selected' : '' }}>Jalur Prestasi</option>
-                        <option value="tahfidz" {{ old('admission_path', $registration->admission_path) === 'tahfidz' ? 'selected' : '' }}>Jalur Tahfidz</option>
-                    </x-select>
+                    <x-select-menu id="edit_admission_path" name="admission_path" class="mt-1" required
+                                   :value="old('admission_path', $registration->admission_path)"
+                                   :options="['umum' => 'Jalur reguler', 'prestasi' => 'Jalur prestasi', 'tahfidz' => 'Jalur tahfidz']" />
                 </div>
             </div>
 
@@ -1012,11 +998,9 @@ function toggleRegPassword(inputId, iconId) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <x-input-label for="edit_education_level" value="Pendidikan Terakhir" required="true" />
-                    <x-select id="edit_education_level" name="education_level" class="mt-1 block w-full" required>
-                        @foreach(\App\Models\Registration::EDUCATION_LEVELS as $key => $option)
-                            <option value="{{ $key }}" @selected(old('education_level', $registration->education_level ?? \App\Models\Registration::DEFAULT_EDUCATION_LEVEL) === $key)>{{ $option['label'] }}</option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="edit_education_level" name="education_level" class="mt-1" required
+                                   :value="old('education_level', $registration->education_level ?? \App\Models\Registration::DEFAULT_EDUCATION_LEVEL)"
+                                   :options="collect(\App\Models\Registration::EDUCATION_LEVELS)->map(fn ($o) => $o['label'])->all()" />
                 </div>
                 <div>
                     <x-input-label for="edit_school_name" value="Asal Sekolah / Perguruan Tinggi" required="true" />
@@ -1034,13 +1018,10 @@ function toggleRegPassword(inputId, iconId) {
                 </div>
                 <div>
                     <x-input-label for="edit_program_id" value="Program Studi" required="true" />
-                    <x-select id="edit_program_id" name="first_choice_program_id" class="mt-1 block w-full" :disabled="$registration->nim ? true : false" :required="$registration->nim ? false : true">
-                        @foreach(\App\Models\Program::all() as $prog)
-                            <option value="{{ $prog->id }}" {{ old('first_choice_program_id', $registration->first_choice_program_id) == $prog->id ? 'selected' : '' }}>
-                                {{ $prog->name }}
-                            </option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="edit_program_id" name="first_choice_program_id" class="mt-1"
+                                   :disabled="(bool) $registration->nim" :required="! $registration->nim"
+                                   :value="old('first_choice_program_id', $registration->first_choice_program_id)"
+                                   :options="\App\Models\Program::pluck('name', 'id')->all()" />
                     @if($registration->nim)
                         <p class="text-xs text-error-600 mt-1">Tidak bisa diubah — NIM sudah diterbitkan.</p>
                     @endif

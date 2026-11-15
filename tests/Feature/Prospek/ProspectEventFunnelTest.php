@@ -122,7 +122,6 @@ class ProspectEventFunnelTest extends TestCase
         $this->makeProspect([$event], 'daftar_ulang_selesai');
 
         $this->assertSame([6, 3, 1], $this->funnel($event));
-        $this->assertSame(50, ProspectEvent::withFunnel()->find($event->id)->funnelPercent(3));
     }
 
     public function test_fraud_prospects_are_excluded_from_every_number(): void
@@ -158,12 +157,11 @@ class ProspectEventFunnelTest extends TestCase
         $this->assertSame([1, 0, 0], $this->funnel($event));
     }
 
-    public function test_event_without_prospects_has_no_percentage(): void
+    public function test_event_without_prospects_counts_zero(): void
     {
         $event = $this->makeEvent('Sosialisasi Kosong');
 
         $this->assertSame([0, 0, 0], $this->funnel($event));
-        $this->assertNull(ProspectEvent::withFunnel()->find($event->id)->funnelPercent(0));
     }
 
     public function test_index_page_shows_funnel_and_applies_filters_and_sort(): void
@@ -183,8 +181,12 @@ class ProspectEventFunnelTest extends TestCase
         $this->actingAs($admin)->get(route('admin.prospects.events.index'))
             ->assertOk()
             ->assertSee('Daftar ulang')
-            ->assertSee('50%')
+            // Persen konversi tidak ditampilkan lagi, hanya jumlah.
+            ->assertDontSee('>50%<', false)
             ->assertSee(route('admin.prospects.index', ['event' => $big->id]), false)
+            // Filter memakai dropdown kustom, bukan <select> bawaan.
+            ->assertDontSee('<select', false)
+            ->assertSee('role="combobox"', false)
             ->assertSeeInOrder([$noPeriod->name, $online->name, $big->name, $small->name]);
 
         $this->actingAs($admin)->get(route('admin.prospects.events.index', ['urut' => 'prospek']))

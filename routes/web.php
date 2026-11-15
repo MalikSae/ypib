@@ -199,7 +199,6 @@ Route::prefix('admin')
         // Form minat prospek: daftar prospek, status, kirim ulang link, dan event (potongan daftar ulang)
         Route::prefix('prospek')->name('prospects.')->group(function () {
             Route::get('/', [AdminProspectController::class, 'index'])->name('index');
-            Route::get('/cari-affiliator', [AdminProspectController::class, 'searchAffiliators'])->name('affiliator-search');
             Route::get('/{prospect}', [AdminProspectController::class, 'show'])->whereNumber('prospect')->name('show');
             Route::post('/{prospect}/status', [AdminProspectController::class, 'updateStatus'])->whereNumber('prospect')->name('update-status');
             Route::post('/{prospect}/catatan', [AdminProspectController::class, 'contact'])->whereNumber('prospect')->name('contact');

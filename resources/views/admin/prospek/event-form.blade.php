@@ -27,11 +27,8 @@
         <div class="space-y-5 md:p-6 md:bg-neutral-50 md:rounded-xl md:border md:border-neutral-200">
             <div>
                 <x-input-label for="kind" value="Jenis" required="true" />
-                <x-select id="kind" name="kind" required :error="$errors->has('kind')" x-model="kind">
-                    @foreach($kinds as $kindValue => $kindLabel)
-                        <option value="{{ $kindValue }}" @selected(old('kind', $event->kind ?? 'event') === $kindValue)>{{ $kindLabel }}</option>
-                    @endforeach
-                </x-select>
+                <x-select-menu id="kind" name="kind" required :error="$errors->has('kind')" x-model="kind"
+                               :value="old('kind', $event->kind ?? 'event')" :options="$kinds" />
                 <x-input-error :messages="$errors->get('kind')" />
             </div>
 
@@ -59,22 +56,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                     <x-input-label for="campus_id" value="Kampus" required="true" />
-                    <x-select id="campus_id" name="campus_id" required :error="$errors->has('campus_id')">
-                        <option value="">-- Pilih Kampus --</option>
-                        @foreach($campuses as $campus)
-                            <option value="{{ $campus->id }}" @selected(old('campus_id', $event->campus_id) == $campus->id)>{{ $campus->name }}</option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="campus_id" name="campus_id" required :error="$errors->has('campus_id')"
+                                   :value="old('campus_id', $event->campus_id)"
+                                   :options="['' => 'Pilih kampus'] + $campuses->pluck('name', 'id')->all()" />
                     <x-input-error :messages="$errors->get('campus_id')" />
                 </div>
                 <div>
                     <x-input-label for="period_id" value="Periode" />
-                    <x-select id="period_id" name="period_id" :error="$errors->has('period_id')">
-                        <option value="">Ikuti periode berjalan</option>
-                        @foreach($periods as $period)
-                            <option value="{{ $period->id }}" @selected(old('period_id', $event->period_id) == $period->id)>{{ $period->name }}</option>
-                        @endforeach
-                    </x-select>
+                    <x-select-menu id="period_id" name="period_id" :error="$errors->has('period_id')"
+                                   :value="old('period_id', $event->period_id)"
+                                   :options="['' => 'Ikuti periode berjalan'] + $periods->pluck('name', 'id')->all()" />
                     <x-input-error :messages="$errors->get('period_id')" />
                 </div>
             </div>

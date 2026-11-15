@@ -268,7 +268,7 @@
                                 {{ $reg->created_at->format('d/m/Y') }}
                             </td>
                             <td style="padding:14px 20px;">
-                                <div style="font-size:14px;font-weight:500;" class="text-neutral-900">{{ $reg->full_name }}</div>
+                                <div style="font-size:14px;font-weight:500;max-width:20rem;" class="text-neutral-900 truncate" title="{{ $reg->full_name }}">{{ $reg->full_name }}</div>
                                 @if($reg->registration_number)
                                     <div style="font-size:11px;font-family:monospace;margin-top:2px;" class="text-neutral-400">{{ $reg->registration_number }}</div>
                                 @endif
@@ -278,11 +278,9 @@
                                 @if($reg->rewards && $reg->rewards->isNotEmpty())
                                     <div style="display:flex;flex-direction:column;gap:4px;">
                                     @foreach($reg->rewards as $reward)
-                                        <div>
-                                            <span style="font-size:10px;display:block;font-weight:600;text-transform:uppercase;" class="text-neutral-400">
-                                                {{ $reward->reward_type === 'registration' ? 'Pendaftaran' : 'Daftar Ulang' }}
-                                            </span>
+                                        <div style="white-space:nowrap;">
                                             Rp {{ number_format($reward->amount, 0, ',', '.') }}
+                                            <span style="font-size:12px;font-weight:500;" class="text-neutral-500">{{ $reward->reward_type === 'registration' ? 'pendaftaran' : 'daftar ulang' }}</span>
                                         </div>
                                     @endforeach
                                     </div>

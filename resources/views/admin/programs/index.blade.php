@@ -25,23 +25,15 @@
     <form action="{{ route('admin.programs.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <label for="per_page" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Tampilkan:</label>
-            <x-select name="per_page" id="per_page" onchange="this.form.submit()" style="width:auto;">
-                <option value="5" {{ $perPage === 5 ? 'selected' : '' }}>5</option>
-                <option value="10" {{ $perPage === 10 ? 'selected' : '' }}>10</option>
-                <option value="25" {{ $perPage === 25 ? 'selected' : '' }}>25</option>
-                <option value="50" {{ $perPage === 50 ? 'selected' : '' }}>50</option>
-                <option value="100" {{ $perPage === 100 ? 'selected' : '' }}>100</option>
-            </x-select>
+            <x-select-menu id="per_page" name="per_page" class="w-24" onchange="this.closest('form').submit()"
+                           :value="$perPage" :options="[5 => '5', 10 => '10', 25 => '25', 50 => '50', 100 => '100']" />
         </div>
 
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <label for="campus" class="text-sm font-semibold text-neutral-600 whitespace-nowrap">Kampus:</label>
-            <x-select name="campus" id="campus" onchange="this.form.submit()" style="width:auto;">
-                <option value="">Semua kampus</option>
-                @foreach($campuses as $campusOption)
-                    <option value="{{ $campusOption->id }}" @selected($campusFilter?->id === $campusOption->id)>{{ $campusOption->name }}</option>
-                @endforeach
-            </x-select>
+            <x-select-menu id="campus" name="campus" class="w-full sm:w-56" onchange="this.closest('form').submit()"
+                           :value="$campusFilter?->id"
+                           :options="['' => 'Semua kampus'] + $campuses->pluck('name', 'id')->all()" />
         </div>
         
         <div class="relative w-full sm:w-72">
@@ -75,8 +67,8 @@
                 @forelse($programs as $program)
                 <tr class="hover:bg-neutral-50 transition-colors duration-100 group">
                     <td class="px-6 py-4">
-                        <div class="text-sm font-semibold text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $program->name }}</div>
-                        <div class="text-xs font-mono mt-0.5 text-neutral-400">Akreditasi: {{ $program->accreditation ?? '-' }}</div>
+                        <div class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $program->name }}">{{ $program->name }}</div>
+                        <div class="text-xs text-neutral-500">Akreditasi: {{ $program->accreditation ?? '-' }}</div>
                     </td>
                     <td class="px-6 py-4">
                         @if($program->kode_prodi)
@@ -93,15 +85,19 @@
                         @endif
                     </td>
                     <td class="px-6 py-4">
-                        <span class="text-sm font-medium text-neutral-600">{{ $program->faculty->name }}</span>
+                        <span class="block text-sm text-neutral-700 truncate max-w-[14rem]" title="{{ $program->faculty->name }}">{{ $program->faculty->name }}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="flex flex-wrap gap-1.5">
-                            @forelse($program->offeringCampuses ?? [] as $offeringCampus)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200 whitespace-nowrap">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
+                        @php $offering = collect($program->offeringCampuses ?? []); @endphp
+                        <div class="flex items-center gap-1.5 whitespace-nowrap" title="{{ $offering->map(fn ($c) => $c->city ?: $c->name)->implode(', ') }}">
+                            @forelse($offering->take(2) as $offeringCampus)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200">{{ $offeringCampus->city ?: $offeringCampus->name }}</span>
                             @empty
-                                <span class="text-xs text-neutral-400">Belum ditawarkan</span>
+                                <span class="text-xs text-neutral-500">Belum ditawarkan</span>
                             @endforelse
+                            @if($offering->count() > 2)
+                                <span class="text-xs text-neutral-500">+{{ $offering->count() - 2 }}</span>
+                            @endif
                         </div>
                     </td>
                     <td class="px-6 py-4">

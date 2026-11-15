@@ -149,7 +149,7 @@
                 <tbody class="divide-y divide-neutral-100">
                     @forelse($finance['rows'] as $row)
                         <tr>
-                            <td class="px-5 py-3 text-sm font-medium text-neutral-900">{{ $row['name'] }}</td>
+                            <td class="px-5 py-3 text-sm font-medium text-neutral-900"><span class="block truncate max-w-xs" title="{{ $row['name'] }}">{{ $row['name'] }}</span></td>
                             <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['registration_fee'], 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['re_registration'], 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-sm text-right text-neutral-700">Rp {{ number_format($row['outstanding'], 0, ',', '.') }}</td>
@@ -204,13 +204,13 @@
                 @endphp
                 <tr class="hover:bg-neutral-50 transition-colors group">
                     <td class="px-5 py-3.5">
-                        <span class="text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors">{{ $reg->full_name }}</span>
+                        <span class="block text-sm font-medium text-neutral-900 group-hover:text-primary-700 transition-colors truncate max-w-xs" title="{{ $reg->full_name }}">{{ $reg->full_name }}</span>
                     </td>
                     <td class="px-5 py-3.5">
                         <span class="font-mono text-xs text-neutral-500">{{ $reg->registration_number ?? '—' }}</span>
                     </td>
                     <td class="px-5 py-3.5">
-                        <span class="text-xs text-neutral-600">{{ Str::limit($reg->firstChoiceProgram?->name ?? '—', 28) }}</span>
+                        <span class="text-xs text-neutral-600 whitespace-nowrap">{{ Str::limit($reg->firstChoiceProgram?->name ?? '—', 28) }}</span>
                     </td>
                     <td class="px-5 py-3.5">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $bgClass }}">

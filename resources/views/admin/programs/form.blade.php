@@ -42,14 +42,9 @@
                         </div>
                         <div>
                             <x-input-label for="faculty_id" value="Fakultas" required="true" />
-                            <x-select id="faculty_id" name="faculty_id" required :error="$errors->has('faculty_id')">
-                                <option value="">-- Pilih Fakultas --</option>
-                                @foreach($faculties as $faculty)
-                                    <option value="{{ $faculty->id }}" {{ old('faculty_id', $program->faculty_id ?? '') == $faculty->id ? 'selected' : '' }}>
-                                        {{ $faculty->name }}
-                                    </option>
-                                @endforeach
-                            </x-select>
+                            <x-select-menu id="faculty_id" name="faculty_id" required :error="$errors->has('faculty_id')"
+                                           :value="old('faculty_id', $program->faculty_id ?? '')"
+                                           :options="['' => 'Pilih fakultas'] + $faculties->pluck('name', 'id')->all()" />
                             <x-input-error :messages="$errors->get('faculty_id')" />
                         </div>
                     </div>
@@ -68,10 +63,9 @@
                         </div>
                         <div>
                             <x-input-label for="registration_track" value="Tipe Program" required="true" />
-                            <x-select id="registration_track" name="registration_track" required :error="$errors->has('registration_track')">
-                                <option value="reguler" {{ old('registration_track', $program->registration_track ?? 'reguler') == 'reguler' ? 'selected' : '' }}>Reguler</option>
-                                <option value="non_reguler" {{ old('registration_track', $program->registration_track ?? 'reguler') == 'non_reguler' ? 'selected' : '' }}>Non-Reguler</option>
-                            </x-select>
+                            <x-select-menu id="registration_track" name="registration_track" required :error="$errors->has('registration_track')"
+                                           :value="old('registration_track', $program->registration_track ?? 'reguler')"
+                                           :options="['reguler' => 'Reguler', 'non_reguler' => 'Non-reguler']" />
                             <x-input-error :messages="$errors->get('registration_track')" />
                         </div>
                     </div>
@@ -80,12 +74,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="accreditation" value="Akreditasi" />
-                            <x-select id="accreditation" name="accreditation" :error="$errors->has('accreditation')">
-                                <option value="">-- Pilih Akreditasi --</option>
-                                <option value="Baik" {{ old('accreditation', $program->accreditation ?? '') == 'Baik' ? 'selected' : '' }}>Baik</option>
-                                <option value="Baik Sekali" {{ old('accreditation', $program->accreditation ?? '') == 'Baik Sekali' ? 'selected' : '' }}>Baik Sekali</option>
-                                <option value="Unggul" {{ old('accreditation', $program->accreditation ?? '') == 'Unggul' ? 'selected' : '' }}>Unggul</option>
-                            </x-select>
+                            <x-select-menu id="accreditation" name="accreditation" :error="$errors->has('accreditation')"
+                                           :value="old('accreditation', $program->accreditation ?? '')"
+                                           :options="['' => 'Pilih akreditasi', 'Baik' => 'Baik', 'Baik Sekali' => 'Baik Sekali', 'Unggul' => 'Unggul']" />
                             <x-input-error :messages="$errors->get('accreditation')" />
                         </div>
                     </div>
