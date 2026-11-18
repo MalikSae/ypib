@@ -12,6 +12,46 @@
 
 return [
     [
+        'date'    => '2026-11-18',
+        'title'   => 'Hasil event, filter langsung, dan tampilan admin yang lebih seragam',
+        'commit'  => '5dd920f',
+        'sections' => [
+            'Event dan Kampanye' => [
+                'Setiap event menampilkan jumlah prospek, pendaftar yang sudah bayar, dan yang sudah daftar ulang.',
+                'Satu pendaftar dihitung untuk satu event saja: event dari link daftar yang dipakai, atau event pertama yang dihadiri bila daftar tanpa link.',
+                'Prospek yang ditandai curang tidak ikut dihitung.',
+                'Filter jenis (event kampus atau kampanye online) dan periode, serta pilihan urutan.',
+            ],
+            'Kelola Prospek' => [
+                'Tab status lengkap dengan jumlah, untuk tindak lanjut harian.',
+                'Prospek yang paling lama menunggu dihubungi tampil paling atas.',
+                'Di Data Afiliasi, kolom Prospek membuka daftar prospek milik affiliator tersebut.',
+            ],
+            'Filter langsung tanpa tombol Terapkan' => [
+                'Daftar langsung tersaring saat mengetik atau memilih filter, tanpa memuat ulang halaman.',
+                'Berlaku di Data Pendaftar, Arsip Pendaftar, Kelola Prospek, Event dan Kampanye, Data Afiliasi, Komisi, Program Studi, Bank Soal, Akun Staf, dan riwayat interview Panitia.',
+                'Filter tetap tersimpan di alamat halaman, jadi link yang dibagikan menampilkan hasil yang sama.',
+                'Filter yang sedang dipakai diberi warna biru muda, dan tombol "Hapus filter" mengosongkan semuanya.',
+                'Data Pendaftar: status dipilih dari satu dropdown berisi jumlah per status.',
+                'Ekspor Excel tetap mengikuti filter yang sedang aktif.',
+            ],
+            'Tampilan admin' => [
+                'Dropdown baru yang bisa dipakai dengan keyboard dan tidak terpotong di dalam card atau jendela pop-up.',
+                'Tabel maksimal dua baris per sel; teks panjang dipotong, teks lengkap muncul saat kursor diarahkan.',
+                'Tombol, kotak isian, card, kotak centang, dan pilihan file diseragamkan di semua halaman admin.',
+                'Status aktif/tampil di form kampus, soal, fasilitas, partner, prodi, event, dan harga kini berupa saklar on/off.',
+                'Tab di halaman Komisi bisa dipindah dengan tombol panah keyboard.',
+                'Pesan saat daftar kosong dibuat seragam dan menjelaskan langkah berikutnya.',
+            ],
+            'Perbaikan' => [
+                'Nama affiliator dari kampus lain tidak lagi terlihat di filter Kelola Prospek.',
+                'Pencarian Data Afiliasi tidak lagi mengabaikan filter lain, dan ekspornya ikut memakai kata kunci pencarian.',
+                'Jumlah di tab Detail Transaksi Komisi kini menampilkan total, bukan jumlah baris di halaman itu saja.',
+                'Data Pendaftar tidak lagi bergeser ke samping di layar laptop 1366px.',
+            ],
+        ],
+    ],
+    [
         'date'    => '2026-11-08',
         'title'   => 'Halaman changelog',
         'commit'  => null,
